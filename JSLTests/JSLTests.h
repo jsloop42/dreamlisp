@@ -9,6 +9,11 @@
 #ifndef JSLTests_h
 #define JSLTests_h
 
+#import <Foundation/Foundation.h>
+#import "Env.h"
+#import "Utils.h"
+#import "Types.h"
 #import "JSL.h"
+#import "Reader.h"
 
 #endif /* JSLTests_h */

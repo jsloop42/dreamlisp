@@ -7,3 +7,12 @@
 //
 
 #import "Utils.h"
+
+@implementation Utils
+
++ (BOOL)matchString:(NSString *)string withPattern:(NSString *)pattern {
+    NSRange range = [string rangeOfString:pattern options:NSRegularExpressionSearch range:NSMakeRange(0, [string length])];
+    return range.location != NSNotFound;
+}
+
+@end

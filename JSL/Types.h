@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "Env.h"
 #import "Utils.h"
+#import "Types.h"
+
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -38,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSList : JSData
 @property (nonatomic, readwrite) JSData *meta;
-- (instancetype)initWith:(NSArray *)list;
+- (instancetype)initWithArray:(NSArray *)list;
 - (void)add:(JSData *)object;
 - (void)add:(JSData *)object atIndex:(NSUInteger)index;
 - (void)remove:(JSData *)object;
@@ -56,13 +58,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSNumber : JSData
 @property (nonatomic, readwrite) JSData *meta;
-- (instancetype)initWith:(float)num;
+- (instancetype)initWithFloat:(float)num;
+- (instancetype)initWithString:(NSString *)string;
+- (instancetype)initWithNumber:(NSNumber *)number;
 - (BOOL)isEqual:(JSNumber *)num;
 - (float)value;
 - (NSNumber *)val;
 @end
 
 @interface JSSymbol: JSData
+- (instancetype)initWithName:(NSString *)name;
 - (NSString *)name;
 - (BOOL)isEqual:(JSSymbol *)sym;
 @end

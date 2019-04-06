@@ -135,7 +135,7 @@
     return self;
 }
 
-- (instancetype)initWith:(NSArray *)list {
+- (instancetype)initWithArray:(NSArray *)list {
     self = [super init];
     if (self) {
         array = [[NSMutableArray alloc] initWithArray:list];
@@ -178,7 +178,7 @@
 
 - (JSData *)rest {
     NSArray *arr = [array objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(1, [array count] - 1)]];
-    return [[JSList alloc] initWith:arr];
+    return [[JSList alloc] initWithArray:arr];
 }
 
 - (JSData *)last {
@@ -223,16 +223,46 @@
 @implementation JSNumber {
     NSNumber *n;
     NSString *_dataType;
+    NSString *decimalPattern;
 }
 
 @synthesize dataType = _dataType;
 @synthesize meta;
 
-- (instancetype)initWith:(float)num {
+- (instancetype)initWithFloat:(float)num {
     self = [super init];
     if (self) {
         n = [[NSNumber alloc] initWithFloat:num];
+        self = [self initWithNumber:n];
+    }
+    return self;
+}
+
+- (instancetype)initWithString:(NSString *)string {
+    self = [super init];
+    if (self) {
+        NSNumberFormatter *formatter = [NSNumberFormatter new];
+        decimalPattern = @"\\d+(\\.\\d+)";
+        if ([Utils matchString:string withPattern:decimalPattern]) {
+            // Float
+            formatter.numberStyle = NSNumberFormatterDecimalStyle;
+            n = [formatter numberFromString:string];
+        } else {
+            // Integer
+            formatter.numberStyle = NSNumberFormatterNoStyle;
+            n = [formatter numberFromString:string];
+        }
+        self = [self initWithNumber:n];
+    }
+    return self;
+}
+
+- (instancetype)initWithNumber:(NSNumber *)number {
+    self = [super init];
+    if (self) {
         _dataType = [self className];
+        n = number;
+        decimalPattern = @"\\d+(\\.\\d+)";
     }
     return self;
 }

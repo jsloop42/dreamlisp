@@ -39,12 +39,27 @@
 }
 
 - (void)testNumber {
-    JSNumber* n1 = [[JSNumber alloc] initWith:3.14];
+    JSNumber* n1 = [[JSNumber alloc] initWithFloat:3.14];
     JSNumber* n2 = n1;
     XCTAssertTrue([n1 isEqual:n2]);
 }
 
-- (void)testPerformanceExample {
+- (void)testString {
+    NSString *s1 = @"1";
+    NSString *s2 = s1;
+    s1 = @"2";
+    XCTAssertEqualObjects(s2, @"1");
+}
+
+- (void)testTokenize {
+    Reader *reader = [Reader new];
+    NSString *exp = @"(+ 1 2)";
+    NSArray *tokens = [reader tokenize:exp];
+    NSMutableArray *tokensArr = [[NSMutableArray alloc] initWithObjects: @"(", @"+", @"1", @"2", @")", nil];
+    XCTAssertEqualObjects(tokens, tokensArr);
+}
+
+- (void)notestPerformanceExample {
     // This is an example of a performance test case.
     [self measureBlock:^{
         // Put the code you want to measure the time of here.

@@ -17,4 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 #   define info(...) NSLog(__VA_ARGS__)
 #endif
 
+@interface Utils : NSObject
++ (BOOL)matchString:(NSString *)string withPattern:(NSString *)pattern;
+@end
+
 NS_ASSUME_NONNULL_END
