@@ -59,6 +59,22 @@
     XCTAssertEqualObjects(tokens, tokensArr);
 }
 
+- (void)testListMap {
+    JSList *list = [[JSList alloc] initWithArray:@[@"abc", @"def", @"ghi"]];
+    NSMutableArray *uc = [list map:^NSString * (NSString *arg) {
+        return [arg uppercaseString];
+    }];
+    XCTAssertEqualObjects(uc[0], @"ABC");
+}
+
+- (void)testMapOnDictionary {
+    JSHashMap *hm = [[JSHashMap alloc] initWithArray:[@[@"a", @"abc", @"b", @"bcd", @"c", @"cde"] mutableCopy]];
+    NSDictionary *dict = [hm map:^NSDictionary *(NSString *key, NSString *obj) {
+        return [[NSMutableDictionary alloc] initWithObjects:@[[obj uppercaseString]] forKeys:@[key]];
+    }];
+    XCTAssertEqualObjects([dict valueForKey:@"a"], @"ABC");
+}
+
 - (void)notestPerformanceExample {
     // This is an example of a performance test case.
     [self measureBlock:^{

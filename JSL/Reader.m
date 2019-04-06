@@ -64,7 +64,7 @@
 - (JSData *)readForm {
     NSString *token = [self peek];
     if (token == nil) {
-        info(@"Error: Token is empty.");
+        info(@"Error: %@", TOKEN_EMPTY);
         return nil;
     }
     if ([token isEqual:@"("] || [token isEqual:@"["] || [token isEqual:@"{"]) {
@@ -90,7 +90,7 @@
         if ([self peek] != nil) {
             [list addObject:[self readForm]];
         } else {
-            info(@"Parens mismatch");
+            info(@"Error: %@", PARENS_MISMATCH);
             return nil;
         }
     }
@@ -126,7 +126,7 @@
                          stringByReplacingOccurrencesOfString:@"0xff" withString:@"\\"];
         return  [[JSString alloc] initWithString:ret];
     } else if ([self matchString:token withPattern:stringUnclosed]) {
-        info(@"Error: Quotation mark mismatch");
+        info(@"Error: %@", QUOTE_MARK_MISMATCH);
         return nil;
     } else if ([token isEqual:@"true"]) {
         return [JSTrue new];

@@ -36,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithArray:(NSMutableArray *)array;
 - (NSUInteger)count;
 - (NSMutableDictionary *)value;
+- (NSMutableDictionary *)map:(id (^)(id key, id obj))block;
 @end
 
 @interface JSList : JSData
@@ -51,6 +52,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (JSData *)second;
 - (JSData *)rest;
 - (JSData *)last;
+- (NSMutableArray *)map:(id (^)(id arg))block;
 @end
 
 @interface JSVector: JSList

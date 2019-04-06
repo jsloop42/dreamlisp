@@ -86,14 +86,14 @@
 }
 
 - (NSMutableDictionary *)fromArray:(NSMutableArray *)array {
-    NSMutableDictionary* dict;
+    NSMutableDictionary* dict = [NSMutableDictionary new];
     NSUInteger i = 0, len = [array count];
     if (len % 2 != 0) {
         info(@"JSError: Odd number of elements in the array.");
         return dict;
     }
     for (i = 0; i < len; i = i + 2) {
-        [dict setObject:array[i + 1] forKey:array[i]];
+        [dict setObject:array[i + 1] forKey:(NSString *)array[i]];
     }
     return dict;
 }
@@ -112,6 +112,15 @@
 
 - (NSMutableDictionary *)value {
     return dict;
+}
+
+- (NSMutableDictionary *)map:(id (^)(id key, id obj))block {
+    NSMutableDictionary *hm = [NSMutableDictionary new];
+    [dict enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        NSDictionary *newDict = block(key, obj);
+        [hm setObject:[newDict valueForKey:key] forKey:key];
+    }];
+    return hm;
 }
 
 @end
@@ -183,6 +192,14 @@
 
 - (JSData *)last {
     return [array objectAtIndex:[array count] - 1];
+}
+
+- (NSMutableArray *)map:(id (^)(id arg))block {
+    NSMutableArray *acc = [NSMutableArray new];
+    [array enumerateObjectsUsingBlock:^(id arg, NSUInteger idx, BOOL *stop) {
+        [acc addObject:block(arg)];
+    }];
+    return acc;
 }
 
 @end

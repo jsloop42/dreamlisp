@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		9E281CEA225890B10038A5AF /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CE9225890B10038A5AF /* Utils.m */; };
 		9E281CEB225890B10038A5AF /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CE9225890B10038A5AF /* Utils.m */; };
+		9E281CEE225908480038A5AF /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Constants.m */; };
+		9E281CEF225908480038A5AF /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Constants.m */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D5A22568B1300348529 /* JSLTests.m */; };
 		9E3A9D6522568D4B00348529 /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6422568D4B00348529 /* Core.m */; };
@@ -40,6 +42,8 @@
 /* Begin PBXFileReference section */
 		9E281CE8225890B10038A5AF /* Utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		9E281CE9225890B10038A5AF /* Utils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
+		9E281CEC225908480038A5AF /* Constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
+		9E281CED225908480038A5AF /* Constants.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Constants.m; sourceTree = "<group>"; };
 		9E3A9D4A22568AFC00348529 /* JSL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = JSL; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E3A9D4D22568AFC00348529 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9E3A9D5822568B1300348529 /* JSLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -100,6 +104,8 @@
 			isa = PBXGroup;
 			children = (
 				9E3A9D4D22568AFC00348529 /* main.m */,
+				9E281CEC225908480038A5AF /* Constants.h */,
+				9E281CED225908480038A5AF /* Constants.m */,
 				9E3A9D6322568D4B00348529 /* Core.h */,
 				9E3A9D6422568D4B00348529 /* Core.m */,
 				9E3A9D6B22568D8D00348529 /* Env.h */,
@@ -223,6 +229,7 @@
 				9E3A9D6522568D4B00348529 /* Core.m in Sources */,
 				9E3A9D7522568DBD00348529 /* Reader.m in Sources */,
 				9E3A9D4E22568AFC00348529 /* main.m in Sources */,
+				9E281CEE225908480038A5AF /* Constants.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,6 +245,7 @@
 				9E3A9D6622568D4B00348529 /* Core.m in Sources */,
 				9E3A9D7622568DBD00348529 /* Reader.m in Sources */,
 				9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */,
+				9E281CEF225908480038A5AF /* Constants.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
