@@ -77,6 +77,27 @@
     return self;
 }
 
+- (instancetype)initWithArray:(NSMutableArray *)array {
+    self = [super init];
+    if (self) {
+        dict = [self fromArray:array];
+    }
+    return self;
+}
+
+- (NSMutableDictionary *)fromArray:(NSMutableArray *)array {
+    NSMutableDictionary* dict;
+    NSUInteger i = 0, len = [array count];
+    if (len % 2 != 0) {
+        info(@"JSError: Odd number of elements in the array.");
+        return dict;
+    }
+    for (i = 0; i < len; i = i + 2) {
+        [dict setObject:array[i + 1] forKey:array[i]];
+    }
+    return dict;
+}
+
 - (JSData*)valueForKey:(NSString*)key {
     return [dict valueForKey:key];
 }
@@ -89,8 +110,8 @@
     return [dict count];
 }
 
-- (Class)dataType {
-    return [self class];
+- (NSMutableDictionary *)value {
+    return dict;
 }
 
 @end

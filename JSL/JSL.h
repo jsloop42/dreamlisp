@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#include "Types.h"
+#import "Types.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

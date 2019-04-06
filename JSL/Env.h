@@ -7,11 +7,29 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Types.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface Env : NSObject
+@class JSSymbol;
+@class JSData;
 
+@interface Env : NSObject
+@property (nonatomic, readwrite) Env *outer;
+@property (nonatomic, readwrite) NSMutableDictionary *data;
+- (instancetype)initWithEnv:(Env *)env;
+
+/**
+ Initializes environment with an outer environment and binds symbols with expressions.
+
+ @param env The outer environment.
+ @param binds A array of `JSSymbol` symbols.
+ @param exprs A array of `JSData` expressions.
+ */
+- (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs;
+- (void)setValue:(JSData *)value forSymbol:(JSSymbol *)key;
+- (Env *)findEnvForKey:(JSSymbol *)key;
+- (JSData *)valueForSymbol:(JSSymbol *)key;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -8,6 +8,67 @@
 
 #import "Env.h"
 
-@implementation Env
+@implementation Env {
+    Env *outer;
+    NSMutableDictionary *data;
+}
+
+@synthesize outer = outer;
+@synthesize data = data;
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        data = [NSMutableDictionary new];
+    }
+    return self;
+}
+
+- (instancetype)initWithEnv:(Env *)env {
+    self = [super init];
+    if (self) {
+        outer = env;
+    }
+    return self;
+}
+
+- (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs {
+    self = [super init];
+    NSUInteger len = [binds count], i = 0;
+    if (self) {
+        outer = env;
+        for (i = 0; i < len; i++) {
+            NSString *sym = [(JSSymbol *)binds[i] name];
+            if ([sym isEqual:@"&"]) {
+                [data setObject:[exprs subarrayWithRange:NSMakeRange(i, len)] forKey:[(JSSymbol *)binds[i + 1] name]];
+                break;
+            }
+            [data setObject:exprs[i] forKey:sym];
+        }
+    }
+    return self;
+}
+
+- (void)setValue:(JSData *)value forSymbol:(JSSymbol *)key {
+    [data setValue:value forKey:[key name]];
+}
+
+- (Env *)findEnvForKey:(JSSymbol *)key {
+    if ([data valueForKey:[key name]] != nil) {
+        return self;
+    }
+    return [outer findEnvForKey:key];
+}
+
+- (JSData *)valueForSymbol:(JSSymbol *)key {
+    Env * env = [self findEnvForKey:key];
+    if (env != nil) {
+        JSData *data = [[env data] valueForKey:[key name]];
+        if (data != nil) {
+            return data;
+        }
+    }
+    return nil;
+}
 
 @end

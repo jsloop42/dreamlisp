@@ -8,8 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import "Env.h"
+#import "Utils.h"
 
 NS_ASSUME_NONNULL_BEGIN
+
+@class Env;
 
 @protocol JSDataProtocol<NSObject>
 @property (nonatomic, readonly) NSString *dataType;
@@ -28,7 +31,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSHashMap : JSData
 @property (nonatomic, readwrite) JSData *meta;
+- (instancetype)initWithArray:(NSMutableArray *)array;
 - (NSUInteger)count;
+- (NSMutableDictionary *)value;
 @end
 
 @interface JSList : JSData
