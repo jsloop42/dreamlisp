@@ -19,6 +19,8 @@
 		9E3A9D7222568DB100348529 /* Printer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7022568DB100348529 /* Printer.m */; };
 		9E3A9D7522568DBD00348529 /* Reader.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7422568DBD00348529 /* Reader.m */; };
 		9E3A9D7622568DBD00348529 /* Reader.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7422568DBD00348529 /* Reader.m */; };
+		9E6F444822578E5600777A24 /* JSL.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F444722578E5600777A24 /* JSL.m */; };
+		9E6F444922578E5600777A24 /* JSL.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F444722578E5600777A24 /* JSL.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -49,6 +51,9 @@
 		9E3A9D7022568DB100348529 /* Printer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Printer.m; sourceTree = "<group>"; };
 		9E3A9D7322568DBD00348529 /* Reader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Reader.h; sourceTree = "<group>"; };
 		9E3A9D7422568DBD00348529 /* Reader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Reader.m; sourceTree = "<group>"; };
+		9E6F444622578E5600777A24 /* JSL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSL.h; sourceTree = "<group>"; };
+		9E6F444722578E5600777A24 /* JSL.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSL.m; sourceTree = "<group>"; };
+		9E6F444A2257C00900777A24 /* JSLTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSLTests.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +100,8 @@
 				9E3A9D6422568D4B00348529 /* Core.m */,
 				9E3A9D6B22568D8D00348529 /* Env.h */,
 				9E3A9D6C22568D8D00348529 /* Env.m */,
+				9E6F444622578E5600777A24 /* JSL.h */,
+				9E6F444722578E5600777A24 /* JSL.m */,
 				9E3A9D6F22568DB100348529 /* Printer.h */,
 				9E3A9D7022568DB100348529 /* Printer.m */,
 				9E3A9D7322568DBD00348529 /* Reader.h */,
@@ -108,6 +115,7 @@
 		9E3A9D5922568B1300348529 /* JSLTests */ = {
 			isa = PBXGroup;
 			children = (
+				9E6F444A2257C00900777A24 /* JSLTests.h */,
 				9E3A9D5A22568B1300348529 /* JSLTests.m */,
 				9E3A9D5C22568B1300348529 /* Info.plist */,
 			);
@@ -201,6 +209,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E6F444822578E5600777A24 /* JSL.m in Sources */,
 				9E3A9D6922568D7D00348529 /* Types.m in Sources */,
 				9E3A9D6D22568D8D00348529 /* Env.m in Sources */,
 				9E3A9D7122568DB100348529 /* Printer.m in Sources */,
@@ -214,6 +223,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E6F444922578E5600777A24 /* JSL.m in Sources */,
 				9E3A9D6A22568D7D00348529 /* Types.m in Sources */,
 				9E3A9D6E22568D8D00348529 /* Env.m in Sources */,
 				9E3A9D7222568DB100348529 /* Printer.m in Sources */,

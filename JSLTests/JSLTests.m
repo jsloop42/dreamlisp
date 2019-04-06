@@ -7,6 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "JSLTests.h"
 
 @interface JSLTests : XCTestCase
 
@@ -15,16 +16,32 @@
 @implementation JSLTests
 
 - (void)setUp {
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+
 }
 
 - (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
+
 }
 
-- (void)testExample {
-    // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct results.
+- (void)testDataType {
+    JSString* str = [[JSString alloc] initWithString:@"Foo"];
+    XCTAssertEqualObjects([str dataType], @"JSString");
+}
+
+- (void)testList {
+    JSList* list = [JSList new];
+    JSString* str = [[JSString alloc] initWithString:@"Foo"];
+    JSString* str1 = str;
+    [list add:str];
+    [list add:str1];
+    XCTAssertEqualObjects([(JSString*)[list first] value], @"Foo");
+    XCTAssertEqual([list count], 2);
+}
+
+- (void)testNumber {
+    JSNumber* n1 = [[JSNumber alloc] initWith:3.14];
+    JSNumber* n2 = n1;
+    XCTAssertTrue([n1 isEqual:n2]);
 }
 
 - (void)testPerformanceExample {
