@@ -23,21 +23,22 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSData : NSObject <JSDataProtocol>
 @end
 
-@interface JSString : JSData
+@interface JSString : JSData<NSCopying>
+@property (nonatomic, readwrite) NSString *value;
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)str;
 - (instancetype)initWithFormat:(NSString *)format, ...;
-- (NSString *)value;
 @end
 
 @interface NSString (JSDataProtocol)
 @property (nonatomic, readonly) NSString *dataType;
 @end
 
-@interface JSKeyword : JSData
+@interface JSKeyword : JSData<NSCopying>
+@property (nonatomic, readwrite) NSString *value;
 - (instancetype)init;
+- (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithKeyword:(NSString *)string;
-- (NSString *)value;
 @end
 
 @interface JSHashMap : JSData
@@ -68,6 +69,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSVector: JSList
 - (instancetype)initWithArray:(NSArray *)list;
+@end
+
+@interface NSArray (JSDataProtocol)
+@property (nonatomic, readonly) NSString *dataType;
+- (NSMutableArray *)map:(id (^)(id arg))block;
 @end
 
 @interface JSNumber : JSData

@@ -117,9 +117,9 @@
     if ([self matchString:token withPattern:numPattern]) {
         return [[JSNumber alloc] initWithString:token];
     } else if ([self matchString:token withPattern:keywordPattern]) {
-        return [[JSKeyword alloc] initWithKeyword:token];
+        return [[JSKeyword alloc] initWithString:token];
     } else if ([self matchString:token withPattern:stringPattern]) {
-        NSString *stripped = [token substringWithRange:NSMakeRange(1, [token length] - 1)];
+        NSString *stripped = [token substringWithRange:NSMakeRange(1, [token length] - 2)];
         NSString* ret = [[[[stripped stringByReplacingOccurrencesOfString:@"\\\\" withString:@"0xff"]
                          stringByReplacingOccurrencesOfString:@"\\\"" withString:@"\""]
                          stringByReplacingOccurrencesOfString:@"\\n" withString:@"\n"]

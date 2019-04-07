@@ -11,13 +11,10 @@
 @implementation Printer
 
 - (NSString *)readableStringFor:(NSString *)string {
-    NSMutableString *ms = [[NSMutableString alloc] initWithString:@"\""];
     NSString *readable = [[[string stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"]
                            stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""]
-                          stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"];
-    [ms appendString:readable];
-    [ms appendString:@"\""];
-    return ms;
+                           stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"];
+    return [NSString stringWithFormat:@"\"%@\"", readable];
 }
 
 - (NSString *)printStringFor:(JSData *)data readably:(BOOL)readably {
@@ -50,9 +47,15 @@
             return [self printStringFor:obj readably:readably];
         }];
         return [[NSString alloc] initWithFormat:@"[%@]", [xs componentsJoinedByString:@" "]];
+    } else if ([dataType isEqual:@"NSArray"]) {
+        NSMutableArray *xs = [(JSVector *)data map:^NSString *(JSData *obj) {
+            return [self printStringFor:obj readably:readably];
+        }];
+        return [[NSString alloc] initWithFormat:@"[%@]", [xs componentsJoinedByString:@" "]];
     } else if ([dataType isEqual:@"JSHashMap"]) {
         NSMutableArray *xs = [(JSHashMap *)data map:^NSString *(JSData *key, JSData * val) {
-            return [[NSString alloc] initWithFormat:@"%@ %@", [self printStringFor:key readably:readably], [self printStringFor:val readably:readably]];
+            return [[NSString alloc] initWithFormat:@"%@ %@", [self printStringFor:key readably:readably],
+                                                              [self printStringFor:val readably:readably]];
         }];
         return [[NSString alloc] initWithFormat:@"{%@}", [xs componentsJoinedByString:@" "]];
     } else if ([dataType isEqual:@"JSKeyword"]) {

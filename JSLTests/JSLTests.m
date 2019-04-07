@@ -119,6 +119,29 @@
     // Vector with strings
     JSVector *svec = [[JSVector alloc] initWithArray:@[@"1", @"2", @"3"]];
     XCTAssertEqualObjects([prn printStringFor:svec readably:true], @"[\"1\" \"2\" \"3\"]");
+    // Hashmap [String: String]
+    JSHashMap *hm1 = [[JSHashMap alloc] initWithArray:[@[@"a", @"abc", @"b", @"bcd", @"c", @"cde"] mutableCopy]];
+    XCTAssertEqualObjects([prn printStringFor:hm1 readably:true], @"{\"a\" \"abc\" \"b\" \"bcd\" \"c\" \"cde\"}");
+    JSHashMap *hm2 = [[JSHashMap alloc] initWithArray:[@[@"a", @123, @"b", @234, @"c", @345] mutableCopy]];
+    XCTAssertEqualObjects([prn printStringFor:hm2 readably:true], @"{\"a\" 123 \"b\" 234 \"c\" 345}");
+    JSHashMap *hm3 = [[JSHashMap alloc] initWithArray:[@[@"a", @[@123], @"b", @[@234], @"c", @[@345]] mutableCopy]];
+    XCTAssertEqualObjects([prn printStringFor:hm3 readably:true], @"{\"a\" [123] \"b\" [234] \"c\" [345]}");
+}
+
+- (void)testReadPrint {
+    Reader *reader = [Reader new];
+    Printer *printer = [Printer new];
+    NSString *(^print)(NSString *) = ^NSString *(NSString *exp) {
+        return [printer printStringFor:[reader readString:exp] readably:true];
+    };
+    XCTAssertEqualObjects(print(@"(1 2 3)"), @"(1 2 3)");
+    XCTAssertEqualObjects(print(@"[1 2 3]"), @"[1 2 3]");
+    XCTAssertEqualObjects(print(@"(\"1\" \"2\" \"3\")"), @"(\"1\" \"2\" \"3\")");
+    XCTAssertEqualObjects(print(@"{\"1\" \"2\"}"), @"{\"1\" \"2\"}");
+    XCTAssertEqualObjects(print(@"{:1 \"2\"}"), @"{:1 \"2\"}");
+}
+
+- (void)notest {
 }
 
 - (void)notestPerformanceExample {

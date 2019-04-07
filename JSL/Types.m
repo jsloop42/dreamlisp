@@ -35,6 +35,8 @@
     NSString *_string;
 }
 
+@synthesize value = _string;
+
 - (instancetype)init {
     self = [super init];
     return self;
@@ -68,6 +70,18 @@
     return _string;
 }
 
+- (void)setValue:(NSString *)string {
+    _string = string;
+}
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    id copy = [[self class] new];
+    if (copy) {
+        [copy setValue:_string];
+    }
+    return copy;
+}
+
 @end
 
 #pragma mark NSString
@@ -86,10 +100,20 @@
     NSString *_string;
 }
 
+@synthesize value = _string;
+
 - (instancetype)init {
     self = [super init];
     if (self) {
-        self = [self initWithKeyword:@""];
+        self = [self initWithString:@""];
+    }
+    return self;
+}
+
+- (instancetype)initWithString:(NSString *)string {
+    self = [super init];
+    if (self) {
+        _string = string;
     }
     return self;
 }
@@ -112,6 +136,18 @@
 
 - (NSString *)value {
     return _string;
+}
+
+-(void)setValue:(NSString *)value {
+    _string = value;
+}
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    id copy = [[self class] new];
+    if (copy) {
+        [copy setValue:_string];
+    }
+    return copy;
 }
 
 @end
@@ -152,7 +188,7 @@
         return dict;
     }
     for (i = 0; i < len; i = i + 2) {
-        [dict setObject:array[i + 1] forKey:(NSString *)array[i]];
+        [dict setObject:array[i + 1] forKey:array[i]];
     }
     return dict;
 }
@@ -289,6 +325,20 @@
 
 - (NSMutableArray *)map:(id (^)(id arg))block {
     return [TypeUtils mapOnArray:array withBlock:block];
+}
+
+@end
+
+#pragma mark NSArray
+
+@implementation NSArray (JSDataProtocol)
+
+-(NSString *)dataType {
+    return @"NSArray";
+}
+
+- (NSMutableArray *)map:(id (^)(id arg))block {
+    return [TypeUtils mapOnArray:[self mutableCopy] withBlock:block];
 }
 
 @end
