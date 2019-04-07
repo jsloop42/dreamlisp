@@ -1,0 +1,62 @@
+#!/bin/bash
+
+BIN="JSLTests/objc"
+
+function build() {
+    if [ "$1" = "0" ]; then
+        OUT="step0_repl"
+    elif [ "$1" = "1" ]; then
+        OUT=step1_read_print
+    elif [ "$1" = "2" ]; then
+        OUT="step2_eval"
+        echo "$0 $OUT"
+    elif [ "$1" = "3" ]; then
+        OUT="step3_env"
+    elif [ "$1" = "4" ]; then
+        OUT="step4_if_fn_do"
+    elif [ "$1" = "5" ]; then
+        OUT="step5_tco"
+    elif [ "$1" = "6" ]; then
+        OUT="step6_file"
+    elif [ "$1" = "7" ]; then
+        OUT="step7_quote"
+    elif [ "$1" = "8" ]; then
+        OUT="step8_macros"
+    elif [ "$1" = "9" ]; then
+        OUT="step9_try"
+    elif [ "$1" = "A" ]; then
+        OUT="stepA_mal"
+    else
+        echo "step argument missing."
+        exit
+    fi
+    echo "Building $OUT."
+    cd JSL
+    clang -framework Foundation main.m Types.m Reader.m Printer.m Utils.m JSL.m Env.m Core.m Constants.m -ledit -lncurses -o $OUT
+    mv $OUT ../$BIN
+}
+
+function help() {
+    echo "Build requires step as argument"
+    echo "Usage: $0 step"
+    exit
+}
+
+# Check if the step argument is provided
+if [ $# -ne 1 ]; then
+  help
+fi
+
+# Display a progress bar
+function spinner() {
+    local pid=$!
+    local delay=0.3
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        echo -n "."
+        sleep $delay
+    done
+    echo ""
+}
+
+# A long running operation with progress
+(build $@) & spinner

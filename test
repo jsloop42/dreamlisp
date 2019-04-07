@@ -1,0 +1,19 @@
+#!/bin/bash
+
+function test() {
+    cd JSLTests
+    make "test^objc^step$1"
+}
+
+function help() {
+    echo "Test requires step as argument"
+    echo "Usage: $0 step"
+    exit
+}
+
+# Check if the step argument is provided
+if [ $# -ne 1 ]; then
+  help
+fi
+
+test $@

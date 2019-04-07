@@ -11,6 +11,14 @@
 		9E281CEB225890B10038A5AF /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CE9225890B10038A5AF /* Utils.m */; };
 		9E281CEE225908480038A5AF /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Constants.m */; };
 		9E281CEF225908480038A5AF /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Constants.m */; };
+		9E281CF5225A48620038A5AF /* build in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CF4225A48620038A5AF /* build */; };
+		9E281CF8225A4C790038A5AF /* libreadline.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E281CF7225A4C790038A5AF /* libreadline.tbd */; };
+		9E281CFD225A60770038A5AF /* tests in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CF9225A60760038A5AF /* tests */; };
+		9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CFA225A60760038A5AF /* run_argv_test.sh */; };
+		9E281CFF225A60770038A5AF /* runtest.py in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CFB225A60760038A5AF /* runtest.py */; };
+		9E281D00225A60770038A5AF /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CFC225A60760038A5AF /* Makefile */; };
+		9E281D01225A60770038A5AF /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CFC225A60760038A5AF /* Makefile */; };
+		9E281D03225A608D0038A5AF /* test in Resources */ = {isa = PBXBuildFile; fileRef = 9E281D02225A608D0038A5AF /* test */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D5A22568B1300348529 /* JSLTests.m */; };
 		9E3A9D6522568D4B00348529 /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6422568D4B00348529 /* Core.m */; };
@@ -44,6 +52,13 @@
 		9E281CE9225890B10038A5AF /* Utils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
 		9E281CEC225908480038A5AF /* Constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
 		9E281CED225908480038A5AF /* Constants.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Constants.m; sourceTree = "<group>"; };
+		9E281CF4225A48620038A5AF /* build */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build; sourceTree = "<group>"; };
+		9E281CF7225A4C790038A5AF /* libreadline.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libreadline.tbd; path = usr/lib/libreadline.tbd; sourceTree = SDKROOT; };
+		9E281CF9225A60760038A5AF /* tests */ = {isa = PBXFileReference; lastKnownFileType = folder; path = tests; sourceTree = "<group>"; };
+		9E281CFA225A60760038A5AF /* run_argv_test.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run_argv_test.sh; sourceTree = "<group>"; };
+		9E281CFB225A60760038A5AF /* runtest.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = runtest.py; sourceTree = "<group>"; };
+		9E281CFC225A60760038A5AF /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		9E281D02225A608D0038A5AF /* test */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = test; sourceTree = "<group>"; };
 		9E3A9D4A22568AFC00348529 /* JSL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = JSL; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E3A9D4D22568AFC00348529 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9E3A9D5822568B1300348529 /* JSLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -69,6 +84,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E281CF8225A4C790038A5AF /* libreadline.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,12 +98,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9E281CF6225A4C780038A5AF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9E281CF7225A4C790038A5AF /* libreadline.tbd */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		9E3A9D4122568AFC00348529 = {
 			isa = PBXGroup;
 			children = (
+				9E281D02225A608D0038A5AF /* test */,
+				9E281CF4225A48620038A5AF /* build */,
 				9E3A9D4C22568AFC00348529 /* JSL */,
 				9E3A9D5922568B1300348529 /* JSLTests */,
 				9E3A9D4B22568AFC00348529 /* Products */,
+				9E281CF6225A4C780038A5AF /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -127,6 +154,10 @@
 		9E3A9D5922568B1300348529 /* JSLTests */ = {
 			isa = PBXGroup;
 			children = (
+				9E281CF9225A60760038A5AF /* tests */,
+				9E281CFC225A60760038A5AF /* Makefile */,
+				9E281CFA225A60760038A5AF /* run_argv_test.sh */,
+				9E281CFB225A60760038A5AF /* runtest.py */,
 				9E6F444A2257C00900777A24 /* JSLTests.h */,
 				9E3A9D5A22568B1300348529 /* JSLTests.m */,
 				9E3A9D5C22568B1300348529 /* Info.plist */,
@@ -211,6 +242,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E281CFD225A60770038A5AF /* tests in Resources */,
+				9E281D03225A608D0038A5AF /* test in Resources */,
+				9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */,
+				9E281CFF225A60770038A5AF /* runtest.py in Resources */,
+				9E281CF5225A48620038A5AF /* build in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,6 +257,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E281D00225A60770038A5AF /* Makefile in Sources */,
 				9E6F444822578E5600777A24 /* JSL.m in Sources */,
 				9E3A9D6922568D7D00348529 /* Types.m in Sources */,
 				9E3A9D6D22568D8D00348529 /* Env.m in Sources */,
@@ -237,6 +274,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E281D01225A60770038A5AF /* Makefile in Sources */,
 				9E6F444922578E5600777A24 /* JSL.m in Sources */,
 				9E3A9D6A22568D7D00348529 /* Types.m in Sources */,
 				9E3A9D6E22568D8D00348529 /* Env.m in Sources */,
