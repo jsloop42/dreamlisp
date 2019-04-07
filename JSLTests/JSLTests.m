@@ -49,6 +49,8 @@
     NSString *s2 = s1;
     s1 = @"2";
     XCTAssertEqualObjects(s2, @"1");
+    JSString *s3 = [[JSString alloc] initWithFormat:@"%d", 42];
+    XCTAssertEqualObjects([s3 value], @"42");
 }
 
 - (void)testTokenize {
@@ -69,10 +71,25 @@
 
 - (void)testMapOnDictionary {
     JSHashMap *hm = [[JSHashMap alloc] initWithArray:[@[@"a", @"abc", @"b", @"bcd", @"c", @"cde"] mutableCopy]];
-    NSDictionary *dict = [hm map:^NSDictionary *(NSString *key, NSString *obj) {
-        return [[NSMutableDictionary alloc] initWithObjects:@[[obj uppercaseString]] forKeys:@[key]];
+    NSMutableArray *list = [hm map:^NSString *(NSString *key, NSString *obj) {
+        return [obj uppercaseString];
     }];
-    XCTAssertEqualObjects([dict valueForKey:@"a"], @"ABC");
+    XCTAssertEqualObjects(list[0], @"ABC");
+}
+
+- (void)testPrintString {
+    Printer *prn = [Printer new];
+    JSFunction *fn = [[JSFunction alloc] initWithAst:[JSNil new] params:[NSMutableArray new] env:[Env new] isMacro:false meta:[JSNil new]
+                                                  fn:^id(id arg){return nil;}];
+    XCTAssertEqualObjects([prn printStringFor:fn readably:true], @"#<function>");
+
+    JSSymbol *sym = [[JSSymbol alloc] initWithName:@"greet"];
+    XCTAssertEqualObjects([prn printStringFor:sym readably:true], @"greet");
+
+    JSNumber *num = [[JSNumber alloc] initWithString:@"42"];
+    XCTAssertEqual([num numberType], kCFNumberSInt64Type);
+    XCTAssertEqual([num value], 42);
+    XCTAssertEqualObjects([prn printStringFor:num readably:true], @"42");
 }
 
 - (void)notestPerformanceExample {

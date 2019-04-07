@@ -10,19 +10,19 @@
 
 @implementation Printer
 
--(NSString *)printListFor:(JSList *)list readably:(BOOL)readably withFormatter:(NSString *)formatter {
+- (NSString *)printListFor:(JSList *)list readably:(BOOL)readably withFormatter:(NSString *)formatter {
     NSMutableArray *xs = [(JSList *)list map:^NSString *(JSData *obj) {
         return [self printStringFor:obj readably:readably];
     }];
     return [[NSString alloc] initWithFormat:formatter, [xs componentsJoinedByString:@" "]];
 }
 
--(NSString *)printStringFor:(JSData *)data readably:(BOOL)readably {
+- (NSString *)printStringFor:(JSData *)data readably:(BOOL)readably {
     NSString *dataType = [data dataType];
     if ([dataType isEqual:@"JSSymbol"]) {
         return [(JSSymbol *)data name];
     } else if ([dataType isEqual:@"JSNumber"]) {
-        return [[NSString alloc] initWithFormat:@"%f", [(JSNumber *)data value]];
+        return [(JSNumber *)data string];
     } else if ([dataType isEqual:@"JSString"]) {
         NSString *string = [(JSString *)data value];
         if (readably) {
@@ -40,7 +40,22 @@
     } else if ([dataType isEqual:@"JSVector"]) {
         return [self printListFor:(JSVector *)data readably:readably withFormatter:@"[%@]"];
     } else if ([dataType isEqual:@"JSHashMap"]) {
-        //
+        NSMutableArray *xs = [(JSHashMap *)data map:^NSString *(JSData *key, JSData * val) {
+            return [[NSString alloc] initWithFormat:@"%@ %@", [self printStringFor:key readably:readably], [self printStringFor:val readably:readably]];
+        }];
+        return [[NSString alloc] initWithFormat:@"{%@}", [xs componentsJoinedByString:@" "]];
+    } else if ([dataType isEqual:@"JSKeyword"]) {
+        return [(JSKeyword *)data value];
+    } else if ([dataType isEqual:@"JSAtom"]) {
+        return [self printStringFor:[[JSString alloc] initWithFormat:@"(atom %@)", [(JSAtom *)data value]] readably:readably];
+    } else if ([dataType isEqual:@"JSNil"]) {
+        return @"nil";
+    } else if ([dataType isEqual:@"JSTrue"]) {
+        return @"true";
+    } else if ([dataType isEqual:@"JSFalse"]) {
+        return @"false";
+    } else if ([dataType isEqual:@"JSFunction"]) {
+        return @"#<function>";
     }
     return ERROR_TYPE;
 }

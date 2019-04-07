@@ -68,7 +68,7 @@
             return data;
         }
     }
-    return nil;
+    return [JSNil new];
 }
 
 @end

@@ -16,13 +16,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface Reader : NSObject
 - (instancetype)initWithTokens:(NSMutableArray *)array;
-- (NSString *)next;
-- (NSString *)peek;
+- (nullable NSString *)next;
+- (nullable NSString *)peek;
 - (void)pass;
-- (JSData *)readString:(NSString *)string;
-- (JSData *)readForm;
-- (JSData *)readListStartingWith:(NSString *)leftParens;
-- (JSData *)readAtom;
+- (nullable JSData *)readString:(NSString *)string;
+- (nullable JSData *)readForm;
+- (nullable JSData *)readListStartingWith:(NSString *)leftParens;
+- (nullable JSData *)readAtom;
 - (NSMutableArray *)tokenize:(NSString *)string;
 @end
 

@@ -31,14 +31,14 @@
     return self;
 }
 
-- (NSString *)next {
+- (nullable NSString *)next {
     if (position >= [tokens count]) {
         return nil;
     }
     return tokens[position++];
 }
 
-- (NSString *)peek {
+- (nullable NSString *)peek {
     if (position >= [tokens count]) {
         return nil;
     }
@@ -52,7 +52,7 @@
     position++;
 }
 
-- (JSData *)readString:(NSString *)string {
+- (nullable JSData *)readString:(NSString *)string {
     NSMutableArray *tokens = [self tokenize:string];
     if ([tokens count] <= 0) {
         return nil;
@@ -61,7 +61,7 @@
     return [reader readForm];
 }
 
-- (JSData *)readForm {
+- (nullable JSData *)readForm {
     NSString *token = [self peek];
     if (token == nil) {
         info(@"Error: %@", TOKEN_EMPTY);
@@ -82,7 +82,7 @@
     return [self readAtom];
 }
 
-- (JSData *)readListStartingWith:(NSString *)leftParens {
+- (nullable JSData *)readListStartingWith:(NSString *)leftParens {
     NSMutableArray *list = [NSMutableArray new];
     NSArray *rightParens = @[@")", @"]", @"}"];
     [self pass];
@@ -108,7 +108,7 @@
     return range.location != NSNotFound;
 }
 
-- (JSData *)readAtom {
+- (nullable JSData *)readAtom {
     NSString *token = [self next];
     NSString *stringPattern = @"\"(?:\\\\.|[^\\\\\"])*\"";
     NSString *stringUnclosed = @"\"(?:\\\\.|[^\\\\\"])*";
@@ -117,7 +117,7 @@
     if ([self matchString:token withPattern:numPattern]) {
         return [[JSNumber alloc] initWithString:token];
     } else if ([self matchString:token withPattern:keywordPattern]) {
-        return [[JSString alloc] initWithKeyword:token];
+        return [[JSKeyword alloc] initWithKeyword:token];
     } else if ([self matchString:token withPattern:stringPattern]) {
         NSString *stripped = [token substringWithRange:NSMakeRange(1, [token length] - 1)];
         NSString* ret = [[[[stripped stringByReplacingOccurrencesOfString:@"\\\\" withString:@"0xff"]

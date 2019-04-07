@@ -15,45 +15,73 @@
 @end
 
 @implementation JSString {
-    NSString *string;
-    BOOL _isKeyword;
+    NSString *_string;
     NSString *_dataType;
 }
 
 @synthesize dataType = _dataType;
-@synthesize isKeyword = _isKeyword;
 
 - (instancetype)init {
     self = [super init];
     if (self) {
-        string = @"";
-        _isKeyword = NO;
-        _dataType = [self className];
+        self = [self initWithString:@""];
     }
     return self;
 }
 
-- (instancetype)initWithString:(NSString *)str {
+- (instancetype)initWithFormat:(NSString *)format, ... {
     self = [super init];
     if (self) {
-        string = str;
-        _dataType = [self className];
+        va_list args;
+        va_start(args, format);
+        _string = [[NSString alloc] initWithFormat:format arguments:args];
+        va_end(args);
+        self = [self initWithString:_string];
     }
     return self;
 }
 
-- (instancetype)initWithKeyword:(NSString *)str {
+- (instancetype)initWithString:(NSString *)string {
     self = [super init];
     if (self) {
-        string = str;
-        _isKeyword = YES;
-        _dataType = @"JSKeyword";
+        _string = string;
+        _dataType = [self className];
     }
     return self;
 }
 
 - (NSString *)value {
-    return string;
+    return _string;
+}
+
+@end
+
+@implementation JSKeyword {
+    NSString *_dataType;
+    NSString *_string;
+}
+
+@synthesize dataType = _dataType;
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self = [self initWithKeyword:@""];
+    }
+    return self;
+}
+
+- (instancetype)initWithKeyword:(NSString *)string {
+    self = [super init];
+    if (self) {
+        _dataType = [self className];
+        _string = string;
+    }
+    return self;
+}
+
+- (NSString *)value {
+    return _string;
 }
 
 @end
@@ -81,6 +109,7 @@
     self = [super init];
     if (self) {
         dict = [self fromArray:array];
+        _dataType = [self className];
     }
     return self;
 }
@@ -114,13 +143,12 @@
     return dict;
 }
 
-- (NSMutableDictionary *)map:(id (^)(id key, id obj))block {
-    NSMutableDictionary *hm = [NSMutableDictionary new];
+- (NSMutableArray *)map:(id (^)(id key, id obj))block {
+    NSMutableArray *list = [NSMutableArray new];
     [dict enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        NSDictionary *newDict = block(key, obj);
-        [hm setObject:[newDict valueForKey:key] forKey:key];
+        [list addObject:block(key, obj)];
     }];
-    return hm;
+    return list;
 }
 
 @end
@@ -224,7 +252,7 @@
     return self;
 }
 
-- (instancetype)initWith:(NSArray *)list {
+- (instancetype)initWithArray:(NSArray *)list {
     self = [super init];
     if (self) {
         array = [[NSMutableArray alloc] initWithArray:list];
@@ -241,15 +269,18 @@
     NSNumber *n;
     NSString *_dataType;
     NSString *decimalPattern;
+    enum CFNumberType _numberType;
 }
 
 @synthesize dataType = _dataType;
 @synthesize meta;
+@synthesize numberType = _numberType;
 
-- (instancetype)initWithFloat:(float)num {
+- (instancetype)initWithFloat:(float)number {
     self = [super init];
     if (self) {
-        n = [[NSNumber alloc] initWithFloat:num];
+        n = [[NSNumber alloc] initWithFloat:number];
+        _numberType = kCFNumberFloatType;
         self = [self initWithNumber:n];
     }
     return self;
@@ -263,10 +294,12 @@
         if ([Utils matchString:string withPattern:decimalPattern]) {
             // Float
             formatter.numberStyle = NSNumberFormatterDecimalStyle;
+            _numberType = kCFNumberFloatType;
             n = [formatter numberFromString:string];
         } else {
             // Integer
             formatter.numberStyle = NSNumberFormatterNoStyle;
+            _numberType = kCFNumberIntType;
             n = [formatter numberFromString:string];
         }
         self = [self initWithNumber:n];
@@ -279,21 +312,38 @@
     if (self) {
         _dataType = [self className];
         n = number;
+        _numberType = CFNumberGetType((CFNumberRef)number);
         decimalPattern = @"\\d+(\\.\\d+)";
     }
     return self;
 }
 
-- (BOOL)isEqual:(JSNumber *)num {
-    return [n isEqualToNumber:[num val]];
+- (BOOL)isEqual:(JSNumber *)number {
+    return [n isEqualToNumber:[number val]];
 }
 
-- (float)value {
-    return [n floatValue];
+- (CFNumberType)value {
+    CFNumberType num;
+    CFNumberGetValue((CFNumberRef)n, _numberType, &num);
+    return num;
 }
 
 - (NSNumber *)val {
     return n;
+}
+
+- (CFNumberType)numberType {
+    return _numberType;
+}
+
+- (NSString *)string {
+    NSNumberFormatter *formatter = [NSNumberFormatter new];
+    if (_numberType == kCFNumberFloatType || _numberType == kCFNumberFloat32Type || _numberType == kCFNumberFloat64Type || _numberType == kCFNumberDoubleType) {
+        formatter.numberStyle = NSNumberFormatterDecimalStyle;
+    } else {
+        formatter.numberStyle = NSNumberFormatterNoStyle;
+    }
+    return [formatter stringFromNumber:n];
 }
 
 @end
@@ -320,8 +370,8 @@
     return _name;
 }
 
-- (BOOL)isEqual:(JSSymbol *)sym {
-    return [_name isEqualToString:[sym name]];
+- (BOOL)isEqual:(JSSymbol *)symbol {
+    return [_name isEqualToString:[symbol name]];
 }
 
 @end
@@ -335,7 +385,7 @@
 
 @synthesize dataType = _dataType;
 
-- (instancetype)initWith:(JSData *) data {
+- (instancetype)initWithData:(JSData *)data {
     self = [super init];
     if (self) {
         _data = data;
