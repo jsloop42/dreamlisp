@@ -34,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSString *dataType;
 @end
 
-@interface JSKeyword : JSString
+@interface JSKeyword : JSData
 - (instancetype)init;
 - (instancetype)initWithKeyword:(NSString *)string;
 - (NSString *)value;

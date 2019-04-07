@@ -8,11 +8,28 @@
 
 #import "Types.h"
 
-#pragma mark String
-
 @implementation JSData
 @synthesize dataType;
 @end
+
+#pragma mark TypeUtils
+
+@interface TypeUtils: NSObject
++ (NSMutableArray *)mapOnArray:(NSMutableArray *)array withBlock:(id (^)(id arg))block;
+@end
+
+@implementation TypeUtils
+
++ (NSMutableArray *)mapOnArray:(NSMutableArray *)array withBlock:(id (^)(id arg))block {
+    NSMutableArray *acc = [NSMutableArray new];
+    [array enumerateObjectsUsingBlock:^(id arg, NSUInteger idx, BOOL *stop) {
+        [acc addObject:block(arg)];
+    }];
+    return acc;
+}
+@end
+
+#pragma mark String
 
 @implementation JSString {
     NSString *_string;
@@ -66,11 +83,8 @@
 #pragma mark Keyword
 
 @implementation JSKeyword {
-    NSString *_dataType;
     NSString *_string;
 }
-
-@synthesize dataType = _dataType;
 
 - (instancetype)init {
     self = [super init];
@@ -83,10 +97,17 @@
 - (instancetype)initWithKeyword:(NSString *)string {
     self = [super init];
     if (self) {
-        _dataType = [self className];
-        _string = string;
+        _string = [string stringByReplacingCharactersInRange:NSMakeRange(0, 0) withString:[self keyword]];
     }
     return self;
+}
+
+- (NSString *)dataType {
+    return [self className];
+}
+
+- (NSString *)keyword {
+    return @":";
 }
 
 - (NSString *)value {
@@ -232,11 +253,7 @@
 }
 
 - (NSMutableArray *)map:(id (^)(id arg))block {
-    NSMutableArray *acc = [NSMutableArray new];
-    [array enumerateObjectsUsingBlock:^(id arg, NSUInteger idx, BOOL *stop) {
-        [acc addObject:block(arg)];
-    }];
-    return acc;
+    return [TypeUtils mapOnArray:array withBlock:block];
 }
 
 @end
@@ -268,6 +285,10 @@
 
 - (NSString *)dataType {
     return [self className];
+}
+
+- (NSMutableArray *)map:(id (^)(id arg))block {
+    return [TypeUtils mapOnArray:array withBlock:block];
 }
 
 @end

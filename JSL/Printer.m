@@ -10,13 +10,6 @@
 
 @implementation Printer
 
-- (NSString *)printListFor:(JSList *)list readably:(BOOL)readably withFormatter:(NSString *)formatter {
-    NSMutableArray *xs = [(JSList *)list map:^NSString *(JSData *obj) {
-        return [self printStringFor:obj readably:readably];
-    }];
-    return [[NSString alloc] initWithFormat:formatter, [xs componentsJoinedByString:@" "]];
-}
-
 - (NSString *)readableStringFor:(NSString *)string {
     NSMutableString *ms = [[NSMutableString alloc] initWithString:@"\""];
     NSString *readable = [[[string stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"]
@@ -48,9 +41,15 @@
         }
         return string;
     } else if ([dataType isEqual:@"JSList"]) {
-        return [self printListFor:(JSList *)data readably:readably withFormatter:@"(%@)"];
+        NSMutableArray *xs = [(JSList *)data map:^NSString *(JSData *obj) {
+            return [self printStringFor:obj readably:readably];
+        }];
+        return [[NSString alloc] initWithFormat:@"(%@)", [xs componentsJoinedByString:@" "]];
     } else if ([dataType isEqual:@"JSVector"]) {
-        return [self printListFor:(JSVector *)data readably:readably withFormatter:@"[%@]"];
+        NSMutableArray *xs = [(JSVector *)data map:^NSString *(JSData *obj) {
+            return [self printStringFor:obj readably:readably];
+        }];
+        return [[NSString alloc] initWithFormat:@"[%@]", [xs componentsJoinedByString:@" "]];
     } else if ([dataType isEqual:@"JSHashMap"]) {
         NSMutableArray *xs = [(JSHashMap *)data map:^NSString *(JSData *key, JSData * val) {
             return [[NSString alloc] initWithFormat:@"%@ %@", [self printStringFor:key readably:readably], [self printStringFor:val readably:readably]];

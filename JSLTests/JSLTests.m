@@ -61,13 +61,22 @@
     XCTAssertEqualObjects(tokens, tokensArr);
 }
 
-- (void)testListMap {
+- (void)testMapOnList {
     JSList *list = [[JSList alloc] initWithArray:@[@"abc", @"def", @"ghi"]];
     NSMutableArray *uc = [list map:^NSString * (NSString *arg) {
         return [arg uppercaseString];
     }];
     XCTAssertEqualObjects(uc[0], @"ABC");
 }
+
+- (void)testMapOnVector {
+    JSVector *vec = [[JSVector alloc] initWithArray:@[@"abc", @"def", @"ghi"]];
+    NSMutableArray *uc = [vec map:^NSString * (NSString *arg) {
+        return [arg uppercaseString];
+    }];
+    XCTAssertEqualObjects(uc[0], @"ABC");
+}
+
 
 - (void)testMapOnDictionary {
     JSHashMap *hm = [[JSHashMap alloc] initWithArray:[@[@"a", @"abc", @"b", @"bcd", @"c", @"cde"] mutableCopy]];
@@ -95,12 +104,21 @@
     XCTAssertTrue([num1 isDouble]);
     XCTAssertEqual([num1 doubleValue], 42.42);
     XCTAssertEqualObjects([prn printStringFor:num1 readably:true], @"42.42");
-    // Number list
+    // List with numbers
     JSList *nlist = [[JSList alloc] initWithArray:@[@1, @2, @3]];
     XCTAssertEqualObjects([prn printStringFor:nlist readably:true], @"(1 2 3)");
-    // String list
+    // List with strings
     JSList *slist = [[JSList alloc] initWithArray:@[@"1", @"2", @"3"]];
     XCTAssertEqualObjects([prn printStringFor:slist readably:true], @"(\"1\" \"2\" \"3\")");
+    // Keyword
+    JSKeyword *kw = [[JSKeyword alloc] initWithKeyword:@"abc"];
+    XCTAssertEqualObjects([prn printStringFor:kw readably:true], @":abc");
+    // Vector with numbers
+    JSVector *nvec = [[JSVector alloc] initWithArray:@[@1, @2, @3]];
+    XCTAssertEqualObjects([prn printStringFor:nvec readably:true], @"[1 2 3]");
+    // Vector with strings
+    JSVector *svec = [[JSVector alloc] initWithArray:@[@"1", @"2", @"3"]];
+    XCTAssertEqualObjects([prn printStringFor:svec readably:true], @"[\"1\" \"2\" \"3\"]");
 }
 
 - (void)notestPerformanceExample {
