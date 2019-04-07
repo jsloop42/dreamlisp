@@ -30,6 +30,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)value;
 @end
 
+@interface NSString (JSDataProtocol)
+@property (nonatomic, readonly) NSString *dataType;
+@end
+
 @interface JSKeyword : JSString
 - (instancetype)init;
 - (instancetype)initWithKeyword:(NSString *)string;
@@ -78,6 +82,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)isDouble;
 - (CFNumberType)numberType;
 - (NSString *)string;
+@end
+
+@interface NSNumber (JSDataProtocol)
+@property (nonatomic, readonly) NSString *dataType;
 @end
 
 @interface JSSymbol: JSData

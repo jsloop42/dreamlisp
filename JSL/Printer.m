@@ -17,22 +17,34 @@
     return [[NSString alloc] initWithFormat:formatter, [xs componentsJoinedByString:@" "]];
 }
 
+- (NSString *)readableStringFor:(NSString *)string {
+    NSMutableString *ms = [[NSMutableString alloc] initWithString:@"\""];
+    NSString *readable = [[[string stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"]
+                           stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""]
+                          stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"];
+    [ms appendString:readable];
+    [ms appendString:@"\""];
+    return ms;
+}
+
 - (NSString *)printStringFor:(JSData *)data readably:(BOOL)readably {
     NSString *dataType = [data dataType];
     if ([dataType isEqual:@"JSSymbol"]) {
         return [(JSSymbol *)data name];
     } else if ([dataType isEqual:@"JSNumber"]) {
         return [(JSNumber *)data string];
+    } else if ([dataType isEqual:@"NSNumber"]) {
+        return [[[JSNumber alloc] initWithNumber:(NSNumber *)data] string];
     } else if ([dataType isEqual:@"JSString"]) {
         NSString *string = [(JSString *)data value];
         if (readably) {
-            NSMutableString *ms = [[NSMutableString alloc] initWithString:@"\""];
-            NSString *readable = [[[string stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"]
-                                   stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""]
-                                   stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"];
-            [ms appendString:readable];
-            [ms appendString:@"\""];
-            return ms;
+            return [self readableStringFor:string];
+        }
+        return string;
+    } else if ([dataType isEqual:@"NSString"]) {
+        NSString *string = (NSString *)data;
+        if (readably) {
+            return [self readableStringFor:string];
         }
         return string;
     } else if ([dataType isEqual:@"JSList"]) {

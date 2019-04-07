@@ -16,10 +16,7 @@
 
 @implementation JSString {
     NSString *_string;
-    NSString *_dataType;
 }
-
-@synthesize dataType = _dataType;
 
 - (instancetype)init {
     self = [super init];
@@ -42,9 +39,12 @@
     self = [super init];
     if (self) {
         _string = string;
-        _dataType = [self className];
     }
     return self;
+}
+
+- (NSString *)dataType {
+    return [self className];
 }
 
 - (NSString *)value {
@@ -52,6 +52,18 @@
 }
 
 @end
+
+#pragma mark NSString
+
+@implementation NSString (JSDataProtocol)
+
+-(NSString *)dataType {
+    return @"NSString";
+}
+
+@end
+
+#pragma mark Keyword
 
 @implementation JSKeyword {
     NSString *_dataType;
@@ -87,17 +99,14 @@
 
 @implementation JSHashMap {
     NSMutableDictionary *dict;
-    NSString *_dataType;
 }
 
-@synthesize dataType = _dataType;
 @synthesize meta;
 
 - (instancetype)init {
     self = [super init];
     if (self) {
         dict = [NSMutableDictionary new];
-        _dataType = [self className];
     }
     return self;
 }
@@ -106,9 +115,12 @@
     self = [super init];
     if (self) {
         dict = [self fromArray:array];
-        _dataType = [self className];
     }
     return self;
+}
+
+- (NSString *)dataType {
+    return [self className];
 }
 
 - (NSMutableDictionary *)fromArray:(NSMutableArray *)array {
@@ -154,17 +166,14 @@
 
 @implementation JSList {
     NSMutableArray *array;
-    NSString *_dataType;
 }
 
-@synthesize dataType = _dataType;
 @synthesize meta;
 
 - (instancetype)init {
     self = [super init];
     if (self) {
         array = [NSMutableArray new];
-        _dataType = [self className];
     }
     return self;
 }
@@ -173,9 +182,12 @@
     self = [super init];
     if (self) {
         array = [[NSMutableArray alloc] initWithArray:list];
-        _dataType = [self className];
     }
     return self;
+}
+
+- (NSString *)dataType {
+    return [self className];
 }
 
 - (void)add:(JSData *)object {
@@ -233,18 +245,15 @@
 
 @implementation JSVector {
     NSMutableArray *array;
-    NSString *_dataType;
     JSData *_meta;
 }
 
-@synthesize dataType = _dataType;
 @synthesize meta = _meta;
 
 - (instancetype)init {
     self = [super init];
     if (self) {
         array = [NSMutableArray new];
-        _dataType = [self className];
     }
     return self;
 }
@@ -253,9 +262,12 @@
     self = [super init];
     if (self) {
         array = [[NSMutableArray alloc] initWithArray:list];
-        _dataType = [self className];
     }
     return self;
+}
+
+- (NSString *)dataType {
+    return [self className];
 }
 
 @end
@@ -264,12 +276,10 @@
 
 @implementation JSNumber {
     NSNumber *n;
-    NSString *_dataType;
     NSString *decimalPattern;
     enum CFNumberType _numberType;
 }
 
-@synthesize dataType = _dataType;
 @synthesize meta;
 @synthesize numberType = _numberType;
 
@@ -307,12 +317,15 @@
 - (instancetype)initWithNumber:(NSNumber *)number {
     self = [super init];
     if (self) {
-        _dataType = [self className];
         n = number;
         _numberType = CFNumberGetType((CFNumberRef)number);
         decimalPattern = @"\\d+(\\.\\d+)";
     }
     return self;
+}
+
+- (NSString *)dataType {
+    return [self className];
 }
 
 - (BOOL)isEqual:(JSNumber *)number {
@@ -360,22 +373,32 @@
 
 @end
 
+#pragma mark NSNumber
+
+@implementation NSNumber (JSDataProtocol)
+
+-(NSString *)dataType {
+    return @"NSNumber";
+}
+
+@end
+
 #pragma mark Symbol
 
 @implementation JSSymbol {
     NSString *_name;
-    NSString *_dataType;
 }
-
-@synthesize dataType = _dataType;
 
 - (instancetype)initWithName:(NSString *)name {
     self = [super init];
     if (self) {
         _name = name;
-        _dataType = [self className];
     }
     return self;
+}
+
+-(NSString *)dataType {
+    return [self className];
 }
 
 - (NSString *)name {
@@ -391,19 +414,19 @@
 #pragma mark Atom
 
 @implementation JSAtom {
-    NSString *_dataType;
     JSData *_data;
 }
-
-@synthesize dataType = _dataType;
 
 - (instancetype)initWithData:(JSData *)data {
     self = [super init];
     if (self) {
         _data = data;
-        _dataType = [self className];
     }
     return self;
+}
+
+- (NSString *)dataType {
+    return [self className];
 }
 
 - (JSData *)value {
@@ -432,41 +455,25 @@
 
 #pragma mark True
 
-@implementation JSTrue {
-    NSString *_dataType;
+@implementation JSTrue
+
+- (NSString *)dataType {
+    return [self className];
 }
 
-@synthesize dataType = _dataType;
-
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        _dataType = [self className];
-    }
-    return self;
-}
 @end
 
 #pragma mark False
 
-@implementation JSFalse {
-    NSString *_dataType;
-}
+@implementation JSFalse
 
-@synthesize dataType = _dataType;
-
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        _dataType = [self className];
-    }
-    return self;
+- (NSString *)dataType {
+    return [self className];
 }
 
 @end
 
 @implementation JSFunction {
-    NSString *_dataType;
     JSData *(^_fn)(NSMutableArray *);
     JSData *_ast;
     NSMutableArray *_params;
@@ -475,7 +482,6 @@
     JSData *_meta;
 }
 
-@synthesize dataType = _dataType;
 @synthesize fn = _fn;
 @synthesize ast = _ast;
 @synthesize params = _params;
@@ -487,7 +493,6 @@
                          fn:(JSData *(^)(NSMutableArray *))fn {
     self = [super init];
     if (self) {
-        _dataType = [self className];
         _fn = fn;
         _ast = ast;
         _params = params;
@@ -512,6 +517,10 @@
         self = [self initWithAst:func.ast params:func.params env:func.env isMacro:func.isMacro meta:meta fn:func.fn];
     }
     return self;
+}
+
+- (NSString *)dataType {
+    return [self className];
 }
 
 - (JSData *)apply {

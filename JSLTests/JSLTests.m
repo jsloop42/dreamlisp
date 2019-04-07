@@ -95,9 +95,12 @@
     XCTAssertTrue([num1 isDouble]);
     XCTAssertEqual([num1 doubleValue], 42.42);
     XCTAssertEqualObjects([prn printStringFor:num1 readably:true], @"42.42");
-    // List
-    JSList *list = [[JSList alloc] initWithArray:@[@1, @2, @3]];
-    //XCTAssertEqualObjects([prn printStringFor:list readably:true], @"(1 2 3)");
+    // Number list
+    JSList *nlist = [[JSList alloc] initWithArray:@[@1, @2, @3]];
+    XCTAssertEqualObjects([prn printStringFor:nlist readably:true], @"(1 2 3)");
+    // String list
+    JSList *slist = [[JSList alloc] initWithArray:@[@"1", @"2", @"3"]];
+    XCTAssertEqualObjects([prn printStringFor:slist readably:true], @"(\"1\" \"2\" \"3\")");
 }
 
 - (void)notestPerformanceExample {
