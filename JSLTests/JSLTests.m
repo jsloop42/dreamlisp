@@ -79,17 +79,25 @@
 
 - (void)testPrintString {
     Printer *prn = [Printer new];
+    // Function
     JSFunction *fn = [[JSFunction alloc] initWithAst:[JSNil new] params:[NSMutableArray new] env:[Env new] isMacro:false meta:[JSNil new]
                                                   fn:^id(id arg){return nil;}];
     XCTAssertEqualObjects([prn printStringFor:fn readably:true], @"#<function>");
-
+    // Symbol
     JSSymbol *sym = [[JSSymbol alloc] initWithName:@"greet"];
     XCTAssertEqualObjects([prn printStringFor:sym readably:true], @"greet");
-
+    // Integer
     JSNumber *num = [[JSNumber alloc] initWithString:@"42"];
-    XCTAssertEqual([num numberType], kCFNumberSInt64Type);
-    XCTAssertEqual([num value], 42);
+    XCTAssertEqual([num intValue], 42);
     XCTAssertEqualObjects([prn printStringFor:num readably:true], @"42");
+    // Double
+    JSNumber *num1 = [[JSNumber alloc] initWithString:@"42.42"];
+    XCTAssertTrue([num1 isDouble]);
+    XCTAssertEqual([num1 doubleValue], 42.42);
+    XCTAssertEqualObjects([prn printStringFor:num1 readably:true], @"42.42");
+    // List
+    JSList *list = [[JSList alloc] initWithArray:@[@1, @2, @3]];
+    //XCTAssertEqualObjects([prn printStringFor:list readably:true], @"(1 2 3)");
 }
 
 - (void)notestPerformanceExample {

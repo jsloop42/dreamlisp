@@ -23,9 +23,6 @@
 
 - (instancetype)init {
     self = [super init];
-    if (self) {
-        self = [self initWithString:@""];
-    }
     return self;
 }
 
@@ -294,7 +291,7 @@
         if ([Utils matchString:string withPattern:decimalPattern]) {
             // Float
             formatter.numberStyle = NSNumberFormatterDecimalStyle;
-            _numberType = kCFNumberFloatType;
+            _numberType = kCFNumberDoubleType;
             n = [formatter numberFromString:string];
         } else {
             // Integer
@@ -322,14 +319,29 @@
     return [n isEqualToNumber:[number val]];
 }
 
-- (CFNumberType)value {
-    CFNumberType num;
-    CFNumberGetValue((CFNumberRef)n, _numberType, &num);
-    return num;
+- (double)doubleValue {
+    if ([self isDouble]) {
+        return [n doubleValue];
+    }
+    return 0.0;
+}
+
+- (int)intValue {
+    if (![self isDouble]) {
+        return [n intValue];
+    }
+    return 0;
 }
 
 - (NSNumber *)val {
     return n;
+}
+
+- (BOOL)isDouble {
+    if (_numberType == kCFNumberFloatType || _numberType == kCFNumberFloat32Type || _numberType == kCFNumberFloat64Type || _numberType == kCFNumberDoubleType) {
+        return YES;
+    }
+    return NO;
 }
 
 - (CFNumberType)numberType {
@@ -338,7 +350,7 @@
 
 - (NSString *)string {
     NSNumberFormatter *formatter = [NSNumberFormatter new];
-    if (_numberType == kCFNumberFloatType || _numberType == kCFNumberFloat32Type || _numberType == kCFNumberFloat64Type || _numberType == kCFNumberDoubleType) {
+    if ([self isDouble]) {
         formatter.numberStyle = NSNumberFormatterDecimalStyle;
     } else {
         formatter.numberStyle = NSNumberFormatterNoStyle;

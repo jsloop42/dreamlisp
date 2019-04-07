@@ -16,11 +16,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class Env;
 
-@protocol JSDataProtocol<NSObject>
+@protocol JSDataProtocol <NSObject>
 @property (nonatomic, readonly) NSString *dataType;
 @end
 
-@interface JSData : NSObject<JSDataProtocol>
+@interface JSData : NSObject <JSDataProtocol>
 @end
 
 @interface JSString : JSData
@@ -69,13 +69,13 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSNumber : JSData
 @property (nonatomic, readwrite) JSData *meta;
 @property (nonatomic, assign) enum CFNumberType numberType;
-- (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithFloat:(float)num;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithNumber:(NSNumber *)number;
 - (BOOL)isEqual:(JSNumber *)num;
-- (CFNumberType)value;
-- (NSNumber *)val;
+- (double)doubleValue;
+- (int)intValue;
+- (BOOL)isDouble;
 - (CFNumberType)numberType;
 - (NSString *)string;
 @end

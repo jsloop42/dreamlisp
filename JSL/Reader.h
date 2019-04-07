@@ -10,9 +10,9 @@
 #import "Types.h"
 #import "Constants.h"
 
-@class JSData;
-
 NS_ASSUME_NONNULL_BEGIN
+
+@class JSData;
 
 @interface Reader : NSObject
 - (instancetype)initWithTokens:(NSMutableArray *)array;
