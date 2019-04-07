@@ -63,9 +63,9 @@
 - (JSData *)valueForSymbol:(JSSymbol *)key {
     Env * env = [self findEnvForKey:key];
     if (env != nil) {
-        JSData *data = [[env data] valueForKey:[key name]];
-        if (data != nil) {
-            return data;
+        JSData *_data = [[env data] valueForKey:[key name]];
+        if (_data != nil) {
+            return _data;
         }
     }
     return [JSNil new];

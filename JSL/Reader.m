@@ -53,11 +53,11 @@
 }
 
 - (nullable JSData *)readString:(NSString *)string {
-    NSMutableArray *tokens = [self tokenize:string];
-    if ([tokens count] <= 0) {
+    NSMutableArray *_tokens = [self tokenize:string];
+    if ([_tokens count] <= 0) {
         return nil;
     }
-    Reader *reader = [[Reader alloc] initWithTokens:tokens];
+    Reader *reader = [[Reader alloc] initWithTokens:_tokens];
     return [reader readForm];
 }
 
@@ -94,9 +94,14 @@
             return nil;
         }
     }
-    if ([leftParens isEqual:@"["] && [[self peek] isEqual:@"]"]) {
+    if ([leftParens isEqual:@"("] && [[self peek] isEqual:@")"]) {
+        [self pass];
+        return [[JSList alloc] initWithArray:list];
+    } else if ([leftParens isEqual:@"["] && [[self peek] isEqual:@"]"]) {
+        [self pass];
         return [[JSVector alloc] initWithArray:list];
     } else if ([leftParens isEqual:@"{"] && [[self peek] isEqual:@"}"]) {
+        [self pass];
         return [[JSHashMap alloc] initWithArray:list];
     }
     [self pass];
@@ -140,14 +145,15 @@
 
 - (NSMutableArray *)tokenize:(NSString *)string {
     NSString *pattern = @"[\\s,]*(~@|[\\[\\]{}()'`~^@]|\"(?:[\\\\].|[^\\\\\"])*\"?|;.*|[^\\s\\[\\]{}()'\"`@,;]+)";
-    NSRegularExpression *regex = [[NSRegularExpression alloc] initWithPattern:pattern options:NSRegularExpressionUseUnixLineSeparators error:nil];
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:NULL];
     NSArray *matches = [regex matchesInString:string options:0 range:NSMakeRange(0, [string length])];
-    NSMutableArray *tokens = [NSMutableArray new];
+    NSMutableArray *_tokens = [NSMutableArray array];
     for (NSTextCheckingResult *match in matches) {
-        NSRange group1 = [match rangeAtIndex:1];
-        [tokens addObject:[string substringWithRange:group1]];
+        NSString * mstr = [string substringWithRange:[match rangeAtIndex:1]];
+        if ([mstr characterAtIndex:0] == ';') { continue; }
+        [_tokens addObject:mstr];
     }
-    return tokens;
+    return _tokens;
 }
 
 @end

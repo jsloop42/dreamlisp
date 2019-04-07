@@ -15,8 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 @class JSData;
 
 @interface Env : NSObject
-@property (nonatomic, readwrite) Env *outer;
-@property (nonatomic, readwrite) NSMutableDictionary *data;
+@property (nonatomic, readwrite, copy) Env *outer;
+@property (nonatomic, readwrite, copy) NSMutableDictionary *data;
 - (instancetype)initWithEnv:(Env *)env;
 
 /**

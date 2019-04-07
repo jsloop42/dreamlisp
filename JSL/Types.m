@@ -181,16 +181,16 @@
 }
 
 - (NSMutableDictionary *)fromArray:(NSMutableArray *)array {
-    NSMutableDictionary* dict = [NSMutableDictionary new];
+    NSMutableDictionary* _dict = [NSMutableDictionary new];
     NSUInteger i = 0, len = [array count];
     if (len % 2 != 0) {
         info(@"JSError: Odd number of elements in the array.");
         return dict;
     }
     for (i = 0; i < len; i = i + 2) {
-        [dict setObject:array[i + 1] forKey:array[i]];
+        [_dict setObject:array[i + 1] forKey:array[i]];
     }
-    return dict;
+    return _dict;
 }
 
 - (JSData*)valueForKey:(NSString*)key {

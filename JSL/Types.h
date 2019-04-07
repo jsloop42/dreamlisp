@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface JSString : JSData<NSCopying>
-@property (nonatomic, readwrite) NSString *value;
+@property (nonatomic, readwrite, copy) NSString *value;
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)str;
 - (instancetype)initWithFormat:(NSString *)format, ...;
@@ -35,14 +35,14 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface JSKeyword : JSData<NSCopying>
-@property (nonatomic, readwrite) NSString *value;
+@property (nonatomic, readwrite, copy) NSString *value;
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithKeyword:(NSString *)string;
 @end
 
 @interface JSHashMap : JSData
-@property (nonatomic, readwrite) JSData *meta;
+@property (nonatomic, readwrite, copy) JSData *meta;
 - (instancetype)init;
 - (instancetype)initWithArray:(NSMutableArray *)array;
 - (NSUInteger)count;
@@ -51,7 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface JSList : JSData
-@property (nonatomic, readwrite) JSData *meta;
+@property (nonatomic, readwrite, copy) JSData *meta;
 - (instancetype)init;
 - (instancetype)initWithArray:(NSArray *)list;
 - (void)add:(JSData *)object;
@@ -77,7 +77,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface JSNumber : JSData
-@property (nonatomic, readwrite) JSData *meta;
+@property (nonatomic, readwrite, copy) JSData *meta;
 @property (nonatomic, assign) enum CFNumberType numberType;
 - (instancetype)initWithFloat:(float)num;
 - (instancetype)initWithString:(NSString *)string;
@@ -119,12 +119,12 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSFunction: JSData
 // ([JSData]) -> JSData
 @property (nonatomic, copy) JSData *(^fn)(NSMutableArray *);
-@property (nonatomic, readwrite) JSData *ast;
+@property (nonatomic, readwrite, copy) JSData *ast;
 // [Symbols]
-@property (nonatomic, readwrite) NSMutableArray *params;
-@property (nonatomic, readwrite) Env *env;
-@property (nonatomic, readwrite) BOOL isMacro;
-@property (nonatomic, readwrite) JSData *meta;
+@property (nonatomic, readwrite, copy) NSMutableArray *params;
+@property (nonatomic, readwrite, copy) Env *env;
+@property (nonatomic, readwrite, assign) BOOL isMacro;
+@property (nonatomic, readwrite, copy) JSData *meta;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithAst:(JSData *)ast params:(NSMutableArray *)params env:(Env *)env isMacro:(BOOL)isMacro meta:(JSData *)meta
                          fn:(JSData *(^)(NSMutableArray *))fn;

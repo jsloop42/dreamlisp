@@ -139,9 +139,7 @@
     XCTAssertEqualObjects(print(@"(\"1\" \"2\" \"3\")"), @"(\"1\" \"2\" \"3\")");
     XCTAssertEqualObjects(print(@"{\"1\" \"2\"}"), @"{\"1\" \"2\"}");
     XCTAssertEqualObjects(print(@"{:1 \"2\"}"), @"{:1 \"2\"}");
-}
 
-- (void)notest {
 }
 
 - (void)notestPerformanceExample {

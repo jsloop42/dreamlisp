@@ -10,20 +10,20 @@
 
 @implementation JSL
 
--(NSString*)read:(NSString*)str {
-    return str;
+- (NSString*)read:(NSString*)string {
+    return string;
 }
 
--(NSString*)eval:(NSString*)str {
-    return str;
+- (NSString*)eval:(NSString*)string {
+    return string;
 }
 
--(NSString*)print:(NSString*)str {
-    return str;
+- (NSString*)print:(NSString*)string {
+    return string;
 }
 
--(NSString*)rep:(NSString*)str {
-    return [self print:[self eval:[self read:str]]];
+- (NSString*)rep:(NSString*)string {
+    return [self print:[self eval:[self read:string]]];
 }
 
 @end

@@ -12,7 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSL : NSObject
--(NSString*)rep:(NSString*)str;
+-(NSString*)rep:(NSString*)string;
 @end
 
 NS_ASSUME_NONNULL_END

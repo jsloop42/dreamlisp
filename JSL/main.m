@@ -8,21 +8,20 @@
 
 #import <Foundation/Foundation.h>
 #import "JSL.h"
-#import "Types.h"
+#include <readline/readline.h>
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        NSString* str = @"A";
-        JSL* jsl = [[JSL alloc] init];
-        NSString* ret = [jsl rep:str];
-        NSLog(@"Ret: %@", ret);
-
-        JSHashMap* hm = [[JSHashMap alloc] init];
-        [hm setValue:@"foo" forKey:@"bar"];
-        NSLog(@"%@", [hm valueForKey:@"bar"]);
-
-        JSString* str1 = [[JSString alloc] initWithString:@"Foo"];
-        NSLog(@"%@", [str1 value]);
+        JSL* jsl = [JSL new];
+        const char *prompt = "user> ";
+        char *input = NULL;
+        while ((input = readline(prompt)) != NULL) {
+            add_history(input);
+            NSString *inp = [[NSString alloc] initWithUTF8String:input];
+            free(input);
+            NSString *ret = [jsl rep:inp];
+            info(@"%@", ret);
+        }
     }
     return 0;
 }

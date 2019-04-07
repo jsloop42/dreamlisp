@@ -10,6 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+#define NSLog(FORMAT, ...) fprintf(stderr, "%s\n", [[NSString stringWithFormat:FORMAT, ##__VA_ARGS__] UTF8String]);
+
 #ifdef DEBUG
 #   define debug(...) NSLog(__VA_ARGS__)
 #   define info(...) NSLog(__VA_ARGS__)
