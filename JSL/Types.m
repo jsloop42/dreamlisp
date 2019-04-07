@@ -557,10 +557,10 @@
 @synthesize ast = _ast;
 @synthesize params = _params;
 @synthesize env = _env;
-@synthesize isMacro = _isMacro;
+@synthesize macro = _isMacro;
 @synthesize meta = _meta;
 
-- (instancetype)initWithAst:(JSData *)ast params:(NSMutableArray *)params env:(Env *)env isMacro:(BOOL)isMacro meta:(JSData *)meta
+- (instancetype)initWithAst:(JSData *)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(JSData *)meta
                          fn:(JSData *(^)(NSMutableArray *))fn {
     self = [super init];
     if (self) {
@@ -574,10 +574,10 @@
     return self;
 }
 
-- (instancetype)initWithIsMacro:(BOOL)isMacro func:(JSFunction *)func {
+- (instancetype)initWithMacro:(BOOL)isMacro func:(JSFunction *)func {
     self = [super init];
     if (self) {
-        self = [self initWithAst:func.ast params:func.params env:func.env isMacro:isMacro meta:func.meta fn:func.fn];
+        self = [self initWithAst:func.ast params:func.params env:func.env macro:isMacro meta:func.meta fn:func.fn];
     }
     return self;
 }
@@ -585,7 +585,7 @@
 - (instancetype)initWithMeta:(JSData *)meta func:(JSFunction *)func {
     self = [super init];
     if (self) {
-        self = [self initWithAst:func.ast params:func.params env:func.env isMacro:func.isMacro meta:meta fn:func.fn];
+        self = [self initWithAst:func.ast params:func.params env:func.env macro:func.isMacro meta:meta fn:func.fn];
     }
     return self;
 }

@@ -123,12 +123,12 @@ NS_ASSUME_NONNULL_BEGIN
 // [Symbols]
 @property (nonatomic, readwrite, copy) NSMutableArray *params;
 @property (nonatomic, readwrite, copy) Env *env;
-@property (nonatomic, readwrite, assign) BOOL isMacro;
+@property (nonatomic, readwrite, assign, getter=isMacro) BOOL macro;
 @property (nonatomic, readwrite, copy) JSData *meta;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithAst:(JSData *)ast params:(NSMutableArray *)params env:(Env *)env isMacro:(BOOL)isMacro meta:(JSData *)meta
+- (instancetype)initWithAst:(JSData *)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(JSData *)meta
                          fn:(JSData *(^)(NSMutableArray *))fn;
-- (instancetype)initWithIsMacro:(BOOL)isMacro func:(JSFunction *)func;
+- (instancetype)initWithMacro:(BOOL)isMacro func:(JSFunction *)func;
 - (instancetype)initWithMeta:(JSData *)meta func:(JSFunction *)func;
 - (JSData *)apply;
 - (JSData *)apply:(NSMutableArray *)args;

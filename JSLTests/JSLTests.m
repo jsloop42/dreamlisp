@@ -89,7 +89,7 @@
 - (void)testPrintString {
     Printer *prn = [Printer new];
     // Function
-    JSFunction *fn = [[JSFunction alloc] initWithAst:[JSNil new] params:[NSMutableArray new] env:[Env new] isMacro:false meta:[JSNil new]
+    JSFunction *fn = [[JSFunction alloc] initWithAst:[JSNil new] params:[NSMutableArray new] env:[Env new] macro:false meta:[JSNil new]
                                                   fn:^id(id arg){return nil;}];
     XCTAssertEqualObjects([prn printStringFor:fn readably:true], @"#<function>");
     // Symbol

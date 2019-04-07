@@ -8,21 +8,33 @@
 
 #import "JSL.h"
 
-@implementation JSL
-
-- (NSString*)read:(NSString*)string {
-    return string;
+@implementation JSL {
+    Reader *reader;
+    Printer *printer;
 }
 
-- (NSString*)eval:(NSString*)string {
-    return string;
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        reader = [Reader new];
+        printer = [Printer new];
+    }
+    return self;
 }
 
-- (NSString*)print:(NSString*)string {
-    return string;
+- (JSData *)read:(NSString *)string {
+    return [reader readString:string];
 }
 
-- (NSString*)rep:(NSString*)string {
+- (JSData *)eval:(JSData *)data {
+    return data;
+}
+
+- (NSString *)print:(JSData *)data {
+    return [printer printStringFor:data readably:YES];
+}
+
+- (NSString *)rep:(NSString *)string {
     return [self print:[self eval:[self read:string]]];
 }
 

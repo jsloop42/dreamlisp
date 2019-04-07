@@ -16,7 +16,6 @@
 		9E281CFD225A60770038A5AF /* tests in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CF9225A60760038A5AF /* tests */; };
 		9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CFA225A60760038A5AF /* run_argv_test.sh */; };
 		9E281CFF225A60770038A5AF /* runtest.py in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CFB225A60760038A5AF /* runtest.py */; };
-		9E281D00225A60770038A5AF /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CFC225A60760038A5AF /* Makefile */; };
 		9E281D01225A60770038A5AF /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CFC225A60760038A5AF /* Makefile */; };
 		9E281D03225A608D0038A5AF /* test in Resources */ = {isa = PBXBuildFile; fileRef = 9E281D02225A608D0038A5AF /* test */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
@@ -257,7 +256,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E281D00225A60770038A5AF /* Makefile in Sources */,
 				9E6F444822578E5600777A24 /* JSL.m in Sources */,
 				9E3A9D6922568D7D00348529 /* Types.m in Sources */,
 				9E3A9D6D22568D8D00348529 /* Env.m in Sources */,

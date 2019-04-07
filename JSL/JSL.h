@@ -8,11 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import "Types.h"
+#import "Reader.h"
+#import "Printer.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSL : NSObject
--(NSString*)rep:(NSString*)string;
+- (instancetype)init;
+- (NSString *)rep:(NSString *)string;
 @end
 
 NS_ASSUME_NONNULL_END
