@@ -15,5 +15,9 @@
 #import "Types.h"
 #import "JSL.h"
 #import "Reader.h"
+#import "FileOps.h"
+
+@interface JSLTests : XCTestCase
+@end
 
 #endif /* JSLTests_h */

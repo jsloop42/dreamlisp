@@ -2,7 +2,7 @@
 
 BIN="JSLTests/objc"
 
-function build() {
+function run() {
     if [ "$1" = "0" ]; then
         OUT="step0_repl"
     elif [ "$1" = "1" ]; then
@@ -30,10 +30,8 @@ function build() {
         echo "step argument missing."
         exit
     fi
-    echo "Building $OUT."
-    cd JSL
-    clang -framework Foundation main.m Types.m Reader.m Printer.m Utils.m JSL.m Env.m Core.m Constants.m Terminal.m -ledit -lncurses -o $OUT
-    mv $OUT ../$BIN
+    echo $OUT
+    $BIN/$OUT
 }
 
 function help() {
@@ -47,16 +45,4 @@ if [ $# -ne 1 ]; then
   help
 fi
 
-# Display a progress bar
-function spinner() {
-    local pid=$!
-    local delay=0.3
-    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-        echo -n "."
-        sleep $delay
-    done
-    echo ""
-}
-
-# A long running operation with progress
-(build $@) & spinner
+run $@

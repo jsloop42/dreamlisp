@@ -9,10 +9,6 @@
 #import <XCTest/XCTest.h>
 #import "JSLTests.h"
 
-@interface JSLTests : XCTestCase
-
-@end
-
 @implementation JSLTests
 
 - (void)setUp {
@@ -140,6 +136,20 @@
     XCTAssertEqualObjects(print(@"{\"1\" \"2\"}"), @"{\"1\" \"2\"}");
     XCTAssertEqualObjects(print(@"{:1 \"2\"}"), @"{:1 \"2\"}");
 
+}
+
+- (void)testFileOps {
+    FileOps *fops = [[FileOps alloc] init];
+    NSString *file = @"/tmp/fopstest.txt";
+    NSString *content = @"foo";
+    XCTAssertTrue([fops delete:file]);
+    [fops createFileIfNotExist:file];
+    XCTAssertNoThrow([fops append:content]);
+    XCTAssertNoThrow([fops openFile:file]);
+    XCTAssertTrue([fops hashNext]);
+    XCTAssertEqualObjects([fops readLine], content);
+    [fops closeFile];
+    XCTAssertTrue([fops delete:file]);
 }
 
 - (void)notestPerformanceExample {
