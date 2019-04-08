@@ -77,15 +77,16 @@ NSString * const READ_ERROR = @"Error reading file.";
 
 - (NSString *)readLine {
     NSData *line = [NSData new];
-    NSRange range = [_fileData rangeOfData:_delim options:0 range:NSMakeRange(_start, _buff)];
+    NSRange range = [_fileData rangeOfData:_delim options:0 range:NSMakeRange(_start, _buff - _start)];
     if (range.location != NSNotFound) {
-        _offset = range.location;
-        line = [_fileHandle readDataOfLength:_offset - _start];
-        [_fileHandle seekToFileOffset:_offset];
+        _offset = range.location - _start;
+        line = [_fileHandle readDataOfLength:_offset];
+        _start += _offset + range.length;
+        [_fileHandle seekToFileOffset:_start];
     } else {
-        _offset += _offset;
-        line = [_fileHandle readDataOfLength:_offset - _start];
-        [_fileHandle seekToFileOffset:_offset];
+        _offset = _buff - _start;
+        line = [_fileHandle readDataOfLength:_offset];
+        [_fileHandle seekToFileOffset:_buff];
         _start = _buff;
     }
     return [[NSString alloc] initWithData:line encoding:NSUTF8StringEncoding];
@@ -97,7 +98,7 @@ NSString * const READ_ERROR = @"Error reading file.";
     }
     if (_appendHandle) {
         [_appendHandle seekToEndOfFile];
-        NSData *data = [[string stringByAppendingString:@"\n"] dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
         if (data) {
             [_appendHandle writeData:data];
         }

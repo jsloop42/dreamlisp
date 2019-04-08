@@ -141,13 +141,16 @@
 - (void)testFileOps {
     FileOps *fops = [[FileOps alloc] init];
     NSString *file = @"/tmp/fopstest.txt";
-    NSString *content = @"foo";
-    XCTAssertTrue([fops delete:file]);
+    NSString *content = @"foo\nbar";
     [fops createFileIfNotExist:file];
     XCTAssertNoThrow([fops append:content]);
     XCTAssertNoThrow([fops openFile:file]);
     XCTAssertTrue([fops hashNext]);
-    XCTAssertEqualObjects([fops readLine], content);
+    NSString *text = @"";
+    while ([fops hashNext]) {
+        text = [text stringByAppendingString:[fops readLine]];
+    }
+    XCTAssertEqualObjects(text, @"foobar");
     [fops closeFile];
     XCTAssertTrue([fops delete:file]);
 }

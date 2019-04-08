@@ -8,26 +8,21 @@
 
 #import <Foundation/Foundation.h>
 #import "JSL.h"
-#include <readline/readline.h>
+#import "Terminal.h"
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
         JSL* jsl = [JSL new];
-        const char *prompt = "user> ";
-        char *input = NULL;
+        Terminal *term = [Terminal new];
         NSString *inp = @"";
         NSString *ret = @"";
-        while ((input = readline(prompt)) != NULL) {
-            add_history(input);
-            inp = [[NSString alloc] initWithUTF8String:input];
-            free(input);
+        while ((inp = [term readline]) != nil) {
             @try {
                  ret = [jsl rep:inp];
                 info(@"%@", ret);
             } @catch (NSException *exception) {
                 info(@"%@", exception.description);
             }
-
         }
     }
     return 0;
