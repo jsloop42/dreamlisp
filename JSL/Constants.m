@@ -10,7 +10,7 @@
 
 @implementation Constants
 NSString * const ERROR_TYPE = @"Error type.";
-NSString * const PARENS_MISMATCH = @"Parenthesis mismatch.";
-NSString * const QUOTE_MARK_MISMATCH = @"Quotation mark mismatch.";
+NSString * const PARENS_MISMATCH = @"Parenthesis unbalanced.";
+NSString * const QUOTE_MARK_MISMATCH = @"Quotation mark unbalanced.";
 NSString * const TOKEN_EMPTY = @"Token is empty.";
 @end

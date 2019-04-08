@@ -15,12 +15,19 @@ int main(int argc, const char * argv[]) {
         JSL* jsl = [JSL new];
         const char *prompt = "user> ";
         char *input = NULL;
+        NSString *inp = @"";
+        NSString *ret = @"";
         while ((input = readline(prompt)) != NULL) {
             add_history(input);
-            NSString *inp = [[NSString alloc] initWithUTF8String:input];
+            inp = [[NSString alloc] initWithUTF8String:input];
             free(input);
-            NSString *ret = [jsl rep:inp];
-            info(@"%@", ret);
+            @try {
+                 ret = [jsl rep:inp];
+                info(@"%@", ret);
+            } @catch (NSException *exception) {
+                info(@"%@", exception.description);
+            }
+
         }
     }
     return 0;
