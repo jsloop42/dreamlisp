@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)closeFile;
 - (BOOL)hashNext;
 - (NSString *)readLine;
-- (void)append:(NSString *)string;
+- (void)append:(NSString *)string completion:(void  (^ _Nullable)(void))callback;
 - (BOOL)delete:(NSString *)path;
 @end
 

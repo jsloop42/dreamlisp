@@ -21,6 +21,7 @@ NSString * const READ_ERROR = @"Error reading file.";
     NSUInteger _offset;
     NSUInteger _buff;
     NSFileManager *_fm;
+    dispatch_queue_t serialQueue;
 }
 
 - (instancetype)init {
@@ -40,6 +41,7 @@ NSString * const READ_ERROR = @"Error reading file.";
     _offset = 0;
     _buff = 0;
     _fm = [NSFileManager defaultManager];
+    serialQueue = dispatch_queue_create("jsl-fileops-queue", DISPATCH_QUEUE_SERIAL);
 }
 
 - (void)createFileIfNotExist:(NSString *)path {
@@ -76,7 +78,7 @@ NSString * const READ_ERROR = @"Error reading file.";
 }
 
 - (NSString *)readLine {
-    NSData *line = [NSData new];
+    NSData *line = nil;
     NSRange range = [_fileData rangeOfData:_delim options:0 range:NSMakeRange(_start, _buff - _start)];
     if (range.location != NSNotFound) {
         _offset = range.location - _start;
@@ -92,19 +94,24 @@ NSString * const READ_ERROR = @"Error reading file.";
     return [[NSString alloc] initWithData:line encoding:NSUTF8StringEncoding];
 }
 
-- (void)append:(NSString *)string {
-    if (!_appendHandle && _path) {
-        _appendHandle = [NSFileHandle fileHandleForUpdatingAtPath:_path];
-    }
-    if (_appendHandle) {
-        [_appendHandle seekToEndOfFile];
-        NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
-        if (data) {
-            [_appendHandle writeData:data];
+- (void)append:(NSString *)string completion:(void  (^ _Nullable)(void))callback {
+    dispatch_async(self->serialQueue, ^{
+        if (!self->_appendHandle && self->_path) {
+            self->_appendHandle = [NSFileHandle fileHandleForUpdatingAtPath:self->_path];
         }
-    } else {
-        @throw [[NSException alloc] initWithName:@"READ_ERROR" reason:READ_ERROR userInfo:nil];
-    }
+        if (self->_appendHandle) {
+            [self->_appendHandle seekToEndOfFile];
+            NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
+            if (data) {
+                [self->_appendHandle writeData:data];
+            }
+        } else {
+            @throw [[NSException alloc] initWithName:@"READ_ERROR" reason:READ_ERROR userInfo:nil];
+        }
+        if (callback) {
+            callback();
+        }
+    });
 }
 
 - (BOOL)delete:(NSString *)path {

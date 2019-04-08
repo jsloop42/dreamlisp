@@ -139,20 +139,24 @@
 }
 
 - (void)testFileOps {
+    XCTestExpectation *exp = [[XCTestExpectation alloc] initWithDescription:@"Appending and reading file content."];
     FileOps *fops = [[FileOps alloc] init];
     NSString *file = @"/tmp/fopstest.txt";
     NSString *content = @"foo\nbar";
     [fops createFileIfNotExist:file];
-    XCTAssertNoThrow([fops append:content]);
-    XCTAssertNoThrow([fops openFile:file]);
-    XCTAssertTrue([fops hashNext]);
-    NSString *text = @"";
-    while ([fops hashNext]) {
-        text = [text stringByAppendingString:[fops readLine]];
-    }
-    XCTAssertEqualObjects(text, @"foobar");
-    [fops closeFile];
-    XCTAssertTrue([fops delete:file]);
+    XCTAssertNoThrow([fops append:content completion:^ {
+        XCTAssertNoThrow([fops openFile:file]);
+        XCTAssertTrue([fops hashNext]);
+        NSString *text = @"";
+        while ([fops hashNext]) {
+            text = [text stringByAppendingString:[fops readLine]];
+        }
+        XCTAssertEqualObjects(text, @"foobar");
+        [fops closeFile];
+        XCTAssertTrue([fops delete:file]);
+        [exp fulfill];
+    }]);
+    [self waitForExpectations:@[exp] timeout:10.0];
 }
 
 - (void)notestPerformanceExample {
