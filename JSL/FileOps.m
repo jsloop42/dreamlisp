@@ -32,6 +32,12 @@ NSString * const READ_ERROR = @"Error reading file.";
     return self;
 }
 
+- (void)dealloc {
+    [self closeFile];
+    _appendHandle = nil;
+    _fileHandle = nil;
+}
+
 - (void)bootstrap {
     _filePath = [NSURL fileURLWithPath:@""];
     _fileData = [NSData new];
@@ -67,7 +73,9 @@ NSString * const READ_ERROR = @"Error reading file.";
 }
 
 - (void)closeFile {
-    [_fileHandle closeFile];
+    if (_fileHandle) {
+        [_fileHandle closeFile];
+    }
     if (_appendHandle) {
         [_appendHandle closeFile];
     }
@@ -95,21 +103,25 @@ NSString * const READ_ERROR = @"Error reading file.";
 }
 
 - (void)append:(NSString *)string completion:(void  (^ _Nullable)(void))callback {
+    FileOps * __weak weakSelf = self;
     dispatch_async(self->serialQueue, ^{
-        if (!self->_appendHandle && self->_path) {
-            self->_appendHandle = [NSFileHandle fileHandleForUpdatingAtPath:self->_path];
-        }
-        if (self->_appendHandle) {
-            [self->_appendHandle seekToEndOfFile];
-            NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
-            if (data) {
-                [self->_appendHandle writeData:data];
+        FileOps *this = weakSelf;
+        if (this) {
+            if (!this->_appendHandle && this->_path) {
+                this->_appendHandle = [NSFileHandle fileHandleForUpdatingAtPath:this->_path];
             }
-        } else {
-            @throw [[NSException alloc] initWithName:@"READ_ERROR" reason:READ_ERROR userInfo:nil];
-        }
-        if (callback) {
-            callback();
+            if (this->_appendHandle) {
+                [this->_appendHandle seekToEndOfFile];
+                NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
+                if (data) {
+                    [this->_appendHandle writeData:data];
+                }
+            } else {
+                @throw [[NSException alloc] initWithName:@"READ_ERROR" reason:READ_ERROR userInfo:nil];
+            }
+            if (callback) {
+                callback();
+            }
         }
     });
 }
