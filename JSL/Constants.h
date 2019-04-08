@@ -15,6 +15,7 @@ extern NSString * const ERROR_TYPE;
 extern NSString * const PARENS_MISMATCH;
 extern NSString * const QUOTE_MARK_MISMATCH;
 extern NSString * const TOKEN_EMPTY;
+extern NSString * const SYMBOL_NOT_FOUND;
 @end
 
 NS_ASSUME_NONNULL_END

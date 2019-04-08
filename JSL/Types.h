@@ -121,7 +121,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy) JSData *(^fn)(NSMutableArray *);
 @property (nonatomic, readwrite, copy) JSData *ast;
 // [Symbols]
-@property (nonatomic, readwrite, copy) NSMutableArray *params;
+@property (nonatomic, readwrite, retain) NSMutableArray *params;
 @property (nonatomic, readwrite, copy) Env *env;
 @property (nonatomic, readwrite, assign, getter=isMacro) BOOL macro;
 @property (nonatomic, readwrite, copy) JSData *meta;

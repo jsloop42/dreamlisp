@@ -58,6 +58,7 @@ NSString *_historyFile = @"/.jsl-history";
             add_history(input);
         }
         exp = [[NSString alloc] initWithUTF8String:input];
+        [fops append:exp completion:nil];
         free(input);
     }
     return exp;

@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface Env : NSObject
 @property (nonatomic, readwrite, copy) Env *outer;
-@property (nonatomic, readwrite, copy) NSMutableDictionary *data;
+@property (nonatomic, readwrite, retain) NSMutableDictionary *data;
 - (instancetype)initWithEnv:(Env *)env;
 
 /**
