@@ -10,6 +10,7 @@
 #import "Types.h"
 #import "Reader.h"
 #import "Printer.h"
+#import "Core.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

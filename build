@@ -32,7 +32,7 @@ function build() {
     fi
     echo "Building $OUT."
     cd JSL
-    clang -framework Foundation main.m Types.m Reader.m Printer.m Utils.m JSL.m Env.m Core.m Constants.m Terminal.m FileOps.m -ledit -lncurses -o $OUT
+    clang -framework Foundation main.m Types.m Reader.m Printer.m Utils.m JSL.m Env.m Core.m Constants.m Terminal.m FileOps.m -fobjc-arc -ledit -lncurses -o $OUT
     mv $OUT ../$BIN
 }
 

@@ -53,10 +53,16 @@
         }];
         return [[NSString alloc] initWithFormat:@"[%@]", [xs componentsJoinedByString:@" "]];
     } else if ([dataType isEqual:@"JSHashMap"]) {
-        NSMutableArray *xs = [(JSHashMap *)data map:^NSString *(JSData *key, JSData * val) {
-            return [[NSString alloc] initWithFormat:@"%@ %@", [self printStringFor:key readably:readably],
-                                                              [self printStringFor:val readably:readably]];
-        }];
+        NSUInteger i = 0;
+        JSHashMap *hm = (JSHashMap *)data;
+        NSArray *keys = [hm allKeys];
+        NSUInteger len = [keys count];
+        NSMutableArray *xs = [NSMutableArray new];
+        for (i = 0; i < len; i++) {
+            [xs addObject:[[NSString alloc] initWithFormat:@"%@ %@",
+                                [self printStringFor:(JSData *)keys[i] readably:readably],
+                                [self printStringFor:(JSData *)[hm objectForKey:keys[i]] readably:readably]]];
+        }
         return [[NSString alloc] initWithFormat:@"{%@}", [xs componentsJoinedByString:@" "]];
     } else if ([dataType isEqual:@"JSKeyword"]) {
         return [(JSKeyword *)data value];
@@ -71,6 +77,6 @@
     } else if ([dataType isEqual:@"JSFunction"]) {
         return @"#<function>";
     }
-    return ERROR_TYPE;
+    return ERROR_TYPE_MSG;
 }
 @end

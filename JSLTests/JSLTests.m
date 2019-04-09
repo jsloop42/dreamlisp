@@ -73,15 +73,6 @@
     XCTAssertEqualObjects(uc[0], @"ABC");
 }
 
-
-- (void)testMapOnDictionary {
-    JSHashMap *hm = [[JSHashMap alloc] initWithArray:[@[@"a", @"abc", @"b", @"bcd", @"c", @"cde"] mutableCopy]];
-    NSMutableArray *list = [hm map:^NSString *(NSString *key, NSString *obj) {
-        return [obj uppercaseString];
-    }];
-    XCTAssertEqualObjects(list[0], @"ABC");
-}
-
 - (void)testPrintString {
     Printer *prn = [Printer new];
     // Function
@@ -115,13 +106,6 @@
     // Vector with strings
     JSVector *svec = [[JSVector alloc] initWithArray:@[@"1", @"2", @"3"]];
     XCTAssertEqualObjects([prn printStringFor:svec readably:true], @"[\"1\" \"2\" \"3\"]");
-    // Hashmap [String: String]
-    JSHashMap *hm1 = [[JSHashMap alloc] initWithArray:[@[@"a", @"abc", @"b", @"bcd", @"c", @"cde"] mutableCopy]];
-    XCTAssertEqualObjects([prn printStringFor:hm1 readably:true], @"{\"a\" \"abc\" \"b\" \"bcd\" \"c\" \"cde\"}");
-    JSHashMap *hm2 = [[JSHashMap alloc] initWithArray:[@[@"a", @123, @"b", @234, @"c", @345] mutableCopy]];
-    XCTAssertEqualObjects([prn printStringFor:hm2 readably:true], @"{\"a\" 123 \"b\" 234 \"c\" 345}");
-    JSHashMap *hm3 = [[JSHashMap alloc] initWithArray:[@[@"a", @[@123], @"b", @[@234], @"c", @[@345]] mutableCopy]];
-    XCTAssertEqualObjects([prn printStringFor:hm3 readably:true], @"{\"a\" [123] \"b\" [234] \"c\" [345]}");
 }
 
 - (void)testReadPrint {
@@ -133,8 +117,6 @@
     XCTAssertEqualObjects(print(@"(1 2 3)"), @"(1 2 3)");
     XCTAssertEqualObjects(print(@"[1 2 3]"), @"[1 2 3]");
     XCTAssertEqualObjects(print(@"(\"1\" \"2\" \"3\")"), @"(\"1\" \"2\" \"3\")");
-    XCTAssertEqualObjects(print(@"{\"1\" \"2\"}"), @"{\"1\" \"2\"}");
-    XCTAssertEqualObjects(print(@"{:1 \"2\"}"), @"{:1 \"2\"}");
 
 }
 
@@ -159,10 +141,49 @@
     [self waitForExpectations:@[exp] timeout:10.0];
 }
 
-- (void)notestPerformanceExample {
-    // This is an example of a performance test case.
+- (void)testHashMap {
+    Reader *reader = [Reader new];
+    Printer *printer = [Printer new];
+    NSString *exp = @"{\"a\" \"abc\" \"b\" \"bcd\" \"c\" \"cde\"}";
+    NSArray *inp = @[@"a", @"abc", @"b", @"bcd", @"c", @"cde"];
+    JSData * data = [reader readString:exp];
+    NSString *ret = [printer printStringFor:data readably:false];
+    NSArray *arr = [[[ret stringByReplacingOccurrencesOfString:@"{" withString:@""] stringByReplacingOccurrencesOfString:@"}" withString:@""]
+                    componentsSeparatedByString:@" "];
+    XCTAssertEqual([arr count], [inp count]);
+    for (int i = 0; i < [arr count]; i++) {
+        XCTAssertTrue([inp containsObject:arr[i]]);
+    }
+}
+
+- (void)testJSListRest {
+    JSList *xs = [[JSList alloc] initWithArray:@[@"1", @"2", @"3"]];
+    XCTAssertEqual([xs count], 3);
+    JSList *rest = (JSList *)[xs rest];
+    XCTAssertEqual([xs count], 3);
+    XCTAssertEqual([rest count], 2);
+}
+
+- (void)testJSListDropLast {
+    JSList *xs = [[JSList alloc] initWithArray:@[@"1", @"2", @"3"]];
+    XCTAssertEqual([xs count], 3);
+    JSList *list = (JSList *)[xs dropLast];
+    XCTAssertEqual([xs count], 3);
+    XCTAssertEqual([list count], 2);
+    XCTAssertEqualObjects([list last], [xs second]);
+}
+
+- (void)notestPerformanceJSListDropFirst {
+    NSMutableArray *arr = [NSMutableArray new];
+    for (int i = 0; i < 10000; i++) {
+        [arr addObject:@"1"];
+    }
+    JSList *xs = [[JSList alloc] initWithArray:arr];
     [self measureBlock:^{
-        // Put the code you want to measure the time of here.
+        JSList *lst = (JSList *)[xs rest];
+        for (int i = 0; i < 9999; i++) {
+            lst = (JSList *)[lst rest];
+        }
     }];
 }
 

@@ -8,7 +8,8 @@
 
 #import "FileOps.h"
 
-NSString * const READ_ERROR = @"Error reading file.";
+NSString * const READ_ERROR = @"READ_ERROR";
+NSString * const READ_ERROR_MSG = @"Error reading file.";
 
 @implementation FileOps {
     NSString *_path;
@@ -62,12 +63,12 @@ NSString * const READ_ERROR = @"Error reading file.";
     _filePath = [NSURL fileURLWithPath:_path];
     _fileData = [NSData dataWithContentsOfURL:_filePath];
     if (!_fileData) {
-        @throw [[NSException alloc] initWithName:@"READ_ERROR" reason:READ_ERROR userInfo:nil];
+        @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
     }
     NSError *err = nil;
     _fileHandle = [NSFileHandle fileHandleForReadingFromURL:_filePath error:&err];
     if (!_fileHandle && err) {
-        @throw [[NSException alloc] initWithName:@"READ_ERROR" reason:READ_ERROR userInfo:nil];
+        @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
     }
     _buff = [_fileData length];
 }
@@ -117,7 +118,7 @@ NSString * const READ_ERROR = @"Error reading file.";
                     [this->_appendHandle writeData:data];
                 }
             } else {
-                @throw [[NSException alloc] initWithName:@"READ_ERROR" reason:READ_ERROR userInfo:nil];
+                @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
             }
             if (callback) {
                 callback();

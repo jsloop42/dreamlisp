@@ -168,6 +168,14 @@
     return self;
 }
 
+- (instancetype)initWithDictionary:(NSMutableDictionary *)dictionary {
+    self = [super init];
+    if (self) {
+        dict = dictionary;
+    }
+    return self;
+}
+
 - (instancetype)initWithArray:(NSMutableArray *)array {
     self = [super init];
     if (self) {
@@ -193,11 +201,15 @@
     return _dict;
 }
 
-- (JSData*)valueForKey:(NSString*)key {
-    return [dict valueForKey:key];
+- (JSData *)objectForString:(NSString *)key {
+    return [dict objectForKey:key];
 }
 
-- (void)setValue:(JSData*)value forKey:(NSString *)key {
+- (JSData *)objectForKey:(JSString *)key {
+    return [dict objectForKey:key];
+}
+
+- (void)setValue:(JSData *)value forKey:(NSString *)key {
     [dict setValue:value forKey:key];
 }
 
@@ -209,12 +221,12 @@
     return dict;
 }
 
-- (NSMutableArray *)map:(id (^)(id key, id obj))block {
-    NSMutableArray *list = [NSMutableArray new];
-    [dict enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        [list addObject:block(key, obj)];
-    }];
-    return list;
+- (NSArray *)allKeys {
+    return [dict allKeys];
+}
+
+- (NSArray *)allValues {
+    return [dict allValues];
 }
 
 @end
@@ -280,7 +292,8 @@
 }
 
 - (JSData *)rest {
-    NSArray *arr = [array objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(1, [array count] - 1)]];
+    NSMutableArray *arr = [array mutableCopy];
+    [arr removeObjectAtIndex:0];
     return [[JSList alloc] initWithArray:arr];
 }
 
@@ -288,8 +301,22 @@
     return [array objectAtIndex:[array count] - 1];
 }
 
+- (JSData *)dropLast {
+    NSMutableArray *arr = [array mutableCopy];
+    [arr removeLastObject];
+    return [[JSList alloc] initWithArray:arr];
+}
+
+- (JSData *)nth:(NSInteger)n {
+    return [array objectAtIndex:n];
+}
+
 - (NSMutableArray *)map:(id (^)(id arg))block {
     return [TypeUtils mapOnArray:array withBlock:block];
+}
+
+- (BOOL)isEmpty {
+    return [array count] == 0;
 }
 
 @end
@@ -560,7 +587,7 @@
 @synthesize macro = _isMacro;
 @synthesize meta = _meta;
 
-- (instancetype)initWithAst:(JSData *)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(JSData *)meta
+- (instancetype)initWithAst:(JSData *)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(JSData * _Nullable)meta
                          fn:(JSData *(^)(NSMutableArray *))fn {
     self = [super init];
     if (self) {
@@ -574,10 +601,18 @@
     return self;
 }
 
-- (instancetype)initWithMacro:(BOOL)isMacro func:(JSFunction *)func {
+- (instancetype)initWithFn:(JSData * (^)(NSMutableArray *))fn {
     self = [super init];
     if (self) {
-        self = [self initWithAst:func.ast params:func.params env:func.env macro:isMacro meta:func.meta fn:func.fn];
+        _fn = fn;
+    }
+    return self;
+}
+
+- (instancetype)initWithMacro:(JSFunction *)func {
+    self = [super init];
+    if (self) {
+        self = [self initWithAst:func.ast params:func.params env:func.env macro:YES meta:func.meta fn:func.fn];
     }
     return self;
 }

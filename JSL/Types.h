@@ -44,10 +44,14 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSHashMap : JSData
 @property (nonatomic, readwrite, copy) JSData *meta;
 - (instancetype)init;
+- (instancetype)initWithDictionary:(NSMutableDictionary *)dictionary;
 - (instancetype)initWithArray:(NSMutableArray *)array;
+- (JSData *)objectForString:(NSString *)key;
+- (JSData *)objectForKey:(JSString *)key;
 - (NSUInteger)count;
 - (NSMutableDictionary *)value;
-- (NSMutableArray *)map:(id (^)(id key, id obj))block;
+- (NSArray *)allKeys;
+- (NSArray *)allValues;
 @end
 
 @interface JSList : JSData
@@ -64,7 +68,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (JSData *)second;
 - (JSData *)rest;
 - (JSData *)last;
+- (JSData *)dropLast;
+- (JSData *)nth:(NSInteger)n;
 - (NSMutableArray *)map:(id (^)(id arg))block;
+- (BOOL)isEmpty;
 @end
 
 @interface JSVector: JSList
@@ -119,16 +126,17 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSFunction: JSData
 // ([JSData]) -> JSData
 @property (nonatomic, copy) JSData *(^fn)(NSMutableArray *);
-@property (nonatomic, readwrite, copy) JSData *ast;
+@property (nonatomic, readwrite, copy, nullable) JSData *ast;
 // [Symbols]
-@property (nonatomic, readwrite, retain) NSMutableArray *params;
-@property (nonatomic, readwrite, copy) Env *env;
+@property (nonatomic, readwrite, retain, nullable) NSMutableArray *params;
+@property (nonatomic, readwrite, copy, nullable) Env *env;
 @property (nonatomic, readwrite, assign, getter=isMacro) BOOL macro;
-@property (nonatomic, readwrite, copy) JSData *meta;
+@property (nonatomic, readwrite, copy, nullable) JSData *meta;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithAst:(JSData *)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(JSData *)meta
+- (instancetype)initWithAst:(JSData *)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(JSData * _Nullable)meta
                          fn:(JSData *(^)(NSMutableArray *))fn;
-- (instancetype)initWithMacro:(BOOL)isMacro func:(JSFunction *)func;
+- (instancetype)initWithFn:(JSData * (^)(NSMutableArray *))fn;
+- (instancetype)initWithMacro:(JSFunction *)func;
 - (instancetype)initWithMeta:(JSData *)meta func:(JSFunction *)func;
 - (JSData *)apply;
 - (JSData *)apply:(NSMutableArray *)args;

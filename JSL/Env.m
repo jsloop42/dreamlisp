@@ -68,7 +68,7 @@
             return _data;
         }
     }
-    @throw [[NSException alloc] initWithName:@"SYMBOL_NOT_FOUND" reason:SYMBOL_NOT_FOUND userInfo:nil];
+    @throw [[NSException alloc] initWithName:SYMBOL_NOT_FOUND reason:SYMBOL_NOT_FOUND_MSG userInfo:nil];
 }
 
 @end
