@@ -373,18 +373,18 @@
 #pragma mark Number
 
 @implementation JSNumber {
-    NSNumber *n;
+    NSDecimalNumber *n;
     NSString *decimalPattern;
     enum CFNumberType _numberType;
 }
 
 @synthesize meta;
-@synthesize numberType = _numberType;
 
 - (instancetype)initWithFloat:(float)number {
     self = [super init];
     if (self) {
-        n = [[NSNumber alloc] initWithFloat:number];
+        [self bootstrap];
+        n = [[NSDecimalNumber alloc] initWithFloat:number];
         _numberType = kCFNumberFloatType;
         self = [self initWithNumber:n];
     }
@@ -394,32 +394,23 @@
 - (instancetype)initWithString:(NSString *)string {
     self = [super init];
     if (self) {
-        NSNumberFormatter *formatter = [NSNumberFormatter new];
-        decimalPattern = @"\\d+(\\.\\d+)";
-        if ([Utils matchString:string withPattern:decimalPattern]) {
-            // Float
-            formatter.numberStyle = NSNumberFormatterDecimalStyle;
-            _numberType = kCFNumberDoubleType;
-            n = [formatter numberFromString:string];
-        } else {
-            // Integer
-            formatter.numberStyle = NSNumberFormatterNoStyle;
-            _numberType = kCFNumberIntType;
-            n = [formatter numberFromString:string];
-        }
-        self = [self initWithNumber:n];
+        [self bootstrap];
+        n = [[NSDecimalNumber alloc] initWithString:string];
     }
     return self;
 }
 
-- (instancetype)initWithNumber:(NSNumber *)number {
+- (instancetype)initWithNumber:(NSDecimalNumber *)number {
     self = [super init];
     if (self) {
+        [self bootstrap];
         n = number;
-        _numberType = CFNumberGetType((CFNumberRef)number);
-        decimalPattern = @"\\d+(\\.\\d+)";
     }
     return self;
+}
+
+- (void)bootstrap {
+    decimalPattern = @"\\d+(\\.\\d+)";
 }
 
 - (NSString *)dataType {
@@ -444,29 +435,19 @@
     return 0;
 }
 
-- (NSNumber *)val {
+- (NSDecimalNumber *)val {
     return n;
 }
 
 - (BOOL)isDouble {
-    if (_numberType == kCFNumberFloatType || _numberType == kCFNumberFloat32Type || _numberType == kCFNumberFloat64Type || _numberType == kCFNumberDoubleType) {
+    if ([Utils matchString:[self string] withPattern:decimalPattern]) {
         return YES;
     }
     return NO;
 }
 
-- (CFNumberType)numberType {
-    return _numberType;
-}
-
 - (NSString *)string {
-    NSNumberFormatter *formatter = [NSNumberFormatter new];
-    if ([self isDouble]) {
-        formatter.numberStyle = NSNumberFormatterDecimalStyle;
-    } else {
-        formatter.numberStyle = NSNumberFormatterNoStyle;
-    }
-    return [formatter stringFromNumber:n];
+    return [n stringValue];
 }
 
 @end
@@ -477,6 +458,16 @@
 
 -(NSString *)dataType {
     return @"NSNumber";
+}
+
+@end
+
+#pragma mark NSDecimalNumber
+
+@implementation NSDecimalNumber (JSDataProtocol)
+
+-(NSString *)dataType {
+    return @"NSDecimalNumber";
 }
 
 @end

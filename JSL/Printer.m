@@ -23,8 +23,8 @@
         return [(JSSymbol *)data name];
     } else if ([dataType isEqual:@"JSNumber"]) {
         return [(JSNumber *)data string];
-    } else if ([dataType isEqual:@"NSNumber"]) {
-        return [[[JSNumber alloc] initWithNumber:(NSNumber *)data] string];
+    } else if ([dataType isEqual:@"NSNumber"] || [dataType isEqual:@"NSDecimalNumber"]) {
+        return [[[JSNumber alloc] initWithNumber:(NSDecimalNumber *)data] string];
     } else if ([dataType isEqual:@"JSString"]) {
         NSString *string = [(JSString *)data value];
         if (readably) {

@@ -173,6 +173,11 @@
     XCTAssertEqualObjects([list last], [xs second]);
 }
 
+- (void)testArithmeticFunctions {
+    Core *core = [Core new];
+    [core addArithmeticFunctions];
+}
+
 - (void)notestPerformanceJSListDropFirst {
     NSMutableArray *arr = [NSMutableArray new];
     for (int i = 0; i < 10000; i++) {

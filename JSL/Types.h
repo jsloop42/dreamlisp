@@ -85,19 +85,22 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSNumber : JSData
 @property (nonatomic, readwrite, copy) JSData *meta;
-@property (nonatomic, assign) enum CFNumberType numberType;
 - (instancetype)initWithFloat:(float)num;
 - (instancetype)initWithString:(NSString *)string;
-- (instancetype)initWithNumber:(NSNumber *)number;
+- (instancetype)initWithNumber:(NSDecimalNumber *)number;
 - (BOOL)isEqual:(JSNumber *)num;
 - (double)doubleValue;
 - (int)intValue;
 - (BOOL)isDouble;
-- (CFNumberType)numberType;
+- (NSDecimalNumber *)val;
 - (NSString *)string;
 @end
 
 @interface NSNumber (JSDataProtocol)
+@property (nonatomic, readonly) NSString *dataType;
+@end
+
+@interface NSDecimalNumber (JSDataProtocol)
 @property (nonatomic, readonly) NSString *dataType;
 @end
 
