@@ -15,6 +15,8 @@
     Core *core;
 }
 
+@synthesize env = _env;
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -29,6 +31,7 @@
     _env = [Env new];
     core = [Core new];
     [self setEvalToREPL:_env];
+    [self setJSLFuns];
 }
 
 /**
@@ -41,6 +44,18 @@
     [env setValue:[[JSFunction alloc] initWithFn:fn] forSymbol:[[JSSymbol alloc] initWithName:@"eval"]];
     [env setValue:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
     [env setValue:[[JSString alloc] initWithString:@"Objective-C"] forSymbol:[[JSSymbol alloc] initWithName:@"*host-language*"]];
+}
+
+- (void)setJSLFuns {
+    [self rep:@"(def! not (fn* (a) (if a false true)))" withEnv:_env];
+    [self rep:@"(def! load-file (fn* (x) (eval (read-string (str \"(do \" (slurp x) \")\")))))" withEnv:_env];
+    [self rep:@"(defmacro! cond (fn* (& xs) (if (> (count xs) 0) `(if ~(first xs) ~(if (> (count xs) 1) (nth xs 1) " \
+               "(throw \"odd number of forms to cond\")) (cond ~@(rest (rest xs)))))))" withEnv:_env];
+    [self rep:@"(def! *gensym-counter* (atom 0))" withEnv:_env];
+    [self rep:@"(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))" withEnv:_env];
+    [self rep:@"(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs))" \
+               "(if ~condvar ~condvar (or ~@(rest xs)))))))))" withEnv:_env];
+    [self rep:@"(def! exit (fn* () (do (prn \"Bye.\") (exit*))))" withEnv:_env];
 }
 
 - (JSData *)read:(NSString *)string {
@@ -73,7 +88,7 @@
     return ast;
 }
 
-- (JSData *) quasiQuote:(JSData *)ast {
+- (JSData *)quasiQuote:(JSData *)ast {
     JSList *xs = (JSList *)ast;
     if ([xs isEmpty]) {
         return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], ast] mutableCopy]];
@@ -223,8 +238,8 @@
     return [printer printStringFor:data readably:YES];
 }
 
-- (NSString *)rep:(NSString *)string {
-    return [self print:[self eval:[self read:string] withEnv:_env]];
+- (NSString *)rep:(NSString *)string withEnv:(Env *)env {
+    return [self print:[self eval:[self read:string] withEnv:env]];
 }
 
 @end
