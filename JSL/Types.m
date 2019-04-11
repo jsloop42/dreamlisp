@@ -428,17 +428,11 @@
 }
 
 - (double)doubleValue {
-    if ([self isDouble]) {
-        return [n doubleValue];
-    }
-    return 0.0;
+    return [n doubleValue];
 }
 
 - (int)intValue {
-    if (![self isDouble]) {
-        return [n intValue];
-    }
-    return 0;
+    return [n intValue];
 }
 
 - (NSDecimalNumber *)val {
