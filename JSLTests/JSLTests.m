@@ -35,7 +35,7 @@
 }
 
 - (void)testNumber {
-    JSNumber* n1 = [[JSNumber alloc] initWithFloat:3.14];
+    JSNumber* n1 = [[JSNumber alloc] initWithDouble:3.14];
     JSNumber* n2 = n1;
     XCTAssertTrue([n1 isEqual:n2]);
 }
@@ -175,7 +175,12 @@
 
 - (void)testArithmeticFunctions {
     Core *core = [Core new];
-    [core addArithmeticFunctions];
+    NSMutableDictionary *ns = [core namespace];
+    JSData *(^add)(JSNumber *first, ...) NS_REQUIRES_NIL_TERMINATION = [ns objectForKey:@"+"];
+    XCTAssertEqual([(JSNumber *)add([[JSNumber alloc] initWithString:@"1"], [[JSNumber alloc] initWithString:@"2"], [[JSNumber alloc] initWithString:@"3"],
+                                    [[JSNumber alloc] initWithInt:4], [[JSNumber alloc] initWithInt:5], nil) intValue], 15);
+    XCTAssertEqual([(JSNumber *)add([[JSNumber alloc] initWithDouble:1.5], [[JSNumber alloc] initWithDouble:2], [[JSNumber alloc] initWithDouble:3],
+                                    [[JSNumber alloc] initWithDouble:4], [[JSNumber alloc] initWithDouble:5.5], nil) intValue], 16.0);
 }
 
 - (void)notestPerformanceJSListDropFirst {
