@@ -85,7 +85,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSNumber : JSData
 @property (nonatomic, readwrite, copy) JSData *meta;
-- (instancetype)initWithFloat:(float)num;
+- (instancetype)initWithDouble:(double)num;
+- (instancetype)initWithInt:(int)number;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithNumber:(NSDecimalNumber *)number;
 - (BOOL)isEqual:(JSNumber *)num;

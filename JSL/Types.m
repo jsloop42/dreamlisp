@@ -375,18 +375,24 @@
 @implementation JSNumber {
     NSDecimalNumber *n;
     NSString *decimalPattern;
-    enum CFNumberType _numberType;
 }
 
 @synthesize meta;
 
-- (instancetype)initWithFloat:(float)number {
+- (instancetype)initWithDouble:(double)number {
     self = [super init];
     if (self) {
         [self bootstrap];
-        n = [[NSDecimalNumber alloc] initWithFloat:number];
-        _numberType = kCFNumberFloatType;
-        self = [self initWithNumber:n];
+        n = [[NSDecimalNumber alloc] initWithDouble:number];
+    }
+    return self;
+}
+
+- (instancetype)initWithInt:(int)number {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+        n = [[NSDecimalNumber alloc] initWithInt:number];
     }
     return self;
 }
