@@ -78,6 +78,6 @@
     } else if ([dataType isEqual:@"JSFunction"]) {
         return @"#<function>";
     }
-    return ERROR_TYPE_MSG;
+    return JSL_ERROR_TYPE_MSG;
 }
 @end

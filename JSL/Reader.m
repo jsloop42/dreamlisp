@@ -64,7 +64,7 @@
 - (nullable JSData *)readForm {
     NSString *token = [self peek];
     if (token == nil) {
-        @throw [[NSException alloc] initWithName:TOKEN_EMPTY reason:TOKEN_EMPTY_MSG userInfo:nil];
+        @throw [[NSException alloc] initWithName:JSL_TOKEN_EMPTY reason:JSL_TOKEN_EMPTY_MSG userInfo:nil];
     }
     if ([token isEqual:@"("] || [token isEqual:@"["] || [token isEqual:@"{"]) {
         return [self readListStartingWith:token];
@@ -89,7 +89,7 @@
         if ([self peek] != nil) {
             [list addObject:[self readForm]];
         } else {
-            @throw [[NSException alloc] initWithName:PARENS_MISMATCH reason:PARENS_MISMATCH_MSG userInfo:nil];
+            @throw [[NSException alloc] initWithName:JSL_PARENS_MISMATCH reason:JSL_PARENS_MISMATCH_MSG userInfo:nil];
         }
     }
     if ([leftParens isEqual:@"("] && [[self peek] isEqual:@")"]) {
@@ -129,7 +129,7 @@
                          stringByReplacingOccurrencesOfString:@"0xff" withString:@"\\"];
         return  [[JSString alloc] initWithString:ret];
     } else if ([self matchString:token withPattern:stringUnclosed]) {
-        @throw [[NSException alloc] initWithName:QUOTE_MARK_MISMATCH reason:QUOTE_MARK_MISMATCH_MSG userInfo:nil];
+        @throw [[NSException alloc] initWithName:JSL_QUOTE_MARK_MISMATCH reason:JSL_QUOTE_MARK_MISMATCH_MSG userInfo:nil];
     } else if ([token isEqual:@"true"]) {
         return [[JSBool alloc] initWithBool:true];
     } else if ([token isEqual:@"false"]) {

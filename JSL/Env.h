@@ -27,9 +27,9 @@ NS_ASSUME_NONNULL_BEGIN
  @param exprs A array of `JSData` expressions.
  */
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs;
-- (void)setValue:(JSData *)value forSymbol:(JSSymbol *)key;
+- (void)setObject:(JSData *)value forSymbol:(JSSymbol *)key;
 - (Env *)findEnvForKey:(JSSymbol *)key;
-- (JSData *)valueForSymbol:(JSSymbol *)key;
+- (JSData *)objectForSymbol:(JSSymbol *)key;
 @end
 
 NS_ASSUME_NONNULL_END

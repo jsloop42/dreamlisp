@@ -32,68 +32,55 @@
 }
 
 - (void)addArithmeticFunctions {
-    JSData *(^add)(JSNumber *first, ...) NS_REQUIRES_NIL_TERMINATION = ^JSData *(JSNumber *first, ...) {
-        NSDecimalNumber *num = nil;
-        va_list args;
-        va_start(args, first);
-        for (JSNumber *arg = first; arg != nil; arg = va_arg(args, JSNumber *)) {
-            if (num != nil) {
-                num = [num decimalNumberByAdding:[arg val]];
-            } else {
-                num = [arg val];
+    JSData *(^calc)(NSMutableArray *args, SEL sel) = ^JSData *(NSMutableArray *args, SEL sel) {
+        NSDecimalNumber *num = [NSDecimalNumber new];
+        NSUInteger len = [args count];
+        NSUInteger i = 0;
+        if (len == 0) {
+            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+        } else if (len == 1) {
+            return (JSNumber *)args[0];
+        }
+        if (len >= 2) {
+            NSDecimalNumber *n = [(JSNumber *)args[0] val];
+            if ([n respondsToSelector:sel]) {
+                num = objc_msgSend(n, sel, [(JSNumber *)args[1] val]);
             }
         }
-        va_end(args);
+        if (len > 2) {
+            for (i = 2; i < len; i++) {
+                num = objc_msgSend(num, sel, [(JSNumber *)args[i] val]);
+            }
+        }
         return [[JSNumber alloc] initWithNumber:num];
     };
+
+
+    JSFunction *add = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
+        return calc(args, @selector(decimalNumberByAdding:));
+    }];
     [ns setObject:add forKey:@"+"];
-    JSData *(^subtract)(JSNumber *first, ...) NS_REQUIRES_NIL_TERMINATION = ^JSData *(JSNumber *first, ...) {
-        NSDecimalNumber *num = nil;
-        va_list args;
-        va_start(args, first);
-        for (JSNumber *arg = first; arg != nil; arg = va_arg(args, JSNumber *)) {
-            if (num != nil) {
-                num = [num decimalNumberBySubtracting:[arg val]];
-            } else {
-                num = [arg val];
-            }
-        }
-        va_end(args);
-        return [[JSNumber alloc] initWithNumber:num];
-    };
+
+    JSFunction *subtract = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
+        return calc(args, @selector(decimalNumberBySubtracting:));
+    }];
     [ns setObject:subtract forKey:@"-"];
-    JSData *(^multiply)(JSNumber *first, ...) NS_REQUIRES_NIL_TERMINATION = ^JSData *(JSNumber *first, ...) {
-        NSDecimalNumber *num = nil;
-        va_list args;
-        va_start(args, first);
-        for (JSNumber *arg = first; arg != nil; arg = va_arg(args, JSNumber *)) {
-            if (num != nil) {
-                num = [num decimalNumberByMultiplyingBy:[arg val]];
-            } else {
-                num = [arg val];
-            }
-        }
-        va_end(args);
-        return [[JSNumber alloc] initWithNumber:num];
-    };
+
+    JSFunction *multiply = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
+        return calc(args, @selector(decimalNumberByMultiplyingBy:));
+    }];
     [ns setObject:multiply forKey:@"*"];
-    JSData *(^divide)(JSNumber *first, ...) NS_REQUIRES_NIL_TERMINATION = ^JSData *(JSNumber *first, ...) {
-        NSDecimalNumber *num = nil;
-        va_list args;
-        va_start(args, first);
-        for (JSNumber *arg = first; arg != nil; arg = va_arg(args, JSNumber *)) {
-            if (num != nil) {
-                num = [num decimalNumberByDividingBy:[arg val]];
-            } else {
-                num = [arg val];
-            }
-        }
-        va_end(args);
-        return [[JSNumber alloc] initWithNumber:num];
-    };
+
+    JSFunction *divide = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
+        return calc(args, @selector(decimalNumberByDividingBy:));
+    }];
     [ns setObject:divide forKey:@"/"];
-    JSData *(^mod)(JSNumber *first, JSNumber *second) = ^JSData *(JSNumber *first, JSNumber *second) {
-        return [[JSNumber alloc] initWithInt:[first intValue] % [second intValue]];
+
+    JSData *(^mod)(NSMutableArray *args) = ^JSData *(NSMutableArray *args) {
+        if ([args count] != 2) {
+            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+        }
+        return [[JSNumber alloc] initWithInt:[(JSNumber *)args[0] intValue] % [(JSNumber *)args[1] intValue]];
     };
     [ns setObject:mod forKey:@"mod"];
 }

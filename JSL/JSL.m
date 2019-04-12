@@ -30,8 +30,20 @@
     printer = [Printer new];
     _env = [Env new];
     core = [Core new];
-    [self setEvalToREPL:_env];
-    [self setJSLFuns];
+    [self setCoreFunctionsToREPL:_env];
+//    [self setEvalToREPL:_env];
+//    [self setJSLFuns];
+}
+
+- (void)setCoreFunctionsToREPL:(Env *)env {
+    NSMutableDictionary *ns = [core namespace];
+    NSArray *keys = [ns allKeys];
+    NSUInteger len = [keys count];
+    NSUInteger i = 0;
+    for (i = 0; i < len; i++) {
+        NSString *key = keys[i];
+        [env setObject:[ns objectForKey:key] forSymbol:[[JSSymbol alloc] initWithName:key]];
+    }
 }
 
 /**
@@ -41,9 +53,9 @@
     JSData * (^fn)(NSMutableArray *arg) = ^JSData *(NSMutableArray *arg) {
         return [self eval:(JSData *)arg[0] withEnv:env];
     };
-    [env setValue:[[JSFunction alloc] initWithFn:fn] forSymbol:[[JSSymbol alloc] initWithName:@"eval"]];
-    [env setValue:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
-    [env setValue:[[JSString alloc] initWithString:@"Objective-C"] forSymbol:[[JSSymbol alloc] initWithName:@"*host-language*"]];
+    [env setObject:[[JSFunction alloc] initWithFn:fn] forSymbol:[[JSSymbol alloc] initWithName:@"eval"]];
+    [env setObject:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
+    [env setObject:[[JSString alloc] initWithString:@"Objective-C"] forSymbol:[[JSSymbol alloc] initWithName:@"*host-language*"]];
 }
 
 - (void)setJSLFuns {
@@ -64,7 +76,7 @@
 
 - (JSData *)evalAST:(JSData *)ast withEnv:(Env *)env {
     if ([[ast dataType] isEqual:@"JSSymbol"]) {
-        return [env valueForSymbol:(JSSymbol *)ast];
+        return [env objectForSymbol:(JSSymbol *)ast];
     } else if ([[ast dataType] isEqual:@"JSList"]) {
         NSMutableArray *arr = [(JSList *)ast map: ^JSData * (JSData *xs) {
             return [self eval:xs withEnv:env];
@@ -108,11 +120,13 @@
     while ([[ast dataType] isEqual:@"JSList"]) {
         JSList *xs = (JSList *)ast;
         JSSymbol *sym = (JSSymbol *)[xs first];
-        JSData *fnData = [env valueForSymbol:sym];
-        if ([[fnData dataType] isEqual:@"JSFunction"]) {
+        JSData *fnData = [env objectForSymbol:sym];
+        if ([[fnData className] isEqual:@"__NSGlobalBlock__"] || [[fnData dataType] isEqual:@"JSFunction"]) {
             JSFunction *fn = (JSFunction *)fnData;
             if ([fn isMacro]) {
                 ast = [fn apply:[(JSList *)[xs rest] value]];
+            } else {
+                break;
             }
         }
     }
@@ -140,12 +154,12 @@
                 JSSymbol *sym = (JSSymbol *)[xs first];
                 if ([[sym name] isEqual:@"def!"]) {
                     JSData *val = [self eval:[xs nth:2] withEnv:env];
-                    [env setValue:val forSymbol:(JSSymbol *)[xs first]];
+                    [env setObject:val forSymbol:(JSSymbol *)[xs first]];
                     return val;
                 } else if ([[sym name] isEqual:@"defmacro!"]) {
                     JSFunction *fn = (JSFunction *)[self eval:[xs nth:2] withEnv:env];
                     JSFunction *macro = [[JSFunction alloc] initWithMacro:fn];
-                    [env setValue:macro forSymbol:(JSSymbol *)[xs first]];
+                    [env setObject:macro forSymbol:(JSSymbol *)[xs first]];
                     return macro;
                 } else if ([[sym name] isEqual:@"try*"]) {
                     @try {
@@ -154,7 +168,7 @@
                         if ([xs count] > 2) {
                             JSList *catchxs = (JSList *)[xs nth:2];
                             if ([[[catchxs first] dataType] isEqual:@"JSSymbol"] && [[(JSSymbol *)[catchxs first] name] isNotEqualTo:@"catch*"]) {
-                                @throw [[NSException alloc] initWithName:SYMBOL_NOT_FOUND reason:SYMBOL_NOT_FOUND_MSG userInfo:@{@"errMsg": [catchxs first]}];
+                                @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:JSL_SYMBOL_NOT_FOUND_MSG userInfo:@{@"errMsg": [catchxs first]}];
                             }
                             Env *catchEnv = [[Env alloc] initWithEnv:env binds:[@[(JSSymbol *)[catchxs second]] mutableCopy]
                                                                exprs:[@[exception.description] mutableCopy]];
@@ -182,20 +196,20 @@
                     continue;
                 } else if ([[sym name] isEqual:@"fn*"]) {
                     JSData * (^fn)(NSMutableArray *) = ^JSData *(NSMutableArray * arg) {
-                        Env *_env = [[Env alloc] initWithEnv:env binds:[@[[xs second]] mutableCopy] exprs:arg];
-                        return [self eval:[xs nth:2] withEnv:_env];
+                        Env *fnEnv = [[Env alloc] initWithEnv:env binds:[@[[xs second]] mutableCopy] exprs:arg];
+                        return [self eval:[xs nth:2] withEnv:fnEnv];
                     };
                     return [[JSFunction alloc] initWithAst:[xs nth:2] params:[@[[xs second]] mutableCopy] env:env macro:NO meta:nil fn:fn];
                 } else if ([[sym name] isEqual:@"let*"]) {
-                    Env *_env = [[Env alloc] initWithEnv:env];
+                    Env *letEnv = [[Env alloc] initWithEnv:env];
                     JSList *bindings = (JSList *)[xs second];
                     NSUInteger len = [bindings count];
                     NSUInteger i = 0;
                     for (i = 0; i < len; i += 2) {
-                        [_env setValue:[self eval:[bindings nth: i + 2] withEnv:_env] forSymbol:(JSSymbol *)[bindings nth:i]];
+                        [letEnv setObject:[self eval:[bindings nth: i + 2] withEnv:letEnv] forSymbol:(JSSymbol *)[bindings nth:i]];
                     }
                     ast = [xs nth:2];
-                    env = _env;
+                    env = letEnv;
                     continue;
                 } else if ([[sym name] isEqual:@"quote"]) {
                     return [xs second];
@@ -208,7 +222,7 @@
             }
             JSList *list = (JSList *)[self evalAST:ast withEnv:env];
             if ([[[list first] dataType] isNotEqualTo:@"JSFunction"]) {
-                @throw [[NSException alloc] initWithName:SYMBOL_NOT_FOUND reason:SYMBOL_NOT_FOUND_MSG userInfo:nil];
+                @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:JSL_SYMBOL_NOT_FOUND_MSG userInfo:nil];
             }
             JSFunction *fn = (JSFunction *)[list first];
             NSMutableArray *rest = [(JSList *)[xs rest] value];

@@ -12,18 +12,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface Constants : NSObject
 // Error constants
-extern NSString * const ERROR_TYPE;
-extern NSString * const PARENS_MISMATCH;
-extern NSString * const QUOTE_MARK_MISMATCH;
-extern NSString * const TOKEN_EMPTY;
-extern NSString * const SYMBOL_NOT_FOUND;
+extern NSString * const JSL_ERROR_TYPE;
+extern NSString * const JSL_PARENS_MISMATCH;
+extern NSString * const JSL_QUOTE_MARK_MISMATCH;
+extern NSString * const JSL_TOKEN_EMPTY;
+extern NSString * const JSL_SYMBOL_NOT_FOUND;
+extern NSString * const JSL_INVALID_ARGUMENT;
 
 // Error messages
-extern NSString * const ERROR_TYPE_MSG;
-extern NSString * const PARENS_MISMATCH_MSG;
-extern NSString * const QUOTE_MARK_MISMATCH_MSG;
-extern NSString * const TOKEN_EMPTY_MSG;
-extern NSString * const SYMBOL_NOT_FOUND_MSG;
+extern NSString * const JSL_ERROR_TYPE_MSG;
+extern NSString * const JSL_PARENS_MISMATCH_MSG;
+extern NSString * const JSL_QUOTE_MARK_MISMATCH_MSG;
+extern NSString * const JSL_TOKEN_EMPTY_MSG;
+extern NSString * const JSL_SYMBOL_NOT_FOUND_MSG;
+extern NSString * const JSL_INVALID_ARGUMENT_MSG;
 @end
 
 NS_ASSUME_NONNULL_END

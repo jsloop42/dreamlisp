@@ -19,6 +19,10 @@
 		9E281D03225A608D0038A5AF /* test in Resources */ = {isa = PBXBuildFile; fileRef = 9E281D02225A608D0038A5AF /* test */; };
 		9E30553B2260FA8F001D4597 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553A2260FA8F001D4597 /* Logger.m */; };
 		9E30553C2260FA8F001D4597 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553A2260FA8F001D4597 /* Logger.m */; };
+		9E30553F22612AF1001D4597 /* NSMutableArray+JSList.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553E22612AF0001D4597 /* NSMutableArray+JSList.m */; };
+		9E30554022612AF1001D4597 /* NSMutableArray+JSList.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553E22612AF0001D4597 /* NSMutableArray+JSList.m */; };
+		9E30554422612C34001D4597 /* NSString+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554322612C34001D4597 /* NSString+JSDataProtocol.m */; };
+		9E30554522612C34001D4597 /* NSString+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554322612C34001D4597 /* NSString+JSDataProtocol.m */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D5A22568B1300348529 /* JSLTests.m */; };
 		9E3A9D6522568D4B00348529 /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6422568D4B00348529 /* Core.m */; };
@@ -66,6 +70,10 @@
 		9E281D02225A608D0038A5AF /* test */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = test; sourceTree = "<group>"; };
 		9E3055392260FA8F001D4597 /* Logger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Logger.h; sourceTree = "<group>"; };
 		9E30553A2260FA8F001D4597 /* Logger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Logger.m; sourceTree = "<group>"; };
+		9E30553D22612AF0001D4597 /* NSMutableArray+JSList.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSMutableArray+JSList.h"; sourceTree = "<group>"; };
+		9E30553E22612AF0001D4597 /* NSMutableArray+JSList.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSMutableArray+JSList.m"; sourceTree = "<group>"; };
+		9E30554222612C34001D4597 /* NSString+JSDataProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+JSDataProtocol.h"; sourceTree = "<group>"; };
+		9E30554322612C34001D4597 /* NSString+JSDataProtocol.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+JSDataProtocol.m"; sourceTree = "<group>"; };
 		9E3A9D4A22568AFC00348529 /* JSL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = JSL; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E3A9D4D22568AFC00348529 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9E3A9D5822568B1300348529 /* JSLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -120,6 +128,19 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		9E30554122612BA4001D4597 /* Types */ = {
+			isa = PBXGroup;
+			children = (
+				9E30553D22612AF0001D4597 /* NSMutableArray+JSList.h */,
+				9E30553E22612AF0001D4597 /* NSMutableArray+JSList.m */,
+				9E30554222612C34001D4597 /* NSString+JSDataProtocol.h */,
+				9E30554322612C34001D4597 /* NSString+JSDataProtocol.m */,
+				9E3A9D6722568D7D00348529 /* Types.h */,
+				9E3A9D6822568D7D00348529 /* Types.m */,
+			);
+			path = Types;
+			sourceTree = "<group>";
+		};
 		9E3A9D4122568AFC00348529 = {
 			isa = PBXGroup;
 			children = (
@@ -144,6 +165,7 @@
 		9E3A9D4C22568AFC00348529 /* JSL */ = {
 			isa = PBXGroup;
 			children = (
+				9E30554122612BA4001D4597 /* Types */,
 				9E3A9D4D22568AFC00348529 /* main.m */,
 				9E281CEC225908480038A5AF /* Constants.h */,
 				9E281CED225908480038A5AF /* Constants.m */,
@@ -163,8 +185,6 @@
 				9E3A9D7422568DBD00348529 /* Reader.m */,
 				9E5D7B49225B947E00970453 /* Terminal.h */,
 				9E5D7B4A225B947E00970453 /* Terminal.m */,
-				9E3A9D6722568D7D00348529 /* Types.h */,
-				9E3A9D6822568D7D00348529 /* Types.m */,
 				9E281CE8225890B10038A5AF /* Utils.h */,
 				9E281CE9225890B10038A5AF /* Utils.m */,
 			);
@@ -282,11 +302,13 @@
 				9E3A9D6D22568D8D00348529 /* Env.m in Sources */,
 				9E281CEA225890B10038A5AF /* Utils.m in Sources */,
 				9E3A9D7122568DB100348529 /* Printer.m in Sources */,
+				9E30553F22612AF1001D4597 /* NSMutableArray+JSList.m in Sources */,
 				9E3A9D6522568D4B00348529 /* Core.m in Sources */,
 				9E3A9D7522568DBD00348529 /* Reader.m in Sources */,
 				9E30553B2260FA8F001D4597 /* Logger.m in Sources */,
 				9E5D7B4B225B947E00970453 /* Terminal.m in Sources */,
 				9E3A9D4E22568AFC00348529 /* main.m in Sources */,
+				9E30554422612C34001D4597 /* NSString+JSDataProtocol.m in Sources */,
 				9E9B6228225B9FC20060DA9A /* FileOps.m in Sources */,
 				9E281CEE225908480038A5AF /* Constants.m in Sources */,
 			);
@@ -301,11 +323,13 @@
 				9E3A9D6A22568D7D00348529 /* Types.m in Sources */,
 				9E3A9D6E22568D8D00348529 /* Env.m in Sources */,
 				9E281CEB225890B10038A5AF /* Utils.m in Sources */,
+				9E30554022612AF1001D4597 /* NSMutableArray+JSList.m in Sources */,
 				9E3A9D7222568DB100348529 /* Printer.m in Sources */,
 				9E3A9D6622568D4B00348529 /* Core.m in Sources */,
 				9E30553C2260FA8F001D4597 /* Logger.m in Sources */,
 				9E3A9D7622568DBD00348529 /* Reader.m in Sources */,
 				9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */,
+				9E30554522612C34001D4597 /* NSString+JSDataProtocol.m in Sources */,
 				9E9B6229225B9FC20060DA9A /* FileOps.m in Sources */,
 				9E281CEF225908480038A5AF /* Constants.m in Sources */,
 			);
@@ -430,6 +454,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 7S7UE44956;
+				ENABLE_STRICT_OBJC_MSGSEND = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -439,6 +464,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 7S7UE44956;
+				ENABLE_STRICT_OBJC_MSGSEND = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -449,6 +475,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 7S7UE44956;
+				ENABLE_STRICT_OBJC_MSGSEND = NO;
 				INFOPLIST_FILE = JSLTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -466,6 +493,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 7S7UE44956;
+				ENABLE_STRICT_OBJC_MSGSEND = NO;
 				INFOPLIST_FILE = JSLTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

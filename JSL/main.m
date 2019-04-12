@@ -20,7 +20,7 @@ int main(int argc, const char * argv[]) {
                 NSString *jslFile = [[NSString alloc] initWithCString:argv[1] encoding:NSUTF8StringEncoding];
                 NSMutableArray *arr = [[NSValue valueWithPointer:argv] mutableCopy];
                 [arr removeObjectsAtIndexes:[[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, 2)]];
-                [env setValue:[[JSList alloc] initWithArray:arr] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
+                [env setObject:[[JSList alloc] initWithArray:arr] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
                 [jsl rep:[[NSString alloc] initWithFormat:@"(load-file %@)", jslFile] withEnv:env];
                 exit(0);
             } @catch (NSException *exception) {

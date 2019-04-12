@@ -49,26 +49,26 @@
     return self;
 }
 
-- (void)setValue:(JSData *)value forSymbol:(JSSymbol *)key {
-    [data setValue:value forKey:[key name]];
+- (void)setObject:(JSData *)value forSymbol:(JSSymbol *)key {
+    [data setObject:value forKey:[key name]];
 }
 
 - (Env *)findEnvForKey:(JSSymbol *)key {
-    if ([data valueForKey:[key name]] != nil) {
+    if ([data objectForKey:[key name]] != nil) {
         return self;
     }
     return [outer findEnvForKey:key];
 }
 
-- (JSData *)valueForSymbol:(JSSymbol *)key {
+- (JSData *)objectForSymbol:(JSSymbol *)key {
     Env * env = [self findEnvForKey:key];
     if (env != nil) {
-        JSData *_data = [[env data] valueForKey:[key name]];
+        JSData *_data = [[env data] objectForKey:[key name]];
         if (_data != nil) {
             return _data;
         }
     }
-    @throw [[NSException alloc] initWithName:SYMBOL_NOT_FOUND reason:SYMBOL_NOT_FOUND_MSG userInfo:nil];
+    @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:JSL_SYMBOL_NOT_FOUND_MSG userInfo:nil];
 }
 
 @end

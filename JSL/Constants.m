@@ -12,17 +12,19 @@
 
 #pragma mark Error constant
 
-NSString * const ERROR_TYPE = @"ERROR_TYPE";
-NSString * const PARENS_MISMATCH = @"PARENS_MISMATCH";
-NSString * const QUOTE_MARK_MISMATCH = @"QUOTE_MARK_MISMATCH";
-NSString * const TOKEN_EMPTY = @"TOKEN_EMPTY";
-NSString * const SYMBOL_NOT_FOUND = @"SYMBOL_NOT_FOUND";
+NSString * const JSL_ERROR_TYPE = @"ERROR_TYPE";
+NSString * const JSL_PARENS_MISMATCH = @"PARENS_MISMATCH";
+NSString * const JSL_QUOTE_MARK_MISMATCH = @"QUOTE_MARK_MISMATCH";
+NSString * const JSL_TOKEN_EMPTY = @"TOKEN_EMPTY";
+NSString * const JSL_SYMBOL_NOT_FOUND = @"SYMBOL_NOT_FOUND";
+NSString * const JSL_INVALID_ARGUMENT = @"Invalid argument.";
 
 #pragma mark Error message
 
-NSString * const ERROR_TYPE_MSG = @"Error type.";
-NSString * const PARENS_MISMATCH_MSG = @"Parenthesis unbalanced.";
-NSString * const QUOTE_MARK_MISMATCH_MSG = @"Quotation mark unbalanced.";
-NSString * const TOKEN_EMPTY_MSG = @"Token is empty.";
-NSString * const SYMBOL_NOT_FOUND_MSG = @"Symbol not found.";
+NSString * const JSL_ERROR_TYPE_MSG = @"Error type.";
+NSString * const JSL_PARENS_MISMATCH_MSG = @"Parenthesis unbalanced.";
+NSString * const JSL_QUOTE_MARK_MISMATCH_MSG = @"Quotation mark unbalanced.";
+NSString * const JSL_TOKEN_EMPTY_MSG = @"Token is empty.";
+NSString * const JSL_SYMBOL_NOT_FOUND_MSG = @"Symbol not found.";
+NSString * const JSL_INVALID_ARGUMENT_MSG = @"Invalid argument.";
 @end
