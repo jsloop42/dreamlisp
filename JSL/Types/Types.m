@@ -84,16 +84,6 @@
 
 @end
 
-#pragma mark NSString
-
-@implementation NSString (JSDataProtocol)
-
--(NSString *)dataType {
-    return @"NSString";
-}
-
-@end
-
 #pragma mark Keyword
 
 @implementation JSKeyword {
@@ -638,7 +628,7 @@
     return _fn([NSMutableArray new]);
 }
 
-- (JSData *)apply:(NSMutableArray*)args {
+- (JSData *)apply:(NSMutableArray *)args {
     return _fn(args);
 }
 

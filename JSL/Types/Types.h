@@ -12,6 +12,8 @@
 #import "Reader.h"
 #import "Printer.h"
 #import "Logger.h"
+#import "NSMutableArray+JSList.h"
+#import "NSString+JSDataProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -29,10 +31,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)str;
 - (instancetype)initWithFormat:(NSString *)format, ...;
-@end
-
-@interface NSString (JSDataProtocol)
-@property (nonatomic, readonly) NSString *dataType;
 @end
 
 @interface JSKeyword : JSData<NSCopying>
