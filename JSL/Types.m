@@ -542,25 +542,39 @@
 
 @end
 
-#pragma mark True
+#pragma mark Bool
 
-@implementation JSTrue
+@implementation JSBool {
+    BOOL _flag;
+}
+
+- (instancetype)initWithBool:(BOOL)flag {
+    self = [super init];
+    if (self) {
+        _flag = flag;
+    }
+    return self;
+}
+
+- (instancetype)initWithJSBool:(JSBool *)object {
+    self = [super init];
+    if (self) {
+        _flag = [object val];
+    }
+    return self;
+}
 
 - (NSString *)dataType {
     return [self className];
 }
 
-@end
-
-#pragma mark False
-
-@implementation JSFalse
-
-- (NSString *)dataType {
-    return [self className];
+-(BOOL)val {
+    return _flag;
 }
 
 @end
+
+#pragma mark Function
 
 @implementation JSFunction {
     JSData *(^_fn)(NSMutableArray *);

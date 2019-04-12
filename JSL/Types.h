@@ -121,10 +121,11 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSNil : JSData
 @end
 
-@interface JSTrue : JSData
-@end
+@interface JSBool : JSData
+- (instancetype)initWithBool:(BOOL)flag;
+- (instancetype)initWithJSBool:(JSBool *)object;
+-(BOOL)val;
 
-@interface JSFalse : JSData
 @end
 
 @interface JSFunction: JSData

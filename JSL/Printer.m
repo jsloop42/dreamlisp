@@ -70,9 +70,10 @@
         return [self printStringFor:[[JSString alloc] initWithFormat:@"(atom %@)", [(JSAtom *)data value]] readably:readably];
     } else if ([dataType isEqual:@"JSNil"]) {
         return @"nil";
-    } else if ([dataType isEqual:@"JSTrue"]) {
-        return @"true";
-    } else if ([dataType isEqual:@"JSFalse"]) {
+    } else if ([dataType isEqual:@"JSBool"]) {
+        if ([(JSBool *)data val]) {
+            return @"true";
+        }
         return @"false";
     } else if ([dataType isEqual:@"JSFunction"]) {
         return @"#<function>";

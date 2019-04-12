@@ -194,6 +194,26 @@
     XCTAssertEqual([(JSNumber *)mod([[JSNumber alloc] initWithInt:5], [[JSNumber alloc] initWithInt:3]) intValue], 2);
 }
 
+-(void)testComparisonFunctions {
+    Core *core = [Core new];
+    NSMutableDictionary *ns = [core namespace];
+    JSData *(^lessThan)(JSNumber *lhs, JSNumber *rhs) = [ns objectForKey:@"<"];
+    JSData *(^greaterThan)(JSNumber *lhs, JSNumber *rhs) = [ns objectForKey:@">"];
+    JSData *(^greaterThanOrEqual)(JSNumber *lhs, JSNumber *rhs) = [ns objectForKey:@">="];
+    JSData *(^lessThanOrEqual)(JSNumber *lhs, JSNumber *rhs) = [ns objectForKey:@"<="];
+    JSData *(^equalTo)(JSNumber *lhs, JSNumber *rhs) = [ns objectForKey:@"="];
+    XCTAssertTrue([(JSBool *)lessThan([[JSNumber alloc] initWithInt:21], [[JSNumber alloc] initWithInt:42]) val]);
+    XCTAssertFalse([(JSBool *)lessThan([[JSNumber alloc] initWithInt:42], [[JSNumber alloc] initWithInt:21]) val]);
+    XCTAssertTrue([(JSBool *)greaterThan([[JSNumber alloc] initWithInt:42], [[JSNumber alloc] initWithInt:21]) val]);
+    XCTAssertFalse([(JSBool *)greaterThan([[JSNumber alloc] initWithInt:21], [[JSNumber alloc] initWithInt:42]) val]);
+    XCTAssertTrue([(JSBool *)greaterThanOrEqual([[JSNumber alloc] initWithInt:42], [[JSNumber alloc] initWithInt:42]) val]);
+    XCTAssertTrue([(JSBool *)greaterThanOrEqual([[JSNumber alloc] initWithInt:42], [[JSNumber alloc] initWithInt:21]) val]);
+    XCTAssertTrue([(JSBool *)lessThanOrEqual([[JSNumber alloc] initWithInt:42], [[JSNumber alloc] initWithInt:42]) val]);
+    XCTAssertTrue([(JSBool *)lessThanOrEqual([[JSNumber alloc] initWithInt:21], [[JSNumber alloc] initWithInt:42]) val]);
+    XCTAssertTrue([(JSBool *)equalTo([[JSNumber alloc] initWithInt:42], [[JSNumber alloc] initWithInt:42]) val]);
+    XCTAssertFalse([(JSBool *)equalTo([[JSNumber alloc] initWithInt:42], [[JSNumber alloc] initWithInt:21]) val]);
+}
+
 - (void)notestPerformanceJSListDropFirst {
     NSMutableArray *arr = [NSMutableArray new];
     for (int i = 0; i < 10000; i++) {

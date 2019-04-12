@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface Core : NSObject
 - (void)addArithmeticFunctions;
+- (void)addComparisonFunctions;
 - (NSMutableDictionary *)namespace;
 @end
 

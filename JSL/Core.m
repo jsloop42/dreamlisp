@@ -25,6 +25,7 @@
 - (void)bootstrap {
     ns = [NSMutableDictionary new];
     [self addArithmeticFunctions];
+    [self addComparisonFunctions];
 }
 
 - (void)addArithmeticFunctions {
@@ -81,7 +82,6 @@
         va_list args;
         va_start(args, first);
         for (JSNumber *arg = first; arg != nil; arg = va_arg(args, JSNumber *)) {
-            NSLog(@"%@", arg);
             if (num != nil) {
                 num = [num decimalNumberByDividingBy:[arg val]];
             } else {
@@ -96,6 +96,29 @@
         return [[JSNumber alloc] initWithInt:[first intValue] % [second intValue]];
     };
     [ns setObject:mod forKey:@"mod"];
+}
+
+- (void)addComparisonFunctions {
+    JSData *(^lessThan)(JSNumber *lhs, JSNumber *rhs) = ^JSData *(JSNumber *lhs, JSNumber *rhs) {
+        return [[JSBool alloc] initWithBool:[[lhs val] isLessThan:[rhs val]]];
+    };
+    [ns setObject:lessThan forKey:@"<"];
+    JSData *(^greaterThan)(JSNumber *lhs, JSNumber *rhs) = ^JSData *(JSNumber *lhs, JSNumber *rhs) {
+        return [[JSBool alloc] initWithBool:[[lhs val] isGreaterThan:[rhs val]]];
+    };
+    [ns setObject:greaterThan forKey:@">"];
+    JSData *(^lessThanOrEqualTo)(JSNumber *lhs, JSNumber *rhs) = ^JSData *(JSNumber *lhs, JSNumber *rhs) {
+        return [[JSBool alloc] initWithBool:[[lhs val] isLessThanOrEqualTo:[rhs val]]];
+    };
+    [ns setObject:lessThanOrEqualTo forKey:@"<="];
+    JSData *(^greaterThanOrEqualTo)(JSNumber *lhs, JSNumber *rhs) = ^JSData *(JSNumber *lhs, JSNumber *rhs) {
+        return [[JSBool alloc] initWithBool:[[lhs val] isGreaterThanOrEqualTo:[rhs val]]];
+    };
+    [ns setObject:greaterThanOrEqualTo forKey:@">="];
+    JSData *(^equalTo)(JSNumber *lhs, JSNumber *rhs) = ^JSData *(JSNumber *lhs, JSNumber *rhs) {
+        return [[JSBool alloc] initWithBool:[[lhs val] isEqualTo:[rhs val]]];
+    };
+    [ns setObject:equalTo forKey:@"="];
 }
 
 - (NSMutableDictionary *)namespace {

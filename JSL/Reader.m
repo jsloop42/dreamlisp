@@ -131,9 +131,9 @@
     } else if ([self matchString:token withPattern:stringUnclosed]) {
         @throw [[NSException alloc] initWithName:QUOTE_MARK_MISMATCH reason:QUOTE_MARK_MISMATCH_MSG userInfo:nil];
     } else if ([token isEqual:@"true"]) {
-        return [JSTrue new];
+        return [[JSBool alloc] initWithBool:true];
     } else if ([token isEqual:@"false"]) {
-        return [JSFalse new];
+        return [[JSBool alloc] initWithBool:false];
     } else if ([token isEqual:@"nil"]) {
         return [JSNil new];
     }
