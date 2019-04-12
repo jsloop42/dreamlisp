@@ -42,7 +42,7 @@ NSString *_historyFile = @"/.jsl-history";
             }
         }
     } @catch (NSException *exception) {
-        info(@"%@", exception.description);
+        error(@"%@", exception.description);
     }
 }
 

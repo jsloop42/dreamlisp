@@ -17,6 +17,8 @@
 		9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CFA225A60760038A5AF /* run_argv_test.sh */; };
 		9E281CFF225A60770038A5AF /* runtest.py in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CFB225A60760038A5AF /* runtest.py */; };
 		9E281D03225A608D0038A5AF /* test in Resources */ = {isa = PBXBuildFile; fileRef = 9E281D02225A608D0038A5AF /* test */; };
+		9E30553B2260FA8F001D4597 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553A2260FA8F001D4597 /* Logger.m */; };
+		9E30553C2260FA8F001D4597 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553A2260FA8F001D4597 /* Logger.m */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D5A22568B1300348529 /* JSLTests.m */; };
 		9E3A9D6522568D4B00348529 /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6422568D4B00348529 /* Core.m */; };
@@ -62,6 +64,8 @@
 		9E281CFB225A60760038A5AF /* runtest.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = runtest.py; sourceTree = "<group>"; };
 		9E281CFC225A60760038A5AF /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		9E281D02225A608D0038A5AF /* test */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = test; sourceTree = "<group>"; };
+		9E3055392260FA8F001D4597 /* Logger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Logger.h; sourceTree = "<group>"; };
+		9E30553A2260FA8F001D4597 /* Logger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Logger.m; sourceTree = "<group>"; };
 		9E3A9D4A22568AFC00348529 /* JSL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = JSL; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E3A9D4D22568AFC00348529 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9E3A9D5822568B1300348529 /* JSLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -151,6 +155,8 @@
 				9E9B6227225B9FC20060DA9A /* FileOps.m */,
 				9E6F444622578E5600777A24 /* JSL.h */,
 				9E6F444722578E5600777A24 /* JSL.m */,
+				9E3055392260FA8F001D4597 /* Logger.h */,
+				9E30553A2260FA8F001D4597 /* Logger.m */,
 				9E3A9D6F22568DB100348529 /* Printer.h */,
 				9E3A9D7022568DB100348529 /* Printer.m */,
 				9E3A9D7322568DBD00348529 /* Reader.h */,
@@ -278,6 +284,7 @@
 				9E3A9D7122568DB100348529 /* Printer.m in Sources */,
 				9E3A9D6522568D4B00348529 /* Core.m in Sources */,
 				9E3A9D7522568DBD00348529 /* Reader.m in Sources */,
+				9E30553B2260FA8F001D4597 /* Logger.m in Sources */,
 				9E5D7B4B225B947E00970453 /* Terminal.m in Sources */,
 				9E3A9D4E22568AFC00348529 /* main.m in Sources */,
 				9E9B6228225B9FC20060DA9A /* FileOps.m in Sources */,
@@ -296,6 +303,7 @@
 				9E281CEB225890B10038A5AF /* Utils.m in Sources */,
 				9E3A9D7222568DB100348529 /* Printer.m in Sources */,
 				9E3A9D6622568D4B00348529 /* Core.m in Sources */,
+				9E30553C2260FA8F001D4597 /* Logger.m in Sources */,
 				9E3A9D7622568DBD00348529 /* Reader.m in Sources */,
 				9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */,
 				9E9B6229225B9FC20060DA9A /* FileOps.m in Sources */,

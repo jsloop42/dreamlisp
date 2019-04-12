@@ -11,6 +11,7 @@
 #import "Utils.h"
 #import "Reader.h"
 #import "Printer.h"
+#import "Logger.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

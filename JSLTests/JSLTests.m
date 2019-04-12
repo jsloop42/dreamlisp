@@ -194,7 +194,7 @@
     XCTAssertEqual([(JSNumber *)mod([[JSNumber alloc] initWithInt:5], [[JSNumber alloc] initWithInt:3]) intValue], 2);
 }
 
--(void)testComparisonFunctions {
+- (void)testComparisonFunctions {
     Core *core = [Core new];
     NSMutableDictionary *ns = [core namespace];
     JSData *(^lessThan)(JSNumber *lhs, JSNumber *rhs) = [ns objectForKey:@"<"];
@@ -212,6 +212,27 @@
     XCTAssertTrue([(JSBool *)lessThanOrEqual([[JSNumber alloc] initWithInt:21], [[JSNumber alloc] initWithInt:42]) val]);
     XCTAssertTrue([(JSBool *)equalTo([[JSNumber alloc] initWithInt:42], [[JSNumber alloc] initWithInt:42]) val]);
     XCTAssertFalse([(JSBool *)equalTo([[JSNumber alloc] initWithInt:42], [[JSNumber alloc] initWithInt:21]) val]);
+}
+
+void testPrintCallback(id param, const char *s) {
+    [param testPrintCallback:[[NSString alloc] initWithCString:s encoding:NSUTF8StringEncoding]];
+}
+
+- (void)testPrintFunctions {
+    Core *core = [Core new];
+    NSMutableDictionary *ns = [core namespace];
+    JSData *(^println)(JSList *xs) = [ns objectForKey:@"println"];
+    JSData *(^prn)(JSList *xs) = [ns objectForKey:@"prn"];
+    infoCallback(self, &testPrintCallback);
+    println([[JSList alloc] initWithArray:[@[@42, @21] mutableCopy]]);
+    infoCallback(self, &testPrintCallback);
+    prn([[JSList alloc] initWithArray:[@[@42, @21] mutableCopy]]);
+    // todo: rest
+}
+
+- (void)testPrintCallback:(NSString *)message {
+    XCTAssertNotNil(message);
+    XCTAssertEqualObjects(message, @"42 21");
 }
 
 - (void)notestPerformanceJSListDropFirst {

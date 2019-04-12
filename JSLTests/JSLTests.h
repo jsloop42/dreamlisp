@@ -17,6 +17,7 @@
 #import "Reader.h"
 #import "FileOps.h"
 #import "Core.h"
+#import "Logger.h"
 
 @interface JSLTests : XCTestCase
 @end

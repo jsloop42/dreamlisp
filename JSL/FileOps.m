@@ -131,7 +131,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     NSError *err = nil;
     BOOL ret = [_fm removeItemAtPath:path error:&err];
     if (!ret && err) {
-        NSLog(@"Error: %@", err.description);
+        error(@"Error: %@", err.description);
     }
     return ret;
 }

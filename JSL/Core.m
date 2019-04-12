@@ -24,8 +24,11 @@
 
 - (void)bootstrap {
     ns = [NSMutableDictionary new];
+    reader = [Reader new];
+    printer = [Printer new];
     [self addArithmeticFunctions];
     [self addComparisonFunctions];
+    [self addPrintFunctions];
 }
 
 - (void)addArithmeticFunctions {
@@ -34,7 +37,6 @@
         va_list args;
         va_start(args, first);
         for (JSNumber *arg = first; arg != nil; arg = va_arg(args, JSNumber *)) {
-            NSLog(@"%@", arg);
             if (num != nil) {
                 num = [num decimalNumberByAdding:[arg val]];
             } else {
@@ -50,7 +52,6 @@
         va_list args;
         va_start(args, first);
         for (JSNumber *arg = first; arg != nil; arg = va_arg(args, JSNumber *)) {
-            NSLog(@"%@", arg);
             if (num != nil) {
                 num = [num decimalNumberBySubtracting:[arg val]];
             } else {
@@ -66,7 +67,6 @@
         va_list args;
         va_start(args, first);
         for (JSNumber *arg = first; arg != nil; arg = va_arg(args, JSNumber *)) {
-            NSLog(@"%@", arg);
             if (num != nil) {
                 num = [num decimalNumberByMultiplyingBy:[arg val]];
             } else {
@@ -119,6 +119,56 @@
         return [[JSBool alloc] initWithBool:[[lhs val] isEqualTo:[rhs val]]];
     };
     [ns setObject:equalTo forKey:@"="];
+}
+
+- (void)addPrintFunctions {
+    Core * __weak weakSelf = self;
+    JSData *(^println)(JSList *xs) = ^JSData *(JSList *xs) {
+        Core *this = weakSelf;
+        NSUInteger len = [xs count];
+        NSUInteger i = 0;
+        NSMutableArray *ret = [NSMutableArray new];
+        for (i = 0; i < len; i++) {
+            [ret addObject:[this->printer printStringFor:(JSData *)[xs nth:i] readably:false]];
+        }
+        info(@"%@", [ret componentsJoinedByString:@" "]);
+        return [JSNil new];
+    };
+    [ns setObject:println forKey:@"println"];
+    JSData *(^prn)(JSList *xs) = ^JSData *(JSList *xs) {
+        Core *this = weakSelf;
+        NSUInteger len = [xs count];
+        NSUInteger i = 0;
+        NSMutableArray *ret = [NSMutableArray new];
+        for (i = 0; i < len; i++) {
+            [ret addObject:[this->printer printStringFor:[xs nth:i] readably:true]];
+        }
+        info(@"%@", [ret componentsJoinedByString:@" "]);
+        return [JSNil new];
+    };
+    [ns setObject:prn forKey:@"prn"];
+    JSData *(^prstr)(JSList *xs) = ^JSData *(JSList *xs) {
+        Core *this = weakSelf;
+        NSUInteger len = [xs count];
+        NSUInteger i = 0;
+        NSMutableArray *ret = [NSMutableArray new];
+        for (i = 0; i < len; i++) {
+            [ret addObject:[this->printer printStringFor:[xs nth:i] readably:true]];
+        }
+        return [[JSString alloc] initWithString:[ret componentsJoinedByString:@" "]];
+    };
+    [ns setObject:prstr forKey:@"pr-str"];
+    JSData *(^str)(JSList *xs) = ^JSData *(JSList *xs) {
+        Core *this = weakSelf;
+        NSUInteger len = [xs count];
+        NSUInteger i = 0;
+        NSMutableArray *ret = [NSMutableArray new];
+        for (i = 0; i < len; i++) {
+            [ret addObject:[this->printer printStringFor:[xs nth:i] readably:false]];
+        }
+        return [[JSString alloc] initWithString:[ret componentsJoinedByString:@""]];
+    };
+    [ns setObject:str forKey:@"str"];
 }
 
 - (NSMutableDictionary *)namespace {

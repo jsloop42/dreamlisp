@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "JSL.h"
 #import "Terminal.h"
+#import "Logger.h"
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
@@ -23,7 +24,7 @@ int main(int argc, const char * argv[]) {
                 [jsl rep:[[NSString alloc] initWithFormat:@"(load-file %@)", jslFile] withEnv:env];
                 exit(0);
             } @catch (NSException *exception) {
-                info(@"%@", exception.description);
+                error(@"%@", exception.description);
             }
         }
         Terminal *term = [Terminal new];
@@ -33,9 +34,9 @@ int main(int argc, const char * argv[]) {
         while ((inp = [term readline]) != nil) {
             @try {
                 ret = [jsl rep:inp withEnv:env];
-                info(@"%@", ret);
+                error(@"%@", ret);
             } @catch (NSException *exception) {
-                info(@"%@", exception.description);
+                error(@"%@", exception.description);
             }
         }
     }

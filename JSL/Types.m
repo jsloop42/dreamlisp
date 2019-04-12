@@ -192,7 +192,7 @@
     NSMutableDictionary* _dict = [NSMutableDictionary new];
     NSUInteger i = 0, len = [array count];
     if (len % 2 != 0) {
-        info(@"JSError: Odd number of elements in the array.");
+        error(@"JSError: Odd number of elements in the array.");
         return dict;
     }
     for (i = 0; i < len; i = i + 2) {

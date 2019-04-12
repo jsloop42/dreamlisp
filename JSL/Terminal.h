@@ -10,6 +10,7 @@
 #import <readline/readline.h>
 #import "FileOps.h"
 #import "Utils.h"
+#import "Logger.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
