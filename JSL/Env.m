@@ -70,7 +70,8 @@
             return _data;
         }
     }
-    @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:JSL_SYMBOL_NOT_FOUND_MSG userInfo:nil];
+    @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:JSL_SYMBOL_NOT_FOUND_MSG
+                                    userInfo:[[[JSError alloc] initWithFormat:SymbolNotFound, [key name]] value]];
 }
 
 @end

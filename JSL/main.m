@@ -38,7 +38,11 @@ int main(int argc, const char * argv[]) {
                     error(@"%@", ret);
                 }
             } @catch (NSException *exception) {
-                error(@"%@", exception.description);
+                if (exception.userInfo != nil) {
+                    error(@"%@", [exception.userInfo valueForKey:@"description"]);
+                } else {
+                    error(@"%@", exception.description);
+                }
             }
         }
     }

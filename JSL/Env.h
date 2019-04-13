@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "Types.h"
+#import "JSError.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
