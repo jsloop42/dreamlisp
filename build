@@ -1,39 +1,38 @@
 #!/bin/bash
 
-BIN="JSLTests/objc"
+bin="JSLTests/objc"
+buildlog="build.log"
+proj="JSL.xcodeproj"
+scheme="JSL"
 
-function build() {
+function getFilename() {
     if [ "$1" = "0" ]; then
-        OUT="step0_repl"
+        out="step0_repl"
     elif [ "$1" = "1" ]; then
-        OUT=step1_read_print
+        out=step1_read_print
     elif [ "$1" = "2" ]; then
-        OUT="step2_eval"
-        echo "$0 $OUT"
+        out="step2_eval"
     elif [ "$1" = "3" ]; then
-        OUT="step3_env"
+        out="step3_env"
     elif [ "$1" = "4" ]; then
-        OUT="step4_if_fn_do"
+        out="step4_if_fn_do"
     elif [ "$1" = "5" ]; then
-        OUT="step5_tco"
+        out="step5_tco"
     elif [ "$1" = "6" ]; then
-        OUT="step6_file"
+        out="step6_file"
     elif [ "$1" = "7" ]; then
-        OUT="step7_quote"
+        out="step7_quote"
     elif [ "$1" = "8" ]; then
-        OUT="step8_macros"
+        out="step8_macros"
     elif [ "$1" = "9" ]; then
-        OUT="step9_try"
+        out="step9_try"
     elif [ "$1" = "A" ]; then
-        OUT="stepA_mal"
+        out="stepA_mal"
     else
         echo "step argument missing."
         exit
     fi
-    echo "Building $OUT."
-    cd JSL
-    clang -framework Foundation main.m Constants.m Core.m Env.m FileOps.m JSL.m Logger.m Printer.m Reader.m Terminal.m Types.m Utils.m -fobjc-arc -ledit -lncurses -o $OUT
-    mv $OUT ../$BIN
+    echo "$out"
 }
 
 function help() {
@@ -41,11 +40,6 @@ function help() {
     echo "Usage: $0 step"
     exit
 }
-
-# Check if the step argument is provided
-if [ $# -ne 1 ]; then
-  help
-fi
 
 # Display a progress bar
 function spinner() {
@@ -58,5 +52,25 @@ function spinner() {
     echo ""
 }
 
-# A long running operation with progress
+function buildproj() {
+    xcodebuild -scheme $scheme build > $buildlog 2>&1
+    # xcodebuild -scheme $scheme build 2>&1 | tee $buildlog
+}
+
+function clean() {
+    xcodebuild clean -project $proj -scheme $scheme > /dev/null
+}
+
+function build() {
+    clean
+    ret=$(getFilename "$1")
+    buildproj
+    cp $(tail -4 $buildlog | head -1 | rev | cut -d " " -f1 | rev) $bin/$ret
+}
+
+# Check if the step argument is provided
+if [ $# -ne 1 ]; then
+  help
+fi
+
 (build $@) & spinner
