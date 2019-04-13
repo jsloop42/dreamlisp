@@ -23,25 +23,32 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class Env;
 
-@protocol JSDataProtocol <NSObject>
+@protocol JSDataProtocol <NSObject, NSCopying>
 @property (nonatomic, readonly) NSString *dataType;
 @end
 
 @interface JSData : NSObject <JSDataProtocol>
 @end
 
-@interface JSString : JSData<NSCopying>
+@interface JSString : JSData
 @property (nonatomic, readwrite, copy) NSString *value;
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)str;
 - (instancetype)initWithFormat:(NSString *)format, ...;
 @end
 
-@interface JSKeyword : JSData<NSCopying>
+@interface JSKeyword : JSData
 @property (nonatomic, readwrite, copy) NSString *value;
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithKeyword:(NSString *)string;
+@end
+
+@interface JSSymbol: JSData
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithName:(NSString *)name;
+- (NSString *)name;
+- (BOOL)isEqual:(JSSymbol *)sym;
 @end
 
 @interface JSHashMap : JSData
@@ -49,8 +56,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init;
 - (instancetype)initWithDictionary:(NSMutableDictionary *)dictionary;
 - (instancetype)initWithArray:(NSMutableArray *)array;
-- (JSData *)objectForString:(NSString *)key;
-- (JSData *)objectForKey:(JSString *)key;
+- (JSData *)objectForKey:(NSString *)key;
+- (void)setObject:(JSData *)object forKey:(NSString *)key;
 - (NSUInteger)count;
 - (NSMutableDictionary *)value;
 - (NSArray *)allKeys;
@@ -95,13 +102,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)string;
 @end
 
-@interface JSSymbol: JSData
-- (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithName:(NSString *)name;
-- (NSString *)name;
-- (BOOL)isEqual:(JSSymbol *)sym;
-@end
-
 @interface JSAtom : JSData
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithData:(JSData *)data;
@@ -133,6 +133,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithFn:(JSData * (^)(NSMutableArray *))fn;
 - (instancetype)initWithMacro:(JSFunction *)func;
 - (instancetype)initWithMeta:(JSData *)meta func:(JSFunction *)func;
+- (instancetype)initWithFunction:(JSFunction *)function;
 - (JSData *)apply;
 - (JSData *)apply:(NSMutableArray *)args;
 @end

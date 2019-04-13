@@ -120,14 +120,13 @@
     while ([[ast dataType] isEqual:@"JSList"]) {
         JSList *xs = (JSList *)ast;
         JSSymbol *sym = (JSSymbol *)[xs first];
+        if (sym == nil) break;
         JSData *fnData = [env objectForSymbol:sym];
-        if ([[fnData className] isEqual:@"__NSGlobalBlock__"] || [[fnData dataType] isEqual:@"JSFunction"]) {
+        if (fnData == nil) break;
+        if ([[fnData dataType] isEqual:@"JSFunction"]) {
             JSFunction *fn = (JSFunction *)fnData;
-            if ([fn isMacro]) {
-                ast = [fn apply:[(JSList *)[xs rest] value]];
-            } else {
-                break;
-            }
+            if (![fn isMacro]) break;
+            ast = [fn apply:[(JSList *)[xs rest] value]];
         }
     }
     return ast;
@@ -147,7 +146,7 @@
             }
             JSList *xs = (JSList *)ast;
             if ([xs isEmpty]) {
-                return xs;
+                return ast;
             }
             if ([[[xs first] dataType] isEqual:@"JSSymbol"]) {
                 // special forms
@@ -233,15 +232,17 @@
                 return [fn apply:rest];
             }
         } else if ([[ast dataType] isEqual:@"JSHashMap"]) {
-            NSMutableDictionary *dict = [(JSHashMap *)ast value];
-            NSArray *value = [dict allValues];
+            JSHashMap *dict = (JSHashMap *)ast;
+            NSArray *keys = [dict allKeys];
             NSUInteger i = 0;
-            NSUInteger len = [value count];
-            NSMutableArray *arr = [NSMutableArray new];
+            NSUInteger len = [keys count];
+            JSHashMap *ret = [JSHashMap new];
             for (i = 0; i < len; i++) {
-                [arr addObject:[self eval:value[i] withEnv:env]];
+                NSString *key = keys[i];
+                JSData *object = (JSData *)[self eval:(JSData *)[dict objectForKey:key] withEnv:env];
+                [ret setObject:object forKey:key];
             }
-            return [[JSList alloc] initWithArray:arr];
+            return ret;
         } else {
             return [self evalAST:ast withEnv:env];
         }

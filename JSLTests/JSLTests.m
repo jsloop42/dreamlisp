@@ -24,7 +24,7 @@
     XCTAssertEqualObjects([str dataType], @"JSString");
 }
 
-- (void)testList {
+- (void)testJSList {
     JSList* list = [JSList new];
     JSString* str = [[JSString alloc] initWithString:@"Foo"];
     JSString* str1 = str;
@@ -34,13 +34,13 @@
     XCTAssertEqual([list count], 2);
 }
 
-- (void)testNumber {
+- (void)testJSNumber {
     JSNumber* n1 = [[JSNumber alloc] initWithDouble:3.14];
     JSNumber* n2 = n1;
     XCTAssertTrue([n1 isEqual:n2]);
 }
 
-- (void)testString {
+- (void)testJSString {
     NSString *s1 = @"1";
     NSString *s2 = s1;
     s1 = @"2";
@@ -57,7 +57,7 @@
     XCTAssertEqualObjects(tokens, tokensArr);
 }
 
-- (void)testMapOnList {
+- (void)testMapOnJSList {
     JSList *list = [[JSList alloc] initWithArray:@[@"abc", @"def", @"ghi"]];
     NSMutableArray *uc = [list map:^NSString * (NSString *arg) {
         return [arg uppercaseString];
@@ -65,7 +65,7 @@
     XCTAssertEqualObjects(uc[0], @"ABC");
 }
 
-- (void)testMapOnVector {
+- (void)testMapOnVJSector {
     JSVector *vec = [[JSVector alloc] initWithArray:@[@"abc", @"def", @"ghi"]];
     NSMutableArray *uc = [vec map:^NSString * (NSString *arg) {
         return [arg uppercaseString];
@@ -141,7 +141,7 @@
     [self waitForExpectations:@[exp] timeout:10.0];
 }
 
-- (void)testHashMap {
+- (void)testJSHashMap {
     Reader *reader = [Reader new];
     Printer *printer = [Printer new];
     NSString *exp = @"{\"a\" \"abc\" \"b\" \"bcd\" \"c\" \"cde\"}";
@@ -154,6 +154,11 @@
     for (int i = 0; i < [arr count]; i++) {
         XCTAssertTrue([inp containsObject:arr[i]]);
     }
+    JSHashMap *dict = [JSHashMap new];
+    NSString *key = @"sym";
+    JSString *object = [[JSString alloc] initWithString:@"1234"];
+    [dict setObject:object forKey:key];
+    XCTAssertEqualObjects((JSString *)[dict objectForKey:key], object);
 }
 
 - (void)testJSListRest {
@@ -224,7 +229,7 @@
 }
 
 - (void)test {
-    // JSL *jsl = [JSL new];
+    //JSL *jsl = [JSL new];
 }
 
 void testPrintCallback(id param, const char *s) {
@@ -245,6 +250,18 @@ void testPrintCallback(id param, const char *s) {
 - (void)testPrintCallback:(NSString *)message {
     XCTAssertNotNil(message);
     XCTAssertEqualObjects(message, @"[33 2 3]");
+}
+
+- (void)testList {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"()"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(list 1 2 3)"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(list 1 (list 21 22 23) 3)"], @"(1 (21 22 23) 3)");
+}
+
+- (void)testHashMap {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"{\"a\" 1}"], @"{\"a\" 1}");
 }
 
 - (void)notestPerformanceJSListDropFirst {

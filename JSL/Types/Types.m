@@ -9,7 +9,14 @@
 #import "Types.h"
 
 @implementation JSData
+
 @synthesize dataType;
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    id copy = [JSData new];
+    return copy;
+}
+
 @end
 
 #pragma mark String
@@ -58,10 +65,7 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[self class] new];
-    if (copy) {
-        [copy setValue:_string];
-    }
+    id copy = [[JSString alloc] initWithString:_string];
     return copy;
 }
 
@@ -116,10 +120,40 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[self class] new];
-    if (copy) {
-        [copy setValue:_string];
+    id copy = [[JSKeyword alloc] initWithKeyword:_string];
+    return copy;
+}
+
+@end
+
+#pragma mark Symbol
+
+@implementation JSSymbol {
+    NSString *_name;
+}
+
+- (instancetype)initWithName:(NSString *)name {
+    self = [super init];
+    if (self) {
+        _name = name;
     }
+    return self;
+}
+
+-(NSString *)dataType {
+    return [self className];
+}
+
+- (NSString *)name {
+    return _name;
+}
+
+- (BOOL)isEqual:(JSSymbol *)symbol {
+    return [_name isEqualToString:[symbol name]];
+}
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    id copy = [[JSSymbol alloc] initWithName:_name];
     return copy;
 }
 
@@ -169,22 +203,31 @@
         return dict;
     }
     for (i = 0; i < len; i = i + 2) {
-        [_dict setObject:array[i + 1] forKey:array[i]];
+        NSString *key = nil;
+        JSData *dkey = (JSData *)[array[i] dataType];
+        if (dkey == nil) @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+        if (dkey != nil) {
+            if ([dkey isEqual:@"JSSymbol"]) {
+                key = [(JSSymbol *)array[i] name];
+            } else if ([dkey isEqual:@"JSString"]) {
+                key = [(JSString *)array[i] value];
+            } else if ([dkey isEqual:@"NSString"]) {
+                key = array[i];
+            }
+        }
+        [_dict setObject:(JSData *)array[i + 1] forKey:key];
     }
     return _dict;
 }
 
-- (JSData *)objectForString:(NSString *)key {
+- (JSData *)objectForKey:(NSString *)key {
     return [dict objectForKey:key];
 }
 
-- (JSData *)objectForKey:(JSString *)key {
-    return [dict objectForKey:key];
+- (void)setObject:(JSData *)object forKey:(NSString *)key {
+    [dict setObject:object forKey:key];
 }
 
-- (void)setValue:(JSData *)value forKey:(NSString *)key {
-    [dict setValue:value forKey:key];
-}
 
 - (NSUInteger)count {
     return [dict count];
@@ -200,6 +243,11 @@
 
 - (NSArray *)allValues {
     return [dict allValues];
+}
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    id copy = [[JSHashMap alloc] initWithDictionary:dict];
+    return copy;
 }
 
 @end
@@ -292,6 +340,11 @@
     return [array count] == 0;
 }
 
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    id copy = [[JSList alloc] initWithArray:array];
+    return copy;
+}
+
 @end
 
 #pragma mark Vector
@@ -325,6 +378,11 @@
 
 - (NSMutableArray *)map:(id (^)(id arg))block {
     return [TypeUtils mapOnArray:array withBlock:block];
+}
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    id copy = [[JSVector alloc] initWithArray:array];
+    return copy;
 }
 
 @end
@@ -421,32 +479,9 @@
     return [n stringValue];
 }
 
-@end
-
-#pragma mark Symbol
-
-@implementation JSSymbol {
-    NSString *_name;
-}
-
-- (instancetype)initWithName:(NSString *)name {
-    self = [super init];
-    if (self) {
-        _name = name;
-    }
-    return self;
-}
-
--(NSString *)dataType {
-    return [self className];
-}
-
-- (NSString *)name {
-    return _name;
-}
-
-- (BOOL)isEqual:(JSSymbol *)symbol {
-    return [_name isEqualToString:[symbol name]];
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    id copy = [[JSNumber alloc] initWithNumber:n];
+    return copy;
 }
 
 @end
@@ -471,6 +506,11 @@
 
 - (JSData *)value {
     return _data;
+}
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    id copy = [[JSAtom alloc] initWithData:_data];
+    return copy;
 }
 
 @end
@@ -581,6 +621,14 @@
     return self;
 }
 
+- (instancetype)initWithFunction:(JSFunction *)function {
+    self = [super init];
+    if (self) {
+        self = [self initWithAst:[function ast] params:[function params] env:[function env] macro:[function isMacro] meta:[function meta] fn:[function fn]];
+    }
+    return self;
+}
+
 - (NSString *)dataType {
     return [self className];
 }
@@ -591,6 +639,11 @@
 
 - (JSData *)apply:(NSMutableArray *)args {
     return _fn(args);
+}
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    id copy = [[JSFunction alloc] initWithFunction:self];
+    return copy;
 }
 
 @end

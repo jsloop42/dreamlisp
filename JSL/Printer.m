@@ -59,9 +59,10 @@
         NSUInteger len = [keys count];
         NSMutableArray *xs = [NSMutableArray new];
         for (i = 0; i < len; i++) {
+            NSString *key = keys[i];
             [xs addObject:[[NSString alloc] initWithFormat:@"%@ %@",
-                                [self printStringFor:(JSData *)keys[i] readably:readably],
-                                [self printStringFor:(JSData *)[hm objectForKey:keys[i]] readably:readably]]];
+                                [self printStringFor:[[JSString alloc] initWithString:key] readably:readably],
+                                [self printStringFor:(JSData *)[hm objectForKey:key] readably:readably]]];
         }
         return [[NSString alloc] initWithFormat:@"{%@}", [xs componentsJoinedByString:@" "]];
     } else if ([dataType isEqual:@"JSKeyword"]) {
