@@ -10,8 +10,16 @@
 
 @implementation NSString (JSDataProtocol)
 
--(NSString *)dataType {
+- (NSString *)dataType {
     return @"NSString";
+}
+
+- (BOOL)isEmpty {
+    return [self length] == 0;
+}
+
+- (BOOL)isNotEmpty {
+    return [self length] > 0;
 }
 
 @end

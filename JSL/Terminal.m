@@ -52,7 +52,7 @@ NSString *_historyFile = @"/.jsl-history";
 
 - (NSString *)readline {
     char *input = readline(_prompt);
-    NSString *exp = @"";
+    NSString *exp;
     if (input) {
         if (_isHistoryEnabled) {
             add_history(input);

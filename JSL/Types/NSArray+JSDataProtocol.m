@@ -19,4 +19,8 @@
     return [TypeUtils mapOnArray:[self mutableCopy] withBlock:block];
 }
 
+- (BOOL)isEmpty {
+    return [self count] == 0;
+}
+
 @end

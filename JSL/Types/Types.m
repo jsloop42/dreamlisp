@@ -308,6 +308,10 @@
     [array removeObjectAtIndex:index];
 }
 
+- (void)setValue:(NSMutableArray *)aArray {
+    array = aArray;
+}
+
 - (NSMutableArray *)value {
     return array;
 }
@@ -372,6 +376,7 @@
     self = [super init];
     if (self) {
         array = [NSMutableArray new];
+        [super setValue:array];
     }
     return self;
 }
@@ -380,6 +385,7 @@
     self = [super init];
     if (self) {
         array = [[NSMutableArray alloc] initWithArray:list];
+        [super setValue:array];
     }
     return self;
 }

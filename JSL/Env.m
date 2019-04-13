@@ -28,13 +28,15 @@
     self = [super init];
     if (self) {
         outer = env;
+        data = [NSMutableDictionary new];
     }
     return self;
 }
 
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs {
     self = [super init];
-    NSUInteger len = [binds count], i = 0;
+    NSUInteger len = [binds count];
+    NSUInteger i = 0;
     if (self) {
         outer = env;
         for (i = 0; i < len; i++) {

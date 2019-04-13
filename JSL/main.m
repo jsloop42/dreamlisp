@@ -27,13 +27,16 @@ int main(int argc, const char * argv[]) {
             }
         }
         Terminal *term = [Terminal new];
-        NSString *inp = @"";
-        NSString *ret = @"";
+        NSString *inp;
+        NSString *ret;
         // TODO: print host lang.
-        while ((inp = [term readline]) != nil) {
+        while (true) {
             @try {
-                ret = [jsl rep:inp];
-                error(@"%@", ret);
+                inp = [term readline];
+                if (inp && [inp isNotEmpty]) {
+                    ret = [jsl rep:inp];
+                    error(@"%@", ret);
+                }
             } @catch (NSException *exception) {
                 error(@"%@", exception.description);
             }

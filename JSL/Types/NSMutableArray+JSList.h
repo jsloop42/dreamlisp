@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (id)last;
 - (id)dropLast;
 - (id)nth:(NSInteger)n;
+- (BOOL)isEmpty;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -74,6 +74,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)add:(JSData *)object atIndex:(NSUInteger)index;
 - (void)remove:(JSData *)object;
 - (void)removeAtIndex:(NSUInteger)index;
+- (void)setValue:(NSMutableArray *)aArray;
 - (NSMutableArray *)value;
 - (NSUInteger)count;
 - (JSData *)first;

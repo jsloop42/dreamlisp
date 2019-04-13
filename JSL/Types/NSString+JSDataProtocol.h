@@ -11,6 +11,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSString (JSDataProtocol)
+- (BOOL)isEmpty;
+- (BOOL)isNotEmpty;
 @end
 
 NS_ASSUME_NONNULL_END

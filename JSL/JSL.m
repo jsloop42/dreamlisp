@@ -101,7 +101,7 @@
 }
 
 - (JSData *)quasiQuote:(JSData *)ast {
-    JSList *xs = (JSList *)ast;
+    NSMutableArray *xs = [(JSList *)ast value];
     if ([xs isEmpty]) {
         return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], ast] mutableCopy]];
     }
@@ -109,24 +109,30 @@
     if ([[first dataType] isEqual:@"JSSymbol"] && [[(JSSymbol *)first name] isEqual:@"unquote"]) {
         return [xs second];
     }
-    JSList *list = (JSList *)first;
+    NSMutableArray *list = [(JSList *)first value];
     if (![list isEmpty] && [[[list first] dataType] isEqual:@"JSSymbol"] && [[(JSSymbol *)[list first] name] isEqual:@"splice-unquote"]) {
-        return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"concat"], [list second], [self quasiQuote:[list rest]]] mutableCopy]];
+        return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"concat"], [list second],
+                                                [self quasiQuote:[[JSList alloc] initWithArray:[list rest]]]] mutableCopy]];
     }
-    return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"cons"], [self quasiQuote:first], [self quasiQuote:[xs rest]]] mutableCopy]];
+    return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"cons"], [self quasiQuote:first],
+                                            [self quasiQuote:[[JSList alloc] initWithArray:[xs rest]]]] mutableCopy]];
 }
 
 - (JSData *)macroExpand:(JSData *)ast withEnv:(Env *)env {
     while ([[ast dataType] isEqual:@"JSList"]) {
-        JSList *xs = (JSList *)ast;
+        NSMutableArray *xs = [(JSList *)ast value];
         JSSymbol *sym = (JSSymbol *)[xs first];
         if (sym == nil) break;
-        JSData *fnData = [env objectForSymbol:sym];
-        if (fnData == nil) break;
-        if ([[fnData dataType] isEqual:@"JSFunction"]) {
-            JSFunction *fn = (JSFunction *)fnData;
-            if (![fn isMacro]) break;
-            ast = [fn apply:[(JSList *)[xs rest] value]];
+        @try {
+            JSData *fnData = [env objectForSymbol:sym];
+            if (fnData == nil) break;
+            if ([[fnData dataType] isEqual:@"JSFunction"]) {
+                JSFunction *fn = (JSFunction *)fnData;
+                if (![fn isMacro]) break;
+                ast = [fn apply:[(JSList *)[xs rest] value]];
+            }
+        } @catch (NSException *exception) {
+            break;
         }
     }
     return ast;
@@ -144,7 +150,7 @@
             if (![[ast dataType] isEqual:@"JSList"]) {
                 return [self evalAST:ast withEnv:env];
             }
-            JSList *xs = (JSList *)ast;
+            NSMutableArray *xs = [(JSList *)ast value];
             if ([xs isEmpty]) {
                 return ast;
             }
@@ -153,12 +159,12 @@
                 JSSymbol *sym = (JSSymbol *)[xs first];
                 if ([[sym name] isEqual:@"def!"]) {
                     JSData *val = [self eval:[xs nth:2] withEnv:env];
-                    [env setObject:val forSymbol:(JSSymbol *)[xs first]];
+                    [env setObject:val forSymbol:(JSSymbol *)[xs second]];
                     return val;
                 } else if ([[sym name] isEqual:@"defmacro!"]) {
                     JSFunction *fn = (JSFunction *)[self eval:[xs nth:2] withEnv:env];
                     JSFunction *macro = [[JSFunction alloc] initWithMacro:fn];
-                    [env setObject:macro forSymbol:(JSSymbol *)[xs first]];
+                    [env setObject:macro forSymbol:(JSSymbol *)[xs second]];
                     return macro;
                 } else if ([[sym name] isEqual:@"try*"]) {
                     @try {
@@ -201,11 +207,12 @@
                     return [[JSFunction alloc] initWithAst:[xs nth:2] params:[@[[xs second]] mutableCopy] env:env macro:NO meta:nil fn:fn];
                 } else if ([[sym name] isEqual:@"let*"]) {
                     Env *letEnv = [[Env alloc] initWithEnv:env];
-                    JSList *bindings = (JSList *)[xs second];
+                    NSMutableArray *bindings = [[(JSData *)[xs second] dataType] isEqual:@"JSVector"] ?
+                                                    [(JSVector *)[xs second] value] : [(JSList *)[xs second] value];
                     NSUInteger len = [bindings count];
                     NSUInteger i = 0;
                     for (i = 0; i < len; i += 2) {
-                        [letEnv setObject:[self eval:[bindings nth: i + 2] withEnv:letEnv] forSymbol:(JSSymbol *)[bindings nth:i]];
+                        [letEnv setObject:[self eval:[bindings nth: i + 1] withEnv:letEnv] forSymbol:(JSSymbol *)[bindings nth:i]];
                     }
                     ast = [xs nth:2];
                     env = letEnv;

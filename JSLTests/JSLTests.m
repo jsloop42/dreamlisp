@@ -271,8 +271,36 @@ void testPrintCallback(id param, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"{:a (+ 7 8)}"], @"{:a 15}");
 }
 
+- (void)testEnv {
+    Env *env = [Env new];
+    JSString *obj = [[JSString alloc] initWithString:@"123"];
+    JSSymbol *key = [[JSSymbol alloc] initWithName:@"key"];
+    [env setObject:obj forSymbol:key];
+    XCTAssertEqualObjects([env objectForSymbol:key], obj);
+    Env *aEnv = [[Env alloc] initWithEnv:env];
+    JSSymbol *aKey = [[JSSymbol alloc] initWithName:@"aKey"];
+    JSString *aObj = [[JSString alloc] initWithString:@"987"];
+    [aEnv setObject:aObj forSymbol:aKey];
+    XCTAssertEqualObjects([aEnv objectForSymbol:aKey], aObj);
+
+}
+
+- (void)testSpecialForms {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(def! x 3)"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"x"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(let* (z (+ 2 3)) (+ 1 z))"], @"6");
+    XCTAssertEqualObjects([jsl rep:@"(let* [z 9] z)"], @"9");
+}
+
+- (void)testMisc {
+
+}
+
+// TODO: add test cases from mal
+
 - (void)test {
-    //JSL *jsl = [JSL new];
+    JSL *jsl = [JSL new];
 }
 
 
