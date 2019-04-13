@@ -60,8 +60,14 @@
         NSMutableArray *xs = [NSMutableArray new];
         for (i = 0; i < len; i++) {
             NSString *key = keys[i];
+            JSData *keyData = nil;
+            if ([JSKeyword isKeyword:key]) {
+                keyData = [[JSKeyword alloc] initWithKeyword:key];
+            } else {
+                keyData = [[JSString alloc] initWithString:key];
+            }
             [xs addObject:[[NSString alloc] initWithFormat:@"%@ %@",
-                                [self printStringFor:[[JSString alloc] initWithString:key] readably:readably],
+                                [self printStringFor:keyData readably:readably],
                                 [self printStringFor:(JSData *)[hm objectForKey:key] readably:readably]]];
         }
         return [[NSString alloc] initWithFormat:@"{%@}", [xs componentsJoinedByString:@" "]];

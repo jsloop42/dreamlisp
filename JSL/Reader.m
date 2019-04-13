@@ -120,7 +120,7 @@
     if ([self matchString:token withPattern:numPattern]) {
         return [[JSNumber alloc] initWithString:token];
     } else if ([self matchString:token withPattern:keywordPattern]) {
-        return [[JSKeyword alloc] initWithString:token];
+        return [[JSKeyword alloc] initWithKeyword:token];
     } else if ([self matchString:token withPattern:stringPattern]) {
         NSString *stripped = [token substringWithRange:NSMakeRange(1, [token length] - 2)];
         NSString* ret = [[[[stripped stringByReplacingOccurrencesOfString:@"\\\\" withString:@"0xff"]

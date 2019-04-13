@@ -39,9 +39,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSKeyword : JSData
 @property (nonatomic, readwrite, copy) NSString *value;
++ (BOOL)isKeyword:(NSString *)string;
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithKeyword:(NSString *)string;
+- (NSString *)string;
 @end
 
 @interface JSSymbol: JSData

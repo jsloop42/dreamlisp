@@ -79,10 +79,17 @@
 
 @synthesize value = _string;
 
++ (BOOL)isKeyword:(NSString *)string {
+    if ([string characterAtIndex:0] == ':') {
+        return YES;
+    }
+    return NO;
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
-        self = [self initWithString:@""];
+        self = [self initWithKeyword:@""];
     }
     return self;
 }
@@ -90,7 +97,7 @@
 - (instancetype)initWithString:(NSString *)string {
     self = [super init];
     if (self) {
-        _string = string;
+        _string = [string stringByReplacingCharactersInRange:NSMakeRange(0, 0) withString:@":"];
     }
     return self;
 }
@@ -98,7 +105,7 @@
 - (instancetype)initWithKeyword:(NSString *)string {
     self = [super init];
     if (self) {
-        _string = [string stringByReplacingCharactersInRange:NSMakeRange(0, 0) withString:[self keyword]];
+        _string = string;
     }
     return self;
 }
@@ -107,11 +114,14 @@
     return [self className];
 }
 
-- (NSString *)keyword {
-    return @":";
+- (NSString *)value {
+    return _string;
 }
 
-- (NSString *)value {
+- (NSString *)string {
+    if ([_string characterAtIndex:0] == ':') {
+        return [_string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:@""];
+    }
     return _string;
 }
 
@@ -120,7 +130,7 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[JSKeyword alloc] initWithKeyword:_string];
+    id copy = [[JSKeyword alloc] initWithKeyword:[self string]];
     return copy;
 }
 
@@ -211,6 +221,8 @@
                 key = [(JSSymbol *)array[i] name];
             } else if ([dkey isEqual:@"JSString"]) {
                 key = [(JSString *)array[i] value];
+            } else if ([dkey isEqual:@"JSKeyword"]) {
+                key = [(JSKeyword *)array[i] value];
             } else if ([dkey isEqual:@"NSString"]) {
                 key = array[i];
             }

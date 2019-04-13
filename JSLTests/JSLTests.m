@@ -49,6 +49,15 @@
     XCTAssertEqualObjects([s3 value], @"42");
 }
 
+- (void)testJSKeyword {
+    JSKeyword *kwd = [[JSKeyword alloc] initWithString:@"foo"];
+    XCTAssertEqualObjects([kwd value], @":foo");
+    kwd = [[JSKeyword alloc] initWithKeyword:@":foo"];
+    XCTAssertEqualObjects([kwd value], @":foo");
+    kwd = [[JSKeyword alloc] initWithKeyword:@"foo"];
+    XCTAssertEqualObjects([kwd string], @"foo");
+}
+
 - (void)testTokenize {
     Reader *reader = [Reader new];
     NSString *exp = @"(+ 1 2)";
@@ -98,7 +107,7 @@
     JSList *slist = [[JSList alloc] initWithArray:@[@"1", @"2", @"3"]];
     XCTAssertEqualObjects([prn printStringFor:slist readably:true], @"(\"1\" \"2\" \"3\")");
     // Keyword
-    JSKeyword *kw = [[JSKeyword alloc] initWithKeyword:@"abc"];
+    JSKeyword *kw = [[JSKeyword alloc] initWithKeyword:@":abc"];
     XCTAssertEqualObjects([prn printStringFor:kw readably:true], @":abc");
     // Vector with numbers
     JSVector *nvec = [[JSVector alloc] initWithArray:@[@1, @2, @3]];
@@ -228,10 +237,6 @@
     XCTAssertEqualObjects([jsl rep:@"(= 47.404017857142857142857142857142857142 47.404017857142857142857142857142857142)"], @"true");
 }
 
-- (void)test {
-    //JSL *jsl = [JSL new];
-}
-
 void testPrintCallback(id param, const char *s) {
     [param testPrintCallback:[[NSString alloc] initWithCString:s encoding:NSUTF8StringEncoding]];
 }
@@ -262,7 +267,14 @@ void testPrintCallback(id param, const char *s) {
 - (void)testHashMap {
     JSL *jsl = [JSL new];
     XCTAssertEqualObjects([jsl rep:@"{\"a\" 1}"], @"{\"a\" 1}");
+    XCTAssertEqualObjects([jsl rep:@"{\"a\" (+ 1 2)}"], @"{\"a\" 3}");
+    XCTAssertEqualObjects([jsl rep:@"{:a (+ 7 8)}"], @"{:a 15}");
 }
+
+- (void)test {
+    //JSL *jsl = [JSL new];
+}
+
 
 - (void)notestPerformanceJSListDropFirst {
     NSMutableArray *arr = [NSMutableArray new];
