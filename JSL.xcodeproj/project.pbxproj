@@ -11,7 +11,6 @@
 		9E281CEB225890B10038A5AF /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CE9225890B10038A5AF /* Utils.m */; };
 		9E281CEE225908480038A5AF /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Constants.m */; };
 		9E281CEF225908480038A5AF /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Constants.m */; };
-		9E281CF5225A48620038A5AF /* build in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CF4225A48620038A5AF /* build */; };
 		9E281CF8225A4C790038A5AF /* libreadline.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E281CF7225A4C790038A5AF /* libreadline.tbd */; };
 		9E281CFD225A60770038A5AF /* tests in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CF9225A60760038A5AF /* tests */; };
 		9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CFA225A60760038A5AF /* run_argv_test.sh */; };
@@ -23,6 +22,15 @@
 		9E30554022612AF1001D4597 /* NSMutableArray+JSList.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553E22612AF0001D4597 /* NSMutableArray+JSList.m */; };
 		9E30554422612C34001D4597 /* NSString+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554322612C34001D4597 /* NSString+JSDataProtocol.m */; };
 		9E30554522612C34001D4597 /* NSString+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554322612C34001D4597 /* NSString+JSDataProtocol.m */; };
+		9E30554822619F3F001D4597 /* NSNumber+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554722619F3F001D4597 /* NSNumber+JSDataProtocol.m */; };
+		9E30554922619F3F001D4597 /* NSNumber+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554722619F3F001D4597 /* NSNumber+JSDataProtocol.m */; };
+		9E30554C2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554B2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m */; };
+		9E30554D2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554B2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m */; };
+		9E3055502261A10F001D4597 /* NSArray+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554F2261A10F001D4597 /* NSArray+JSDataProtocol.m */; };
+		9E3055512261A10F001D4597 /* NSArray+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554F2261A10F001D4597 /* NSArray+JSDataProtocol.m */; };
+		9E3055542261A162001D4597 /* TypeUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3055532261A162001D4597 /* TypeUtils.m */; };
+		9E3055552261A162001D4597 /* TypeUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3055532261A162001D4597 /* TypeUtils.m */; };
+		9E30555D2261C4DD001D4597 /* build in Resources */ = {isa = PBXBuildFile; fileRef = 9E30555C2261C4DC001D4597 /* build */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D5A22568B1300348529 /* JSLTests.m */; };
 		9E3A9D6522568D4B00348529 /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6422568D4B00348529 /* Core.m */; };
@@ -61,7 +69,6 @@
 		9E281CE9225890B10038A5AF /* Utils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
 		9E281CEC225908480038A5AF /* Constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
 		9E281CED225908480038A5AF /* Constants.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Constants.m; sourceTree = "<group>"; };
-		9E281CF4225A48620038A5AF /* build */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build; sourceTree = "<group>"; };
 		9E281CF7225A4C790038A5AF /* libreadline.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libreadline.tbd; path = usr/lib/libreadline.tbd; sourceTree = SDKROOT; };
 		9E281CF9225A60760038A5AF /* tests */ = {isa = PBXFileReference; lastKnownFileType = folder; path = tests; sourceTree = "<group>"; };
 		9E281CFA225A60760038A5AF /* run_argv_test.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run_argv_test.sh; sourceTree = "<group>"; };
@@ -74,6 +81,15 @@
 		9E30553E22612AF0001D4597 /* NSMutableArray+JSList.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSMutableArray+JSList.m"; sourceTree = "<group>"; };
 		9E30554222612C34001D4597 /* NSString+JSDataProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+JSDataProtocol.h"; sourceTree = "<group>"; };
 		9E30554322612C34001D4597 /* NSString+JSDataProtocol.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+JSDataProtocol.m"; sourceTree = "<group>"; };
+		9E30554622619F3F001D4597 /* NSNumber+JSDataProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSNumber+JSDataProtocol.h"; sourceTree = "<group>"; };
+		9E30554722619F3F001D4597 /* NSNumber+JSDataProtocol.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSNumber+JSDataProtocol.m"; sourceTree = "<group>"; };
+		9E30554A2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSDecimalNumber+JSDataProtocol.h"; sourceTree = "<group>"; };
+		9E30554B2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSDecimalNumber+JSDataProtocol.m"; sourceTree = "<group>"; };
+		9E30554E2261A10F001D4597 /* NSArray+JSDataProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSArray+JSDataProtocol.h"; sourceTree = "<group>"; };
+		9E30554F2261A10F001D4597 /* NSArray+JSDataProtocol.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSArray+JSDataProtocol.m"; sourceTree = "<group>"; };
+		9E3055522261A162001D4597 /* TypeUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TypeUtils.h; sourceTree = "<group>"; };
+		9E3055532261A162001D4597 /* TypeUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TypeUtils.m; sourceTree = "<group>"; };
+		9E30555C2261C4DC001D4597 /* build */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build; sourceTree = "<group>"; };
 		9E3A9D4A22568AFC00348529 /* JSL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = JSL; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E3A9D4D22568AFC00348529 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9E3A9D5822568B1300348529 /* JSLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -131,12 +147,20 @@
 		9E30554122612BA4001D4597 /* Types */ = {
 			isa = PBXGroup;
 			children = (
+				9E30554E2261A10F001D4597 /* NSArray+JSDataProtocol.h */,
+				9E30554F2261A10F001D4597 /* NSArray+JSDataProtocol.m */,
+				9E30554A2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.h */,
+				9E30554B2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m */,
 				9E30553D22612AF0001D4597 /* NSMutableArray+JSList.h */,
 				9E30553E22612AF0001D4597 /* NSMutableArray+JSList.m */,
+				9E30554622619F3F001D4597 /* NSNumber+JSDataProtocol.h */,
+				9E30554722619F3F001D4597 /* NSNumber+JSDataProtocol.m */,
 				9E30554222612C34001D4597 /* NSString+JSDataProtocol.h */,
 				9E30554322612C34001D4597 /* NSString+JSDataProtocol.m */,
 				9E3A9D6722568D7D00348529 /* Types.h */,
 				9E3A9D6822568D7D00348529 /* Types.m */,
+				9E3055522261A162001D4597 /* TypeUtils.h */,
+				9E3055532261A162001D4597 /* TypeUtils.m */,
 			);
 			path = Types;
 			sourceTree = "<group>";
@@ -144,8 +168,8 @@
 		9E3A9D4122568AFC00348529 = {
 			isa = PBXGroup;
 			children = (
+				9E30555C2261C4DC001D4597 /* build */,
 				9E281D02225A608D0038A5AF /* test */,
-				9E281CF4225A48620038A5AF /* build */,
 				9E3A9D4C22568AFC00348529 /* JSL */,
 				9E3A9D5922568B1300348529 /* JSLTests */,
 				9E3A9D4B22568AFC00348529 /* Products */,
@@ -253,9 +277,11 @@
 				TargetAttributes = {
 					9E3A9D4922568AFC00348529 = {
 						CreatedOnToolsVersion = 10.2;
+						LastSwiftMigration = 1020;
 					};
 					9E3A9D5722568B1300348529 = {
 						CreatedOnToolsVersion = 10.2;
+						LastSwiftMigration = 1020;
 					};
 				};
 			};
@@ -282,11 +308,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E30555D2261C4DD001D4597 /* build in Resources */,
 				9E281CFD225A60770038A5AF /* tests in Resources */,
 				9E281D03225A608D0038A5AF /* test in Resources */,
 				9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */,
 				9E281CFF225A60770038A5AF /* runtest.py in Resources */,
-				9E281CF5225A48620038A5AF /* build in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,13 +323,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E30554C2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */,
 				9E6F444822578E5600777A24 /* JSL.m in Sources */,
 				9E3A9D6922568D7D00348529 /* Types.m in Sources */,
 				9E3A9D6D22568D8D00348529 /* Env.m in Sources */,
 				9E281CEA225890B10038A5AF /* Utils.m in Sources */,
 				9E3A9D7122568DB100348529 /* Printer.m in Sources */,
 				9E30553F22612AF1001D4597 /* NSMutableArray+JSList.m in Sources */,
+				9E3055542261A162001D4597 /* TypeUtils.m in Sources */,
 				9E3A9D6522568D4B00348529 /* Core.m in Sources */,
+				9E30554822619F3F001D4597 /* NSNumber+JSDataProtocol.m in Sources */,
+				9E3055502261A10F001D4597 /* NSArray+JSDataProtocol.m in Sources */,
 				9E3A9D7522568DBD00348529 /* Reader.m in Sources */,
 				9E30553B2260FA8F001D4597 /* Logger.m in Sources */,
 				9E5D7B4B225B947E00970453 /* Terminal.m in Sources */,
@@ -318,13 +348,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E30554D2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */,
 				9E6F444922578E5600777A24 /* JSL.m in Sources */,
 				9E5D7B4C225B947E00970453 /* Terminal.m in Sources */,
 				9E3A9D6A22568D7D00348529 /* Types.m in Sources */,
 				9E3A9D6E22568D8D00348529 /* Env.m in Sources */,
 				9E281CEB225890B10038A5AF /* Utils.m in Sources */,
 				9E30554022612AF1001D4597 /* NSMutableArray+JSList.m in Sources */,
+				9E3055552261A162001D4597 /* TypeUtils.m in Sources */,
 				9E3A9D7222568DB100348529 /* Printer.m in Sources */,
+				9E30554922619F3F001D4597 /* NSNumber+JSDataProtocol.m in Sources */,
+				9E3055512261A10F001D4597 /* NSArray+JSDataProtocol.m in Sources */,
 				9E3A9D6622568D4B00348529 /* Core.m in Sources */,
 				9E30553C2260FA8F001D4597 /* Logger.m in Sources */,
 				9E3A9D7622568DBD00348529 /* Reader.m in Sources */,
@@ -452,26 +486,42 @@
 		9E3A9D5222568AFC00348529 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 7S7UE44956;
 				ENABLE_STRICT_OBJC_MSGSEND = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		9E3A9D5322568AFC00348529 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 7S7UE44956;
 				ENABLE_STRICT_OBJC_MSGSEND = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
 		9E3A9D5E22568B1300348529 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 7S7UE44956;
@@ -484,12 +534,15 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.JSLTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		9E3A9D5F22568B1300348529 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 7S7UE44956;
@@ -502,6 +555,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.JSLTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};

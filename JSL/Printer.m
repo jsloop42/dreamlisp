@@ -71,7 +71,7 @@
     } else if ([dataType isEqual:@"JSNil"]) {
         return @"nil";
     } else if ([dataType isEqual:@"JSBool"]) {
-        if ([(JSBool *)data val]) {
+        if ([(JSBool *)data value]) {
             return @"true";
         }
         return @"false";

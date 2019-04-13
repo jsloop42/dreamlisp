@@ -18,3 +18,4 @@ xcuserdata/
 Pods/
 bin
 step*
+*.log

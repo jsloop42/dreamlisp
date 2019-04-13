@@ -12,8 +12,12 @@
 #import "Reader.h"
 #import "Printer.h"
 #import "Logger.h"
+#import "NSArray+JSDataProtocol.h"
+#import "NSDecimalNumber+JSDataProtocol.h"
 #import "NSMutableArray+JSList.h"
+#import "NSNumber+JSDataProtocol.h"
 #import "NSString+JSDataProtocol.h"
+#import "TypeUtils.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -77,11 +81,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithArray:(NSArray *)list;
 @end
 
-@interface NSArray (JSDataProtocol)
-@property (nonatomic, readonly) NSString *dataType;
-- (NSMutableArray *)map:(id (^)(id arg))block;
-@end
-
 @interface JSNumber : JSData
 @property (nonatomic, readwrite, copy) JSData *meta;
 - (instancetype)initWithDouble:(double)num;
@@ -92,16 +91,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (double)doubleValue;
 - (int)intValue;
 - (BOOL)isDouble;
-- (NSDecimalNumber *)val;
+- (NSDecimalNumber *)value;
 - (NSString *)string;
-@end
-
-@interface NSNumber (JSDataProtocol)
-@property (nonatomic, readonly) NSString *dataType;
-@end
-
-@interface NSDecimalNumber (JSDataProtocol)
-@property (nonatomic, readonly) NSString *dataType;
 @end
 
 @interface JSSymbol: JSData
@@ -123,7 +114,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSBool : JSData
 - (instancetype)initWithBool:(BOOL)flag;
 - (instancetype)initWithJSBool:(JSBool *)object;
--(BOOL)val;
+-(BOOL)value;
 
 @end
 

@@ -1,17 +1,17 @@
 //
-//  NSString+JSString.m
+//  NSNumber+JSNumber.m
 //  JSL
 //
 //  Created by jsloop on 13/04/19.
 //  Copyright © 2019 jsloop. All rights reserved.
 //
 
-#import "NSString+JSDataProtocol.h"
+#import "NSNumber+JSDataProtocol.h"
 
-@implementation NSString (JSDataProtocol)
+@implementation NSNumber (JSDataProtocol)
 
 -(NSString *)dataType {
-    return @"NSString";
+    return @"NSNumber";
 }
 
 @end

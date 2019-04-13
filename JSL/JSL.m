@@ -59,15 +59,15 @@
 }
 
 - (void)setJSLFuns {
-    [self rep:@"(def! not (fn* (a) (if a false true)))" withEnv:_env];
-    [self rep:@"(def! load-file (fn* (x) (eval (read-string (str \"(do \" (slurp x) \")\")))))" withEnv:_env];
+    [self rep:@"(def! not (fn* (a) (if a false true)))"];
+    [self rep:@"(def! load-file (fn* (x) (eval (read-string (str \"(do \" (slurp x) \")\")))))"];
     [self rep:@"(defmacro! cond (fn* (& xs) (if (> (count xs) 0) `(if ~(first xs) ~(if (> (count xs) 1) (nth xs 1) " \
-               "(throw \"odd number of forms to cond\")) (cond ~@(rest (rest xs)))))))" withEnv:_env];
-    [self rep:@"(def! *gensym-counter* (atom 0))" withEnv:_env];
-    [self rep:@"(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))" withEnv:_env];
+               "(throw \"odd number of forms to cond\")) (cond ~@(rest (rest xs)))))))"];
+    [self rep:@"(def! *gensym-counter* (atom 0))"];
+    [self rep:@"(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"];
     [self rep:@"(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs))" \
-               "(if ~condvar ~condvar (or ~@(rest xs)))))))))" withEnv:_env];
-    [self rep:@"(def! exit (fn* () (do (prn \"Bye.\") (exit*))))" withEnv:_env];
+               "(if ~condvar ~condvar (or ~@(rest xs)))))))))"];
+    [self rep:@"(def! exit (fn* () (do (prn \"Bye.\") (exit*))))"];
 }
 
 - (JSData *)read:(NSString *)string {
@@ -187,7 +187,7 @@
                     continue;
                 } else if ([[sym name] isEqual:@"if"]) {
                     JSData *res = [self eval:[xs second] withEnv:env];
-                    // TODO: check if BOOl typecast is required/
+                    // TODO: check if BOOL typecast is required/
                     if ([[res dataType] isEqual:@"JSNil"] || (BOOL)res == NO) {
                         ast = [xs count] > 3 ? [xs nth:3] : [JSNil new];
                     } else {
@@ -220,12 +220,12 @@
                     return [self macroExpand:[xs second] withEnv:env];
                 }
             }
-            JSList *list = (JSList *)[self evalAST:ast withEnv:env];
+            NSMutableArray *list = [(JSList *)[self evalAST:ast withEnv:env] value];
             if ([[[list first] dataType] isNotEqualTo:@"JSFunction"]) {
                 @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:JSL_SYMBOL_NOT_FOUND_MSG userInfo:nil];
             }
             JSFunction *fn = (JSFunction *)[list first];
-            NSMutableArray *rest = [(JSList *)[xs rest] value];
+            NSMutableArray *rest = [list rest];
             if ([fn ast] != nil) {
                 ast = [fn ast];
                 env = [[Env alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest];
@@ -252,8 +252,8 @@
     return [printer printStringFor:data readably:YES];
 }
 
-- (NSString *)rep:(NSString *)string withEnv:(Env *)env {
-    return [self print:[self eval:[self read:string] withEnv:env]];
+- (NSString *)rep:(NSString *)string {
+    return [self print:[self eval:[self read:string] withEnv:[self env]]];
 }
 
 @end

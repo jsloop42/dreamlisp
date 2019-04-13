@@ -12,23 +12,6 @@
 @synthesize dataType;
 @end
 
-#pragma mark TypeUtils
-
-@interface TypeUtils: NSObject
-+ (NSMutableArray *)mapOnArray:(NSMutableArray *)array withBlock:(id (^)(id arg))block;
-@end
-
-@implementation TypeUtils
-
-+ (NSMutableArray *)mapOnArray:(NSMutableArray *)array withBlock:(id (^)(id arg))block {
-    NSMutableArray *acc = [NSMutableArray new];
-    [array enumerateObjectsUsingBlock:^(id arg, NSUInteger idx, BOOL *stop) {
-        [acc addObject:block(arg)];
-    }];
-    return acc;
-}
-@end
-
 #pragma mark String
 
 @implementation JSString {
@@ -346,25 +329,12 @@
 
 @end
 
-#pragma mark NSArray
-
-@implementation NSArray (JSDataProtocol)
-
--(NSString *)dataType {
-    return @"NSArray";
-}
-
-- (NSMutableArray *)map:(id (^)(id arg))block {
-    return [TypeUtils mapOnArray:[self mutableCopy] withBlock:block];
-}
-
-@end
-
 #pragma mark Number
 
 @implementation JSNumber {
     NSDecimalNumber *n;
     NSString *decimalPattern;
+    BOOL _isDouble;
 }
 
 @synthesize meta;
@@ -374,6 +344,7 @@
     if (self) {
         [self bootstrap];
         n = [[NSDecimalNumber alloc] initWithDouble:number];
+        _isDouble = YES;
     }
     return self;
 }
@@ -383,6 +354,7 @@
     if (self) {
         [self bootstrap];
         n = [[NSDecimalNumber alloc] initWithInt:number];
+        _isDouble = NO;
     }
     return self;
 }
@@ -392,6 +364,7 @@
     if (self) {
         [self bootstrap];
         n = [[NSDecimalNumber alloc] initWithString:string];
+        _isDouble = [self checkDouble:[n stringValue]];
     }
     return self;
 }
@@ -401,6 +374,7 @@
     if (self) {
         [self bootstrap];
         n = number;
+        _isDouble = [self checkDouble:[n stringValue]];
     }
     return self;
 }
@@ -414,7 +388,7 @@
 }
 
 - (BOOL)isEqual:(JSNumber *)number {
-    return [n isEqualToNumber:[number val]];
+    return [n isEqualToNumber:[number value]];
 }
 
 - (double)doubleValue {
@@ -425,39 +399,26 @@
     return [n intValue];
 }
 
-- (NSDecimalNumber *)val {
+- (NSDecimalNumber *)value {
     return n;
 }
 
-- (BOOL)isDouble {
-    if ([Utils matchString:[self string] withPattern:decimalPattern]) {
+- (BOOL)checkDouble:(NSString *)string {
+    if ([Utils matchString:string withPattern:decimalPattern]) {
         return YES;
     }
     return NO;
 }
 
+- (BOOL)isDouble {
+    return _isDouble;
+}
+
 - (NSString *)string {
+    if (_isDouble && ![self checkDouble:[n stringValue]]) {
+        return [NSString stringWithFormat:@"%.01f", [n doubleValue]];
+    }
     return [n stringValue];
-}
-
-@end
-
-#pragma mark NSNumber
-
-@implementation NSNumber (JSDataProtocol)
-
--(NSString *)dataType {
-    return @"NSNumber";
-}
-
-@end
-
-#pragma mark NSDecimalNumber
-
-@implementation NSDecimalNumber (JSDataProtocol)
-
--(NSString *)dataType {
-    return @"NSDecimalNumber";
 }
 
 @end
@@ -549,7 +510,7 @@
 - (instancetype)initWithJSBool:(JSBool *)object {
     self = [super init];
     if (self) {
-        _flag = [object val];
+        _flag = [object value];
     }
     return self;
 }
@@ -558,7 +519,7 @@
     return [self className];
 }
 
--(BOOL)val {
+-(BOOL)value {
     return _flag;
 }
 

@@ -1,5 +1,5 @@
 //
-//  NSMutableArray+JSList.h
+//  NSArray+JSDataProtocol.h
 //  JSL
 //
 //  Created by jsloop on 13/04/19.
@@ -10,13 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface NSMutableArray (JSList)
-- (id)first;
-- (id)second;
-- (NSMutableArray *)rest;
-- (id)last;
-- (id)dropLast;
-- (id)nth:(NSInteger)n;
+@interface NSArray (JSDataProtocol)
+- (NSMutableArray *)map:(id (^)(id arg))block;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -31,6 +31,10 @@
     [self addPrintFunctions];
 }
 
+double dmod(double a, double n) {
+    return a - n * floor(a / n);
+}
+
 - (void)addArithmeticFunctions {
     JSData *(^calc)(NSMutableArray *args, SEL sel) = ^JSData *(NSMutableArray *args, SEL sel) {
         NSDecimalNumber *num = [NSDecimalNumber new];
@@ -42,19 +46,18 @@
             return (JSNumber *)args[0];
         }
         if (len >= 2) {
-            NSDecimalNumber *n = [(JSNumber *)args[0] val];
+            NSDecimalNumber *n = [(JSNumber *)args[0] value];
             if ([n respondsToSelector:sel]) {
-                num = objc_msgSend(n, sel, [(JSNumber *)args[1] val]);
+                num = objc_msgSend(n, sel, [(JSNumber *)args[1] value]);
             }
         }
         if (len > 2) {
             for (i = 2; i < len; i++) {
-                num = objc_msgSend(num, sel, [(JSNumber *)args[i] val]);
+                num = objc_msgSend(num, sel, [(JSNumber *)args[i] value]);
             }
         }
         return [[JSNumber alloc] initWithNumber:num];
     };
-
 
     JSFunction *add = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
         return calc(args, @selector(decimalNumberByAdding:));
@@ -80,37 +83,56 @@
         if ([args count] != 2) {
             @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
         }
-        return [[JSNumber alloc] initWithInt:[(JSNumber *)args[0] intValue] % [(JSNumber *)args[1] intValue]];
+        JSNumber *lhs = (JSNumber *)[args first];
+        JSNumber *rhs = (JSNumber *)[args second];
+        JSNumber *ret = nil;
+        if ([lhs isDouble] || [rhs isDouble]) {
+            ret = [[JSNumber alloc] initWithDouble:dmod([lhs doubleValue], [rhs doubleValue])];
+        } else {
+            ret = [[JSNumber alloc] initWithInt:[lhs intValue] % [rhs intValue]];
+        }
+        return ret;
     };
-    [ns setObject:mod forKey:@"mod"];
+    [ns setObject:[[JSFunction alloc] initWithFn:mod] forKey:@"mod"];
 }
 
 - (void)addComparisonFunctions {
-    JSData *(^lessThan)(JSNumber *lhs, JSNumber *rhs) = ^JSData *(JSNumber *lhs, JSNumber *rhs) {
-        return [[JSBool alloc] initWithBool:[[lhs val] isLessThan:[rhs val]]];
+    JSData *(^compare)(NSMutableArray *args, SEL sel) = ^JSData *(NSMutableArray *args, SEL sel) {
+        if ([args count] != 2) {
+            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+        }
+        return [[JSBool alloc] initWithBool:(BOOL)objc_msgSend([(JSNumber *)[args first] value], sel, [(JSNumber *)[args second] value])];
     };
+
+    JSFunction *lessThan = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
+        return compare(args, @selector(isLessThan:));
+    }];
     [ns setObject:lessThan forKey:@"<"];
-    JSData *(^greaterThan)(JSNumber *lhs, JSNumber *rhs) = ^JSData *(JSNumber *lhs, JSNumber *rhs) {
-        return [[JSBool alloc] initWithBool:[[lhs val] isGreaterThan:[rhs val]]];
-    };
+
+    JSFunction *greaterThan = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
+        return compare(args, @selector(isGreaterThan:));
+    }];
     [ns setObject:greaterThan forKey:@">"];
-    JSData *(^lessThanOrEqualTo)(JSNumber *lhs, JSNumber *rhs) = ^JSData *(JSNumber *lhs, JSNumber *rhs) {
-        return [[JSBool alloc] initWithBool:[[lhs val] isLessThanOrEqualTo:[rhs val]]];
-    };
+
+    JSFunction *lessThanOrEqualTo = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
+        return compare(args, @selector(isLessThanOrEqualTo:));
+    }];
     [ns setObject:lessThanOrEqualTo forKey:@"<="];
-    JSData *(^greaterThanOrEqualTo)(JSNumber *lhs, JSNumber *rhs) = ^JSData *(JSNumber *lhs, JSNumber *rhs) {
-        return [[JSBool alloc] initWithBool:[[lhs val] isGreaterThanOrEqualTo:[rhs val]]];
-    };
+
+    JSFunction *greaterThanOrEqualTo = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
+        return compare(args, @selector(isGreaterThanOrEqualTo:));
+    }];
     [ns setObject:greaterThanOrEqualTo forKey:@">="];
-    JSData *(^equalTo)(JSNumber *lhs, JSNumber *rhs) = ^JSData *(JSNumber *lhs, JSNumber *rhs) {
-        return [[JSBool alloc] initWithBool:[[lhs val] isEqualTo:[rhs val]]];
-    };
+
+    JSFunction *equalTo = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
+        return compare(args, @selector(isEqualTo:));
+    }];
     [ns setObject:equalTo forKey:@"="];
 }
 
 - (void)addPrintFunctions {
     Core * __weak weakSelf = self;
-    JSData *(^println)(JSList *xs) = ^JSData *(JSList *xs) {
+    JSData *(^println)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         Core *this = weakSelf;
         NSUInteger len = [xs count];
         NSUInteger i = 0;
@@ -121,8 +143,9 @@
         info(@"%@", [ret componentsJoinedByString:@" "]);
         return [JSNil new];
     };
-    [ns setObject:println forKey:@"println"];
-    JSData *(^prn)(JSList *xs) = ^JSData *(JSList *xs) {
+    [ns setObject:[[JSFunction alloc] initWithFn:println] forKey:@"println"];
+
+    JSData *(^prn)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         Core *this = weakSelf;
         NSUInteger len = [xs count];
         NSUInteger i = 0;
@@ -133,8 +156,9 @@
         info(@"%@", [ret componentsJoinedByString:@" "]);
         return [JSNil new];
     };
-    [ns setObject:prn forKey:@"prn"];
-    JSData *(^prstr)(JSList *xs) = ^JSData *(JSList *xs) {
+    [ns setObject:[[JSFunction alloc] initWithFn:prn] forKey:@"prn"];
+
+    JSData *(^prstr)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         Core *this = weakSelf;
         NSUInteger len = [xs count];
         NSUInteger i = 0;
@@ -144,8 +168,9 @@
         }
         return [[JSString alloc] initWithString:[ret componentsJoinedByString:@" "]];
     };
-    [ns setObject:prstr forKey:@"pr-str"];
-    JSData *(^str)(JSList *xs) = ^JSData *(JSList *xs) {
+    [ns setObject:[[JSFunction alloc] initWithFn:prstr] forKey:@"pr-str"];
+
+    JSData *(^str)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         Core *this = weakSelf;
         NSUInteger len = [xs count];
         NSUInteger i = 0;
@@ -155,7 +180,7 @@
         }
         return [[JSString alloc] initWithString:[ret componentsJoinedByString:@""]];
     };
-    [ns setObject:str forKey:@"str"];
+    [ns setObject:[[JSFunction alloc]initWithFn:str] forKey:@"str"];
 }
 
 - (NSMutableDictionary *)namespace {

@@ -173,12 +173,58 @@
     XCTAssertEqualObjects([list last], [xs second]);
 }
 
-- (void)testArithmeticFunctions {
-
+- (void)testArithmeticEval {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(+ 1 2)"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(+ 1 2 3)"], @"6");
+    XCTAssertEqualObjects([jsl rep:@"(+ 1 2 3 4)"], @"10");
+    XCTAssertEqualObjects([jsl rep:@"(+ 1 2 3 -4)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(- 1 2)"], @"-1");
+    XCTAssertEqualObjects([jsl rep:@"(- 5 1 1)"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(- 5 3 2 1)"], @"-1");
+    XCTAssertEqualObjects([jsl rep:@"(- 5 4 -2 1)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(* 5 4 -2 1)"], @"-40");
+    XCTAssertEqualObjects([jsl rep:@"(- (- 5 4) 2)"], @"-1");
+    XCTAssertEqualObjects([jsl rep:@"(+ (- (- 5 4) 2) 43)"], @"42");
+    XCTAssertEqualObjects([jsl rep:@"(* (- (- 5 4) 2) -42)"], @"42");
+    XCTAssertEqualObjects([jsl rep:@"(/ (+ (* (* 5 -4) -4) 4) 2)"], @"42");
+    XCTAssertEqualObjects([jsl rep:@"(/ (+ (* (* 5.5 -4.20) -4.41) 4.314) 2.24)"], @"47.404017857142857142857142857142857142");
+    XCTAssertEqualObjects([jsl rep:@"(/ 100 2 2)"], @"25");
+    XCTAssertEqualObjects([jsl rep:@"(/ 100 2 2 2)"], @"12.5");
+    XCTAssertEqualObjects([jsl rep:@"(/ 100 2 2 2 2)"], @"6.25");
+    XCTAssertEqualObjects([jsl rep:@"(/ 100 2 2 2 2 2)"], @"3.125");
+    XCTAssertEqualObjects([jsl rep:@"(/ 100 2 2 2 2 2 2)"], @"1.5625");
+    XCTAssertEqualObjects([jsl rep:@"(mod 42 21)"], @"0");
+    XCTAssertEqualObjects([jsl rep:@"(mod 5 3)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(mod 5 3.5)"], @"1.5");
+    XCTAssertEqualObjects([jsl rep:@"(mod 5 -3.5)"], @"-2.0");
 }
 
 - (void)testComparisonFunctions {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(< 42 84)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(> 42 21)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(>= 42 42)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(> 42 43)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(>= 42 43)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(<= 42 41)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= 42 42)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= 42 21)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= 42.0 42.0)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= 42.42 42.42)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(>= 42.42 42)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(> 42.42 42.21)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(< 42.42 42.21)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(<= 42.42 42.21)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(< 42.21 42.42)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(<= 42.42 42.42)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(>= 42.42 42.42)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(> 47.404017857142857142857142857142857142 47.404017857142857142857142857142857141)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= 47.404017857142857142857142857142857142 47.404017857142857142857142857142857142)"], @"true");
+}
 
+- (void)test {
+    // JSL *jsl = [JSL new];
 }
 
 void testPrintCallback(id param, const char *s) {
@@ -186,19 +232,19 @@ void testPrintCallback(id param, const char *s) {
 }
 
 - (void)testPrintFunctions {
-//    Core *core = [Core new];
-//    NSMutableDictionary *ns = [core namespace];
-//    JSData *(^println)(JSList *xs) = [ns objectForKey:@"println"];
-//    JSData *(^prn)(JSList *xs) = [ns objectForKey:@"prn"];
-//    infoCallback(self, &testPrintCallback);
-//    println([[JSList alloc] initWithArray:[@[@42, @21] mutableCopy]]);
-//    infoCallback(self, &testPrintCallback);
-//    prn([[JSList alloc] initWithArray:[@[@42, @21] mutableCopy]]);
+    JSL *jsl = [JSL new];
+    infoCallback(self, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(println [33 2 3])"], @"nil");
+    infoCallback(self, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(prn [(+ 21 12) 2 3])"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(pr-str [(+ 21 12) 2 3])"], @"\"[33 2 3]\"");
+    XCTAssertEqualObjects([jsl rep:@"(str [(+ 21 12) 2 3])"], @"\"[33 2 3]\"");
+    XCTAssertEqualObjects([jsl rep:@"(str [(+ 21 12) 2 3 \"foo\"])"], @"\"[33 2 3 foo]\"");
 }
 
 - (void)testPrintCallback:(NSString *)message {
     XCTAssertNotNil(message);
-    XCTAssertEqualObjects(message, @"42 21");
+    XCTAssertEqualObjects(message, @"[33 2 3]");
 }
 
 - (void)notestPerformanceJSListDropFirst {

@@ -14,14 +14,13 @@
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
         JSL *jsl = [JSL new];
-        Env *env = [jsl env];
         if (argc > 1) {
             @try {
                 NSString *jslFile = [[NSString alloc] initWithCString:argv[1] encoding:NSUTF8StringEncoding];
                 NSMutableArray *arr = [[NSValue valueWithPointer:argv] mutableCopy];
                 [arr removeObjectsAtIndexes:[[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, 2)]];
-                [env setObject:[[JSList alloc] initWithArray:arr] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
-                [jsl rep:[[NSString alloc] initWithFormat:@"(load-file %@)", jslFile] withEnv:env];
+                [[jsl env] setObject:[[JSList alloc] initWithArray:arr] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
+                [jsl rep:[[NSString alloc] initWithFormat:@"(load-file %@)", jslFile]];
                 exit(0);
             } @catch (NSException *exception) {
                 error(@"%@", exception.description);
@@ -33,7 +32,7 @@ int main(int argc, const char * argv[]) {
         // TODO: print host lang.
         while ((inp = [term readline]) != nil) {
             @try {
-                ret = [jsl rep:inp withEnv:env];
+                ret = [jsl rep:inp];
                 error(@"%@", ret);
             } @catch (NSException *exception) {
                 error(@"%@", exception.description);

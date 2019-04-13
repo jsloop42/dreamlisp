@@ -115,7 +115,7 @@
     NSString *token = [self next];
     NSString *stringPattern = @"\"(?:\\\\.|[^\\\\\"])*\"";
     NSString *stringUnclosed = @"\"(?:\\\\.|[^\\\\\"])*";
-    NSString *numPattern = @"^-?[0-9]+$";
+    NSString *numPattern = @"^-?\\d+(\\.\\d+)?$";
     NSString *keywordPattern = @"^:";
     if ([self matchString:token withPattern:numPattern]) {
         return [[JSNumber alloc] initWithString:token];

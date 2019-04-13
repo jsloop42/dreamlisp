@@ -10,6 +10,10 @@
 
 @implementation NSMutableArray (JSList)
 
+-(NSString *)dataType {
+    return @"NSMutableArray";
+}
+
 - (id)first {
     return [self firstObject];
 }
