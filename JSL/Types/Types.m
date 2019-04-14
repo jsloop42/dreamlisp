@@ -52,6 +52,18 @@
     return self;
 }
 
+- (instancetype)initWithContentsOfFile:(NSString *)filePath {
+    self = [super init];
+    if (self) {
+        NSError *err = nil;
+        _string = [[NSString alloc] initWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:&err];
+        if (!_string && err) {
+            @throw [[NSException alloc] initWithName:JSL_FILE_READ_ERROR reason:JSL_FILE_READ_ERROR_MSG userInfo:nil];
+        }
+    }
+    return self;
+}
+
 - (NSString *)dataType {
     return [self className];
 }
@@ -400,6 +412,15 @@
     return [[JSList alloc] initWithArray:[[[[array rest] reverseObjectEnumerator] allObjects] mutableCopy]];
 }
 
+- (JSList *)drop:(NSInteger)n {
+    NSMutableArray *arr = [array mutableCopy];
+    if (n > 0 && n <= [arr count]) {
+        [arr removeObjectsInRange:NSMakeRange(0, n)];
+        return [[JSList alloc] initWithArray:arr];
+    }
+    return nil;
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSList alloc] initWithArray:array];
     return copy;
@@ -596,6 +617,10 @@
 
 - (JSData *)value {
     return _data;
+}
+
+- (void)setValue:(JSData *)data {
+    _data = data;
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {

@@ -31,8 +31,8 @@
     _env = [Env new];
     core = [Core new];
     [self setCoreFunctionsToREPL:_env];
-//    [self setEvalToREPL:_env];
-//    [self setJSLFuns];
+    [self setEvalToREPL:_env];
+    [self setJSLFuns];
 }
 
 - (void)setCoreFunctionsToREPL:(Env *)env {
@@ -61,12 +61,12 @@
 - (void)setJSLFuns {
     [self rep:@"(def! not (fn* (a) (if a false true)))"];
     [self rep:@"(def! load-file (fn* (x) (eval (read-string (str \"(do \" (slurp x) \")\")))))"];
-    [self rep:@"(defmacro! cond (fn* (& xs) (if (> (count xs) 0) `(if ~(first xs) ~(if (> (count xs) 1) (nth xs 1) " \
-               "(throw \"odd number of forms to cond\")) (cond ~@(rest (rest xs)))))))"];
-    [self rep:@"(def! *gensym-counter* (atom 0))"];
-    [self rep:@"(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"];
-    [self rep:@"(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs))" \
-               "(if ~condvar ~condvar (or ~@(rest xs)))))))))"];
+//    [self rep:@"(defmacro! cond (fn* (& xs) (if (> (count xs) 0) `(if ~(first xs) ~(if (> (count xs) 1) (nth xs 1) " \
+//               "(throw \"odd number of forms to cond\")) (cond ~@(rest (rest xs)))))))"];
+//    [self rep:@"(def! *gensym-counter* (atom 0))"];
+//    [self rep:@"(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"];
+//    [self rep:@"(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs))" \
+//               "(if ~condvar ~condvar (or ~@(rest xs)))))))))"];
     [self rep:@"(def! exit (fn* () (do (prn \"Bye.\") (exit*))))"];
 }
 
@@ -191,8 +191,7 @@
                     continue;
                 } else if ([[sym name] isEqual:@"if"]) {
                     JSData *res = [self eval:[xs second] withEnv:env];
-                    // TODO: check if BOOL typecast is required/
-                    if ([[res dataType] isEqual:@"JSNil"] || (BOOL)res == NO) {
+                    if ([[res dataType] isEqual:@"JSNil"] || ([[res dataType] isEqual:@"JSBool"] && [(JSBool *)res value] == NO)) {
                         ast = [xs count] > 3 ? [xs nth:3] : [JSNil new];
                     } else {
                         ast = [xs nth:2];

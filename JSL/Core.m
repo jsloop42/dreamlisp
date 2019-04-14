@@ -30,6 +30,8 @@
     [self addComparisonFunctions];
     [self addPrintFunctions];
     [self addListFunctions];
+    [self addEvalFunctions];
+    [self addAtomFunctions];
 }
 
 double dmod(double a, double n) {
@@ -228,6 +230,9 @@ double dmod(double a, double n) {
     [ns setObject:[[JSFunction alloc] initWithFn:emptyp] forKey:@"empty?"];
 
     JSData *(^count)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([[(JSData *)[xs first] dataType] isEqual:@"JSNil"]) {
+            return [[JSNumber alloc] initWithInteger:0];
+        }
         return [[JSNumber alloc] initWithInteger:[(JSList *)[xs first] count]];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:count] forKey:@"count"];
@@ -322,6 +327,77 @@ double dmod(double a, double n) {
         return [[JSList alloc] initWithArray:[[rest reverse] arrayByAddingObjectsFromArray:list]];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:conj] forKey:@"conj"];
+}
+
+- (void)addEvalFunctions {
+    Core * __weak weakSelf = self;
+    JSData *(^readString)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        Core *this = weakSelf;
+        JSData *first = (JSData *)[xs first];
+        if ([[first dataType] isNotEqualTo:@"JSString"]) {
+            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+        }
+        return [this->reader readString:[(JSString *)first value]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:readString] forKey:@"read-string"];
+
+    JSData *(^slurp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *first = (JSData *)[xs first];
+        if ([[first dataType] isNotEqualTo:@"JSString"]) {
+            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+        }
+        return [[JSString alloc] initWithContentsOfFile:[(JSString *)first value]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:slurp] forKey:@"slurp"];
+}
+
+- (void)addAtomFunctions {
+    JSData *(^atom)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *first = (JSData *)[xs first];
+        return [[JSAtom alloc] initWithData:first];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:atom] forKey:@"atom"];
+
+    JSData *(^atomp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *first = (JSData *)[xs first];
+        return [[JSBool alloc] initWithBool:[[first dataType] isEqual:@"JSAtom"]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:atomp] forKey:@"atom?"];
+
+    JSData *(^deref)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *first = (JSData *)[xs first];
+        if ([[first dataType] isNotEqualTo:@"JSAtom"]) {
+            return [JSNil new];
+        }
+        return [(JSAtom *)first value];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:deref] forKey:@"deref"];
+
+    JSData *(^reset)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *first = (JSData *)[xs first];
+        if ([[first dataType] isNotEqualTo:@"JSAtom"]) {
+            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+        }
+        JSData *value = (JSData *)[xs second];
+        [(JSAtom *)first setValue:value];
+        return value;
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:reset] forKey:@"reset!"];
+
+    JSData *(^swap)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *first = (JSData *)[xs first];
+        JSData *second = (JSData *)[xs second];
+        if ([[first dataType] isNotEqualTo:@"JSAtom"] || [[second dataType] isNotEqualTo:@"JSFunction"]) {
+            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+        }
+        JSAtom *atom = (JSAtom *)first;
+        JSFunction *fn = (JSFunction *)second;
+        NSMutableArray *more = [xs drop:2];
+        [more insertObject:[atom value] atIndex:0];
+        [atom setValue:[fn fn](more)];
+        return [atom value];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:swap] forKey:@"swap!"];
 }
 
 - (NSMutableDictionary *)namespace {

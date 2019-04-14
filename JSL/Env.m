@@ -43,7 +43,7 @@
         for (i = 0; i < len; i++) {
             NSString *sym = [(JSSymbol *)binds[i] name];
             if ([sym isEqual:@"&"]) {
-                [data setObject:[exprs subarrayWithRange:NSMakeRange(i, len)] forKey:[(JSSymbol *)binds[i + 1] name]];
+                [data setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:[(JSSymbol *)binds[i + 1] name]];
                 break;
             }
             [data setObject:exprs[i] forKey:sym];

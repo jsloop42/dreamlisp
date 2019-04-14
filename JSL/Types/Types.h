@@ -35,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)str;
 - (instancetype)initWithFormat:(NSString *)format, ...;
+- (instancetype)initWithContentsOfFile:(NSString *)filePath;
 - (BOOL)isEqual:(JSString *)string;
 @end
 
@@ -90,6 +91,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)isEmpty;
 - (BOOL)isEqual:(JSList *)list;
 - (JSList *)reverse;
+- (JSList *)drop:(NSInteger)n;
 @end
 
 @interface JSVector: JSList
@@ -116,6 +118,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSAtom : JSData
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithData:(JSData *)data;
+- (void)setValue:(JSData *)data;
 - (JSData *)value;
 @end
 

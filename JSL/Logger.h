@@ -14,6 +14,7 @@ extern void info(NSString *format, ...) __attribute__((format(__NSString__, 1, 2
 extern void debug(NSString *format, ...) __attribute__((format(__NSString__, 1, 2)));
 extern void error(NSString *format, ...) __attribute__((format(__NSString__, 1, 2)));
 
-extern void infoCallback(id param, void(*fn)(id param, const char *s));
+extern void infoCallback(id param, int tag, void(*fn)(id param, int tag, int counter, const char *s));
+extern void freeInfoCallback(void);
 
 NS_ASSUME_NONNULL_END
