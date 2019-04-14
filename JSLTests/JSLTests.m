@@ -282,7 +282,6 @@ void testPrintCallback(id param, const char *s) {
     JSString *aObj = [[JSString alloc] initWithString:@"987"];
     [aEnv setObject:aObj forSymbol:aKey];
     XCTAssertEqualObjects([aEnv objectForSymbol:aKey], aObj);
-
 }
 
 - (void)testSpecialForms {
@@ -293,6 +292,24 @@ void testPrintCallback(id param, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(let* [z 9] z)"], @"9");
 }
 
+- (void)testEquality {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(= (list 1 2 3) (list 1 2 3))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= (list 1 3 2) (list 1 2 3))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= (list 1 2 3) [1 2 3])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= (list 1 3 2) [1 2 3])"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= [1 2 3] [1 2 3])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= [1 3 2] [1 2 3])"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= [1 2 3] (list 1 2 3))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= [1 3 2] (list 1 2 3))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= {:a 1 :b 2} {:a 1 :b 2})"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= {:a 1 :b 2} {:b 2 :a 1})"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= {:a 1 :b [1 2 3]} {:b [1 2 3] :a 1})"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= {:a 1 :b [1 0 3]} {:b [1 2 3] :a 1})"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= {\"a\" 1 :b [1 2 3]} {:b [1 2 3] \"a\" 1})"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= {\"a\" {:aa 11} :b [1 2 3]} {:b [1 2 3] \"a\" {:aa 11}})"], @"true");
+}
+
 - (void)testMisc {
 
 }
@@ -300,7 +317,7 @@ void testPrintCallback(id param, const char *s) {
 // TODO: add test cases from mal
 
 - (void)test {
-    JSL *jsl = [JSL new];
+//    JSL *jsl = [JSL new];
 }
 
 

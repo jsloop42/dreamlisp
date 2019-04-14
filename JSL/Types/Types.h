@@ -35,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)str;
 - (instancetype)initWithFormat:(NSString *)format, ...;
+- (BOOL)isEqual:(JSString *)string;
 @end
 
 @interface JSKeyword : JSData
@@ -44,6 +45,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithKeyword:(NSString *)string;
 - (NSString *)string;
+- (BOOL)isEqual:(JSKeyword *)keyword;
 @end
 
 @interface JSSymbol: JSData
@@ -64,6 +66,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSMutableDictionary *)value;
 - (NSArray *)allKeys;
 - (NSArray *)allValues;
+- (BOOL)isEqual:(JSHashMap *)hashmap;
 @end
 
 @interface JSList : JSData
@@ -85,10 +88,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (JSData *)nth:(NSInteger)n;
 - (NSMutableArray *)map:(id (^)(id arg))block;
 - (BOOL)isEmpty;
+- (BOOL)isEqual:(JSList *)list;
 @end
 
 @interface JSVector: JSList
 - (instancetype)initWithArray:(NSArray *)list;
+- (BOOL)isEqual:(JSVector *)vector;
 @end
 
 @interface JSNumber : JSData
@@ -117,8 +122,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSBool : JSData
 - (instancetype)initWithBool:(BOOL)flag;
 - (instancetype)initWithJSBool:(JSBool *)object;
--(BOOL)value;
-
+- (BOOL)value;
+- (BOOL)isEqual:(JSBool *)boolean;
 @end
 
 @interface JSFunction: JSData

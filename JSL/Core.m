@@ -29,6 +29,7 @@
     [self addArithmeticFunctions];
     [self addComparisonFunctions];
     [self addPrintFunctions];
+    [self addListFunctions];
 }
 
 double dmod(double a, double n) {
@@ -96,6 +97,30 @@ double dmod(double a, double n) {
     [ns setObject:[[JSFunction alloc] initWithFn:mod] forKey:@"mod"];
 }
 
+- (BOOL)isEqual:(JSData *)lhs rhs:(JSData *)rhs {
+    if ([[lhs dataType] isEqual:@"JSNumber"] && [[rhs dataType] isEqual:@"JSNumber"]) {
+        return [(JSNumber *)lhs isEqual:(JSNumber *)rhs];
+    } else if ([[lhs dataType] isEqual:@"JSSymbol"] && [[rhs dataType] isEqual:@"JSSymbol"]) {
+        return [(JSSymbol *)lhs isEqual:(JSSymbol *)rhs];
+    } else if ([[lhs dataType] isEqual:@"JSString"] && [[rhs dataType] isEqual:@"JSString"]) {
+        return [(JSString *)lhs isEqual:(JSString *)rhs];
+    } else if ([[lhs dataType] isEqual:@"JSKeyword"] && [[rhs dataType] isEqual:@"JSKeyword"]) {
+        return [(JSString *)lhs isEqual:(JSString *)rhs];
+    } else if (([[lhs dataType] isEqual:@"JSList"] && [[rhs dataType] isEqual:@"JSList"]) ||
+               ([[lhs dataType] isEqual:@"JSList"] && [[rhs dataType] isEqual:@"JSVector"]) ||
+               ([[lhs dataType] isEqual:@"JSVector"] && [[rhs dataType] isEqual:@"JSList"]) ||
+               ([[lhs dataType] isEqual:@"JSVector"] && [[rhs dataType] isEqual:@"JSVector"])) {
+        return [(JSList *)lhs isEqual:(JSList *)rhs];
+    } else if ([[lhs dataType] isEqual:@"JSHashMap"] && [[rhs dataType] isEqual:@"JSHashMap"]) {
+        return [(JSHashMap *)lhs isEqual:(JSHashMap *)rhs];
+    } else if ([[lhs dataType] isEqual:@"JSNil"] && [[rhs dataType] isEqual:@"JSNil"]) {
+        return YES;
+    } else if ([[lhs dataType] isEqual:@"JSBool"] && [[rhs dataType] isEqual:@"JSBool"]) {
+        return [(JSBool *)lhs isEqual:(JSBool *)rhs];
+    }
+    return NO;
+}
+
 - (void)addComparisonFunctions {
     JSData *(^compare)(NSMutableArray *args, SEL sel) = ^JSData *(NSMutableArray *args, SEL sel) {
         if ([args count] != 2) {
@@ -125,7 +150,10 @@ double dmod(double a, double n) {
     [ns setObject:greaterThanOrEqualTo forKey:@">="];
 
     JSFunction *equalTo = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
-        return compare(args, @selector(isEqualTo:));
+        if ([args count] != 2) {
+            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+        }
+        return [[JSBool alloc] initWithBool:[self isEqual:(JSData *)[args first] rhs:(JSData *)[args second]]];
     }];
     [ns setObject:equalTo forKey:@"="];
 }
@@ -181,6 +209,18 @@ double dmod(double a, double n) {
         return [[JSString alloc] initWithString:[ret componentsJoinedByString:@""]];
     };
     [ns setObject:[[JSFunction alloc]initWithFn:str] forKey:@"str"];
+}
+
+- (void)addListFunctions {
+    JSData *(^list)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        return [[JSList alloc] initWithArray:xs];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:list] forKey:@"list"];
+
+    JSData *(^listp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSList"]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:listp] forKey:@"list?"];
 }
 
 - (NSMutableDictionary *)namespace {

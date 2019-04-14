@@ -64,6 +64,10 @@
     _string = string;
 }
 
+- (BOOL)isEqual:(JSString *)string {
+    return [_string isEqualToString:[string value]];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSString alloc] initWithString:_string];
     return copy;
@@ -127,6 +131,10 @@
 
 -(void)setValue:(NSString *)value {
     _string = value;
+}
+
+- (BOOL)isEqual:(JSKeyword *)keyword {
+    return [_string isEqualToString:[keyword value]];
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
@@ -257,6 +265,23 @@
     return [dict allValues];
 }
 
+- (BOOL)isEqual:(JSHashMap *)hashmap {
+    if ([dict count] != [hashmap count]) {
+        return NO;
+    }
+    NSString *key = nil;
+    JSData *lval = nil;
+    JSData *rval = nil;
+    for (key in dict) {
+        lval = [dict objectForKey:key];
+        rval = [hashmap objectForKey:key];
+        if (!lval || !rval || [lval isNotEqualTo:rval]) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSHashMap alloc] initWithDictionary:dict];
     return copy;
@@ -356,6 +381,20 @@
     return [array count] == 0;
 }
 
+- (BOOL)isEqual:(JSList *)list {
+    NSUInteger len = [array count];
+    NSUInteger i = 0;
+    if (len != [list count]) {
+        return NO;
+    }
+    for (i = 0; i < len; i++) {
+        if (![array[i] isEqual:[list nth:i]]) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSList alloc] initWithArray:array];
     return copy;
@@ -396,6 +435,20 @@
 
 - (NSMutableArray *)map:(id (^)(id arg))block {
     return [TypeUtils mapOnArray:array withBlock:block];
+}
+
+- (BOOL)isEqual:(JSVector *)vector {
+    NSUInteger len = [array count];
+    NSUInteger i = 0;
+    if (len != [vector count]) {
+        return NO;
+    }
+    for (i = 0; i < len; i++) {
+        if (![array[i] isEqual:[vector nth:i]]) {
+            return NO;
+        }
+    }
+    return YES;
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
@@ -577,7 +630,11 @@
     return [self className];
 }
 
--(BOOL)value {
+- (BOOL)isEqual:(JSBool *)boolean {
+    return _flag == [boolean value];
+}
+
+- (BOOL)value {
     return _flag;
 }
 
