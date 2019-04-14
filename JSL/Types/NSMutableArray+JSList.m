@@ -46,4 +46,8 @@
     return [self count] == 0;
 }
 
+- (NSMutableArray *)reverse {
+    return [[[self reverseObjectEnumerator] allObjects] mutableCopy];
+}
+
 @end

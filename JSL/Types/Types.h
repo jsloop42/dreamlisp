@@ -89,6 +89,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSMutableArray *)map:(id (^)(id arg))block;
 - (BOOL)isEmpty;
 - (BOOL)isEqual:(JSList *)list;
+- (JSList *)reverse;
 @end
 
 @interface JSVector: JSList
@@ -100,11 +101,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, copy) JSData *meta;
 - (instancetype)initWithDouble:(double)num;
 - (instancetype)initWithInt:(int)number;
+- (instancetype)initWithInteger:(NSUInteger)number;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithNumber:(NSDecimalNumber *)number;
 - (BOOL)isEqual:(JSNumber *)num;
 - (double)doubleValue;
 - (int)intValue;
+- (NSUInteger)integerValue;
 - (BOOL)isDouble;
 - (NSDecimalNumber *)value;
 - (NSString *)string;

@@ -395,6 +395,11 @@
     return YES;
 }
 
+/** Returns a new list which the reverse of the current list. */
+- (JSList *)reverse {
+    return [[JSList alloc] initWithArray:[[[[array rest] reverseObjectEnumerator] allObjects] mutableCopy]];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSList alloc] initWithArray:array];
     return copy;
@@ -488,6 +493,16 @@
     return self;
 }
 
+- (instancetype)initWithInteger:(NSUInteger)number {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+        n = [[NSDecimalNumber alloc] initWithInteger:number];
+        _isDouble = NO;
+    }
+    return self;
+}
+
 - (instancetype)initWithString:(NSString *)string {
     self = [super init];
     if (self) {
@@ -526,6 +541,10 @@
 
 - (int)intValue {
     return [n intValue];
+}
+
+- (NSUInteger)integerValue {
+    return [n integerValue];
 }
 
 - (NSDecimalNumber *)value {

@@ -9,6 +9,7 @@
 #import "JSError.h"
 
 NSString *SymbolNotFound = @"'%@' not found.";
+NSString *IndexOutOfBounds = @"Index out of bounds.";
 
 @implementation JSError {
     NSString *_description;

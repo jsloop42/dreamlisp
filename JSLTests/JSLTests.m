@@ -32,6 +32,11 @@
     [list add:str1];
     XCTAssertEqualObjects([(JSString*)[list first] value], @"Foo");
     XCTAssertEqual([list count], 2);
+    list = [[JSList alloc] initWithArray: [@[[[JSString alloc] initWithString:@"1"], [[JSString alloc] initWithString:@"2"],
+                                             [[JSString alloc] initWithString:@"3"], [[JSString alloc] initWithString:@"4"]] mutableCopy]];
+
+    XCTAssertEqualObjects([(JSString *)[[list reverse] first] value], @"4");
+    XCTAssertEqualObjects([(JSString *)[list first] value], @"1");
 }
 
 - (void)testJSNumber {
@@ -93,7 +98,7 @@
     XCTAssertEqualObjects([prn printStringFor:sym readably:true], @"greet");
     // Integer
     JSNumber *num = [[JSNumber alloc] initWithString:@"42"];
-    XCTAssertEqual([num intValue], 42);
+    XCTAssertEqual([num integerValue], 42);
     XCTAssertEqualObjects([prn printStringFor:num readably:true], @"42");
     // Double
     JSNumber *num1 = [[JSNumber alloc] initWithString:@"42.42"];
@@ -274,7 +279,8 @@ void testPrintCallback(id param, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(list 1 2 3)"], @"(1 2 3)");
     XCTAssertEqualObjects([jsl rep:@"(list 1 (list 21 22 23) 3)"], @"(1 (21 22 23) 3)");
     XCTAssertEqualObjects([jsl rep:@"(list? (list))"], @"true");
-
+    XCTAssertEqualObjects([jsl rep:@"(conj [1 2 3] 4 5 6)"], @"[1 2 3 4 5 6]");
+    XCTAssertEqualObjects([jsl rep:@"(conj '(1 2 3) 4 5 6)"], @"(6 5 4 1 2 3)");
 }
 
 - (void)testHashMap {
@@ -371,7 +377,8 @@ void testPrintCallback(id param, const char *s) {
 // TODO: add test cases from mal
 
 - (void)test {
-    // JSL *jsl = [JSL new];
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(conj '(1 2 3) 4 5 6)"], @"(6 5 4 1 2 3)");
 }
 
 

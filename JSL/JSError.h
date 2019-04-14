@@ -11,6 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 extern NSString *SymbolNotFound;
+extern NSString *IndexOutOfBounds;
 
 @interface JSError : NSObject
 @property (nonatomic, readwrite) NSString *description;

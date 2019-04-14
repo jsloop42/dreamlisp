@@ -90,7 +90,7 @@ double dmod(double a, double n) {
         if ([lhs isDouble] || [rhs isDouble]) {
             ret = [[JSNumber alloc] initWithDouble:dmod([lhs doubleValue], [rhs doubleValue])];
         } else {
-            ret = [[JSNumber alloc] initWithInt:[lhs intValue] % [rhs intValue]];
+            ret = [[JSNumber alloc] initWithInteger:[lhs integerValue] % [rhs integerValue]];
         }
         return ret;
     };
@@ -221,6 +221,107 @@ double dmod(double a, double n) {
         return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSList"]];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:listp] forKey:@"list?"];
+
+    JSData *(^emptyp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        return [[JSBool alloc] initWithBool:[(JSList *)[xs first] isEmpty]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:emptyp] forKey:@"empty?"];
+
+    JSData *(^count)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        return [[JSNumber alloc] initWithInteger:[(JSList *)[xs first] count]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:count] forKey:@"count"];
+
+    JSData *(^cons)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *data = (JSData *)[xs second];
+        NSMutableArray *arr = [(JSList *)data value];
+        [arr insertObject:(JSData *)[xs first] atIndex:0];
+        if ([[data dataType] isEqual:@"JSVector"]) {
+            return [[JSVector alloc] initWithArray:arr];
+        }
+        return [[JSList alloc] initWithArray:arr];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:cons] forKey:@"cons"];
+
+    JSData *(^concat)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        NSMutableArray *arr = [NSMutableArray new];
+        NSUInteger i = 0;
+        NSUInteger j = 0;
+        NSUInteger len = [xs count];
+        NSUInteger jlen = 0;
+        JSList *list = nil;
+        for (i = 0; i < len; i++) {
+            list = (JSList *)[xs nth:i];
+            jlen = [list count];
+            for (j = 0; j < jlen; j++) {
+                [arr addObject:[list nth:j]];
+            }
+        }
+        return [[JSList alloc] initWithArray:arr];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:concat] forKey:@"concat"];
+
+    JSData *(^nth)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *second = [xs second];
+        if ([xs first] == nil || second == nil || [[second dataType] isNotEqualTo:@"JSNumber"]) {
+            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+        }
+        NSMutableArray *list = [(JSList *)[xs first] value];
+        JSNumber *num = (JSNumber *)second;
+        NSUInteger n = [num integerValue];
+        if (n >= [list count]) {
+            @throw [[NSException alloc] initWithName:JSL_INDEX_OUT_OF_BOUNDS reason:JSL_INDEX_OUT_OF_BOUNDS_MSG userInfo:nil];
+        }
+        return [list nth:n];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:nth] forKey:@"nth"];
+
+    JSData *(^first)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        NSMutableArray *list = [xs first];
+        if ([list isEmpty]) {
+            return [JSNil new];
+        }
+        return (JSList *)[list first];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:first] forKey:@"first"];
+
+    JSData *(^rest)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        NSMutableArray *list = [xs first];
+        return (JSList *)[list rest];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:rest] forKey:@"rest"];
+
+    JSData *(^map)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *first = (JSData *)[xs first];
+        if (!first || [[first dataType] isNotEqualTo:@"JSFunction"]) {
+            @throw [[NSException alloc] initWithName:JSL_INDEX_OUT_OF_BOUNDS reason:JSL_INDEX_OUT_OF_BOUNDS_MSG userInfo:nil];
+        }
+        JSFunction *fn = (JSFunction *)first;
+        NSMutableArray *list = [(JSList *)[xs second] value];
+        NSUInteger i = 0;
+        NSUInteger len = [list count];
+        NSMutableArray *ret = [NSMutableArray new];
+        for (i = 0; i < len; i++) {
+            [ret addObject:[fn apply:[@[[list nth:i]] mutableCopy]]];
+        }
+        return [[JSList alloc] initWithArray:ret];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:map] forKey:@"map"];
+
+    JSData *(^conj)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *first = (JSData *)[xs first];
+        NSMutableArray *list = nil;
+        NSMutableArray *rest = [xs rest];
+        if ([[first dataType] isEqual:@"JSVector"]) {
+            list = [(JSVector *)first value];
+            [list addObjectsFromArray:rest];
+            return [[JSVector alloc] initWithArray:list];
+        } else if ([[first dataType] isEqual:@"JSList"]) {
+            list = [(JSList *)first value];
+        }
+        return [[JSList alloc] initWithArray:[[rest reverse] arrayByAddingObjectsFromArray:list]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:conj] forKey:@"conj"];
 }
 
 - (NSMutableDictionary *)namespace {
