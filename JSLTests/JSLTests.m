@@ -203,11 +203,21 @@
     XCTAssertEqualObjects([jsl rep:@"(* (- (- 5 4) 2) -42)"], @"42");
     XCTAssertEqualObjects([jsl rep:@"(/ (+ (* (* 5 -4) -4) 4) 2)"], @"42");
     XCTAssertEqualObjects([jsl rep:@"(/ (+ (* (* 5.5 -4.20) -4.41) 4.314) 2.24)"], @"47.404017857142857142857142857142857142");
+    XCTAssertEqualObjects([jsl rep:@"(+ 5 (* 2 3))"], @"11");
+    XCTAssertEqualObjects([jsl rep:@"(- (+ 5 (* 2 3)) 3)"], @"8");
+    XCTAssertEqualObjects([jsl rep:@"(/ (- (+ 5 (* 2 3)) 3) 4)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(/ (- (+ 515 (* 87 311)) 302) 27)"], @"1010");
+    XCTAssertEqualObjects([jsl rep:@"(* -3 6)"], @"-18");
+    XCTAssertEqualObjects([jsl rep:@"(/ (- (+ 515 (* -87 311)) 296) 27)"], @"-994");
+    XCTAssertEqualObjects([jsl rep:@"[1 2 (+ 1 2)]"], @"[1 2 3]");
+    XCTAssertEqualObjects([jsl rep:@"{\"a\" (+ 7 8)}"], @"{\"a\" 15}");
+    XCTAssertEqualObjects([jsl rep:@"{:a (+ 7 8)}"], @"{:a 15}");
     XCTAssertEqualObjects([jsl rep:@"(/ 100 2 2)"], @"25");
     XCTAssertEqualObjects([jsl rep:@"(/ 100 2 2 2)"], @"12.5");
     XCTAssertEqualObjects([jsl rep:@"(/ 100 2 2 2 2)"], @"6.25");
     XCTAssertEqualObjects([jsl rep:@"(/ 100 2 2 2 2 2)"], @"3.125");
     XCTAssertEqualObjects([jsl rep:@"(/ 100 2 2 2 2 2 2)"], @"1.5625");
+    XCTAssertEqualObjects([jsl rep:@"(/ (- (+ 5 (* 2 3)) 3) 4)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(mod 42 21)"], @"0");
     XCTAssertEqualObjects([jsl rep:@"(mod 5 3)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(mod 5 3.5)"], @"1.5");
@@ -260,13 +270,17 @@ void testPrintCallback(id param, const char *s) {
 - (void)testList {
     JSL *jsl = [JSL new];
     XCTAssertEqualObjects([jsl rep:@"()"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(list)"], @"()");
     XCTAssertEqualObjects([jsl rep:@"(list 1 2 3)"], @"(1 2 3)");
     XCTAssertEqualObjects([jsl rep:@"(list 1 (list 21 22 23) 3)"], @"(1 (21 22 23) 3)");
+    XCTAssertEqualObjects([jsl rep:@"(list? (list))"], @"true");
+
 }
 
 - (void)testHashMap {
     JSL *jsl = [JSL new];
     XCTAssertEqualObjects([jsl rep:@"{\"a\" 1}"], @"{\"a\" 1}");
+    XCTAssertEqualObjects([jsl rep:@"{\"abc\" 1}"], @"{\"abc\" 1}");
     XCTAssertEqualObjects([jsl rep:@"{\"a\" (+ 1 2)}"], @"{\"a\" 3}");
     XCTAssertEqualObjects([jsl rep:@"{:a (+ 7 8)}"], @"{:a 15}");
 }
@@ -286,11 +300,50 @@ void testPrintCallback(id param, const char *s) {
 
 - (void)testSpecialForms {
     JSL *jsl = [JSL new];
+    // def!
     XCTAssertEqualObjects([jsl rep:@"(def! x 3)"], @"3");
     XCTAssertEqualObjects([jsl rep:@"x"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(def! x 4)"], @"4");
+    XCTAssertEqualObjects([jsl rep:@"x"], @"4");
+    XCTAssertEqualObjects([jsl rep:@"(def! y (+ 1 7))"], @"8");
+    XCTAssertEqualObjects([jsl rep:@"y"], @"8");
+    // case sensitive symbols
+    XCTAssertEqualObjects([jsl rep:@"(def! mynum 111)"], @"111");
+    XCTAssertEqualObjects([jsl rep:@"(def! MYNUM 222)"], @"222");
+    XCTAssertEqualObjects([jsl rep:@"mynum"], @"111");
+    XCTAssertEqualObjects([jsl rep:@"MYNUM"], @"222");
+    // env lookup error
+    @try {
+        XCTAssertThrowsSpecificNamed([jsl rep:@"(abc 1 2 3)"], NSException, JSL_SYMBOL_NOT_FOUND, @"Symbol not found");
+    } @catch (NSException *exception) {
+        XCTAssertTrue([Utils matchString:[exception.userInfo objectForKey:@"description"] withPattern:@".*\\'?abc\\'? not found.*"]);
+    }
+    // error aborts def! being re-set
+    XCTAssertEqualObjects([jsl rep:@"(def! w 123)"], @"123");
+    XCTAssertThrows([jsl rep:@"(def! w (abc))"], @"Symbol not found");
+    XCTAssertEqualObjects([jsl rep:@"w"], @"123");
+    // let* form
     XCTAssertEqualObjects([jsl rep:@"(let* (z (+ 2 3)) (+ 1 z))"], @"6");
     XCTAssertEqualObjects([jsl rep:@"(let* [z 9] z)"], @"9");
+    XCTAssertEqualObjects([jsl rep:@"(let* (x 9) x)"], @"9");
+    XCTAssertEqualObjects([jsl rep:@"x"], @"4");
+    XCTAssertEqualObjects([jsl rep:@"(let* (z (+ 2 3)) (+ 1 z))"], @"6");
+    XCTAssertEqualObjects([jsl rep:@"(let* (p (+ 2 3) q (+ 2 p)) (+ p q))"], @"12");
+    XCTAssertEqualObjects([jsl rep:@"(def! y (let* (z 7) z))"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"y"], @"7");
     XCTAssertEqualObjects([jsl rep:@"((fn* (a b) (+ b a)) 3 4)"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"((fn* [f x] (f x)) (fn* [a] (+ 1 a)) 7)"], @"8");
+    XCTAssertEqualObjects([jsl rep:@"(((fn* (a) (fn* (b) (+ a b))) 5) 7)"], @"12");
+    // outer env
+    XCTAssertEqualObjects([jsl rep:@"(def! a 4)"], @"4");
+    XCTAssertEqualObjects([jsl rep:@"(let* (q 9) q)"], @"9");
+    XCTAssertEqualObjects([jsl rep:@"(let* (q 9) a)"], @"4");
+    XCTAssertEqualObjects([jsl rep:@"(let* (z 2) (let* (q 9) a))"], @"4");
+    // let* with vector binding
+    XCTAssertEqualObjects([jsl rep:@"(let* [z 9] z)"], @"9");
+    XCTAssertEqualObjects([jsl rep:@"(let* [p (+ 2 3) q (+ 2 p)] (+ p q))"], @"12");
+    // vector evaluation
+    XCTAssertEqualObjects([jsl rep:@"(let* (a 5 b 6) [3 4 a [b 7] 8])"], @"[3 4 5 [6 7] 8]");
 }
 
 - (void)testEquality {
@@ -318,8 +371,7 @@ void testPrintCallback(id param, const char *s) {
 // TODO: add test cases from mal
 
 - (void)test {
-    JSL *jsl = [JSL new];
-    //XCTAssertEqualObjects([jsl rep:@"((fn* [f x] (f x)) (fn* [a] (+ 1 a)) 7)"], @"8");
+    // JSL *jsl = [JSL new];
 }
 
 

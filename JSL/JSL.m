@@ -121,16 +121,15 @@
 - (JSData *)macroExpand:(JSData *)ast withEnv:(Env *)env {
     while ([[ast dataType] isEqual:@"JSList"]) {
         NSMutableArray *xs = [(JSList *)ast value];
-        JSSymbol *sym = (JSSymbol *)[xs first];
-        if (sym == nil) break;
+        JSData *first = [xs first];
+        if (!first || [[first dataType] isNotEqualTo:@"JSSymbol"]) break;
+        JSSymbol *sym = (JSSymbol *)first;
         @try {
             JSData *fnData = [env objectForSymbol:sym];
-            if (fnData == nil) break;
-            if ([[fnData dataType] isEqual:@"JSFunction"]) {
-                JSFunction *fn = (JSFunction *)fnData;
-                if (![fn isMacro]) break;
-                ast = [fn apply:[(JSList *)[xs rest] value]];
-            }
+            if (fnData == nil || [[fnData dataType] isNotEqualTo:@"JSFunction"]) break;
+            JSFunction *fn = (JSFunction *)fnData;
+            if (![fn isMacro]) break;
+            ast = [fn apply:[(JSList *)[xs rest] value]];
         } @catch (NSException *exception) {
             break;
         }
@@ -263,19 +262,7 @@
 }
 
 - (NSString *)rep:(NSString *)string {
-#if DEBUG
-    @try {
-        return [self print:[self eval:[self read:string] withEnv:[self env]]];
-    } @catch (NSException *exception) {
-        if (exception.userInfo != nil) {
-            error(@"%@", [exception.userInfo valueForKey:@"description"]);
-        } else {
-            error(@"%@", exception.description);
-        }
-    }
-#else
     return [self print:[self eval:[self read:string] withEnv:[self env]]];
-#endif
 }
 
 @end

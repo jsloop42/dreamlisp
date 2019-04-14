@@ -4,6 +4,7 @@ bin="JSLTests/objc"
 buildlog="build.log"
 proj="JSL.xcodeproj"
 scheme="JSL"
+config="Release"
 
 function getFilename() {
     if [ "$1" = "0" ]; then
@@ -57,8 +58,8 @@ function spinner() {
 }
 
 function buildproj() {
-    xcodebuild -scheme $scheme build > $buildlog 2>&1
-    # xcodebuild -scheme $scheme build 2>&1 | tee $buildlog
+    xcodebuild -scheme $scheme -configuration $config build > $buildlog 2>&1
+    # xcodebuild -scheme $scheme -configuration $config build 2>&1 | tee $buildlog
 }
 
 function clean() {

@@ -18,6 +18,7 @@
 #import "FileOps.h"
 #import "Core.h"
 #import "Logger.h"
+#import "JSError.h"
 
 @interface JSLTests : XCTestCase
 @end
