@@ -290,6 +290,7 @@ void testPrintCallback(id param, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"x"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(let* (z (+ 2 3)) (+ 1 z))"], @"6");
     XCTAssertEqualObjects([jsl rep:@"(let* [z 9] z)"], @"9");
+    XCTAssertEqualObjects([jsl rep:@"((fn* (a b) (+ b a)) 3 4)"], @"7");
 }
 
 - (void)testEquality {
@@ -317,7 +318,8 @@ void testPrintCallback(id param, const char *s) {
 // TODO: add test cases from mal
 
 - (void)test {
-//    JSL *jsl = [JSL new];
+    JSL *jsl = [JSL new];
+    //XCTAssertEqualObjects([jsl rep:@"((fn* [f x] (f x)) (fn* [a] (+ 1 a)) 7)"], @"8");
 }
 
 

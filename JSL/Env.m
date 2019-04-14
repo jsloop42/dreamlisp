@@ -19,7 +19,7 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        data = [NSMutableDictionary new];
+        [self bootstrap];
     }
     return self;
 }
@@ -27,8 +27,8 @@
 - (instancetype)initWithEnv:(Env *)env {
     self = [super init];
     if (self) {
+        [self bootstrap];
         outer = env;
-        data = [NSMutableDictionary new];
     }
     return self;
 }
@@ -38,6 +38,7 @@
     NSUInteger len = [binds count];
     NSUInteger i = 0;
     if (self) {
+        [self bootstrap];
         outer = env;
         for (i = 0; i < len; i++) {
             NSString *sym = [(JSSymbol *)binds[i] name];
@@ -49,6 +50,10 @@
         }
     }
     return self;
+}
+
+- (void)bootstrap {
+    data = [NSMutableDictionary new];
 }
 
 - (void)setObject:(JSData *)value forSymbol:(JSSymbol *)key {

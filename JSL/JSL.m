@@ -201,10 +201,10 @@
                     continue;
                 } else if ([[sym name] isEqual:@"fn*"]) {
                     JSData * (^fn)(NSMutableArray *) = ^JSData *(NSMutableArray * arg) {
-                        Env *fnEnv = [[Env alloc] initWithEnv:env binds:[@[[xs second]] mutableCopy] exprs:arg];
+                        Env *fnEnv = [[Env alloc] initWithEnv:env binds:[(JSList *)[xs second] value] exprs:arg];
                         return [self eval:[xs nth:2] withEnv:fnEnv];
                     };
-                    return [[JSFunction alloc] initWithAst:[xs nth:2] params:[@[[xs second]] mutableCopy] env:env macro:NO meta:nil fn:fn];
+                    return [[JSFunction alloc] initWithAst:[xs nth:2] params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
                 } else if ([[sym name] isEqual:@"let*"]) {
                     Env *letEnv = [[Env alloc] initWithEnv:env];
                     NSMutableArray *bindings = [[(JSData *)[xs second] dataType] isEqual:@"JSVector"] ?
@@ -226,6 +226,7 @@
                     return [self macroExpand:[xs second] withEnv:env];
                 }
             }
+            // Function
             NSMutableArray *list = [(JSList *)[self evalAST:ast withEnv:env] value];
             if ([[[list first] dataType] isNotEqualTo:@"JSFunction"]) {
                 @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:JSL_SYMBOL_NOT_FOUND_MSG userInfo:nil];
@@ -238,6 +239,7 @@
             } else {
                 return [fn apply:rest];
             }
+            continue;
         } else if ([[ast dataType] isEqual:@"JSHashMap"]) {
             JSHashMap *dict = (JSHashMap *)ast;
             NSArray *keys = [dict allKeys];
@@ -261,7 +263,19 @@
 }
 
 - (NSString *)rep:(NSString *)string {
+#if DEBUG
+    @try {
+        return [self print:[self eval:[self read:string] withEnv:[self env]]];
+    } @catch (NSException *exception) {
+        if (exception.userInfo != nil) {
+            error(@"%@", [exception.userInfo valueForKey:@"description"]);
+        } else {
+            error(@"%@", exception.description);
+        }
+    }
+#else
     return [self print:[self eval:[self read:string] withEnv:[self env]]];
+#endif
 }
 
 @end
