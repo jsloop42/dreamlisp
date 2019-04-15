@@ -265,7 +265,7 @@
 }
 
 void testPrintCallback(id param, int tag, int counter, const char *s) {
-    [param printCallback:[[NSString alloc] initWithCString:s encoding:NSUTF8StringEncoding]];
+    [param printCallback:[[NSString alloc] initWithCString:s encoding:NSUTF8StringEncoding] withTag:tag counter:counter];
 }
 
 - (void)testPrintFunctions {
@@ -274,14 +274,114 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(println [33 2 3])"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(prn [(+ 21 12) 2 3])"], @"nil");
     freeInfoCallback();
-    XCTAssertEqualObjects([jsl rep:@"(pr-str [(+ 21 12) 2 3])"], @"\"[33 2 3]\"");
-    XCTAssertEqualObjects([jsl rep:@"(str [(+ 21 12) 2 3])"], @"\"[33 2 3]\"");
-    XCTAssertEqualObjects([jsl rep:@"(str [(+ 21 12) 2 3 \"foo\"])"], @"\"[33 2 3 foo]\"");
+    infoCallback(self, 1, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(prn)"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 2, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(prn \"\")"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 3, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(prn \"abc\")"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 4, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(prn \"abc  def\" \"ghi jkl\")"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 5, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(prn \"\\\"\")"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 6, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(prn \"abc\\ndef\\nghi\")"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 7, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(prn \"abc\\\\\\\\def\\\\\\\\ghi\")"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 8, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(prn (list 1 2 \"abc\" \"\\\"\") \"def\")"], @"nil");
+    freeInfoCallback();
+    // (println)
+    infoCallback(self, 9, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(println)"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 10, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(println \"\")"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 11, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(println \"abc\")"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 12, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(println \"abc  def\" \"ghi jkl\")"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 13, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(println \"\\\"\")"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 14, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(println \"abc\\ndef\\nghi\")"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 15, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(println \"abc\\\\def\\\\ghi\")"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 16, &testPrintCallback);
+    XCTAssertEqualObjects([jsl rep:@"(println (list 1 2 \"abc\" \"\\\"\") \"def\")"], @"nil");
+    freeInfoCallback();
 }
 
-- (void)printCallback:(NSString *)message {
+- (void)printCallback:(NSString *)message withTag:(int)tag counter:(int)counter {
     XCTAssertNotNil(message);
-    XCTAssertEqualObjects(message, @"[33 2 3]");
+    switch (tag) {
+        case 0:
+            XCTAssertEqualObjects(message, @"[33 2 3]");
+            break;
+        case 1:
+            XCTAssertEqualObjects(message, @"");
+            break;
+        case 2:
+            XCTAssertEqualObjects(message, @"\"\"");
+            break;
+        case 3:
+            XCTAssertEqualObjects(message, @"\"abc\"");
+            break;
+        case 4:
+            XCTAssertEqualObjects(message, @"\"abc  def\" \"ghi jkl\"");
+            break;
+        case 5:
+            XCTAssertEqualObjects(message, @"\"\\\"\"");
+            break;
+        case 6:
+            XCTAssertEqualObjects(message, @"\"abc\\ndef\\nghi\"");
+            break;
+        case 7:
+            XCTAssertEqualObjects(message, @"\"abc\\\\\\\\def\\\\\\\\ghi\"");
+            break;
+        case 8:
+            XCTAssertEqualObjects(message, @"(1 2 \"abc\" \"\\\"\") \"def\"");
+            break;
+        case 9:
+            XCTAssertEqualObjects(message, @"");
+            break;
+        case 10:
+            XCTAssertEqualObjects(message, @"");
+            break;
+        case 11:
+            XCTAssertEqualObjects(message, @"abc");
+            break;
+        case 12:
+            XCTAssertEqualObjects(message, @"abc  def ghi jkl");
+            break;
+        case 13:
+            XCTAssertEqualObjects(message, @"\"");
+            break;
+        case 14:
+            XCTAssertEqualObjects(message, @"abc\ndef\nghi");
+            break;
+        case 15:
+            XCTAssertEqualObjects(message, @"abc\\def\\ghi");
+            break;
+        case 16:
+            XCTAssertEqualObjects(message, @"(1 2 abc \") def");
+            break;
+        default:
+            break;
+    }
 }
 
 - (void)testList {
@@ -383,6 +483,62 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(fib 1)"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(fib 2)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(fib 4)"], @"5");
+    XCTAssertEqualObjects([jsl rep:@"((fn* (& more) (count more)) 1 2 3)"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"((fn* (& more) (list? more)) 1 2 3)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"((fn* (& more) (count more)) 1)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"((fn* (& more) (count more)))"], @"0");
+    XCTAssertEqualObjects([jsl rep:@"((fn* (& more) (list? more)))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"((fn* (a & more) (count more)) 1 2 3)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"((fn* (a & more) (count more)) 1)"], @"0");
+    XCTAssertEqualObjects([jsl rep:@"((fn* (a & more) (list? more)) 1)"], @"true");
+}
+
+- (void)testNotFunction {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(not false)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(not nil)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(not true)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(not \"a\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(not 0)"], @"false");
+}
+
+- (void)testString {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"\"\""], @"\"\"");
+    XCTAssertEqualObjects([jsl rep:@"\"abc\""], @"\"abc\"");
+    XCTAssertEqualObjects([jsl rep:@"\"abc  def\""], @"\"abc  def\"");
+    XCTAssertEqualObjects([jsl rep:@"\"\\\"\""], @"\"\\\"\"");
+    XCTAssertEqualObjects([jsl rep:@"\"abc\\ndef\\nghi\""], @"\"abc\\ndef\\nghi\"");
+    XCTAssertEqualObjects([jsl rep:@"\"abc\\\\def\\\\ghi\""], @"\"abc\\\\def\\\\ghi\"");
+    XCTAssertEqualObjects([jsl rep:@"\"\\\\n\""], @"\"\\\\n\"");
+}
+
+- (void)testPrint {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(pr-str)"], @"\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(pr-str \"\")"], @"\"\\\"\\\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(pr-str \"\\\"\")"], @"\"\\\"\\\\\\\"\\\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(pr-str (list 1 2 \"abc\" \"\\\"\") \"def\")"], @"\"(1 2 \\\"abc\\\" \\\"\\\\\\\"\\\") \\\"def\\\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(pr-str \"abc\\\\ndef\\\\nghi\")"], @"\"\\\"abc\\\\\\\\ndef\\\\\\\\nghi\\\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(pr-str \"abc\\\\\\\\def\\\\\\\\ghi\")"], @"\"\\\"abc\\\\\\\\\\\\\\\\def\\\\\\\\\\\\\\\\ghi\\\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(pr-str (list))"], @"\"()\"");
+    XCTAssertEqualObjects([jsl rep:@"(pr-str [(+ 21 12) 2 3])"], @"\"[33 2 3]\"");
+}
+
+- (void)testStringFunctions {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(str)"], @"\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(str \"\")"], @"\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(str \"abc\")"], @"\"abc\"");
+    XCTAssertEqualObjects([jsl rep:@"(str \"\\\"\")"], @"\"\\\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(str 1 \"abc\" 3)"], @"\"1abc3\"");
+    XCTAssertEqualObjects([jsl rep:@"(str \"abc  def\" \"ghi jkl\")"], @"\"abc  defghi jkl\"");
+    XCTAssertEqualObjects([jsl rep:@"(str \"abc\\\\ndef\\\\nghi\")"], @"\"abc\\\\ndef\\\\nghi\"");
+    XCTAssertEqualObjects([jsl rep:@"(str \"abc\\\\\\\\def\\\\\\\\ghi\")"], @"\"abc\\\\\\\\def\\\\\\\\ghi\"");
+    XCTAssertEqualObjects([jsl rep:@"(str (list 1 2 \"abc\" \"\\\"\") \"def\")"], @"\"(1 2 abc \\\")def\"");
+    XCTAssertEqualObjects([jsl rep:@"(str (list))"], @"\"()\"");
+    XCTAssertEqualObjects([jsl rep:@"(str [(+ 21 12) 2 3])"], @"\"[33 2 3]\"");
+    XCTAssertEqualObjects([jsl rep:@"(str [(+ 21 12) 2 3 \"foo\"])"], @"\"[33 2 3 foo]\"");
 }
 
 void testdoPrintCallback(id param, int tag, int counter, const char *s) {
@@ -506,7 +662,8 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testMisc {
-
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"nil"], @"nil");
 }
 
 // TODO: add test cases from mal
