@@ -74,7 +74,7 @@
     } else if ([dataType isEqual:@"JSKeyword"]) {
         return [(JSKeyword *)data value];
     } else if ([dataType isEqual:@"JSAtom"]) {
-        return [self printStringFor:[[JSString alloc] initWithFormat:@"(atom %@)", [(JSAtom *)data value]] readably:readably];
+        return [self printStringFor:[[JSString alloc] initWithFormat:@"(atom %@)", [self printStringFor:[(JSAtom *)data value] readably:false]] readably:false];
     } else if ([dataType isEqual:@"JSNil"]) {
         return @"nil";
     } else if ([dataType isEqual:@"JSBool"]) {
