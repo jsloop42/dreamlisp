@@ -392,6 +392,28 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(list 1 (list 21 22 23) 3)"], @"(1 (21 22 23) 3)");
 }
 
+- (void)testVector {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(if [] 7 8)"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(count [1 2 3])"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(empty? [1 2 3])"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(empty? [])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(list? [4 5 6])"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= [] (list))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= [7 8] [7 8])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= (list 1 2) [1 2])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= (list 1) [])"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= [] [1])"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= 0 [])"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= [] 0)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= [] \"\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= \"\" [])"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"((fn* [] 4) )"], @"4");
+    XCTAssertEqualObjects([jsl rep:@"((fn* [f x] (f x)) (fn* [a] (+ 1 a)) 7)"], @"8");
+    XCTAssertEqualObjects([jsl rep:@"(= [(list)] (list []))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= [1 2 (list 3 4 [5 6])] (list 1 2 [3 4 (list 5 6)]))"], @"true");
+}
+
 - (void)testHashMap {
     JSL *jsl = [JSL new];
     XCTAssertEqualObjects([jsl rep:@"{\"a\" 1}"], @"{\"a\" 1}");
@@ -523,6 +545,9 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(pr-str \"abc\\\\\\\\def\\\\\\\\ghi\")"], @"\"\\\"abc\\\\\\\\\\\\\\\\def\\\\\\\\\\\\\\\\ghi\\\"\"");
     XCTAssertEqualObjects([jsl rep:@"(pr-str (list))"], @"\"()\"");
     XCTAssertEqualObjects([jsl rep:@"(pr-str [(+ 21 12) 2 3])"], @"\"[33 2 3]\"");
+    XCTAssertEqualObjects([jsl rep:@"(pr-str [1 2 \"abc\" \"\\\"\"] \"def\")"], @"\"[1 2 \\\"abc\\\" \\\"\\\\\\\"\\\"] \\\"def\\\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(pr-str [])"], @"\"[]\"");
+    XCTAssertEqualObjects([jsl rep:@"(str [1 2 \"abc\" \"\\\"\"] \"def\")"], @"\"[1 2 abc \\\"]def\"");
 }
 
 - (void)testStringFunctions {
@@ -539,6 +564,8 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(str (list))"], @"\"()\"");
     XCTAssertEqualObjects([jsl rep:@"(str [(+ 21 12) 2 3])"], @"\"[33 2 3]\"");
     XCTAssertEqualObjects([jsl rep:@"(str [(+ 21 12) 2 3 \"foo\"])"], @"\"[33 2 3 foo]\"");
+    XCTAssertEqualObjects([jsl rep:@"(str [1 2 \"abc\" \"\\\"\"] \"def\")"], @"\"[1 2 abc \\\"]def\"");
+    XCTAssertEqualObjects([jsl rep:@"(str [])"], @"\"[]\"");
 }
 
 void testdoPrintCallback(id param, int tag, int counter, const char *s) {
@@ -661,18 +688,22 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(count nil)"], @"0");
 }
 
+- (void)testKeyword {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(= :abc :abc)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= :abc :def)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= :abc \":abc\")"], @"false");
+}
+
 - (void)testMisc {
     JSL *jsl = [JSL new];
     XCTAssertEqualObjects([jsl rep:@"nil"], @"nil");
 }
 
-// TODO: add test cases from mal
-
 - (void)test {
 //    JSL *jsl = [JSL new];
 
 }
-
 
 - (void)notestPerformanceJSListDropFirst {
     NSMutableArray *arr = [NSMutableArray new];
