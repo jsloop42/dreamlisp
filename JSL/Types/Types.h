@@ -36,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithString:(NSString *)str;
 - (instancetype)initWithFormat:(NSString *)format, ...;
 - (instancetype)initWithContentsOfFile:(NSString *)filePath;
+- (instancetype)initWithCString:(const char *)string;
 - (BOOL)isEqual:(JSString *)string;
 @end
 

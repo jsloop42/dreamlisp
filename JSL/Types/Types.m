@@ -64,6 +64,14 @@
     return self;
 }
 
+- (instancetype)initWithCString:(const char *)string {
+    self = [super init];
+    if (self) {
+        _string = [[NSString alloc] initWithCString:string encoding:NSUTF8StringEncoding];
+    }
+    return self;
+}
+
 - (NSString *)dataType {
     return [self className];
 }

@@ -34,7 +34,7 @@ void info(NSString *format, ...) {
         callback(self, _tag, ++counter, [message cStringUsingEncoding:NSUTF8StringEncoding]);
     }
     va_end(args);
-    fprintf(stderr, "%s\n", [message UTF8String]);
+    fprintf(stdout, "%s\n", [message UTF8String]);
 }
 
 void debug(NSString *format, ...) {

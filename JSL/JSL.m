@@ -31,7 +31,7 @@
     _env = [Env new];
     core = [Core new];
     [self setCoreFunctionsToREPL:_env];
-    [self setEvalToREPL:_env];
+    [self setEvalToREPL];
     [self setJSLFuns];
 }
 
@@ -49,24 +49,24 @@
 /**
  Sets `eval` JSL function in the REPL environment.
 */
-- (void)setEvalToREPL:(Env *)env {
+- (void)setEvalToREPL{
     JSData * (^fn)(NSMutableArray *arg) = ^JSData *(NSMutableArray *arg) {
-        return [self eval:(JSData *)arg[0] withEnv:env];
+        return [self eval:(JSData *)arg[0] withEnv:[self env]];
     };
-    [env setObject:[[JSFunction alloc] initWithFn:fn] forSymbol:[[JSSymbol alloc] initWithName:@"eval"]];
-    [env setObject:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
-    [env setObject:[[JSString alloc] initWithString:@"Objective-C"] forSymbol:[[JSSymbol alloc] initWithName:@"*host-language*"]];
+    [[self env] setObject:[[JSFunction alloc] initWithFn:fn] forSymbol:[[JSSymbol alloc] initWithName:@"eval"]];
+    [[self env] setObject:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
+    [[self env] setObject:[[JSString alloc] initWithString:@"Objective-C"] forSymbol:[[JSSymbol alloc] initWithName:@"*host-language*"]];
 }
 
 - (void)setJSLFuns {
     [self rep:@"(def! not (fn* (a) (if a false true)))"];
     [self rep:@"(def! load-file (fn* (x) (eval (read-string (str \"(do \" (slurp x) \")\")))))"];
-//    [self rep:@"(defmacro! cond (fn* (& xs) (if (> (count xs) 0) `(if ~(first xs) ~(if (> (count xs) 1) (nth xs 1) " \
-//               "(throw \"odd number of forms to cond\")) (cond ~@(rest (rest xs)))))))"];
-//    [self rep:@"(def! *gensym-counter* (atom 0))"];
-//    [self rep:@"(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"];
-//    [self rep:@"(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs))" \
-//               "(if ~condvar ~condvar (or ~@(rest xs)))))))))"];
+    [self rep:@"(defmacro! cond (fn* (& xs) (if (> (count xs) 0) `(if ~(first xs) ~(if (> (count xs) 1) (nth xs 1) " \
+               "(throw \"odd number of forms to cond\")) (cond ~@(rest (rest xs)))))))"];
+    [self rep:@"(def! *gensym-counter* (atom 0))"];
+    [self rep:@"(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"];
+    [self rep:@"(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs))" \
+               "(if ~condvar ~condvar (or ~@(rest xs)))))))))"];
     [self rep:@"(def! exit (fn* () (do (prn \"Bye.\") (exit*))))"];
 }
 

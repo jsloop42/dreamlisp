@@ -30,7 +30,7 @@ function run() {
         exit
     fi
     echo $OUT
-    $BIN/$OUT
+    $BIN/$OUT "${@:2}"
 }
 
 function help() {
@@ -40,7 +40,7 @@ function help() {
 }
 
 # Check if the step argument is provided
-if [ $# -ne 1 ]; then
+if [ $# -le 1 ]; then
   help
 fi
 

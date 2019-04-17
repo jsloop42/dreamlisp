@@ -11,19 +11,33 @@
 #import "Terminal.h"
 #import "Logger.h"
 
+void printException(NSException *exception) {
+    if (exception.userInfo != nil) {
+        error(@"%@", [exception.userInfo valueForKey:@"description"]);
+    } else {
+        error(@"%@", exception.description);
+    }
+}
+
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
         JSL *jsl = [JSL new];
         if (argc > 1) {
             @try {
                 NSString *jslFile = [[NSString alloc] initWithCString:argv[1] encoding:NSUTF8StringEncoding];
-                NSMutableArray *arr = [[NSValue valueWithPointer:argv] mutableCopy];
-                [arr removeObjectsAtIndexes:[[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, 2)]];
+                NSMutableArray *arr = [NSMutableArray new];
+                NSUInteger i = 0;
+                if (argc > 2) {
+                    for (i = 2; i < argc; i++) {
+                        arr[i - 2] = [[JSString alloc] initWithCString:argv[i]];
+                    }
+                }
                 [[jsl env] setObject:[[JSList alloc] initWithArray:arr] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
-                [jsl rep:[[NSString alloc] initWithFormat:@"(load-file %@)", jslFile]];
+                [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", jslFile]];
                 exit(0);
             } @catch (NSException *exception) {
-                error(@"%@", exception.description);
+                printException(exception);
+                exit(-1);
             }
         }
         Terminal *term = [Terminal new];
@@ -38,11 +52,7 @@ int main(int argc, const char * argv[]) {
                     info(@"%@", ret);
                 }
             } @catch (NSException *exception) {
-                if (exception.userInfo != nil) {
-                    error(@"%@", [exception.userInfo valueForKey:@"description"]);
-                } else {
-                    error(@"%@", exception.description);
-                }
+                printException(exception);
             }
         }
     }
