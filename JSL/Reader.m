@@ -123,10 +123,10 @@
         return [[JSKeyword alloc] initWithKeyword:token];
     } else if ([self matchString:token withPattern:stringPattern]) {
         NSString *stripped = [token substringWithRange:NSMakeRange(1, [token length] - 2)];
-        NSString* ret = [[[[stripped stringByReplacingOccurrencesOfString:@"\\\\" withString:@"0xff"]
+        NSString* ret = [[[[stripped stringByReplacingOccurrencesOfString:@"\\\\" withString:@"\u029e"]
                          stringByReplacingOccurrencesOfString:@"\\\"" withString:@"\""]
                          stringByReplacingOccurrencesOfString:@"\\n" withString:@"\n"]
-                         stringByReplacingOccurrencesOfString:@"0xff" withString:@"\\"];
+                         stringByReplacingOccurrencesOfString:@"\u029e" withString:@"\\"];
         return  [[JSString alloc] initWithString:ret];
     } else if ([self matchString:token withPattern:stringUnclosed]) {
         @throw [[NSException alloc] initWithName:JSL_QUOTE_MARK_MISMATCH reason:JSL_QUOTE_MARK_MISMATCH_MSG userInfo:nil];

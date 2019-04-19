@@ -10,6 +10,7 @@
 
 NSString *SymbolNotFound = @"'%@' not found.";
 NSString *IndexOutOfBounds = @"Index out of bounds.";
+NSString *JSLException = @"JSLException";
 
 @implementation JSError {
     NSString *_description;
@@ -38,6 +39,26 @@ NSString *IndexOutOfBounds = @"Index out of bounds.";
         va_end(args);
         _description = [[NSString alloc] initWithFormat:format arguments:argscopy];
         [_errDict setValue:_description forKey:@"description"];
+    }
+    return self;
+}
+
+- (instancetype)initWithData:(JSData *)data {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+        _description = JSLException;
+        [_errDict setValue:data forKey:@"data"];
+    }
+    return self;
+}
+
+- (instancetype)initWithArray:(NSMutableArray *)array {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+        _description = JSLException;
+        [_errDict setValue:array forKey:@"array"];
     }
     return self;
 }

@@ -100,19 +100,31 @@
     return ast;
 }
 
+- (BOOL)isPair:(JSData *)ast {
+    if ([[ast dataType] isEqual:@"JSList"] && [(JSList *)ast count] > 0) {
+        return YES;
+    }
+    return NO;
+}
+
 - (JSData *)quasiQuote:(JSData *)ast {
-    NSMutableArray *xs = [(JSList *)ast value];
-    if ([xs isEmpty]) {
+    if (![self isPair:ast]) {
         return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], ast] mutableCopy]];
     }
+    NSMutableArray *xs = [(JSList *)ast value];
     JSData *first = [xs first];
+    if ([[first dataType] isEqual:@"JSNil"]) {
+        return first;
+    }
     if ([[first dataType] isEqual:@"JSSymbol"] && [[(JSSymbol *)first name] isEqual:@"unquote"]) {
         return [xs second];
     }
-    NSMutableArray *list = [(JSList *)first value];
-    if (![list isEmpty] && [[[list first] dataType] isEqual:@"JSSymbol"] && [[(JSSymbol *)[list first] name] isEqual:@"splice-unquote"]) {
-        return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"concat"], [list second],
-                                                [self quasiQuote:[[JSList alloc] initWithArray:[list rest]]]] mutableCopy]];
+    if ([self isPair:first]) {
+        NSMutableArray *list = [(JSList *)first value];
+        if (![list isEmpty] && [[[list first] dataType] isEqual:@"JSSymbol"] && [[(JSSymbol *)[list first] name] isEqual:@"splice-unquote"]) {
+            return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"concat"], [list second],
+                                                    [self quasiQuote:[[JSList alloc] initWithArray:[list rest]]]] mutableCopy]];
+        }
     }
     return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"cons"], [self quasiQuote:first],
                                             [self quasiQuote:[[JSList alloc] initWithArray:[xs rest]]]] mutableCopy]];
@@ -122,15 +134,18 @@
     while ([[ast dataType] isEqual:@"JSList"]) {
         NSMutableArray *xs = [(JSList *)ast value];
         JSData *first = [xs first];
-        if (!first || [[first dataType] isNotEqualTo:@"JSSymbol"]) break;
-        JSSymbol *sym = (JSSymbol *)first;
-        @try {
-            JSData *fnData = [env objectForSymbol:sym];
-            if (fnData == nil || [[fnData dataType] isNotEqualTo:@"JSFunction"]) break;
-            JSFunction *fn = (JSFunction *)fnData;
-            if (![fn isMacro]) break;
-            ast = [fn apply:[(JSList *)[xs rest] value]];
-        } @catch (NSException *exception) {
+        if (first && [[first dataType] isEqual:@"JSSymbol"]) {
+            JSSymbol *sym = (JSSymbol *)first;
+            @try {
+                JSData *fnData = [env objectForSymbol:sym];
+                if (fnData == nil || [[fnData dataType] isNotEqualTo:@"JSFunction"]) break;
+                JSFunction *fn = (JSFunction *)fnData;
+                if (![fn isMacro]) break;
+                ast = [fn apply:[(JSList *)[xs rest] value]];
+            } @catch (NSException *exception) {
+                break;
+            }
+        } else {
             break;
         }
     }

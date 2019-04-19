@@ -32,6 +32,11 @@
     [self addListFunctions];
     [self addEvalFunctions];
     [self addAtomFunctions];
+    [self addInvokeFunctions];
+    [self addPredicateFunctions];
+    [self addSymbolFunctions];
+    [self addKeywordFunctions];
+    [self addVectorFunctions];
 }
 
 double dmod(double a, double n) {
@@ -241,9 +246,6 @@ double dmod(double a, double n) {
         JSData *data = (JSData *)[xs second];
         NSMutableArray *arr = [(JSList *)data value];
         [arr insertObject:(JSData *)[xs first] atIndex:0];
-        if ([[data dataType] isEqual:@"JSVector"]) {
-            return [[JSVector alloc] initWithArray:arr];
-        }
         return [[JSList alloc] initWithArray:arr];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:cons] forKey:@"cons"];
@@ -398,6 +400,86 @@ double dmod(double a, double n) {
         return [atom value];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:swap] forKey:@"swap!"];
+}
+
+- (void)addInvokeFunctions {
+    JSData *(^throw)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        @throw [[NSException alloc] initWithName:JSLException reason:JSLException userInfo:@{@"array": xs}];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:throw] forKey:@"throw"];
+
+    JSData *(^apply)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([[(JSData *)xs dataType] isEqual:@"JSFunction"]) {
+            JSFunction *fn = (JSFunction *)[xs first];
+            NSMutableArray *params = [[xs drop:0] dropLast];
+            [params addObjectsFromArray:(NSMutableArray *)[xs last]];
+            return [fn apply:params];
+        }
+        @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:apply] forKey:@"apply"];
+}
+
+- (void)addPredicateFunctions {
+    JSData *(^nilp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSNil"]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:nilp] forKey:@"nil?"];
+
+    JSData *(^truep)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([[(JSData *)[xs first] dataType] isEqual:@"JSBool"] && [(JSBool *)[xs first] value] == YES) {
+            return [[JSBool alloc] initWithBool:YES];
+        }
+        return [[JSBool alloc] initWithBool:NO];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:truep] forKey:@"true?"];
+
+    JSData *(^falsep)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([[(JSData *)[xs first] dataType] isEqual:@"JSBool"] && [(JSBool *)[xs first] value] == NO) {
+            return [[JSBool alloc] initWithBool:YES];
+        }
+        return [[JSBool alloc] initWithBool:NO];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:falsep] forKey:@"false?"];
+}
+
+- (void)addSymbolFunctions {
+    JSData *(^symbolp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSSymbol"]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:symbolp] forKey:@"symbol?"];
+
+    JSData *(^symbol)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        return [[JSSymbol alloc] initWithName:[(JSString *)[xs first] value]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:symbol] forKey:@"symbol"];
+}
+
+- (void)addKeywordFunctions {
+    JSData *(^keyword)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([[(JSData *)[xs first] dataType] isEqual:@"JSKeyword"]) {
+            return (JSData *)[xs first];
+        }
+        return [[JSString alloc] initWithFormat:@"\u029e%@", [(JSString *)[xs first] value]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:keyword] forKey:@"keyword"];
+
+    JSData *(^keywordp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSKeyword"]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:keywordp] forKey:@"keyword?"];
+}
+
+- (void)addVectorFunctions {
+    JSData *(^vector)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        return [[JSVector alloc] initWithArray:[xs first]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:vector] forKey:@"vector"];
+
+    JSData *(^vectorp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSVector"]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:vectorp] forKey:@"vector?"];
 }
 
 - (NSMutableDictionary *)namespace {

@@ -695,6 +695,12 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(= :abc \":abc\")"], @"false");
 }
 
+- (void)testQuote {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"`(1 2 3)"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"`(nil)"], @"nil");
+}
+
 - (void)testMisc {
     JSL *jsl = [JSL new];
     XCTAssertEqualObjects([jsl rep:@"nil"], @"nil");
@@ -702,8 +708,8 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
 
 - (void)test {
     JSL *jsl = [JSL new];
-    XCTAssertEqualObjects([jsl rep:@"(def! inc (a) (+ a 1))"], @"nil");
-
+    [jsl rep:@"(def! c (quote (1 \"b\" \"d\"))))"];
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 (splice-unquote c) 3))"], @"(1 1 \"b\" \"d\" 3)");
 }
 
 - (void)notestPerformanceJSListDropFirst {

@@ -34,13 +34,13 @@ function run() {
 }
 
 function help() {
-    echo "Build requires step as argument"
+    echo "Run requires step as argument"
     echo "Usage: $0 step"
     exit
 }
 
 # Check if the step argument is provided
-if [ $# -le 1 ]; then
+if [ $# -le 0 ]; then
   help
 fi
 
