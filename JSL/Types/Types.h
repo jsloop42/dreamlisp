@@ -61,6 +61,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, copy) JSData *meta;
 - (instancetype)init;
 - (instancetype)initWithDictionary:(NSMutableDictionary *)dictionary;
+- (instancetype)initWithStringKey:(NSMutableDictionary<NSString *, id> *)dictionary;
 - (instancetype)initWithArray:(NSMutableArray *)array;
 - (JSData *)objectForKey:(NSString *)key;
 - (void)setObject:(JSData *)object forKey:(NSString *)key;
@@ -69,6 +70,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSArray *)allKeys;
 - (NSArray *)allValues;
 - (BOOL)isEqual:(JSHashMap *)hashmap;
+- (JSData *)addEntriesFromDictionary:(NSMutableDictionary *)xs;
 @end
 
 @interface JSList : JSData

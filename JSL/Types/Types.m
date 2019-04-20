@@ -221,6 +221,14 @@
     return self;
 }
 
+- (instancetype)initWithStringKey:(NSMutableDictionary<NSString *, id> *)dictionary {
+    self = [super init];
+    if (self) {
+        dict = dictionary;
+    }
+    return self;
+}
+
 - (instancetype)initWithArray:(NSMutableArray *)array {
     self = [super init];
     if (self) {
@@ -268,7 +276,6 @@
     [dict setObject:object forKey:key];
 }
 
-
 - (NSUInteger)count {
     return [dict count];
 }
@@ -300,6 +307,13 @@
         }
     }
     return YES;
+}
+
+- (JSData *)addEntriesFromDictionary:(NSMutableDictionary *)xs {
+    JSHashMap *hm = [[JSHashMap alloc] initWithDictionary:dict];
+    NSMutableDictionary *hmDict = [hm mutableCopy];
+    [hmDict addEntriesFromDictionary:xs];
+    return hm;
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {

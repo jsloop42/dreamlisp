@@ -37,6 +37,7 @@
     [self addSymbolFunctions];
     [self addKeywordFunctions];
     [self addVectorFunctions];
+    [self addHashMapFunctions];
 }
 
 double dmod(double a, double n) {
@@ -480,6 +481,48 @@ double dmod(double a, double n) {
         return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSVector"]];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:vectorp] forKey:@"vector?"];
+}
+
+- (void)addHashMapFunctions {
+    JSData *(^hashmap)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        return [[JSHashMap alloc] initWithArray:xs];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:hashmap] forKey:@"hash-map"];
+
+    JSData *(^mapp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSHashMap"]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:mapp] forKey:@"map?"];
+
+    JSData *(^assoc)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSHashMap *first = (JSHashMap *)[xs first];
+        JSHashMap *hm = [[JSHashMap alloc] initWithArray:[xs rest]];
+        return [first addEntriesFromDictionary:[hm value]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:assoc] forKey:@"assoc"];
+
+    JSData *(^dissoc)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSHashMap *first = (JSHashMap *)[xs first];
+        NSMutableArray *keys = [xs rest];
+        NSMutableDictionary *dict = [first value];
+        NSDictionary *hm = [dict dictionaryWithValuesForKeys: [dict.allKeys filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"NOT (self IN %@)", keys]]];
+        return [[JSHashMap alloc] initWithStringKey:[hm mutableCopy]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:dissoc] forKey:@"dissoc"];
+
+    JSData *(^get)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *data = (JSData *)[xs first];
+        if ([[data dataType] isEqual:@"JSHashMap"]) {
+            JSHashMap *first = (JSHashMap *)[xs first];
+            NSString *key = [(JSString *)[xs second] value];
+            JSData *ret = (JSData *)[first objectForKey:key];
+            if (ret) {
+                return ret;
+            }
+        }
+        return [JSNil new];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:get] forKey:@"get"];
 }
 
 - (NSMutableDictionary *)namespace {
