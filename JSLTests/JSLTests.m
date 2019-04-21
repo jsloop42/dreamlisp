@@ -711,6 +711,8 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(def! c (quote (1 \"b\" \"d\")))"], @"(1 \"b\" \"d\")");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 c 3))"], @"(1 c 3)");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 (splice-unquote c) 3))"], @"(1 1 \"b\" \"d\" 3)");
+    XCTAssertEqualObjects([jsl rep:@"(def! a 8)"], @"8");
+    XCTAssertEqualObjects([jsl rep:@"`[1 a 3]"], @"(1 a 3)");
 }
 
 - (void)testMacro {

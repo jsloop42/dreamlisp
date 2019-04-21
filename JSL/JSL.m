@@ -102,7 +102,7 @@
 }
 
 - (BOOL)isPair:(JSData *)ast {
-    if ([[ast dataType] isEqual:@"JSList"] && [(JSList *)ast count] > 0) {
+    if (([[ast dataType] isEqual:@"JSList"] && [(JSList *)ast count] > 0) || ([[ast dataType] isEqual:@"JSVector"] && [(JSVector *)ast count] > 0)) {
         return YES;
     }
     return NO;
