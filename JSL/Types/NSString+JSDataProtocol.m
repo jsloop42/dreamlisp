@@ -22,4 +22,12 @@
     return [self length] > 0;
 }
 
+- (NSUInteger)count {
+    return [self length];
+}
+
+- (NSString *)trim {
+    return [self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+}
+
 @end

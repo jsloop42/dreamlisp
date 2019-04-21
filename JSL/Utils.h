@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface Utils : NSObject
 + (BOOL)matchString:(NSString *)string withPattern:(NSString *)pattern;
++ (double)timestamp;
 @end
 
 NS_ASSUME_NONNULL_END

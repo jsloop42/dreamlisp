@@ -100,6 +100,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSVector: JSList
 - (instancetype)initWithArray:(NSArray *)list;
 - (BOOL)isEqual:(JSVector *)vector;
+- (JSList *)list;
 @end
 
 @interface JSNumber : JSData

@@ -26,6 +26,17 @@ void freeInfoCallback() {
     counter = 0;
 }
 
+void info3(NSString *terminator, NSString *format, ...) {
+    va_list args;
+    va_start(args, format);
+    NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
+    if (self != nil && callback != nil) {
+        callback(self, _tag, ++counter, [message cStringUsingEncoding:NSUTF8StringEncoding]);
+    }
+    va_end(args);
+    fprintf(stdout,"%s%s", [message UTF8String], [terminator UTF8String]);
+}
+
 void info(NSString *format, ...) {
     va_list args;
     va_start(args, format);
@@ -34,7 +45,7 @@ void info(NSString *format, ...) {
         callback(self, _tag, ++counter, [message cStringUsingEncoding:NSUTF8StringEncoding]);
     }
     va_end(args);
-    fprintf(stdout, "%s\n", [message UTF8String]);
+    fprintf(stdout,"%s\n", [message UTF8String]);
 }
 
 void debug(NSString *format, ...) {

@@ -15,4 +15,8 @@
     return range.location != NSNotFound;
 }
 
++ (double)timestamp {
+    return (double)(NSTimeInterval)[[NSDate date] timeIntervalSince1970] * 1000;
+}
+
 @end

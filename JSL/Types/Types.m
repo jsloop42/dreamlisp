@@ -499,6 +499,10 @@
     return YES;
 }
 
+- (JSList *)list {
+    return [[JSList alloc] initWithArray:array];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSVector alloc] initWithArray:array];
     return copy;

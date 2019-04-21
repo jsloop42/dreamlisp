@@ -38,6 +38,9 @@
     [self addKeywordFunctions];
     [self addVectorFunctions];
     [self addHashMapFunctions];
+    [self addIOFunctions];
+    [self addMetaFunctions];
+    [self addMiscFunctions];
 }
 
 double dmod(double a, double n) {
@@ -330,6 +333,41 @@ double dmod(double a, double n) {
         return [[JSList alloc] initWithArray:[[rest reverse] arrayByAddingObjectsFromArray:list]];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:conj] forKey:@"conj"];
+
+    JSData *(^sequentialp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *first = (JSData *)[xs first];
+        if ([[first dataType] isEqual:@"JSList"] || [[first dataType] isEqual:@"JSVector"]) {
+            return [[JSBool alloc] initWithBool:YES];
+        }
+        return [[JSBool alloc] initWithBool:NO];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:sequentialp] forKey:@"sequential?"];
+
+    JSData *(^seq)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([xs count] == 0) {
+            return [JSNil new];
+        }
+        JSData *first = (JSData *)[xs first];
+        if ([[first dataType] isEqual:@"JSList"]) {
+            return (JSList *)first;
+        }
+        if ([[first dataType] isEqual:@"JSVector"]) {
+            return [(JSVector *)first list];
+        }
+        if ([[first dataType] isEqual:@"JSString"]) {
+            NSMutableArray *arr = [NSMutableArray new];
+            NSUInteger i = 0;
+            JSString *str = (JSString *)first;
+            NSString *string = [str value];
+            NSUInteger len = [string count];
+            for(i = 0; i < len; i++) {
+                [arr addObject:[[NSString alloc] initWithFormat:@"%@", arr[i]]];
+            }
+            return [[JSList alloc] initWithArray:arr];
+        }
+        return [[JSBool alloc] initWithBool:NO];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:seq] forKey:@"seq"];
 }
 
 - (void)addEvalFunctions {
@@ -442,6 +480,43 @@ double dmod(double a, double n) {
         return [[JSBool alloc] initWithBool:NO];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:falsep] forKey:@"false?"];
+
+    JSData *(^stringp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([[(JSData *)[xs first] dataType] isEqual:@"JSString"]) {
+            return [[JSBool alloc] initWithBool:YES];
+        }
+        return [[JSBool alloc] initWithBool:NO];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:stringp] forKey:@"string?"];
+
+    JSData *(^numberp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([[(JSData *)[xs first] dataType] isEqual:@"JSNumber"]) {
+            return [[JSBool alloc] initWithBool:YES];
+        }
+        return [[JSBool alloc] initWithBool:NO];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:numberp] forKey:@"number?"];
+
+    JSData *(^fnp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData * first = (JSData *)[xs first];
+        if ([[first dataType] isEqual:@"JSFunction"]) {
+            JSFunction *fn = (JSFunction *)first;
+            if (![fn isMacro]) {
+                return [[JSBool alloc] initWithBool:YES];
+            }
+        }
+        return [[JSBool alloc] initWithBool:NO];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:fnp] forKey:@"fn?"];
+
+    JSData *(^macrop)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData * first = (JSData *)[xs first];
+        if ([[first dataType] isEqual:@"JSFunction"] && [(JSFunction *)first isMacro]) {
+            return [[JSBool alloc] initWithBool:YES];
+        }
+        return [[JSBool alloc] initWithBool:NO];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:macrop] forKey:@"macro?"];
 }
 
 - (void)addSymbolFunctions {
@@ -523,6 +598,72 @@ double dmod(double a, double n) {
         return [JSNil new];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:get] forKey:@"get"];
+
+    JSData *(^contains)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSHashMap *first = (JSHashMap *)[xs first];
+        NSString *key = [(JSString *)[xs second] value];
+        return [[JSBool alloc] initWithBool:(JSData *)[first objectForKey:key] != nil];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:contains] forKey:@"contains?"];
+
+    JSData *(^keys)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSHashMap *first = (JSHashMap *)[xs first];
+        return [[JSList alloc] initWithArray:[first allKeys]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:keys] forKey:@"keys"];
+
+    JSData *(^vals)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSHashMap *first = (JSHashMap *)[xs first];
+        return [[JSList alloc] initWithArray:[first allValues]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:vals] forKey:@"vals"];
+}
+
+- (void)addIOFunctions {
+    JSData *(^readline)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        info3(@"", @"%@", [(JSString *)[xs first] value]);
+        NSFileHandle *input = [NSFileHandle fileHandleWithStandardInput];
+        NSData *data = [NSData dataWithData:[input availableData]];
+        NSString *inputString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        return [[JSString alloc] initWithString:[inputString trim]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:readline] forKey:@"readline"];
+}
+
+- (void)addMetaFunctions {
+    JSData *(^meta)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *first = (JSData *)[xs first];
+        if ([[first dataType] isEqual:@"JSFunction"]) {
+            JSFunction *fn = (JSFunction *)first;
+            if (![fn meta]) {
+                return [fn meta];
+            }
+        }
+        return [JSNil new];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:meta] forKey:@"meta"];
+
+    JSData *(^withMeta)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        JSData *first = (JSData *)[xs first];
+        if ([[first dataType] isEqual:@"JSFunction"]) {
+            JSFunction *fn = (JSFunction *)first;
+            return [[JSFunction alloc] initWithMeta:(JSData *)[xs second] func:fn];
+        }
+        return first;
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:withMeta] forKey:@"with-meta"];
+}
+
+- (void)addMiscFunctions {
+    JSData *(^exitfn)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        exit(0);
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:exitfn] forKey:@"exit*"];
+
+    JSData *(^timems)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        return [[JSNumber alloc] initWithDouble:[Utils timestamp]];
+    };
+    [ns setObject:[[JSFunction alloc] initWithFn:timems] forKey:@"timems"];
 }
 
 - (NSMutableDictionary *)namespace {

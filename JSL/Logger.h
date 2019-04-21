@@ -10,6 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+extern void info3(NSString *terminator, NSString *format, ...) __attribute__((format(__NSString__, 2, 3)));
 extern void info(NSString *format, ...) __attribute__((format(__NSString__, 1, 2)));
 extern void debug(NSString *format, ...) __attribute__((format(__NSString__, 1, 2)));
 extern void error(NSString *format, ...) __attribute__((format(__NSString__, 1, 2)));
