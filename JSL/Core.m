@@ -571,17 +571,27 @@ double dmod(double a, double n) {
 
     JSData *(^assoc)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSHashMap *first = (JSHashMap *)[xs first];
-        JSHashMap *hm = [[JSHashMap alloc] initWithArray:[xs rest]];
-        return [first addEntriesFromDictionary:[hm value]];
+        NSMutableDictionary *hm = [[first value] mutableCopy];
+        NSMutableDictionary *rest = [[[JSHashMap alloc] initWithArray:[xs rest]] value];
+        [hm addEntriesFromDictionary:rest];
+        return [[JSHashMap alloc] initWithDictionary:hm];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:assoc] forKey:@"assoc"];
 
     JSData *(^dissoc)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSHashMap *first = (JSHashMap *)[xs first];
         NSMutableArray *keys = [xs rest];
-        NSMutableDictionary *dict = [first value];
-        NSDictionary *hm = [dict dictionaryWithValuesForKeys: [dict.allKeys filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"NOT (self IN %@)", keys]]];
-        return [[JSHashMap alloc] initWithStringKey:[hm mutableCopy]];
+        NSMutableDictionary *dict = [[first value] mutableCopy];
+        NSUInteger i = 0;
+        NSUInteger len = [keys count];
+        for(i = 0; i < len; i++) {
+            if ([[(JSData *)keys[i] dataType] isEqual:@"JSString"]) {
+                [dict removeObjectForKey:[(JSString *)keys[i] value]];
+            } else if ([[(JSData *)keys[i] dataType] isEqual:@"JSKeyword"]) {
+                [dict removeObjectForKey:[(JSKeyword *)keys[i] value]];
+            }
+        }
+        return [[JSHashMap alloc] initWithDictionary:dict];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:dissoc] forKey:@"dissoc"];
 

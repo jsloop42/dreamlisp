@@ -17,6 +17,11 @@
     return copy;
 }
 
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    id copy = [JSData new];
+    return copy;
+}
+
 @end
 
 #pragma mark String
@@ -284,6 +289,11 @@
     return dict;
 }
 
+
+- (void)setValue:(NSMutableDictionary *)hm {
+    dict = hm;
+}
+
 - (NSArray *)allKeys {
     return [dict allKeys];
 }
@@ -318,6 +328,12 @@
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSHashMap alloc] initWithDictionary:dict];
+    return copy;
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    id copy = [[JSHashMap allocWithZone:zone] init];
+    [(JSHashMap *)copy setValue:[dict mutableCopyWithZone:zone]];
     return copy;
 }
 

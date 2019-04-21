@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9E2491EA226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2491E9226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m */; };
+		9E2491EB226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2491E9226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m */; };
 		9E281CEA225890B10038A5AF /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CE9225890B10038A5AF /* Utils.m */; };
 		9E281CEB225890B10038A5AF /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CE9225890B10038A5AF /* Utils.m */; };
 		9E281CEE225908480038A5AF /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Constants.m */; };
@@ -67,6 +69,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9E2491E8226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSMutableDictionary+JSHashMap.h"; sourceTree = "<group>"; };
+		9E2491E9226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+JSHashMap.m"; sourceTree = "<group>"; };
 		9E281CE8225890B10038A5AF /* Utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		9E281CE9225890B10038A5AF /* Utils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
 		9E281CEC225908480038A5AF /* Constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
@@ -157,6 +161,8 @@
 				9E30554B2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m */,
 				9E30553D22612AF0001D4597 /* NSMutableArray+JSList.h */,
 				9E30553E22612AF0001D4597 /* NSMutableArray+JSList.m */,
+				9E2491E8226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.h */,
+				9E2491E9226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m */,
 				9E30554622619F3F001D4597 /* NSNumber+JSDataProtocol.h */,
 				9E30554722619F3F001D4597 /* NSNumber+JSDataProtocol.m */,
 				9E30554222612C34001D4597 /* NSString+JSDataProtocol.h */,
@@ -330,6 +336,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E30554C2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */,
+				9E2491EA226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */,
 				9E6F444822578E5600777A24 /* JSL.m in Sources */,
 				9E3A9D6922568D7D00348529 /* Types.m in Sources */,
 				9E3A9D6D22568D8D00348529 /* Env.m in Sources */,
@@ -356,6 +363,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E30554D2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */,
+				9E2491EB226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */,
 				9E6F444922578E5600777A24 /* JSL.m in Sources */,
 				9E5D7B4C225B947E00970453 /* Terminal.m in Sources */,
 				9E3A9D6A22568D7D00348529 /* Types.m in Sources */,

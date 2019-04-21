@@ -708,8 +708,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
 
 - (void)test {
     JSL *jsl = [JSL new];
-    [jsl rep:@"(def! c (quote (1 \"b\" \"d\"))))"];
-    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 (splice-unquote c) 3))"], @"(1 1 \"b\" \"d\" 3)");
+    XCTAssertEqualObjects([jsl rep:@"(dissoc {:a 1 :b 2} :a)"], @"{:b 2}");
 }
 
 - (void)notestPerformanceJSListDropFirst {

@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class Env;
 
-@protocol JSDataProtocol <NSObject, NSCopying>
+@protocol JSDataProtocol <NSObject, NSCopying, NSMutableCopying>
 @property (nonatomic, readonly) NSString *dataType;
 @end
 
@@ -67,6 +67,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setObject:(JSData *)object forKey:(NSString *)key;
 - (NSUInteger)count;
 - (NSMutableDictionary *)value;
+- (void)setValue:(NSMutableDictionary *)hm;
 - (NSArray *)allKeys;
 - (NSArray *)allValues;
 - (BOOL)isEqual:(JSHashMap *)hashmap;
