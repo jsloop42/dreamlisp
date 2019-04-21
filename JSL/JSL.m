@@ -63,6 +63,7 @@
     [self rep:@"(def! load-file (fn* (x) (eval (read-string (str \"(do \" (slurp x) \")\")))))"];
     [self rep:@"(defmacro! cond (fn* (& xs) (if (> (count xs) 0) `(if ~(first xs) ~(if (> (count xs) 1) (nth xs 1) " \
                "(throw \"odd number of forms to cond\")) (cond ~@(rest (rest xs)))))))"];
+    //[self rep:@"(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond")) (cons 'cond (rest (rest xs)))))))"];
     [self rep:@"(def! *gensym-counter* (atom 0))"];
     [self rep:@"(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"];
     [self rep:@"(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs))" \
@@ -113,9 +114,6 @@
     }
     NSMutableArray *xs = [(JSList *)ast value];
     JSData *first = [xs first];
-    if ([[first dataType] isEqual:@"JSNil"]) {
-        return first;
-    }
     if ([[first dataType] isEqual:@"JSSymbol"] && [[(JSSymbol *)first name] isEqual:@"unquote"]) {
         return [xs second];
     }
@@ -123,31 +121,35 @@
         NSMutableArray *list = [(JSList *)first value];
         if (![list isEmpty] && [[[list first] dataType] isEqual:@"JSSymbol"] && [[(JSSymbol *)[list first] name] isEqual:@"splice-unquote"]) {
             return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"concat"], [list second],
-                                                    [self quasiQuote:[[JSList alloc] initWithArray:[list rest]]]] mutableCopy]];
+                                                    [self quasiQuote:[[JSList alloc] initWithArray:[xs rest]]]] mutableCopy]];
         }
     }
     return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"cons"], [self quasiQuote:first],
                                             [self quasiQuote:[[JSList alloc] initWithArray:[xs rest]]]] mutableCopy]];
 }
 
-- (JSData *)macroExpand:(JSData *)ast withEnv:(Env *)env {
-    while ([[ast dataType] isEqual:@"JSList"]) {
+- (BOOL)isMacroCall:(JSData *)ast env:(Env *)env {
+    if ([[ast dataType] isEqual:@"JSList"]) {
         NSMutableArray *xs = [(JSList *)ast value];
         JSData *first = [xs first];
         if (first && [[first dataType] isEqual:@"JSSymbol"]) {
             JSSymbol *sym = (JSSymbol *)first;
-            @try {
+            if ([env findEnvForKey:sym]) {
                 JSData *fnData = [env objectForSymbol:sym];
-                if (fnData == nil || [[fnData dataType] isNotEqualTo:@"JSFunction"]) break;
-                JSFunction *fn = (JSFunction *)fnData;
-                if (![fn isMacro]) break;
-                ast = [fn apply:[(JSList *)[xs rest] value]];
-            } @catch (NSException *exception) {
-                break;
+                if ([[fnData dataType] isEqual:@"JSFunction"]) {
+                    return [(JSFunction *)fnData isMacro];
+                }
             }
-        } else {
-            break;
         }
+    }
+    return NO;
+}
+
+- (JSData *)macroExpand:(JSData *)ast withEnv:(Env *)env {
+    while ([self isMacroCall:ast env:env]) {
+        NSMutableArray *xs = [(JSList *)ast value];
+        JSFunction *fn = (JSFunction *)[env objectForSymbol:(JSSymbol *)[xs first]];
+        ast = [fn apply:[xs rest]];
     }
     return ast;
 }
@@ -160,10 +162,10 @@
             }];
             return [[JSVector alloc] initWithArray:xs];
         } else if ([[ast dataType] isEqual:@"JSList"]) {
-            ast = [self macroExpand:ast withEnv:env];
-            if (![[ast dataType] isEqual:@"JSList"]) {
-                return [self evalAST:ast withEnv:env];
-            }
+            //ast = [self macroExpand:ast withEnv:env];
+//            if (![[ast dataType] isEqual:@"JSList"]) {
+//                return [self evalAST:ast withEnv:env];
+//            }
             NSMutableArray *xs = [(JSList *)ast value];
             if ([xs isEmpty]) {
                 return ast;
@@ -178,7 +180,7 @@
                 } else if ([[sym name] isEqual:@"defmacro!"]) {
                     JSFunction *fn = (JSFunction *)[self eval:[xs nth:2] withEnv:env];
                     JSFunction *macro = [[JSFunction alloc] initWithMacro:fn];
-                    [env setObject:macro forSymbol:(JSSymbol *)[xs second]];
+                    [env setObject:(JSData *)macro forSymbol:(JSSymbol *)[xs second]];
                     return macro;
                 } else if ([[sym name] isEqual:@"try*"]) {
                     @try {

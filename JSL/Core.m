@@ -248,7 +248,7 @@ double dmod(double a, double n) {
 
     JSData *(^cons)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSData *data = (JSData *)[xs second];
-        NSMutableArray *arr = [(JSList *)data value];
+        NSMutableArray *arr = [[(JSList *)data value] mutableCopy];
         [arr insertObject:(JSData *)[xs first] atIndex:0];
         return [[JSList alloc] initWithArray:arr];
     };
@@ -289,15 +289,22 @@ double dmod(double a, double n) {
 
     JSData *(^first)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         NSMutableArray *list = [xs first];
-        if ([list isEmpty]) {
+        if ([xs isEmpty] || [[(JSData *)list dataType] isEqual:@"JSNil"]) {
             return [JSNil new];
         }
-        return (JSList *)[list first];
+        JSData *first = (JSData *)[list first];
+        if (first == nil) {
+            return [JSNil new];
+        }
+        return first;
     };
     [ns setObject:[[JSFunction alloc] initWithFn:first] forKey:@"first"];
 
     JSData *(^rest)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         NSMutableArray *list = [xs first];
+        if ([[(JSData *)list dataType] isEqual:@"JSNil"] || [list isEmpty]) {
+            return [JSList new];
+        }
         return (JSList *)[list rest];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:rest] forKey:@"rest"];
@@ -448,10 +455,15 @@ double dmod(double a, double n) {
     [ns setObject:[[JSFunction alloc] initWithFn:throw] forKey:@"throw"];
 
     JSData *(^apply)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        if ([[(JSData *)xs dataType] isEqual:@"JSFunction"]) {
+        if ([[(JSData *)[xs first] dataType] isEqual:@"JSFunction"]) {
             JSFunction *fn = (JSFunction *)[xs first];
-            NSMutableArray *params = [[xs drop:0] dropLast];
-            [params addObjectsFromArray:(NSMutableArray *)[xs last]];
+            NSMutableArray *last = [[(JSList *)[xs last] value] mutableCopy];
+            NSMutableArray *params = [NSMutableArray new];
+            NSMutableArray *args = [[[xs mutableCopy] drop:0] dropLast];
+            if (args) {
+                params = args;
+            }
+            [params addObjectsFromArray:last];
             return [fn apply:params];
         }
         @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];

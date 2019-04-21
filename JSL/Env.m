@@ -43,7 +43,11 @@
         for (i = 0; i < len; i++) {
             NSString *sym = [(JSSymbol *)binds[i] name];
             if ([sym isEqual:@"&"]) {
-                [data setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:[(JSSymbol *)binds[i + 1] name]];
+                if ([exprs count] > i) {
+                    [data setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:[(JSSymbol *)binds[i + 1] name]];
+                } else {
+                    [data setObject:[[JSList alloc] initWithArray:@[]] forKey:[(JSSymbol *)binds[i + 1] name]];
+                }
                 break;
             }
             [data setObject:exprs[i] forKey:sym];
@@ -75,6 +79,7 @@
             return _data;
         }
     }
+    debug(@"%@ symbol not found.", [key name]);
     @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:JSL_SYMBOL_NOT_FOUND_MSG
                                     userInfo:[[[JSError alloc] initWithFormat:SymbolNotFound, [key name]] value]];
 }
