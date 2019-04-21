@@ -450,7 +450,7 @@ double dmod(double a, double n) {
 
 - (void)addInvokeFunctions {
     JSData *(^throw)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        @throw [[NSException alloc] initWithName:JSLException reason:JSLException userInfo:@{@"array": xs}];
+        @throw [[NSException alloc] initWithName:JSLException reason:JSLException userInfo:@{@"ns-marray": xs}];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:throw] forKey:@"throw"];
 

@@ -11,6 +11,7 @@
 @implementation JSData
 
 @synthesize dataType;
+@synthesize value;
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [JSData new];

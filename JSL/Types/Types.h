@@ -25,6 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol JSDataProtocol <NSObject, NSCopying, NSMutableCopying>
 @property (nonatomic, readonly) NSString *dataType;
+@property (nonatomic, readwrite) id value;
 @end
 
 @interface JSData : NSObject <JSDataProtocol>

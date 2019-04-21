@@ -162,10 +162,10 @@
             }];
             return [[JSVector alloc] initWithArray:xs];
         } else if ([[ast dataType] isEqual:@"JSList"]) {
-            //ast = [self macroExpand:ast withEnv:env];
-//            if (![[ast dataType] isEqual:@"JSList"]) {
-//                return [self evalAST:ast withEnv:env];
-//            }
+            ast = [self macroExpand:ast withEnv:env];
+            if (![[ast dataType] isEqual:@"JSList"]) {
+                return [self evalAST:ast withEnv:env];
+            }
             NSMutableArray *xs = [(JSList *)ast value];
             if ([xs isEmpty]) {
                 return ast;
@@ -280,5 +280,27 @@
 - (NSString *)rep:(NSString *)string {
     return [self print:[self eval:[self read:string] withEnv:[self env]]];
 }
+
+- (NSString *)printException:(NSException *)exception {
+    NSString *desc = nil;
+    if (exception.userInfo != nil) {
+        desc = [exception.userInfo valueForKey:@"description"];
+        if (desc) {
+            error(@"%@", desc);
+        } else {
+            NSMutableArray *arr = (NSMutableArray *)[exception.userInfo valueForKey:@"ns-marray"];
+            if (arr) {
+                JSData *first = (JSData *)[arr first];
+                desc = [[NSString alloc] initWithFormat:@"Error: %@", [printer printStringFor:first readably:YES]];
+                error(@"%@", desc);
+            }
+        }
+    } else {
+        desc = exception.description;
+        error(@"%@", desc);
+    }
+    return desc;
+}
+
 
 @end

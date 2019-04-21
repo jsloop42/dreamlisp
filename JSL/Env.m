@@ -79,9 +79,8 @@
             return _data;
         }
     }
-    debug(@"%@ symbol not found.", [key name]);
-    @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:JSL_SYMBOL_NOT_FOUND_MSG
-                                    userInfo:[[[JSError alloc] initWithFormat:SymbolNotFound, [key name]] value]];
+    JSError *err = [[JSError alloc] initWithFormat:SymbolNotFound, [key name]];
+    @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:[err description] userInfo:[err value]];
 }
 
 @end

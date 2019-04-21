@@ -8,8 +8,8 @@
 
 #import "JSError.h"
 
-NSString *SymbolNotFound = @"'%@' not found.";
-NSString *IndexOutOfBounds = @"Index out of bounds.";
+NSString *SymbolNotFound = @"'%@' not found";
+NSString *IndexOutOfBounds = @"Index out of bounds";
 NSString *JSLException = @"JSLException";
 
 @implementation JSError {

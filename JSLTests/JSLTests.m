@@ -724,6 +724,16 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     //XCTAssertEqualObjects([jsl rep:@"(cond false 7 false 8 false 9)"], @"nil");
 }
 
+- (void)testErrorHandling {
+    JSL *jsl = [JSL new];
+    XCTAssertThrows([jsl rep:@"(throw \"err1\")"], @"Error: err1");
+    @try {
+        XCTAssertEqualObjects([jsl rep:@"(try* (abc 1 2) (catch* exc (prn \"exc is:\" exc)))"], @"nil");
+    } @catch (NSException *exception) {
+        XCTAssertEqualObjects([jsl printException:exception], @"exc is:" "'abc' not found");
+    }
+}
+
 - (void)testMisc {
     JSL *jsl = [JSL new];
     XCTAssertEqualObjects([jsl rep:@"nil"], @"nil");

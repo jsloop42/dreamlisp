@@ -11,13 +11,6 @@
 #import "Terminal.h"
 #import "Logger.h"
 
-void printException(NSException *exception) {
-    if (exception.userInfo != nil) {
-        error(@"%@", [exception.userInfo valueForKey:@"description"]);
-    } else {
-        error(@"%@", exception.description);
-    }
-}
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
@@ -36,7 +29,7 @@ int main(int argc, const char * argv[]) {
                 [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", jslFile]];
                 exit(0);
             } @catch (NSException *exception) {
-                printException(exception);
+                [jsl printException:exception];
                 exit(-1);
             }
         }
@@ -52,7 +45,7 @@ int main(int argc, const char * argv[]) {
                     info(@"%@", ret);
                 }
             } @catch (NSException *exception) {
-                printException(exception);
+                [jsl printException:exception];
             }
         }
     }
