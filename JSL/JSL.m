@@ -55,7 +55,8 @@
     };
     [[self env] setObject:[[JSFunction alloc] initWithFn:fn] forSymbol:[[JSSymbol alloc] initWithName:@"eval"]];
     [[self env] setObject:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
-    [[self env] setObject:[[JSString alloc] initWithString:@"Objective-C"] forSymbol:[[JSSymbol alloc] initWithName:@"*host-language*"]];
+    [[self env] setObject:[[JSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION]
+                forSymbol:[[JSSymbol alloc] initWithName:@"*host-language*"]];
 }
 
 - (void)setJSLFuns {

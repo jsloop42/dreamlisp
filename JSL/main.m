@@ -33,6 +33,7 @@ int main(int argc, const char * argv[]) {
                 exit(-1);
             }
         }
+        [jsl rep:@"(println (str \"JSL [\" *host-language* \"]\"))"];
         Terminal *term = [Terminal new];
         NSString *inp;
         NSString *ret;
