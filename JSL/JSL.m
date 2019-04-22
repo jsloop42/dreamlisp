@@ -63,12 +63,11 @@
     [self rep:@"(def! load-file (fn* (x) (eval (read-string (str \"(do \" (slurp x) \")\")))))"];
     [self rep:@"(defmacro! cond (fn* (& xs) (if (> (count xs) 0) `(if ~(first xs) ~(if (> (count xs) 1) (nth xs 1) " \
                "(throw \"odd number of forms to cond\")) (cond ~@(rest (rest xs)))))))"];
-    //[self rep:@"(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond")) (cons 'cond (rest (rest xs)))))))"];
     [self rep:@"(def! *gensym-counter* (atom 0))"];
     [self rep:@"(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"];
     [self rep:@"(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs))" \
                "(if ~condvar ~condvar (or ~@(rest xs)))))))))"];
-    [self rep:@"(def! exit (fn* () (do (prn \"Bye.\") (exit*))))"];
+    [self rep:@"(def! exit (fn* () (do (println \"Bye.\") (exit*))))"];
 }
 
 - (JSData *)read:(NSString *)string {
