@@ -48,7 +48,7 @@ NSString *JSLException = @"JSLException";
     if (self) {
         [self bootstrap];
         _description = JSLException;
-        [_errDict setValue:data forKey:@"data"];
+        [_errDict setObject:data forKey:@"jsdata"];
     }
     return self;
 }
@@ -58,7 +58,7 @@ NSString *JSLException = @"JSLException";
     if (self) {
         [self bootstrap];
         _description = JSLException;
-        [_errDict setValue:array forKey:@"array"];
+        [_errDict setObject:array forKey:@"array"];
     }
     return self;
 }

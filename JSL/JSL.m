@@ -189,10 +189,10 @@
                         if ([xs count] > 2) {
                             JSList *catchxs = (JSList *)[xs nth:2];
                             if ([[[catchxs first] dataType] isEqual:@"JSSymbol"] && [[(JSSymbol *)[catchxs first] name] isNotEqualTo:@"catch*"]) {
-                                @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:JSL_SYMBOL_NOT_FOUND_MSG userInfo:@{@"errMsg": [catchxs first]}];
+                                @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:JSL_SYMBOL_NOT_FOUND_MSG userInfo:@{@"jsdata": [catchxs first]}];
                             }
                             Env *catchEnv = [[Env alloc] initWithEnv:env binds:[@[(JSSymbol *)[catchxs second]] mutableCopy]
-                                                               exprs:[@[exception.description] mutableCopy]];
+                                                                 exprs:[@[[self exceptionInfo:exception]] mutableCopy]];
                             return [self eval:[catchxs nth:2] withEnv:catchEnv];
                          }
                         @throw exception;
@@ -281,23 +281,38 @@
     return [self print:[self eval:[self read:string] withEnv:[self env]]];
 }
 
-- (NSString *)printException:(NSException *)exception {
+- (nullable JSData *)exceptionInfo:(NSException *)exception {
+    NSDictionary *info = exception.userInfo;
+    if (info) {
+        JSData *data = (JSData *)[info objectForKey:@"jsdata"];
+        if (data) return data;
+        NSString *desc = [info valueForKey:@"description"];
+        if (desc) return [[JSString alloc] initWithString:desc];
+    }
+    if ([exception.description isNotEmpty]) return [[JSString alloc] initWithString:exception.description];
+    return nil;
+}
+
+- (NSString *)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably {
     NSString *desc = nil;
     if (exception.userInfo != nil) {
         desc = [exception.userInfo valueForKey:@"description"];
-        if (desc) {
+        if (desc && log) {
             error(@"%@", desc);
         } else {
-            NSMutableArray *arr = (NSMutableArray *)[exception.userInfo valueForKey:@"ns-marray"];
-            if (arr) {
-                JSData *first = (JSData *)[arr first];
-                desc = [[NSString alloc] initWithFormat:@"Error: %@", [printer printStringFor:first readably:YES]];
-                error(@"%@", desc);
+            JSData *data = (JSData *)[exception.userInfo valueForKey:@"jsdata"];
+            if (data) {
+                desc = [[NSString alloc] initWithFormat:@"Error: %@", [printer printStringFor:data readably:readably]];
+                if (desc && log) {
+                    error(@"%@", desc);
+                }
             }
         }
     } else {
         desc = exception.description;
-        error(@"%@", desc);
+        if (desc && log) {
+            error(@"%@", desc);
+        }
     }
     return desc;
 }

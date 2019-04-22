@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) Env *env;
 - (instancetype)init;
 - (NSString *)rep:(NSString *)string;
-- (NSString *)printException:(NSException *)exception;
+- (NSString *)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably;
 @end
 
 NS_ASSUME_NONNULL_END

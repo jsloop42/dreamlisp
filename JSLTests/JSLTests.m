@@ -61,6 +61,10 @@
     XCTAssertEqualObjects([kwd value], @":foo");
     kwd = [[JSKeyword alloc] initWithKeyword:@"foo"];
     XCTAssertEqualObjects([kwd string], @"foo");
+    kwd = [[JSKeyword alloc] initWithKeyword:@":abc"];
+    XCTAssertEqualObjects([kwd encoded], @"\u029e:abc");
+    kwd = [[JSKeyword alloc] initWithEncodedKeyword:@"\u029e:abc"];
+    XCTAssertEqualObjects([kwd value], @":abc");
 }
 
 - (void)testTokenize {
@@ -415,6 +419,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"((fn* [f x] (f x)) (fn* [a] (+ 1 a)) 7)"], @"8");
     XCTAssertEqualObjects([jsl rep:@"(= [(list)] (list []))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(= [1 2 (list 3 4 [5 6])] (list 1 2 [3 4 (list 5 6)]))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(vector 3 4 5)"], @"[3 4 5]");
 }
 
 - (void)testHashMap {
@@ -424,6 +429,12 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"{\"a\" (+ 1 2)}"], @"{\"a\" 3}");
     XCTAssertEqualObjects([jsl rep:@"{:a (+ 7 8)}"], @"{:a 15}");
     XCTAssertEqualObjects([jsl rep:@"(dissoc {:a 1 :b 2} :a)"], @"{:b 2}");
+    XCTAssertEqualObjects([jsl rep:@"(keys {:abc 123 :def 456})"], @"(:abc :def)");
+    XCTAssertEqualObjects([jsl rep:@"(contains? {:abc nil} :abc)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? {:abc 123} :abc)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(get {:abc 123} :abc)"], @"123");
+    [jsl rep:@"(def! hm4 (assoc {:a 1 :b 2} :a 3 :c 1))"];
+    XCTAssertEqualObjects([jsl rep:@"(get hm4 :a)"], @"3");
 }
 
 - (void)testEnv {
@@ -518,6 +529,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"((fn* (a & more) (count more)) 1)"], @"0");
     XCTAssertEqualObjects([jsl rep:@"((fn* (a & more) (list? more)) 1)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(apply + (list 2 3))"], @"5");
+    XCTAssertEqualObjects([jsl rep:@"(apply + 4 (list 5))"], @"9");
 }
 
 - (void)testNotFunction {
@@ -701,6 +713,11 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(= :abc :abc)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(= :abc :def)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(= :abc \":abc\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(keyword? (keyword \"abc\"))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(keyword? (nth (keys {:abc 123 :def 456}) 0))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(keyword? 'abc)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(keyword? \"abc\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(keyword? \"\")"], @"false");
 }
 
 - (void)testQuote {
@@ -721,7 +738,11 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(one)"], @"1");
     [jsl rep:@"(defmacro! foo (fn* (& more) (count more)))"];
     XCTAssertEqualObjects([jsl rep:@"(foo 1 2 3)"], @"3");
-    //XCTAssertEqualObjects([jsl rep:@"(cond false 7 false 8 false 9)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(cond false 7 false 8 false 9)"], @"nil");
+}
+
+void testErrorHandleCallback(id param, int tag, int counter, const char *s) {
+    [param errorHandleCallback:[[NSString alloc] initWithCString:s encoding:NSUTF8StringEncoding] withTag:tag counter:counter];
 }
 
 - (void)testErrorHandling {
@@ -730,7 +751,26 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     @try {
         XCTAssertEqualObjects([jsl rep:@"(try* (abc 1 2) (catch* exc (prn \"exc is:\" exc)))"], @"nil");
     } @catch (NSException *exception) {
-        XCTAssertEqualObjects([jsl printException:exception], @"exc is:" "'abc' not found");
+        XCTAssertEqualObjects([jsl printException:exception log:NO readably:YES], @"exc is:" "'abc' not found");
+    }
+    XCTAssertEqualObjects([jsl rep:@"(try* (throw \"my exception\") (catch* exc (do (prn \"exc:\" exc) 7)))"], @"7");
+    freeInfoCallback();
+    infoCallback(self, 0, &testErrorHandleCallback);
+    XCTAssertEqualObjects([jsl rep:@"(try* (abc 1 2) (catch* exc (prn \"exc is:\" exc)))"], @"nil");
+    freeInfoCallback();
+    infoCallback(self, 1, &testErrorHandleCallback);
+    XCTAssertEqualObjects([jsl rep:@"(try* (nth [] 1) (catch* exc (prn \"exc is:\" exc)))"], @"nil");
+}
+
+- (void)errorHandleCallback:(NSString *)message withTag:(int)tag counter:(int)counter {
+    XCTAssertNotNil(message);
+    switch (tag) {
+        case 0:
+            XCTAssertEqualObjects(message, @"\"exc is:\" \"'abc' not found\"");
+            break;
+        case 1:
+            XCTAssertEqualObjects(message, @"\"exc is:\" \"Index out of bounds.\"");
+            break;
     }
 }
 
@@ -740,8 +780,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)test {
-    JSL *jsl = [JSL new];
-
+    // JSL *jsl = [JSL new];
 }
 
 - (void)notestPerformanceJSListDropFirst {

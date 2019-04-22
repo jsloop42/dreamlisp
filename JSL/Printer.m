@@ -33,6 +33,9 @@
         return string;
     } else if ([dataType isEqual:@"NSString"]) {
         NSString *string = (NSString *)data;
+        if ([[string substringToIndex:1] isEqual:@"\u029e"]) {
+            return [string substringFromIndex:1];
+        }
         if (readably) {
             return [self readableStringFor:string];
         }
@@ -62,7 +65,7 @@
             NSString *key = keys[i];
             JSData *keyData = nil;
             if ([JSKeyword isKeyword:key]) {
-                keyData = [[JSKeyword alloc] initWithKeyword:key];
+                keyData = [[JSKeyword alloc] initWithEncodedKeyword:key];
             } else {
                 keyData = [[JSString alloc] initWithString:key];
             }

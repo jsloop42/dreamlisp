@@ -110,7 +110,7 @@
 @synthesize value = _string;
 
 + (BOOL)isKeyword:(NSString *)string {
-    if ([string characterAtIndex:0] == ':') {
+    if ([[string substringToIndex:1] isEqual:@"\u029e"]) {
         return YES;
     }
     return NO;
@@ -140,6 +140,18 @@
     return self;
 }
 
+- (instancetype)initWithEncodedKeyword:(NSString *)keyword {
+    self = [super init];
+    if (self) {
+        if ([[keyword substringToIndex:1] isEqual:@"\u029e"]) {
+            _string = [keyword stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:@""];
+        } else {
+            _string = keyword;
+        }
+    }
+    return self;
+}
+
 - (NSString *)dataType {
     return [self className];
 }
@@ -155,7 +167,18 @@
     return _string;
 }
 
--(void)setValue:(NSString *)value {
+- (NSString *)encoded {
+    return [_string stringByReplacingCharactersInRange:NSMakeRange(0, 0) withString:@"\u029e"];
+}
+
+- (NSString *)decoded {
+    if ([[_string substringToIndex:1] isEqual:@"\u029e"]) {
+        return [_string substringFromIndex:1];
+    }
+    return _string;
+}
+
+- (void)setValue:(NSString *)value {
     _string = value;
 }
 
@@ -264,7 +287,7 @@
             } else if ([dkey isEqual:@"JSString"]) {
                 key = [(JSString *)array[i] value];
             } else if ([dkey isEqual:@"JSKeyword"]) {
-                key = [(JSKeyword *)array[i] value];
+                key = [(JSKeyword *)array[i] encoded];
             } else if ([dkey isEqual:@"NSString"]) {
                 key = array[i];
             }
@@ -289,7 +312,6 @@
 - (NSMutableDictionary *)value {
     return dict;
 }
-
 
 - (void)setValue:(NSMutableDictionary *)hm {
     dict = hm;
@@ -451,6 +473,7 @@
     return [[JSList alloc] initWithArray:[[[[array rest] reverseObjectEnumerator] allObjects] mutableCopy]];
 }
 
+/** Drops n elements. */
 - (JSList *)drop:(NSInteger)n {
     NSMutableArray *arr = [array mutableCopy];
     if (n > 0 && n <= [arr count]) {

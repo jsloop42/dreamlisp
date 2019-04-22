@@ -47,7 +47,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithKeyword:(NSString *)string;
+- (instancetype)initWithEncodedKeyword:(NSString *)keyword;
 - (NSString *)string;
+- (NSString *)encoded;
+- (NSString *)decoded;
 - (BOOL)isEqual:(JSKeyword *)keyword;
 @end
 

@@ -29,7 +29,7 @@ int main(int argc, const char * argv[]) {
                 [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", jslFile]];
                 exit(0);
             } @catch (NSException *exception) {
-                [jsl printException:exception];
+                [jsl printException:exception log:YES readably:YES];
                 exit(-1);
             }
         }
@@ -45,7 +45,7 @@ int main(int argc, const char * argv[]) {
                     info(@"%@", ret);
                 }
             } @catch (NSException *exception) {
-                [jsl printException:exception];
+                [jsl printException:exception log:YES readably:YES];
             }
         }
     }
