@@ -780,7 +780,8 @@ void testErrorHandleCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)test {
-    // JSL *jsl = [JSL new];
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(readline \"mal-user> \")"], @"nil");
 }
 
 - (void)notestPerformanceJSListDropFirst {

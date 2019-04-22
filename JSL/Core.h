@@ -11,6 +11,7 @@
 #import "Reader.h"
 #import "Printer.h"
 #import "Logger.h"
+#import "Terminal.h"
 #import <objc/message.h>
 
 NS_ASSUME_NONNULL_BEGIN

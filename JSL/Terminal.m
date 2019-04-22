@@ -8,7 +8,7 @@
 
 #import "Terminal.h"
 
-char *_prompt = "user> ";
+const char *_prompt = "user> ";
 NSString *_historyFile = @"/.jsl-history";
 
 @implementation Terminal {
@@ -51,7 +51,11 @@ NSString *_historyFile = @"/.jsl-history";
 }
 
 - (NSString *)readline {
-    char *input = readline(_prompt);
+    return [self readlineWithPrompt:_prompt];
+}
+
+- (NSString *)readlineWithPrompt:(const char *)prompt {
+    char *input = readline(prompt);
     NSString *exp;
     if (input) {
         if (_isHistoryEnabled) {

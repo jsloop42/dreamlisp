@@ -12,6 +12,7 @@
     NSMutableDictionary *ns;
     Reader *reader;
     Printer *printer;
+    Terminal *terminal;
 }
 
 - (instancetype)init {
@@ -26,6 +27,7 @@
     ns = [NSMutableDictionary new];
     reader = [Reader new];
     printer = [Printer new];
+    terminal = [Terminal new];
     [self addArithmeticFunctions];
     [self addComparisonFunctions];
     [self addPrintFunctions];
@@ -662,12 +664,11 @@ double dmod(double a, double n) {
 }
 
 - (void)addIOFunctions {
+    Core * __weak weakSelf = self;
     JSData *(^readline)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        info3(@"", @"%@", [(JSString *)[xs first] value]);
-        NSFileHandle *input = [NSFileHandle fileHandleWithStandardInput];
-        NSData *data = [NSData dataWithData:[input availableData]];
-        NSString *inputString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        return [[JSString alloc] initWithString:[inputString trim]];
+        Core *this = weakSelf;
+        NSString *line = [this->terminal readlineWithPrompt:[[(JSString *)[xs first] value] UTF8String]];
+        return [[JSString alloc] initWithString:line];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:readline] forKey:@"readline"];
 }
