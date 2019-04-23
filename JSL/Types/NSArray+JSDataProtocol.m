@@ -23,4 +23,8 @@
     return [self count] == 0;
 }
 
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@>", NSStringFromClass([self class]), self, [self componentsJoinedByString:@", "]];
+}
+
 @end

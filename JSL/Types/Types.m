@@ -119,6 +119,10 @@
     return copy;
 }
 
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _string, _meta];
+}
+
 @end
 
 #pragma mark Keyword
@@ -226,6 +230,10 @@
     return copy;
 }
 
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _string, _meta];
+}
+
 @end
 
 #pragma mark Symbol
@@ -273,6 +281,10 @@
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSSymbol alloc] initWithName:_name];
     return copy;
+}
+
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _name, _meta];
 }
 
 @end
@@ -425,6 +437,10 @@
     return copy;
 }
 
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [dict description], _meta];
+}
+
 @end
 
 #pragma mark List
@@ -567,6 +583,10 @@
     return copy;
 }
 
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [array description], _meta];
+}
+
 @end
 
 #pragma mark Vector
@@ -638,6 +658,10 @@
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSVector alloc] initWithArray:array];
     return copy;
+}
+
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [array description], _meta];
 }
 
 @end
@@ -770,6 +794,10 @@
     return copy;
 }
 
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, n, _meta];
+}
+
 @end
 
 #pragma mark Atom
@@ -819,6 +847,10 @@
     return copy;
 }
 
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _data, _meta];
+}
+
 @end
 
 #pragma mark Nil
@@ -841,6 +873,10 @@
 
 - (BOOL)hasMeta {
     return _meta != nil;
+}
+
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, @"nil", _meta];
 }
 
 @end
@@ -884,6 +920,10 @@
 
 - (BOOL)hasMeta {
     return _meta != nil;
+}
+
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _flag ? @"YES" : @"NO", _meta];
 }
 
 @end
@@ -971,6 +1011,10 @@
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSFunction alloc] initWithFunction:self];
     return copy;
+}
+
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - params: %@, ast: %@ meta: %@>", NSStringFromClass([self class]), self, [_params description], _ast, _meta];
 }
 
 @end
