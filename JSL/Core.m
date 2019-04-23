@@ -739,7 +739,7 @@ double dmod(double a, double n) {
     [ns setObject:[[JSFunction alloc] initWithFn:exitfn] forKey:@"exit*"];
 
     JSData *(^timems)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        return [[JSNumber alloc] initWithDouble:[Utils timestamp]];
+        return [[JSNumber alloc] initWithInteger:[Utils timestamp]];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:timems] forKey:@"time-ms"];
 }
