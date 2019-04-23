@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol JSDataProtocol <NSObject, NSCopying, NSMutableCopying>
 @property (nonatomic, readonly) NSString *dataType;
 @property (nonatomic, readwrite) id value;
+@property (nonatomic, readwrite) JSData *meta;
+- (BOOL)hasMeta;
 @end
 
 @interface JSData : NSObject <JSDataProtocol>
@@ -38,6 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithFormat:(NSString *)format, ...;
 - (instancetype)initWithContentsOfFile:(NSString *)filePath;
 - (instancetype)initWithCString:(const char *)string;
+- (instancetype)initWithMeta:(JSData *)meta string:(JSString *)string;
 - (BOOL)isEqual:(JSString *)string;
 @end
 
@@ -48,6 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithKeyword:(NSString *)string;
 - (instancetype)initWithEncodedKeyword:(NSString *)keyword;
+- (instancetype)initWithMeta:(JSData *)meta keyword:(JSKeyword *)keyword;
 - (NSString *)string;
 - (NSString *)encoded;
 - (NSString *)decoded;
@@ -57,6 +61,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSSymbol: JSData
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name;
+- (instancetype)initWithMeta:(JSData *)meta symbol:(JSSymbol *)symbol;
 - (NSString *)name;
 - (BOOL)isEqual:(JSSymbol *)sym;
 @end
@@ -67,6 +72,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithDictionary:(NSMutableDictionary *)dictionary;
 - (instancetype)initWithStringKey:(NSMutableDictionary<NSString *, id> *)dictionary;
 - (instancetype)initWithArray:(NSMutableArray *)array;
+- (instancetype)initWithMeta:(JSData *)meta hashmap:(JSHashMap *)hashmap;
 - (JSData *)objectForKey:(NSString *)key;
 - (void)setObject:(JSData *)object forKey:(NSString *)key;
 - (NSUInteger)count;
@@ -82,6 +88,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, copy) JSData *meta;
 - (instancetype)init;
 - (instancetype)initWithArray:(NSArray *)list;
+- (instancetype)initWithMeta:(JSData *)meta list:(JSList *)list;
 - (void)add:(JSData *)object;
 - (void)add:(JSData *)object atIndex:(NSUInteger)index;
 - (void)remove:(JSData *)object;
@@ -104,6 +111,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSVector: JSList
 - (instancetype)initWithArray:(NSArray *)list;
+- (instancetype)initWithMeta:(JSData *)meta vector:(JSVector *)vector;
 - (BOOL)isEqual:(JSVector *)vector;
 - (JSList *)list;
 @end
@@ -115,6 +123,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithInteger:(NSUInteger)number;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithNumber:(NSDecimalNumber *)number;
+- (instancetype)initWithMeta:(JSData *)meta number:(JSNumber *)number;
 - (BOOL)isEqual:(JSNumber *)num;
 - (double)doubleValue;
 - (int)intValue;
@@ -127,6 +136,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSAtom : JSData
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithData:(JSData *)data;
+- (instancetype)initWithMeta:(JSData *)meta atom:(JSAtom *)atom;
 - (void)setValue:(JSData *)data;
 - (JSData *)value;
 @end

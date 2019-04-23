@@ -706,6 +706,14 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     [jsl rep:@"(def! a (list 2 3))"];
     [jsl rep:@"(cons 1 a)"];
     XCTAssertEqualObjects([jsl rep:@"a"], @"(2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(seq \"abc\")"], @"(\"a\" \"b\" \"c\")");
+    XCTAssertEqualObjects([jsl rep:@"(seq \"\")"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(seq '())"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(seq [])"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(apply str (seq \"this is a test\"))"], @"\"this is a test\"");
+    XCTAssertEqualObjects([jsl rep:@"(seq '(2 3 4))"], @"(2 3 4)");
+    XCTAssertEqualObjects([jsl rep:@"(seq [2 3 4])"], @"(2 3 4)");
+    XCTAssertEqualObjects([jsl rep:@"(seq nil)"], @"nil");
 }
 
 - (void)testKeyword {
@@ -769,9 +777,23 @@ void testErrorHandleCallback(id param, int tag, int counter, const char *s) {
             XCTAssertEqualObjects(message, @"\"exc is:\" \"'abc' not found\"");
             break;
         case 1:
-            XCTAssertEqualObjects(message, @"\"exc is:\" \"Index out of bounds.\"");
+            XCTAssertEqualObjects(message, @"\"exc is:\" \"Index out of bounds\"");
             break;
     }
+}
+
+- (void)testMeta {
+    JSL *jsl = [JSL new];
+    JSSymbol *sym = [JSSymbol new];
+    XCTAssertFalse([sym hasMeta]);
+    JSData *meta = [[JSString alloc] initWithString:@"meta-string"];
+    JSSymbol *symMeta = [[JSSymbol alloc] initWithMeta:meta symbol:sym];
+    XCTAssertNotNil([symMeta meta]);
+    XCTAssertTrue([symMeta hasMeta]);
+    XCTAssertNil([sym meta]);
+    XCTAssertFalse([sym hasMeta]);
+    XCTAssertEqualObjects([jsl rep:@"(meta +)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(meta (with-meta [1 2 3] {\"a\" 1}))"], @"{\"a\" 1}");
 }
 
 - (void)testMisc {
@@ -781,7 +803,7 @@ void testErrorHandleCallback(id param, int tag, int counter, const char *s) {
 
 - (void)test {
     JSL *jsl = [JSL new];
-    XCTAssertEqualObjects([jsl rep:@"(readline \"mal-user> \")"], @"nil");
+    //XCTAssertEqualObjects([jsl rep:@"(readline \"mal-user> \")"], @"hello");
 }
 
 - (void)notestPerformanceJSListDropFirst {

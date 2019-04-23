@@ -358,10 +358,14 @@ double dmod(double a, double n) {
         }
         JSData *first = (JSData *)[xs first];
         if ([[first dataType] isEqual:@"JSList"]) {
-            return (JSList *)first;
+            JSList *list = (JSList *)first;
+            if ([list count] == 0) return [JSNil new];
+            return list;
         }
         if ([[first dataType] isEqual:@"JSVector"]) {
-            return [(JSVector *)first list];
+            JSVector *vec = (JSVector *)first;
+            if ([vec count] == 0) return [JSNil new];
+            return [vec list];
         }
         if ([[first dataType] isEqual:@"JSString"]) {
             NSMutableArray *arr = [NSMutableArray new];
@@ -369,12 +373,16 @@ double dmod(double a, double n) {
             JSString *str = (JSString *)first;
             NSString *string = [str value];
             NSUInteger len = [string count];
+            if (len == 0) return [JSNil new];
             for(i = 0; i < len; i++) {
-                [arr addObject:[[NSString alloc] initWithFormat:@"%@", arr[i]]];
+                [arr addObject:[[NSString alloc] initWithFormat:@"%c", [string characterAtIndex:i]]];
             }
             return [[JSList alloc] initWithArray:arr];
         }
-        return [[JSBool alloc] initWithBool:NO];
+        if ([[first dataType] isEqual:@"JSNil"]) {
+            return (JSNil *)first;
+        }
+        @throw [[NSException alloc] initWithName:JSL_NOT_A_SEQUENCE_ERROR reason:JSL_NOT_A_SEQUENCE_ERROR_MSG userInfo:nil];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:seq] forKey:@"seq"];
 }
@@ -678,19 +686,46 @@ double dmod(double a, double n) {
         JSData *first = (JSData *)[xs first];
         if ([[first dataType] isEqual:@"JSFunction"]) {
             JSFunction *fn = (JSFunction *)first;
-            if (![fn meta]) {
+            if ([fn meta]) {
                 return [fn meta];
             }
         }
+        if ([first meta]) return [first meta];
         return [JSNil new];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:meta] forKey:@"meta"];
 
     JSData *(^withMeta)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSData *first = (JSData *)[xs first];
-        if ([[first dataType] isEqual:@"JSFunction"]) {
+        JSData *meta = (JSData *)[xs second];
+        NSString *dataType = [first dataType];
+        if ([dataType isEqual:@"JSFunction"]) {
             JSFunction *fn = (JSFunction *)first;
-            return [[JSFunction alloc] initWithMeta:(JSData *)[xs second] func:fn];
+            return [[JSFunction alloc] initWithMeta:meta func:fn];
+        }
+        if ([dataType isEqual:@"JSString"]) {
+            return [[JSString alloc] initWithMeta:meta string:(JSString *)first];
+        }
+        if ([dataType isEqual:@"JSKeyword"]) {
+            return [[JSKeyword alloc] initWithMeta:meta keyword:(JSKeyword *)first];
+        }
+        if ([dataType isEqual:@"JSSymbol"]) {
+            return [[JSSymbol alloc] initWithMeta:meta symbol:(JSSymbol *)first];
+        }
+        if ([dataType isEqual:@"JSHashMap"]) {
+            return [[JSHashMap alloc] initWithMeta:meta hashmap:(JSHashMap *)first];
+        }
+        if ([dataType isEqual:@"JSList"]) {
+            return [[JSList alloc] initWithMeta:meta list:(JSList *)first];
+        }
+        if ([dataType isEqual:@"JSVector"]) {
+            return [[JSVector alloc] initWithMeta:meta vector:(JSVector *)first];
+        }
+        if ([dataType isEqual:@"JSNumber"]) {
+            return [[JSNumber alloc] initWithMeta:meta number:(JSNumber *)first];
+        }
+        if ([dataType isEqual:@"JSAtom"]) {
+            return [[JSAtom alloc] initWithMeta:meta atom:(JSAtom *)first];
         }
         return first;
     };
@@ -706,7 +741,7 @@ double dmod(double a, double n) {
     JSData *(^timems)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         return [[JSNumber alloc] initWithDouble:[Utils timestamp]];
     };
-    [ns setObject:[[JSFunction alloc] initWithFn:timems] forKey:@"timems"];
+    [ns setObject:[[JSFunction alloc] initWithFn:timems] forKey:@"time-ms"];
 }
 
 - (NSMutableDictionary *)namespace {

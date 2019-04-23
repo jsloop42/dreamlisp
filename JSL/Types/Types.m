@@ -12,6 +12,11 @@
 
 @synthesize dataType;
 @synthesize value;
+@synthesize meta;
+
+- (BOOL)hasMeta {
+    return NO;
+}
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [JSData new];
@@ -29,9 +34,11 @@
 
 @implementation JSString {
     NSString *_string;
+    JSData *_meta;
 }
 
 @synthesize value = _string;
+@synthesize meta = _meta;
 
 - (instancetype)init {
     self = [super init];
@@ -78,6 +85,15 @@
     return self;
 }
 
+- (instancetype)initWithMeta:(JSData *)meta string:(JSString *)string {
+    self = [super init];
+    if (self) {
+        _string = [string value];
+        _meta = meta;
+    }
+    return self;
+}
+
 - (NSString *)dataType {
     return [self className];
 }
@@ -94,6 +110,10 @@
     return [_string isEqualToString:[string value]];
 }
 
+- (BOOL)hasMeta {
+    return _meta != nil;
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSString alloc] initWithString:_string];
     return copy;
@@ -105,9 +125,11 @@
 
 @implementation JSKeyword {
     NSString *_string;
+    JSData *_meta;
 }
 
 @synthesize value = _string;
+@synthesize meta = _meta;
 
 + (BOOL)isKeyword:(NSString *)string {
     if ([[string substringToIndex:1] isEqual:@"\u029e"]) {
@@ -152,6 +174,15 @@
     return self;
 }
 
+- (instancetype)initWithMeta:(JSData *)meta keyword:(JSKeyword *)keyword {
+    self = [super init];
+    if (self) {
+        _string = [keyword value];
+        _meta = meta;
+    }
+    return self;
+}
+
 - (NSString *)dataType {
     return [self className];
 }
@@ -186,6 +217,10 @@
     return [_string isEqualToString:[keyword value]];
 }
 
+- (BOOL)hasMeta {
+    return _meta != nil;
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSKeyword alloc] initWithKeyword:[self string]];
     return copy;
@@ -197,7 +232,10 @@
 
 @implementation JSSymbol {
     NSString *_name;
+    JSData *_meta;
 }
+
+@synthesize meta = _meta;
 
 - (instancetype)initWithName:(NSString *)name {
     self = [super init];
@@ -207,7 +245,16 @@
     return self;
 }
 
--(NSString *)dataType {
+- (instancetype)initWithMeta:(JSData *)meta symbol:(JSSymbol *)symbol {
+    self = [super init];
+    if (self) {
+        _name = [symbol name];
+        _meta = meta;
+    }
+    return self;
+}
+
+- (NSString *)dataType {
     return [self className];
 }
 
@@ -217,6 +264,10 @@
 
 - (BOOL)isEqual:(JSSymbol *)symbol {
     return [_name isEqualToString:[symbol name]];
+}
+
+- (BOOL)hasMeta {
+    return _meta != nil;
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
@@ -230,9 +281,10 @@
 
 @implementation JSHashMap {
     NSMutableDictionary *dict;
+    JSData *_meta;
 }
 
-@synthesize meta;
+@synthesize meta = _meta;
 
 - (instancetype)init {
     self = [super init];
@@ -262,6 +314,15 @@
     self = [super init];
     if (self) {
         dict = [self fromArray:array];
+    }
+    return self;
+}
+
+- (instancetype)initWithMeta:(JSData *)meta hashmap:(JSHashMap *)hashmap {
+    self = [super init];
+    if (self) {
+        dict = [hashmap value];
+        _meta = meta;
     }
     return self;
 }
@@ -349,6 +410,10 @@
     return hm;
 }
 
+- (BOOL)hasMeta {
+    return _meta != nil;
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSHashMap alloc] initWithDictionary:dict];
     return copy;
@@ -366,9 +431,10 @@
 
 @implementation JSList {
     NSMutableArray *array;
+    JSData *_meta;
 }
 
-@synthesize meta;
+@synthesize meta = _meta;
 
 - (instancetype)init {
     self = [super init];
@@ -382,6 +448,15 @@
     self = [super init];
     if (self) {
         array = [[NSMutableArray alloc] initWithArray:list];
+    }
+    return self;
+}
+
+- (instancetype)initWithMeta:(JSData *)meta list:(JSList *)list {
+    self = [super init];
+    if (self) {
+        array = [list value];
+        _meta = meta;
     }
     return self;
 }
@@ -483,6 +558,10 @@
     return nil;
 }
 
+- (BOOL)hasMeta {
+    return _meta != nil;
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSList alloc] initWithArray:array];
     return copy;
@@ -517,6 +596,15 @@
     return self;
 }
 
+- (instancetype)initWithMeta:(JSData *)meta vector:(JSVector *)vector {
+    self = [super init];
+    if (self) {
+        array = [vector value];
+        _meta = meta;
+    }
+    return self;
+}
+
 - (NSString *)dataType {
     return [self className];
 }
@@ -543,6 +631,10 @@
     return [[JSList alloc] initWithArray:array];
 }
 
+- (BOOL)hasMeta {
+    return _meta != nil;
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSVector alloc] initWithArray:array];
     return copy;
@@ -556,9 +648,10 @@
     NSDecimalNumber *n;
     NSString *decimalPattern;
     BOOL _isDouble;
+    JSData *_meta;
 }
 
-@synthesize meta;
+@synthesize meta = _meta;
 
 - (instancetype)initWithDouble:(double)number {
     self = [super init];
@@ -610,6 +703,18 @@
     return self;
 }
 
+- (instancetype)initWithMeta:(JSData *)meta number:(JSNumber *)number {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+        n = [number value];
+        _meta = meta;
+        _isDouble = [self checkDouble:[n stringValue]];
+    }
+    return self;
+}
+
+
 - (void)bootstrap {
     decimalPattern = @"\\d+(\\.\\d+)";
 }
@@ -656,6 +761,10 @@
     return [n stringValue];
 }
 
+- (BOOL)hasMeta {
+    return _meta != nil;
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSNumber alloc] initWithNumber:n];
     return copy;
@@ -667,12 +776,24 @@
 
 @implementation JSAtom {
     JSData *_data;
+    JSData *_meta;
 }
+
+@synthesize meta = _meta;
 
 - (instancetype)initWithData:(JSData *)data {
     self = [super init];
     if (self) {
         _data = data;
+    }
+    return self;
+}
+
+- (instancetype)initWithMeta:(JSData *)meta atom:(JSAtom *)atom {
+    self = [super init];
+    if (self) {
+        _data = [atom value];
+        _meta = meta;
     }
     return self;
 }
@@ -689,6 +810,10 @@
     _data = data;
 }
 
+- (BOOL)hasMeta {
+    return _meta != nil;
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSAtom alloc] initWithData:_data];
     return copy;
@@ -700,9 +825,11 @@
 
 @implementation JSNil {
     NSString *_dataType;
+    JSData *_meta;
 }
 
 @synthesize dataType = _dataType;
+@synthesize meta = _meta;
 
 - (instancetype)init {
     self = [super init];
@@ -712,13 +839,20 @@
     return self;
 }
 
+- (BOOL)hasMeta {
+    return _meta != nil;
+}
+
 @end
 
 #pragma mark Bool
 
 @implementation JSBool {
     BOOL _flag;
+    JSData *_meta;
 }
+
+@synthesize meta = _meta;
 
 - (instancetype)initWithBool:(BOOL)flag {
     self = [super init];
@@ -746,6 +880,10 @@
 
 - (BOOL)value {
     return _flag;
+}
+
+- (BOOL)hasMeta {
+    return _meta != nil;
 }
 
 @end
@@ -824,6 +962,10 @@
 
 - (JSData *)apply:(NSMutableArray *)args {
     return _fn(args);
+}
+
+- (BOOL)hasMeta {
+    return _meta != nil;
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
