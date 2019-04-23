@@ -26,10 +26,8 @@ function run() {
     elif [ "$1" = "A" ]; then
         OUT="stepA_mal"
     else
-        echo "step argument missing."
-        exit
+        OUT="jsl"
     fi
-    echo $OUT
     $BIN/$OUT "${@:2}"
 }
 
@@ -38,10 +36,5 @@ function help() {
     echo "Usage: $0 step"
     exit
 }
-
-# Check if the step argument is provided
-if [ $# -le 0 ]; then
-  help
-fi
 
 run $@

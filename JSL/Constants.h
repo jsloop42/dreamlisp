@@ -11,6 +11,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Constants : NSObject
+
+extern NSString * const JSLVersion;
+
 // Error constants
 extern NSString * const JSL_ERROR_TYPE;
 extern NSString * const JSL_PARENS_MISMATCH;

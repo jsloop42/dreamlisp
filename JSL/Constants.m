@@ -10,6 +10,8 @@
 
 @implementation Constants
 
+NSString * const JSLVersion = @"1.1";
+
 #pragma mark Error constant
 
 NSString * const JSL_ERROR_TYPE = @"Type error";

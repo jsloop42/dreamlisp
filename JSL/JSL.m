@@ -53,10 +53,13 @@
     JSData * (^fn)(NSMutableArray *arg) = ^JSData *(NSMutableArray *arg) {
         return [self eval:(JSData *)arg[0] withEnv:[self env]];
     };
+    NSString *hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
+    NSString *langVersion = [[NSString alloc] initWithFormat:@"JSL v%@ [%@]", JSLVersion, hostLangVersion];
     [[self env] setObject:[[JSFunction alloc] initWithFn:fn] forSymbol:[[JSSymbol alloc] initWithName:@"eval"]];
     [[self env] setObject:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
-    [[self env] setObject:[[JSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION]
-                forSymbol:[[JSSymbol alloc] initWithName:@"*host-language*"]];
+    [[self env] setObject:[[JSString alloc] initWithFormat:@"%@", hostLangVersion] forSymbol:[[JSSymbol alloc] initWithName:@"*host-language*"]];
+    [[self env] setObject:[[JSString alloc] initWithFormat:@"%@", langVersion] forSymbol:[[JSSymbol alloc] initWithName:@"*version*"]];
+    [[self env] setObject:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
 }
 
 - (void)setJSLFuns {

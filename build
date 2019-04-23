@@ -30,8 +30,7 @@ function getFilename() {
     elif [[ "$1" == "A" ]]; then
         out="stepA_mal"
     else
-        echo "step argument missing."
-        exit
+        out="jsl"
     fi
     echo "$out"
 }
@@ -76,10 +75,5 @@ function build() {
 	fi
     cp $(tail -4 $buildlog | head -1 | rev | cut -d " " -f1 | rev) $bin/$ret
 }
-
-# Check if the step argument is provided
-if [ $# -ne 1 ]; then
-  help
-fi
 
 (build $@) & spinner
