@@ -17,7 +17,6 @@
 		9E281CFD225A60770038A5AF /* tests in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CF9225A60760038A5AF /* tests */; };
 		9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CFA225A60760038A5AF /* run_argv_test.sh */; };
 		9E281CFF225A60770038A5AF /* runtest.py in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CFB225A60760038A5AF /* runtest.py */; };
-		9E281D03225A608D0038A5AF /* test in Resources */ = {isa = PBXBuildFile; fileRef = 9E281D02225A608D0038A5AF /* test */; };
 		9E30553B2260FA8F001D4597 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553A2260FA8F001D4597 /* Logger.m */; };
 		9E30553C2260FA8F001D4597 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553A2260FA8F001D4597 /* Logger.m */; };
 		9E30553F22612AF1001D4597 /* NSMutableArray+JSList.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553E22612AF0001D4597 /* NSMutableArray+JSList.m */; };
@@ -32,7 +31,6 @@
 		9E3055512261A10F001D4597 /* NSArray+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554F2261A10F001D4597 /* NSArray+JSDataProtocol.m */; };
 		9E3055542261A162001D4597 /* TypeUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3055532261A162001D4597 /* TypeUtils.m */; };
 		9E3055552261A162001D4597 /* TypeUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3055532261A162001D4597 /* TypeUtils.m */; };
-		9E30555D2261C4DD001D4597 /* build in Resources */ = {isa = PBXBuildFile; fileRef = 9E30555C2261C4DC001D4597 /* build */; };
 		9E3055602262633E001D4597 /* JSError.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30555F2262633E001D4597 /* JSError.m */; };
 		9E3055612262633E001D4597 /* JSError.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30555F2262633E001D4597 /* JSError.m */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
@@ -320,9 +318,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E30555D2261C4DD001D4597 /* build in Resources */,
 				9E281CFD225A60770038A5AF /* tests in Resources */,
-				9E281D03225A608D0038A5AF /* test in Resources */,
 				9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */,
 				9E281CFF225A60770038A5AF /* runtest.py in Resources */,
 			);

@@ -448,6 +448,9 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     JSString *aObj = [[JSString alloc] initWithString:@"987"];
     [aEnv setObject:aObj forSymbol:aKey];
     XCTAssertEqualObjects([aEnv objectForSymbol:aKey], aObj);
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(list? *ARGV*)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"*ARGV*"], @"()");
 }
 
 - (void)testSpecialForms {
@@ -762,12 +765,12 @@ void testErrorHandleCallback(id param, int tag, int counter, const char *s) {
         XCTAssertEqualObjects([jsl printException:exception log:NO readably:YES], @"exc is:" "'abc' not found");
     }
     XCTAssertEqualObjects([jsl rep:@"(try* (throw \"my exception\") (catch* exc (do (prn \"exc:\" exc) 7)))"], @"7");
-    freeInfoCallback();
     infoCallback(self, 0, &testErrorHandleCallback);
     XCTAssertEqualObjects([jsl rep:@"(try* (abc 1 2) (catch* exc (prn \"exc is:\" exc)))"], @"nil");
     freeInfoCallback();
     infoCallback(self, 1, &testErrorHandleCallback);
     XCTAssertEqualObjects([jsl rep:@"(try* (nth [] 1) (catch* exc (prn \"exc is:\" exc)))"], @"nil");
+    freeInfoCallback();
 }
 
 - (void)errorHandleCallback:(NSString *)message withTag:(int)tag counter:(int)counter {
@@ -794,6 +797,102 @@ void testErrorHandleCallback(id param, int tag, int counter, const char *s) {
     XCTAssertFalse([sym hasMeta]);
     XCTAssertEqualObjects([jsl rep:@"(meta +)"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(meta (with-meta [1 2 3] {\"a\" 1}))"], @"{\"a\" 1}");
+}
+
+- (void)testTCO {
+    JSL *jsl = [JSL new];
+    [jsl rep:@"(def! sum2 (fn* (n acc) (if (= n 0) acc (sum2 (- n 1) (+ n acc)))))"];
+    XCTAssertEqualObjects([jsl rep:@"(sum2 10 0)"], @"55");
+    XCTAssertEqualObjects([jsl rep:@"(def! res2 nil)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(def! res2 (sum2 10000 0))"], @"50005000");
+    [jsl rep:@"(def! foo (fn* (n) (if (= n 0) 0 (bar (- n 1)))))"];
+    [jsl rep:@"(def! bar (fn* (n) (if (= n 0) 0 (foo (- n 1)))))"];
+    XCTAssertEqualObjects([jsl rep:@"(foo 10000)"], @"0");
+    XCTAssertEqualObjects([jsl rep:@"(do (do 1 2))"], @"2");
+    [jsl rep:@"(def! g (fn* [] 78))"];
+    XCTAssertEqualObjects([jsl rep:@"(g)"], @"78");
+    [jsl rep:@"(def! g (fn* [a] (+ a 78)))"];
+    XCTAssertEqualObjects([jsl rep:@"(g 3)"], @"81");
+}
+
+- (NSString *)pathForFile:(NSString *)filename {
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *path = [[NSString alloc] initWithFormat:@"%@/JSLTests.xctest/Contents/Resources/tests/%@", [fm currentDirectoryPath], filename];
+    if ([fm fileExistsAtPath:path]) {
+        return path;
+    }
+    return @"";
+}
+
+- (void)testReadString {
+    JSL *jsl = [JSL new];
+    FileOps *fops = [FileOps new];
+    XCTAssertEqualObjects([jsl rep:@"(read-string \"(1 2 (3 4) nil)\")"], @"(1 2 (3 4) nil)");
+    XCTAssertEqualObjects([jsl rep:@"(read-string \"(+ 2 3)\")"], @"(+ 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(read-string \"7 ;; comment\")"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(read-string \";; comment\")"], @"Error type");
+    XCTAssertEqualObjects([jsl rep:@"(eval (read-string \"(+ 2 3)\"))"], @"5");
+    [fops createFileIfNotExist:@"/tmp/jsl-test.txt"];
+    [fops append:@"A line of text\n" completion: ^{
+        XCTAssertEqualObjects([jsl rep:@"(slurp \"/tmp/jsl-test.txt\")"], @"\"A line of text\\n\"");
+        [fops closeFile];
+        [fops delete:@"/tmp/jsl-test.txt"];
+    }];
+
+}
+
+- (void)testLoadFile {
+    JSL *jsl = [JSL new];
+    NSString *incPath = [self pathForFile:@"inc.mal"];
+    XCTAssertTrue([incPath isNotEmpty]);
+    [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", incPath]];
+    XCTAssertEqualObjects([jsl rep:@"(inc1 7)"], @"8");
+    XCTAssertEqualObjects([jsl rep:@"(inc2 7)"], @"9");
+    XCTAssertEqualObjects([jsl rep:@"(inc3 9)"], @"12");
+    // testing comments
+    NSString *incBPath = [self pathForFile:@"incB.mal"];
+    XCTAssertTrue([incBPath isNotEmpty]);
+    [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", incBPath]];
+    XCTAssertEqualObjects([jsl rep:@"(inc4 7)"], @"11");
+    XCTAssertEqualObjects([jsl rep:@"(inc5 7)"], @"12");
+    // testing map literal across multiple lines in a file
+    NSString *incCPath = [self pathForFile:@"incC.mal"];
+    XCTAssertTrue([incCPath isNotEmpty]);
+    [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", incCPath]];
+    XCTAssertEqualObjects([jsl rep:@"mymap"], @"{\"a\" 1}");
+}
+
+- (void)testAtom {
+    JSL *jsl = [JSL new];
+    [jsl rep:@"(def! inc3 (fn* (a) (+ 3 a)))"];
+    XCTAssertEqualObjects([jsl rep:@"(def! a (atom 2))"], @"(atom 2)");
+    XCTAssertEqualObjects([jsl rep:@"(atom? a)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(atom? 1)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(deref a)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(reset! a 3)"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(deref a)"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(swap! a inc3)"], @"6");
+    XCTAssertEqualObjects([jsl rep:@"(deref a)"], @"6");
+    XCTAssertEqualObjects([jsl rep:@"(swap! a (fn* (a) a))"], @"6");
+    XCTAssertEqualObjects([jsl rep:@"(swap! a (fn* (a) (* 2 a)))"], @"12");
+    XCTAssertEqualObjects([jsl rep:@"(swap! a (fn* (a b) (* a b)) 10)"], @"120");
+    XCTAssertEqualObjects([jsl rep:@"(swap! a + 3)"], @"123");
+    // testing swap! closure interaction
+    [jsl rep:@"(def! inc-it (fn* (a) (+ 1 a)))"];
+    [jsl rep:@"(def! atm (atom 7))"];
+    [jsl rep:@"(def! f (fn* () (swap! atm inc-it)))"];
+    XCTAssertEqualObjects([jsl rep:@"(f)"], @"8");
+    XCTAssertEqualObjects([jsl rep:@"(f)"], @"9");
+    // testing `@` deref reader macro
+    XCTAssertEqualObjects([jsl rep:@"(def! atm (atom 9))"], @"(atom 9)");
+    XCTAssertEqualObjects([jsl rep:@"@atm"], @"9");
+}
+
+- (void)testEval {
+    JSL *jsl = [JSL new];
+    // testing eval does not use local environment
+    XCTAssertEqualObjects([jsl rep:@"(def! a 1)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(let* (a 2) (eval (read-string \"a\")))"], @"1");
 }
 
 - (void)testMisc {
