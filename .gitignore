@@ -20,3 +20,4 @@ bin
 step*
 *.log
 JSLTests/objc/jsl
+!JSLTests/tests/step*
