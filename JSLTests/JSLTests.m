@@ -486,6 +486,8 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(let* (p (+ 2 3) q (+ 2 p)) (+ p q))"], @"12");
     XCTAssertEqualObjects([jsl rep:@"(def! y (let* (z 7) z))"], @"7");
     XCTAssertEqualObjects([jsl rep:@"y"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(let* (x (or nil \"yes\")) x)"], @"\"yes\"");
+
     // outer env
     XCTAssertEqualObjects([jsl rep:@"(def! a 4)"], @"4");
     XCTAssertEqualObjects([jsl rep:@"(let* (q 9) q)"], @"9");
@@ -680,6 +682,8 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(= \"abc\" (str (quote abc)))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(= (quote abc) nil)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(= nil (quote abc))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(not (= 1 1))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(not (= 1 2))"], @"true");
 }
 
 - (void)testConditional {
@@ -743,6 +747,57 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(cons [1] [2 3])"], @"([1] 2 3)");
     XCTAssertEqualObjects([jsl rep:@"(cons 1 [2 3])"], @"(1 2 3)");
     XCTAssertEqualObjects([jsl rep:@"(concat [1 2] (list 3 4) [5 6])"], @"(1 2 3 4 5 6)");
+    XCTAssertEqualObjects([jsl rep:@"(nth (list 1) 0)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(nth (list 1 2) 1)"], @"2");
+    [jsl rep:@"(def! x \"x\")"];
+    XCTAssertNotEqualObjects(@"(def! x (nth (list 1 2) 2))", @"Index out of bounds");
+    XCTAssertEqualObjects([jsl rep:@"x"], @"\"x\"");
+    XCTAssertEqualObjects([jsl rep:@"(first (list))"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(first (list 6))"], @"6");
+    XCTAssertEqualObjects([jsl rep:@"(first (list 7 8 9))"], @"7");
+
+    XCTAssertEqualObjects([jsl rep:@"(rest (list))"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(rest (list 6))"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(rest (list 7 8 9))"], @"(8 9)");
+    XCTAssertEqualObjects([jsl rep:@"(or)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(or 1)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(or 1 2 3 4)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(or false 2)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(or false nil 3)"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(or false nil false false nil 4)"], @"4");
+    XCTAssertEqualObjects([jsl rep:@"(or false nil 3 false nil 4)"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(or (or false 4))"], @"4");
+    XCTAssertEqualObjects([jsl rep:@"(cond)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(cond true 7)"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(cond true 7 true 8)"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(cond false 7 true 8)"], @"8");
+    XCTAssertEqualObjects([jsl rep:@"(cond false 7 false 8 \"else\" 9)"], @"9");
+    XCTAssertEqualObjects([jsl rep:@"(cond false 7 (= 2 2) 8 \"else\" 9)"], @"8");
+    XCTAssertEqualObjects([jsl rep:@"(cond false 7 false 8 false 9)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(nth [1] 0)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(nth [1 2] 1)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(def! x \"x\")"], @"\"x\"");
+    XCTAssertThrows([jsl rep:@"(def! x (nth [1 2] 2))"], @"Index out of bounds");
+    XCTAssertEqualObjects([jsl rep:@"x"], @"\"x\"");
+    XCTAssertEqualObjects([jsl rep:@"(first [])"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(first nil)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(first [10])"], @"10");
+    XCTAssertEqualObjects([jsl rep:@"(first [10 11 12])"], @"10");
+    XCTAssertEqualObjects([jsl rep:@"(rest [])"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(rest nil)"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(rest [10])"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(rest [10 11 12])"], @"(11 12)");
+    NSString *corePath = [self pathForFile:@"core.mal"];
+    XCTAssertTrue([corePath isNotEmpty]);
+    [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", corePath]];
+    XCTAssertEqualObjects([jsl rep:@"(-> 7)"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(-> (list 7 8 9) first)"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(-> (list 7 8 9) (first))"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(-> (list 7 8 9) first (+ 7))"], @"14");
+    XCTAssertEqualObjects([jsl rep:@"(-> (list 7 8 9) rest (rest) first (+ 7))"], @"16");
+    XCTAssertEqualObjects([jsl rep:@"(->> \"L\")"], @"\"L\"");
+    XCTAssertEqualObjects([jsl rep:@"(->> \"L\" (str \"A\") (str \"M\"))"], @"\"MAL\"");
+    XCTAssertEqualObjects([jsl rep:@"(->> [4] (concat [3]) (concat [2]) rest (concat [1]))"], @"(1 3 4)");
 }
 
 - (void)testKeyword {
@@ -814,6 +869,18 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     JSL *jsl = [JSL new];
     [jsl rep:@"(defmacro! one (fn* () 1))"];
     XCTAssertEqualObjects([jsl rep:@"(one)"], @"1");
+    [jsl rep:@"(defmacro! two (fn* () 2))"];
+    XCTAssertEqualObjects([jsl rep:@"(two)"], @"2");
+    [jsl rep:@"(defmacro! unless (fn* (pred a b) `(if ~pred ~b ~a)))"];
+    XCTAssertEqualObjects([jsl rep:@"(unless false 7 8)"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(unless true 7 8)"], @"8");
+    [jsl rep:@"(defmacro! unless2 (fn* (pred a b) `(if (not ~pred) ~a ~b)))"];
+    XCTAssertEqualObjects([jsl rep:@"(unless2 false 7 8)"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(unless2 true 7 8)"], @"8");
+    // testing macro expand
+    XCTAssertEqualObjects([jsl rep:@"(macroexpand (unless2 2 3 4))"], @"(if (not 2) 3 4)");
+    [jsl rep:@"(defmacro! identity (fn* (x) x))"];
+    XCTAssertEqualObjects([jsl rep:@"(let* (a 123) (identity a))"], @"123");
     [jsl rep:@"(defmacro! foo (fn* (& more) (count more)))"];
     XCTAssertEqualObjects([jsl rep:@"(foo 1 2 3)"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(cond false 7 false 8 false 9)"], @"nil");
@@ -905,7 +972,6 @@ void testErrorHandleCallback(id param, int tag, int counter, const char *s) {
         [fops closeFile];
         [fops delete:@"/tmp/jsl-test.txt"];
     }];
-
 }
 
 - (void)testLoadFile {
