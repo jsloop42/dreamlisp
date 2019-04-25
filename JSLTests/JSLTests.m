@@ -672,6 +672,14 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(= (list) 0)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(= (list) \"\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(= \"\" (list))"], @"false");
+    // test symbol equality
+    XCTAssertEqualObjects([jsl rep:@"(= (quote abc) (quote abc))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= (quote abc) (quote abcd))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= (quote abc) \"abc\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= \"abc\" (quote abc))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= \"abc\" (str (quote abc)))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= (quote abc) nil)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= nil (quote abc))"], @"false");
 }
 
 - (void)testConditional {
@@ -706,9 +714,6 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(count (list 1 2 3))"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(count (list))"], @"0");
     XCTAssertEqualObjects([jsl rep:@"(count nil)"], @"0");
-    [jsl rep:@"(def! a (list 2 3))"];
-    [jsl rep:@"(cons 1 a)"];
-    XCTAssertEqualObjects([jsl rep:@"a"], @"(2 3)");
     XCTAssertEqualObjects([jsl rep:@"(seq \"abc\")"], @"(\"a\" \"b\" \"c\")");
     XCTAssertEqualObjects([jsl rep:@"(seq \"\")"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(seq '())"], @"nil");
@@ -717,6 +722,27 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(seq '(2 3 4))"], @"(2 3 4)");
     XCTAssertEqualObjects([jsl rep:@"(seq [2 3 4])"], @"(2 3 4)");
     XCTAssertEqualObjects([jsl rep:@"(seq nil)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(cons 1 (list))"], @"(1)");
+    XCTAssertEqualObjects([jsl rep:@"(cons 1 (list 2))"], @"(1 2)");
+    XCTAssertEqualObjects([jsl rep:@"(cons 1 (list 2 3))"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(cons (list 1) (list 2 3))"], @"((1) 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(def! a (list 2 3))"], @"(2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(cons 1 a)"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"a"], @"(2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(concat)"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(concat (list 1 2))"], @"(1 2)");
+    XCTAssertEqualObjects([jsl rep:@"(concat (list 1 2) (list 3 4))"], @"(1 2 3 4)");
+    XCTAssertEqualObjects([jsl rep:@"(concat (list 1 2) (list 3 4) (list 5 6))"], @"(1 2 3 4 5 6)");
+    XCTAssertEqualObjects([jsl rep:@"(concat (concat))"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(concat (list) (list))"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(def! a (list 1 2))"], @"(1 2)");
+    XCTAssertEqualObjects([jsl rep:@"(def! b (list 3 4))"], @"(3 4)");
+    XCTAssertEqualObjects([jsl rep:@"(concat a b (list 5 6))"], @"(1 2 3 4 5 6)");
+    XCTAssertEqualObjects([jsl rep:@"a"], @"(1 2)");
+    XCTAssertEqualObjects([jsl rep:@"b"], @"(3 4)");
+    XCTAssertEqualObjects([jsl rep:@"(cons [1] [2 3])"], @"([1] 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(cons 1 [2 3])"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(concat [1 2] (list 3 4) [5 6])"], @"(1 2 3 4 5 6)");
 }
 
 - (void)testKeyword {
@@ -733,14 +759,55 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
 
 - (void)testQuote {
     JSL *jsl = [JSL new];
-    XCTAssertEqualObjects([jsl rep:@"`(1 2 3)"], @"(1 2 3)");
-    XCTAssertEqualObjects([jsl rep:@"`(nil)"], @"(nil)");
+    XCTAssertEqualObjects([jsl rep:@"(quote 7)"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(quote (1 2 3))"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(quote (1 2 (3 4)))"], @"(1 2 (3 4))");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote 7)"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 2 3))"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 2 (3 4)))"], @"(1 2 (3 4))");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (nil))"], @"(nil)");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote (unquote 7))"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(def! a 8)"], @"8");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote a)"], @"a");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote (unquote a))"], @"8");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 a 3))"], @"(1 a 3)");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 (unquote a) 3))"], @"(1 8 3)");
+    XCTAssertEqualObjects([jsl rep:@"(def! b (quote (1 \"b\" \"d\")))"], @"(1 \"b\" \"d\")");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 b 3))"], @"(1 b 3)");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 (unquote b) 3))"], @"(1 (1 \"b\" \"d\") 3)");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote ((unquote 1) (unquote 2)))"], @"(1 2)");
     XCTAssertEqualObjects([jsl rep:@"(def! c (quote (1 \"b\" \"d\")))"], @"(1 \"b\" \"d\")");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 c 3))"], @"(1 c 3)");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 (splice-unquote c) 3))"], @"(1 1 \"b\" \"d\" 3)");
+    // testing reader macros
+    XCTAssertEqualObjects([jsl rep:@"'7"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"'(1 2 3)"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"'(1 2 (3 4))"], @"(1 2 (3 4))");
+    XCTAssertEqualObjects([jsl rep:@"`7"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"`(1 2 3)"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"`(1 2 (3 4))"], @"(1 2 (3 4))");
+    XCTAssertEqualObjects([jsl rep:@"`(nil)"], @"(nil)");
+    XCTAssertEqualObjects([jsl rep:@"`~7"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(def! a 8)"], @"8");
+    XCTAssertEqualObjects([jsl rep:@"`(1 ~a 3)"], @"(1 8 3)");
+    XCTAssertEqualObjects([jsl rep:@"(def! b '(1 \"b\" \"d\"))"], @"(1 \"b\" \"d\")");
+    XCTAssertEqualObjects([jsl rep:@"`(1 b 3)"], @"(1 b 3)");
+    XCTAssertEqualObjects([jsl rep:@"`(1 ~b 3)"], @"(1 (1 \"b\" \"d\") 3)");
+    XCTAssertEqualObjects([jsl rep:@"(def! c '(1 \"b\" \"d\"))"], @"(1 \"b\" \"d\")");
+    XCTAssertEqualObjects([jsl rep:@"`(1 c 3)"], @"(1 c 3)");
+    XCTAssertEqualObjects([jsl rep:@"`(1 ~@c 3)"], @"(1 1 \"b\" \"d\" 3)");
     XCTAssertEqualObjects([jsl rep:@"(def! a 8)"], @"8");
     XCTAssertEqualObjects([jsl rep:@"`[1 a 3]"], @"(1 a 3)");
+    XCTAssertEqualObjects([jsl rep:@"[1 a 3]"], @"[1 8 3]");
+    XCTAssertEqualObjects([jsl rep:@"(def! c '(1 \"b\" \"d\"))"], @"(1 \"b\" \"d\")");
+    XCTAssertEqualObjects([jsl rep:@"`[1 ~@c 3]"], @"(1 1 \"b\" \"d\" 3)");
+}
+
+- (void)testQuine {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects(
+        [jsl rep:@"((fn* [q] (quasiquote ((unquote q) (quote (unquote q))))) (quote (fn* [q] (quasiquote ((unquote q) (quote (unquote q)))))))"],
+                 @"((fn* [q] (quasiquote ((unquote q) (quote (unquote q))))) (quote (fn* [q] (quasiquote ((unquote q) (quote (unquote q)))))))");
 }
 
 - (void)testMacro {
