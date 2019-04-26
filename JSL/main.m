@@ -41,7 +41,9 @@ int main(int argc, const char * argv[]) {
                 inp = [term readline];
                 if (inp && [inp isNotEmpty]) {
                     ret = [jsl rep:inp];
-                    info(@"%@", ret);
+                    if (ret) {
+                        info(@"%@", ret);
+                    }
                 }
             } @catch (NSException *exception) {
                 [jsl printException:exception log:YES readably:YES];

@@ -17,7 +17,8 @@
     return [NSString stringWithFormat:@"\"%@\"", readable];
 }
 
-- (NSString *)printStringFor:(JSData *)data readably:(BOOL)readably {
+- (nullable NSString *)printStringFor:(JSData *)data readably:(BOOL)readably {
+    if (data == nil) { return nil; }
     NSString *dataType = [data dataType];
     if ([dataType isEqual:@"JSSymbol"]) {
         return [(JSSymbol *)data name];
