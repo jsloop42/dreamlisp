@@ -460,10 +460,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(count (keys (assoc hm2 \"b\" 2 \"c\" 3)))"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(assoc {} :bcd 234)"], @"{:bcd 234}");
     XCTAssertEqualObjects([jsl rep:@"(keyword? (nth (keys {:abc 123 :def 456}) 0))"], @"true");
-
     [jsl rep:@"(def! hm3 (assoc hm2 \"b\" 2))"];
-
-
     XCTAssertEqualObjects([jsl rep:@"(keyword? (nth (keys {\":abc\" 123 \":def\" 456}) 0))"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(keyword? (nth (vals {\"a\" :abc \"b\" :def}) 0))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(assoc {} :bcd nil)"], @"{:bcd nil}");
@@ -540,7 +537,6 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(def! y (let* (z 7) z))"], @"7");
     XCTAssertEqualObjects([jsl rep:@"y"], @"7");
     XCTAssertEqualObjects([jsl rep:@"(let* (x (or nil \"yes\")) x)"], @"\"yes\"");
-
     // outer env
     XCTAssertEqualObjects([jsl rep:@"(def! a 4)"], @"4");
     XCTAssertEqualObjects([jsl rep:@"(let* (q 9) q)"], @"9");
@@ -1057,7 +1053,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(read-string \"(1 2 (3 4) nil)\")"], @"(1 2 (3 4) nil)");
     XCTAssertEqualObjects([jsl rep:@"(read-string \"(+ 2 3)\")"], @"(+ 2 3)");
     XCTAssertEqualObjects([jsl rep:@"(read-string \"7 ;; comment\")"], @"7");
-    XCTAssertEqualObjects([jsl rep:@"(read-string \";; comment\")"], @"Error type");
+    XCTAssertNil([jsl rep:@"(read-string \";; comment\")"]);
     XCTAssertEqualObjects([jsl rep:@"(eval (read-string \"(+ 2 3)\"))"], @"5");
     [fops createFileIfNotExist:@"/tmp/jsl-test.txt"];
     [fops append:@"A line of text\n" completion: ^{
@@ -1065,6 +1061,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
         [fops closeFile];
         [fops delete:@"/tmp/jsl-test.txt"];
     }];
+    XCTAssertNil([jsl rep:@"(read-string \";\")"]);
 }
 
 - (void)testLoadFile {
@@ -1112,6 +1109,11 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     // testing `@` deref reader macro
     XCTAssertEqualObjects([jsl rep:@"(def! atm (atom 9))"], @"(atom 9)");
     XCTAssertEqualObjects([jsl rep:@"@atm"], @"9");
+    XCTAssertEqualObjects([jsl rep:@"(def! a (atom {:x 1 :y 2}))"], @"(atom {:x 1 :y 2})");
+    XCTAssertEqualObjects([jsl rep:@"(get @a :x)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(reset! a {:x 1 :y (+ (get @a :y) 1)})"], @"{:x 1 :y 3}");
+    XCTAssertEqualObjects([jsl rep:@"(def! a (atom {}))"], @"(atom {})");
+    XCTAssertEqualObjects([jsl rep:@"(assoc @a :z 1)"], @"{:z 1}");
 }
 
 - (void)testEval {
@@ -1134,9 +1136,15 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(true? true)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(true? false)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(true? true?)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(true? 1)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(true? \"a\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(true? :a)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(false? false)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(false? true)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(false? true)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(false? 1)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(false? \"a\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(false? :a)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(apply + (list 2 3))"], @"5");
     XCTAssertEqualObjects([jsl rep:@"(apply + 4 (list 5))"], @"9");
     infoCallback(self, 0, &predicateFn);
@@ -1201,7 +1209,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)test {
-    // JSL *jsl = [JSL new];
+//    JSL *jsl = [JSL new];
 }
 
 - (void)notestPerformanceJSListDropFirst {
