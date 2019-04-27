@@ -265,8 +265,9 @@
             NSUInteger len = [keys count];
             JSHashMap *ret = [JSHashMap new];
             for (i = 0; i < len; i++) {
-                NSString *key = keys[i];
-                JSData *object = (JSData *)[self eval:(JSData *)[dict objectForKey:key] withEnv:env];
+                id<NSCopying> key = keys[i];
+                JSData *val = (JSData *)[dict objectForKey:key];
+                JSData *object = (JSData *)[self eval:val withEnv:env];
                 [ret setObject:object forKey:key];
             }
             return ret;

@@ -14,6 +14,7 @@
 #import "Logger.h"
 #import "NSArray+JSDataProtocol.h"
 #import "NSDecimalNumber+JSDataProtocol.h"
+#import "NSMapTable+JSHashMap.h"
 #import "NSMutableArray+JSList.h"
 #import "NSNumber+JSDataProtocol.h"
 #import "NSString+JSDataProtocol.h"
@@ -30,7 +31,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)hasMeta;
 @end
 
-@interface JSData : NSObject <JSDataProtocol>
+@protocol JSHashable <JSDataProtocol>
+- (NSUInteger)hash;
+@end
+
+@protocol JSEquatable <JSDataProtocol>
+- (BOOL)isEqual:(JSData *)object;
+@end
+
+@interface JSData : NSObject <JSDataProtocol, JSHashable, JSEquatable>
 @end
 
 @interface JSString : JSData
@@ -46,7 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSKeyword : JSData
 @property (nonatomic, readwrite, copy) NSString *value;
-+ (BOOL)isKeyword:(NSString *)string;
++ (BOOL)isKeyword:(id)string;
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithKeyword:(NSString *)string;
@@ -69,19 +78,17 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSHashMap : JSData
 @property (nonatomic, readwrite, copy) JSData *meta;
 - (instancetype)init;
-- (instancetype)initWithDictionary:(NSMutableDictionary *)dictionary;
-- (instancetype)initWithStringKey:(NSMutableDictionary<NSString *, id> *)dictionary;
-- (instancetype)initWithArray:(NSMutableArray *)array;
+- (instancetype)initWithMapTable:(NSMapTable *)table;
+- (instancetype)initWithArray:(NSArray *)array;
 - (instancetype)initWithMeta:(JSData *)meta hashmap:(JSHashMap *)hashmap;
-- (JSData *)objectForKey:(NSString *)key;
-- (void)setObject:(JSData *)object forKey:(NSString *)key;
+- (JSData *)objectForKey:(id)key;
+- (void)setObject:(JSData *)object forKey:(id)key;
 - (NSUInteger)count;
-- (NSMutableDictionary *)value;
-- (void)setValue:(NSMutableDictionary *)hm;
+- (NSMapTable *)value;
+- (void)setValue:(NSMapTable *)table;
 - (NSArray *)allKeys;
-- (NSArray *)allValues;
-- (BOOL)isEqual:(JSHashMap *)hashmap;
-- (JSData *)addEntriesFromDictionary:(NSMutableDictionary *)xs;
+- (NSArray *)allObjects;
+- (BOOL)isEqual:(JSData *)hashmap;
 @end
 
 @interface JSList : JSData

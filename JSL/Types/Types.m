@@ -28,6 +28,14 @@
     return copy;
 }
 
+- (BOOL)isEqual:(id)object {
+    return NO;
+}
+
+- (NSUInteger)hash {
+    return random();
+}
+
 @end
 
 #pragma mark String
@@ -135,8 +143,8 @@
 @synthesize value = _string;
 @synthesize meta = _meta;
 
-+ (BOOL)isKeyword:(NSString *)string {
-    if ([[string substringToIndex:1] isEqual:@"\u029e"]) {
++ (BOOL)isKeyword:(id)string {
+    if ([string isKindOfClass:[NSString class]] && [[string substringToIndex:1] isEqual:@"\u029e"]) {
         return YES;
     }
     return NO;
@@ -292,7 +300,7 @@
 #pragma mark HashMap
 
 @implementation JSHashMap {
-    NSMutableDictionary *dict;
+    NSMapTable *_table;
     JSData *_meta;
 }
 
@@ -301,31 +309,24 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        dict = [NSMutableDictionary new];
+        [self bootstrap];
     }
     return self;
 }
 
-- (instancetype)initWithDictionary:(NSMutableDictionary *)dictionary {
+- (instancetype)initWithMapTable:(NSMapTable *)table {
     self = [super init];
     if (self) {
-        dict = dictionary;
+        _table = table;
     }
     return self;
 }
 
-- (instancetype)initWithStringKey:(NSMutableDictionary<NSString *, id> *)dictionary {
+- (instancetype)initWithArray:(NSArray *)array {
     self = [super init];
     if (self) {
-        dict = dictionary;
-    }
-    return self;
-}
-
-- (instancetype)initWithArray:(NSMutableArray *)array {
-    self = [super init];
-    if (self) {
-        dict = [self fromArray:array];
+        [self bootstrap];
+        [self fromArray:array];
     }
     return self;
 }
@@ -333,81 +334,76 @@
 - (instancetype)initWithMeta:(JSData *)meta hashmap:(JSHashMap *)hashmap {
     self = [super init];
     if (self) {
-        dict = [hashmap value];
+        _table = [hashmap value];
         _meta = meta;
     }
     return self;
+}
+
+- (void)bootstrap {
+    _table = [NSMapTable mapTableWithKeyOptions:NSHashTableStrongMemory valueOptions:NSMapTableStrongMemory];
 }
 
 - (NSString *)dataType {
     return [self className];
 }
 
-- (NSMutableDictionary *)fromArray:(NSMutableArray *)array {
-    NSMutableDictionary* _dict = [NSMutableDictionary new];
+- (void)fromArray:(NSArray *)array {
     NSUInteger i = 0, len = [array count];
     if (len % 2 != 0) {
         error(@"JSError: Odd number of elements in the array.");
-        return dict;
+        @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
     }
     for (i = 0; i < len; i = i + 2) {
-        NSString *key = nil;
-        JSData *dkey = (JSData *)[array[i] dataType];
-        if (dkey == nil) @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
-        if (dkey != nil) {
-            if ([dkey isEqual:@"JSSymbol"]) {
-                key = [(JSSymbol *)array[i] name];
-            } else if ([dkey isEqual:@"JSString"]) {
-                key = [(JSString *)array[i] value];
-            } else if ([dkey isEqual:@"JSKeyword"]) {
-                key = [(JSKeyword *)array[i] encoded];
-            } else if ([dkey isEqual:@"NSString"]) {
-                key = array[i];
-            }
-        }
-        [_dict setObject:(JSData *)array[i + 1] forKey:key];
+        [_table setObject:(JSData *)array[i + 1] forKey:array[i]];
+        assert([_table objectForKey:array[i]] != nil);
     }
-    return _dict;
+    debug(@"%@", _table);
 }
 
-- (JSData *)objectForKey:(NSString *)key {
-    return [dict objectForKey:key];
+- (JSData *)objectForKey:(id)key {
+    assert([_table objectForKey:key] != nil);
+    return [_table objectForKey:key];
 }
 
-- (void)setObject:(JSData *)object forKey:(NSString *)key {
-    [dict setObject:object forKey:key];
+- (void)setObject:(JSData *)object forKey:(id)key {
+    debug(@"%@ %@", key, object);
+    [_table setObject:object forKey:key];
+    assert([_table objectForKey:key] != nil);
 }
 
 - (NSUInteger)count {
-    return [dict count];
+    return [_table count];
 }
 
-- (NSMutableDictionary *)value {
-    return dict;
+- (NSMapTable *)value {
+    return _table;
 }
 
-- (void)setValue:(NSMutableDictionary *)hm {
-    dict = hm;
+- (void)setValue:(NSMapTable *)table {
+    _table = table;
 }
 
 - (NSArray *)allKeys {
-    return [dict allKeys];
+    return [_table allKeys];
 }
 
-- (NSArray *)allValues {
-    return [dict allValues];
+- (NSArray *)allObjects {
+    return [_table allObjects];
 }
 
 - (BOOL)isEqual:(JSHashMap *)hashmap {
-    if ([dict count] != [hashmap count]) {
+    if ([self count] != [hashmap count]) {
         return NO;
     }
-    NSString *key = nil;
     JSData *lval = nil;
     JSData *rval = nil;
-    for (key in dict) {
-        lval = [dict objectForKey:key];
-        rval = [hashmap objectForKey:key];
+    NSArray *keys = [self allKeys];
+    NSUInteger i = 0;
+    NSUInteger len = [keys count];
+    for (i = 0; i < len; i++) {
+        lval = [_table objectForKey:keys[i]];
+        rval = [hashmap objectForKey:keys[i]];
         if (!lval || !rval || [lval isNotEqualTo:rval]) {
             return NO;
         }
@@ -415,30 +411,23 @@
     return YES;
 }
 
-- (JSData *)addEntriesFromDictionary:(NSMutableDictionary *)xs {
-    JSHashMap *hm = [[JSHashMap alloc] initWithDictionary:dict];
-    NSMutableDictionary *hmDict = [hm mutableCopy];
-    [hmDict addEntriesFromDictionary:xs];
-    return hm;
-}
-
 - (BOOL)hasMeta {
     return _meta != nil;
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[JSHashMap alloc] initWithDictionary:dict];
+    id copy = [[JSHashMap alloc] initWithMapTable:_table];
     return copy;
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
     id copy = [[JSHashMap allocWithZone:zone] init];
-    [(JSHashMap *)copy setValue:[dict mutableCopyWithZone:zone]];
+    [(JSHashMap *)copy setValue:_table];
     return copy;
 }
 
 - (NSString *)description {
-    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [dict description], _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [_table description], _meta];
 }
 
 @end
@@ -792,6 +781,10 @@
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id copy = [[JSNumber alloc] initWithNumber:n];
     return copy;
+}
+
+- (NSUInteger)hash {
+    return [n integerValue];
 }
 
 - (NSString *)description {

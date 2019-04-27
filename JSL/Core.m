@@ -666,7 +666,7 @@ double dmod(double a, double n) {
 
     JSData *(^vals)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSHashMap *first = (JSHashMap *)[xs first];
-        return [[JSList alloc] initWithArray:[first allValues]];
+        return [[JSList alloc] initWithArray:[first allObjects]];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:vals] forKey:@"vals"];
 }

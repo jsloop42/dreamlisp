@@ -49,6 +49,8 @@
 		9E5D7B4C225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
 		9E6F444822578E5600777A24 /* JSL.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F444722578E5600777A24 /* JSL.m */; };
 		9E6F444922578E5600777A24 /* JSL.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F444722578E5600777A24 /* JSL.m */; };
+		9E9458562274EB4400A3D449 /* NSMapTable+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9458552274EB4400A3D449 /* NSMapTable+JSHashMap.m */; };
+		9E9458572274EB4400A3D449 /* NSMapTable+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9458552274EB4400A3D449 /* NSMapTable+JSHashMap.m */; };
 		9E9B6228225B9FC20060DA9A /* FileOps.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9B6227225B9FC20060DA9A /* FileOps.m */; };
 		9E9B6229225B9FC20060DA9A /* FileOps.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9B6227225B9FC20060DA9A /* FileOps.m */; };
 		9E9B622B225BAA280060DA9A /* libedit.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E9B622A225BAA270060DA9A /* libedit.tbd */; };
@@ -116,6 +118,8 @@
 		9E6F444622578E5600777A24 /* JSL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSL.h; sourceTree = "<group>"; };
 		9E6F444722578E5600777A24 /* JSL.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSL.m; sourceTree = "<group>"; };
 		9E6F444A2257C00900777A24 /* JSLTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSLTests.h; sourceTree = "<group>"; };
+		9E9458542274EB4400A3D449 /* NSMapTable+JSHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSMapTable+JSHashMap.h"; sourceTree = "<group>"; };
+		9E9458552274EB4400A3D449 /* NSMapTable+JSHashMap.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSMapTable+JSHashMap.m"; sourceTree = "<group>"; };
 		9E9B6226225B9FC20060DA9A /* FileOps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileOps.h; sourceTree = "<group>"; };
 		9E9B6227225B9FC20060DA9A /* FileOps.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileOps.m; sourceTree = "<group>"; };
 		9E9B622A225BAA270060DA9A /* libedit.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libedit.tbd; path = usr/lib/libedit.tbd; sourceTree = SDKROOT; };
@@ -157,6 +161,8 @@
 				9E30554F2261A10F001D4597 /* NSArray+JSDataProtocol.m */,
 				9E30554A2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.h */,
 				9E30554B2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m */,
+				9E9458542274EB4400A3D449 /* NSMapTable+JSHashMap.h */,
+				9E9458552274EB4400A3D449 /* NSMapTable+JSHashMap.m */,
 				9E30553D22612AF0001D4597 /* NSMutableArray+JSList.h */,
 				9E30553E22612AF0001D4597 /* NSMutableArray+JSList.m */,
 				9E2491E8226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.h */,
@@ -347,6 +353,7 @@
 				9E30553B2260FA8F001D4597 /* Logger.m in Sources */,
 				9E5D7B4B225B947E00970453 /* Terminal.m in Sources */,
 				9E3A9D4E22568AFC00348529 /* main.m in Sources */,
+				9E9458562274EB4400A3D449 /* NSMapTable+JSHashMap.m in Sources */,
 				9E30554422612C34001D4597 /* NSString+JSDataProtocol.m in Sources */,
 				9E3055602262633E001D4597 /* JSError.m in Sources */,
 				9E9B6228225B9FC20060DA9A /* FileOps.m in Sources */,
@@ -374,6 +381,7 @@
 				9E30553C2260FA8F001D4597 /* Logger.m in Sources */,
 				9E3A9D7622568DBD00348529 /* Reader.m in Sources */,
 				9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */,
+				9E9458572274EB4400A3D449 /* NSMapTable+JSHashMap.m in Sources */,
 				9E30554522612C34001D4597 /* NSString+JSDataProtocol.m in Sources */,
 				9E3055612262633E001D4597 /* JSError.m in Sources */,
 				9E9B6229225B9FC20060DA9A /* FileOps.m in Sources */,

@@ -65,6 +65,8 @@
     XCTAssertEqualObjects([kwd encoded], @"\u029e:abc");
     kwd = [[JSKeyword alloc] initWithEncodedKeyword:@"\u029e:abc"];
     XCTAssertEqualObjects([kwd value], @":abc");
+    XCTAssertFalse([JSKeyword isKeyword:[JSNumber new]]);
+    XCTAssertFalse([JSKeyword isKeyword:[JSString new]]);
 }
 
 - (void)testTokenize {
@@ -176,6 +178,34 @@
     JSString *object = [[JSString alloc] initWithString:@"1234"];
     [dict setObject:object forKey:key];
     XCTAssertEqualObjects((JSString *)[dict objectForKey:key], object);
+    // testing hash map with object keys (should implement to `isEqual`, `hash` functions).
+    NSMutableDictionary *aDict = [NSMutableDictionary new];
+    JSNumber *aVal = [[JSNumber alloc] initWithInt:1];
+    JSNumber *aKey = [[JSNumber alloc] initWithInt:2];
+    [aDict setObject:aVal forKey:aKey];
+    JSData * aRet = [aDict objectForKey:aKey];
+    NSArray *aKeys = [aDict allKeys];
+    XCTAssertTrue([aKeys count] == 1);
+    aRet = [aDict objectForKey:aKeys[0]];
+    XCTAssertNotNil(aRet);
+    XCTAssertEqualObjects([aRet dataType], @"JSNumber");
+    aRet = nil;
+    aKeys = nil;
+    // testing hash map with number keys
+    JSHashMap *hm = [[JSHashMap alloc] initWithArray:[@[aKey, aVal] mutableCopy]];
+    aKeys = [hm allKeys];
+    XCTAssertTrue([aKeys count] == 1);
+    aRet = [hm objectForKey:aKeys[0]];
+    XCTAssertNotNil(aRet);
+    XCTAssertEqualObjects([aRet dataType], @"JSNumber");
+}
+
+- (void)testNSMapTable {
+    NSMapTable *table1 = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    [table1 setObject:@"1" forKey:@"1"];
+    NSMapTable *table2 = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    [table2 setObject:@"1" forKey:@"1"];
+    XCTAssertTrue([table1 isEqual:table2]);
 }
 
 - (void)testJSListRest {
@@ -484,6 +514,11 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(= {:a 11 :b 22} (list :a 11 :b 22))"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(= {} [])"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(= [] {})"], @"false");
+    // null key
+    XCTAssertEqualObjects([jsl rep:@"(def! a nil)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(assoc {} a 2)"], @"{nil 2}");
+    // any key
+    XCTAssertEqualObjects([jsl rep:@"{1 1}"], @"{1 1}");
 }
 
 - (void)testEnv {
@@ -1301,7 +1336,17 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)test {
-//    JSL *jsl = [JSL new];
+    JSL *jsl = [JSL new];
+//    XCTAssertEqualObjects([jsl rep:@"{1 2}"], @"{1 2}");
+//    XCTAssertEqualObjects([jsl rep:@"{1 1}"], @"{1 1}");
+//    NSMutableDictionary *dict = [NSMutableDictionary new];
+//    JSString *val = [[JSString alloc] initWithString:@"val"];
+//    JSSymbol *key = [[JSSymbol alloc] initWithName:@"sym"];
+//    [dict setObject:val forKey:key];
+//    JSData * ret = [dict objectForKey:key];
+//    XCTAssertNotNil(ret);
+//    XCTAssertEqualObjects([ret dataType], @"JSString");
+
 }
 
 - (void)notestPerformanceJSListDropFirst {

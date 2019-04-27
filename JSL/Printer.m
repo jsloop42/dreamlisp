@@ -63,15 +63,9 @@
         NSUInteger len = [keys count];
         NSMutableArray *xs = [NSMutableArray new];
         for (i = 0; i < len; i++) {
-            NSString *key = keys[i];
-            JSData *keyData = nil;
-            if ([JSKeyword isKeyword:key]) {
-                keyData = [[JSKeyword alloc] initWithEncodedKeyword:key];
-            } else {
-                keyData = [[JSString alloc] initWithString:key];
-            }
+            id key = keys[i];
             [xs addObject:[[NSString alloc] initWithFormat:@"%@ %@",
-                                [self printStringFor:keyData readably:readably],
+                                [self printStringFor:(JSData *)key readably:readably],
                                 [self printStringFor:(JSData *)[hm objectForKey:key] readably:readably]]];
         }
         return [[NSString alloc] initWithFormat:@"{%@}", [xs componentsJoinedByString:@" "]];
