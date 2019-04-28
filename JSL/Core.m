@@ -602,27 +602,17 @@ double dmod(double a, double n) {
 
     JSData *(^assoc)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSHashMap *first = (JSHashMap *)[xs first];
-        NSMutableDictionary *hm = [[first value] mutableCopy];
-        NSMutableDictionary *rest = [[[JSHashMap alloc] initWithArray:[xs rest]] value];
-        [hm addEntriesFromDictionary:rest];
-        return [[JSHashMap alloc] initWithDictionary:hm];
+        NSMapTable *table = [[first value] mutableCopy];
+        NSMapTable *rest = [[[JSHashMap alloc] initWithArray:[xs rest]] value];
+        return [[JSHashMap alloc] initWithMapTable:[table assoc:rest]];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:assoc] forKey:@"assoc"];
 
     JSData *(^dissoc)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSHashMap *first = (JSHashMap *)[xs first];
-        NSMutableArray *keys = [xs rest];
-        NSMutableDictionary *dict = [[first value] mutableCopy];
-        NSUInteger i = 0;
-        NSUInteger len = [keys count];
-        for(i = 0; i < len; i++) {
-            if ([[(JSData *)keys[i] dataType] isEqual:@"JSString"]) {
-                [dict removeObjectForKey:[(JSString *)keys[i] value]];
-            } else if ([[(JSData *)keys[i] dataType] isEqual:@"JSKeyword"]) {
-                [dict removeObjectForKey:[(JSKeyword *)keys[i] encoded]];
-            }
-        }
-        return [[JSHashMap alloc] initWithDictionary:dict];
+        NSArray *keys = [xs rest];
+        NSMapTable *table = [[first value] mutableCopy];
+        return [[JSHashMap alloc] initWithMapTable:[table dissoc:keys]];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:dissoc] forKey:@"dissoc"];
 
@@ -630,16 +620,8 @@ double dmod(double a, double n) {
         JSData *data = (JSData *)[xs first];
         if ([[data dataType] isEqual:@"JSHashMap"]) {
             JSHashMap *first = (JSHashMap *)[xs first];
-            NSString *key = nil;
-            if ([[(JSData *)[xs second] dataType] isEqual:@"JSKeyword"]) {
-                key = [(JSKeyword *)[xs second] encoded];
-            } else {
-                key = [(JSString *)[xs second] value];
-            }
-            JSData *ret = (JSData *)[first objectForKey:key];
-            if (ret) {
-                return ret;
-            }
+            JSData *ret = (JSData *)[first objectForKey:[xs second]];
+            if (ret) { return ret; }
         }
         return [JSNil new];
     };
@@ -647,20 +629,13 @@ double dmod(double a, double n) {
 
     JSData *(^contains)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSHashMap *first = (JSHashMap *)[xs first];
-        NSString *key = nil;
-        if ([[(JSData *)[xs second] dataType] isEqual:@"JSKeyword"]) {
-            key = [(JSKeyword *)[xs second] encoded];
-        } else {
-            key = [(JSString *)[xs second] value];
-        }
-        return [[JSBool alloc] initWithBool:(JSData *)[first objectForKey:key] != nil];
+        return [[JSBool alloc] initWithBool:[first containsKey:[xs second]]];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:contains] forKey:@"contains?"];
 
     JSData *(^keys)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSHashMap *first = (JSHashMap *)[xs first];
-        NSArray *keys = [first allKeys];
-        return [[JSList alloc] initWithArray:keys];
+        return [[JSList alloc] initWithArray:[first allKeys]];
     };
     [ns setObject:[[JSFunction alloc] initWithFn:keys] forKey:@"keys"];
 

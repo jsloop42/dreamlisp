@@ -13,6 +13,9 @@ NS_ASSUME_NONNULL_BEGIN
 @interface NSMapTable (JSHashMap)
 - (NSArray *)allKeys;
 - (NSArray *)allObjects;
+- (NSMapTable *)assoc:(NSMapTable *)table;
+- (NSMapTable *)dissoc:(NSArray *)keys;
+- (BOOL)containsKey:(id)key;
 @end
 
 NS_ASSUME_NONNULL_END

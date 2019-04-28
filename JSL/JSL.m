@@ -92,14 +92,14 @@
         }];
         return [[JSVector alloc] initWithArray:arr];
     } if ([[ast dataType] isEqual:@"JSHashMap"]) {
-        NSMutableDictionary *dict = [(JSHashMap *)ast value];
+        NSMapTable *table = [(JSHashMap *)ast value];
         NSUInteger i = 0;
-        NSArray *keys = [dict allKeys];
+        NSArray *keys = [table allKeys];
         NSUInteger len = [keys count];
         for (i = 0; i < len; i++) {
-            [dict setObject:[self eval:[dict objectForKey:keys[i]] withEnv:env] forKey:keys[i]];
+            [table setObject:[self eval:[table objectForKey:keys[i]] withEnv:env] forKey:keys[i]];
         }
-        return [[JSHashMap alloc] initWithDictionary:dict];
+        return [[JSHashMap alloc] initWithMapTable:table];
     }
     return ast;
 }
@@ -265,10 +265,10 @@
             NSUInteger len = [keys count];
             JSHashMap *ret = [JSHashMap new];
             for (i = 0; i < len; i++) {
-                id<NSCopying> key = keys[i];
+                id key = keys[i];
                 JSData *val = (JSData *)[dict objectForKey:key];
                 JSData *object = (JSData *)[self eval:val withEnv:env];
-                [ret setObject:object forKey:key];
+                [ret setObject:object forKey:[self eval:(JSData *)key withEnv:env]];
             }
             return ret;
         } else {

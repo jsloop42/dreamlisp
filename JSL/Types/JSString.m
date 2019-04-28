@@ -1,0 +1,106 @@
+//
+//  JSString.m
+//  JSL
+//
+//  Created by jsloop on 28/04/19.
+//  Copyright © 2019 jsloop. All rights reserved.
+//
+
+#import "JSString.h"
+
+@implementation JSString {
+    NSString *_string;
+    JSData *_meta;
+}
+
+@synthesize value = _string;
+@synthesize meta = _meta;
+
+- (instancetype)init {
+    self = [super init];
+    return self;
+}
+
+- (instancetype)initWithFormat:(NSString *)format, ... {
+    self = [super init];
+    if (self) {
+        va_list args;
+        va_start(args, format);
+        _string = [[NSString alloc] initWithFormat:format arguments:args];
+        va_end(args);
+        self = [self initWithString:_string];
+    }
+    return self;
+}
+
+- (instancetype)initWithString:(NSString *)string {
+    self = [super init];
+    if (self) {
+        _string = string;
+    }
+    return self;
+}
+
+- (instancetype)initWithContentsOfFile:(NSString *)filePath {
+    self = [super init];
+    if (self) {
+        NSError *err = nil;
+        _string = [[NSString alloc] initWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:&err];
+        if (!_string && err) {
+            @throw [[NSException alloc] initWithName:JSL_FILE_READ_ERROR reason:JSL_FILE_READ_ERROR_MSG userInfo:nil];
+        }
+    }
+    return self;
+}
+
+- (instancetype)initWithCString:(const char *)string {
+    self = [super init];
+    if (self) {
+        _string = [[NSString alloc] initWithCString:string encoding:NSUTF8StringEncoding];
+    }
+    return self;
+}
+
+- (instancetype)initWithMeta:(JSData *)meta string:(JSString *)string {
+    self = [super init];
+    if (self) {
+        _string = [string value];
+        _meta = meta;
+    }
+    return self;
+}
+
+- (NSString *)dataType {
+    return [self className];
+}
+
+- (NSString *)value {
+    return _string;
+}
+
+- (void)setValue:(NSString *)string {
+    _string = string;
+}
+
+- (BOOL)isEqual:(JSString *)string {
+    return [_string isEqualToString:[string value]];
+}
+
+- (NSUInteger)hash {
+    return [_string hash];
+}
+
+- (BOOL)hasMeta {
+    return _meta != nil;
+}
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    id copy = [[JSString alloc] initWithString:_string];
+    return copy;
+}
+
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _string, _meta];
+}
+
+@end

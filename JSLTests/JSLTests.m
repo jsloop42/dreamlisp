@@ -458,7 +458,8 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"{\"a\" (+ 1 2)}"], @"{\"a\" 3}");
     XCTAssertEqualObjects([jsl rep:@"{:a (+ 7 8)}"], @"{:a 15}");
     XCTAssertEqualObjects([jsl rep:@"(dissoc {:a 1 :b 2} :a)"], @"{:b 2}");
-    XCTAssertEqualObjects([jsl rep:@"(keys {:abc 123 :def 456})"], @"(:abc :def)");
+    NSString *ret = [jsl rep:@"(keys {:abc 123 :def 456})"];
+    XCTAssertTrue([ret isEqual:@"(:abc :def)"] || [ret isEqual:@"(:def :abc)"]);
     XCTAssertEqualObjects([jsl rep:@"(contains? {:abc nil} :abc)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(contains? {:abc 123} :abc)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(get {:abc 123} :abc)"], @"123");
@@ -519,6 +520,13 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(assoc {} a 2)"], @"{nil 2}");
     // any key
     XCTAssertEqualObjects([jsl rep:@"{1 1}"], @"{1 1}");
+    XCTAssertEqualObjects([jsl rep:@"{\"a\" 1}"], @"{\"a\" 1}");
+    XCTAssertEqualObjects([jsl rep:@"{[\"x\" \"y\"] 1}"], @"{[\"x\" \"y\"] 1}");
+    // hash map key evaluation
+    XCTAssertEqualObjects([jsl rep:@"(def! a 1)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"{a 2}"], @"{1 2}");
+    XCTAssertThrows([jsl rep:@"{b 2}"], @"'b' not found");
+    XCTAssertEqualObjects([jsl rep:@"(contains? {a 2} a)"], @"true");
 }
 
 - (void)testEnv {
@@ -670,7 +678,8 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
                           @"\"true \\\".\\\" false \\\".\\\" nil \\\".\\\" :keyw \\\".\\\" symb\"");
     [jsl rep:@"(def! s (str {:abc \"val1\" :def \"val2\"}))"];
     XCTAssertEqualObjects([jsl rep:@"(or (= s \"{:abc val1 :def val2}\") (= s \"{:def val2 :abc val1}\"))"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"(def! p (pr-str {:abc \"val1\" :def \"val2\"}))"], @"\"{:abc \\\"val1\\\" :def \\\"val2\\\"}\"");
+    NSString *ret = [jsl rep:@"(def! p (pr-str {:abc \"val1\" :def \"val2\"}))"];
+    XCTAssertTrue([ret isEqual:@"\"{:abc \\\"val1\\\" :def \\\"val2\\\"}\""] || [ret isEqual:@"\"{:def \\\"val2\\\" :abc \\\"val1\\\"}\""]);
     XCTAssertEqualObjects([jsl rep:@"(or (= p \"{:abc \\\"val1\\\" :def \\\"val2\\\"}\") (= p \"{:def \\\"val2\\\" :abc \\\"val1\\\"}\"))"], @"true");
 }
 
@@ -1200,9 +1209,11 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     // testing `@` deref reader macro
     XCTAssertEqualObjects([jsl rep:@"(def! atm (atom 9))"], @"(atom 9)");
     XCTAssertEqualObjects([jsl rep:@"@atm"], @"9");
-    XCTAssertEqualObjects([jsl rep:@"(def! a (atom {:x 1 :y 2}))"], @"(atom {:x 1 :y 2})");
+    NSString *ret = [jsl rep:@"(def! a (atom {:x 1 :y 2}))"];
+    XCTAssertTrue([ret isEqual:@"(atom {:x 1 :y 2})"] || [ret isEqual:@"(atom {:y 2 :x 1})"]);
     XCTAssertEqualObjects([jsl rep:@"(get @a :x)"], @"1");
-    XCTAssertEqualObjects([jsl rep:@"(reset! a {:x 1 :y (+ (get @a :y) 1)})"], @"{:x 1 :y 3}");
+    ret = [jsl rep:@"(reset! a {:x 1 :y (+ (get @a :y) 1)})"];
+    XCTAssertTrue([ret isEqual:@"{:x 1 :y 3}"] || [ret isEqual:@"{:y 3 :x 1}"]);
     XCTAssertEqualObjects([jsl rep:@"(def! a (atom {}))"], @"(atom {})");
     XCTAssertEqualObjects([jsl rep:@"(assoc @a :z 1)"], @"{:z 1}");
     [jsl rep:@"(def! e (atom {\"+\" +}))"];
@@ -1337,15 +1348,6 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)test {
     JSL *jsl = [JSL new];
-//    XCTAssertEqualObjects([jsl rep:@"{1 2}"], @"{1 2}");
-//    XCTAssertEqualObjects([jsl rep:@"{1 1}"], @"{1 1}");
-//    NSMutableDictionary *dict = [NSMutableDictionary new];
-//    JSString *val = [[JSString alloc] initWithString:@"val"];
-//    JSSymbol *key = [[JSSymbol alloc] initWithName:@"sym"];
-//    [dict setObject:val forKey:key];
-//    JSData * ret = [dict objectForKey:key];
-//    XCTAssertNotNil(ret);
-//    XCTAssertEqualObjects([ret dataType], @"JSString");
 
 }
 
