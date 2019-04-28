@@ -13,9 +13,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class JSData;
 
-extern NSString *SymbolNotFound;
+extern NSString *ArityError;
 extern NSString *IndexOutOfBounds;
 extern NSString *JSLException;
+extern NSString *SymbolNotFound;
 
 @interface JSError : NSObject
 @property (nonatomic, readwrite) NSString *description;
@@ -24,6 +25,7 @@ extern NSString *JSLException;
 - (instancetype)initWithData:(JSData *)data;
 - (instancetype)initWithArray:(NSMutableArray *)array;
 - (NSMutableDictionary *)value;
+- (void)throw;
 @end
 
 NS_ASSUME_NONNULL_END

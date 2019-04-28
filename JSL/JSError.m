@@ -8,9 +8,10 @@
 
 #import "JSError.h"
 
-NSString *SymbolNotFound = @"'%@' not found";
+NSString *ArityError = @"Arity error. Expected %d arguments, but obtained %d.";
 NSString *IndexOutOfBounds = @"Index out of bounds";
 NSString *JSLException = @"JSLException";
+NSString *SymbolNotFound = @"'%@' not found";
 
 @implementation JSError {
     NSString *_description;
@@ -69,6 +70,10 @@ NSString *JSLException = @"JSLException";
 
 - (NSMutableDictionary *)value {
     return _errDict;
+}
+
+- (void)throw {
+    @throw [[NSException alloc] initWithName:JSLException reason:JSLException userInfo:_errDict];
 }
 
 @end
