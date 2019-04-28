@@ -41,9 +41,6 @@
     id key = nil;
     for (i = 0; i < len; i++) {
         key = keys[i];
-        if ([aTable containsKey:key]) {
-            [aTable removeObjectForKey:key];
-        }
         [aTable setObject:[table objectForKey:key] forKey:key];
     }
     return aTable;
