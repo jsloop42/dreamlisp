@@ -8,7 +8,7 @@
 
 #import "JSError.h"
 
-NSString *ArityError = @"Arity error. Expected %d arguments, but obtained %d.";
+NSString *ArityError = @"Arity error. Expected %d arguments, but passed %d.";
 NSString *IndexOutOfBounds = @"Index out of bounds";
 NSString *JSLException = @"JSLException";
 NSString *SymbolNotFound = @"'%@' not found";

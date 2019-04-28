@@ -74,6 +74,7 @@ double dmod(double a, double n) {
     };
 
     JSFunction *add = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
+        if ([args isEmpty]) { return [[JSNumber alloc] initWithInt:0]; }
         return calc(args, @selector(decimalNumberByAdding:));
     }];
     [_ns setObject:add forKey:@"+"];
@@ -84,6 +85,7 @@ double dmod(double a, double n) {
     [_ns setObject:subtract forKey:@"-"];
 
     JSFunction *multiply = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
+        if ([args isEmpty]) { return [[JSNumber alloc] initWithInt:1]; }
         return calc(args, @selector(decimalNumberByMultiplyingBy:));
     }];
     [_ns setObject:multiply forKey:@"*"];
@@ -95,7 +97,8 @@ double dmod(double a, double n) {
 
     JSData *(^mod)(NSMutableArray *args) = ^JSData *(NSMutableArray *args) {
         if ([args count] != 2) {
-            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+            JSError *info = [[JSError alloc] initWithFormat:ArityError, 2, [args count]];
+            [info throw];
         }
         JSNumber *lhs = (JSNumber *)[args first];
         JSNumber *rhs = (JSNumber *)[args second];
@@ -136,10 +139,19 @@ double dmod(double a, double n) {
 
 - (void)addComparisonFunctions {
     JSData *(^compare)(NSMutableArray *args, SEL sel) = ^JSData *(NSMutableArray *args, SEL sel) {
-        if ([args count] != 2) {
-            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+        BOOL ret = YES;
+        NSUInteger i = 0;
+        NSUInteger len = [args count];
+        if (len >= 2) {
+            for (i = 0; i < len - 1; i++) {
+                ret = (BOOL)objc_msgSend([(JSNumber *)args[i] value], sel, [(JSNumber *)args[i + 1] value]);
+                if (!ret) { break; }
+            }
+        } else if (len == 0) {
+            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, len];
+            [info throw];
         }
-        return [[JSBool alloc] initWithBool:(BOOL)objc_msgSend([(JSNumber *)[args first] value], sel, [(JSNumber *)[args second] value])];
+        return [[JSBool alloc] initWithBool:ret];
     };
 
     JSFunction *lessThan = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
@@ -163,10 +175,19 @@ double dmod(double a, double n) {
     [_ns setObject:greaterThanOrEqualTo forKey:@">="];
 
     JSFunction *equalTo = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
-        if ([args count] != 2) {
-            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+        BOOL ret = YES;
+        NSUInteger len = [args count];
+        NSUInteger i = 0;
+        if (len >= 2) {
+            for (i = 0; i < len - 1; i++) {
+                ret = [self isEqual:(JSData *)args[i] rhs:(JSData *)args[i + 1]];
+                if (!ret) { break; }
+            }
+        } else if (len == 0) {
+            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, len];
+            [info throw];
         }
-        return [[JSBool alloc] initWithBool:[self isEqual:(JSData *)[args first] rhs:(JSData *)[args second]]];
+        return [[JSBool alloc] initWithBool:ret];
     }];
     [_ns setObject:equalTo forKey:@"="];
 }
@@ -231,16 +252,28 @@ double dmod(double a, double n) {
     [_ns setObject:[[JSFunction alloc] initWithFn:list] forKey:@"list"];
 
     JSData *(^listp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([xs count] != 1) {
+            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, [xs count]];
+            [info throw];
+        }
         return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSList"]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:listp] forKey:@"list?"];
 
     JSData *(^emptyp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([xs count] != 1) {
+            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, [xs count]];
+            [info throw];
+        }
         return [[JSBool alloc] initWithBool:[(JSList *)[xs first] isEmpty]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:emptyp] forKey:@"empty?"];
 
     JSData *(^count)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([xs count] != 1) {
+            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, [xs count]];
+            [info throw];
+        }
         if ([[(JSData *)[xs first] dataType] isEqual:@"JSNil"]) {
             return [[JSNumber alloc] initWithInteger:0];
         }
@@ -275,6 +308,10 @@ double dmod(double a, double n) {
     [_ns setObject:[[JSFunction alloc] initWithFn:concat] forKey:@"concat"];
 
     JSData *(^nth)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([xs count] != 2) {
+            JSError *info = [[JSError alloc] initWithFormat:ArityError, 2, [xs count]];
+            [info throw];
+        }
         JSData *second = [xs second];
         if ([xs first] == nil || second == nil || [[second dataType] isNotEqualTo:@"JSNumber"]) {
             @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
@@ -290,6 +327,10 @@ double dmod(double a, double n) {
     [_ns setObject:[[JSFunction alloc] initWithFn:nth] forKey:@"nth"];
 
     JSData *(^first)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([xs count] != 1) {
+            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, [xs count]];
+            [info throw];
+        }
         NSMutableArray *list = [xs first];
         if ([xs isEmpty] || [[(JSData *)list dataType] isEqual:@"JSNil"]) {
             return [JSNil new];
@@ -303,6 +344,10 @@ double dmod(double a, double n) {
     [_ns setObject:[[JSFunction alloc] initWithFn:first] forKey:@"first"];
 
     JSData *(^rest)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([xs count] != 1) {
+            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, [xs count]];
+            [info throw];
+        }
         NSMutableArray *list = [xs first];
         if ([[(JSData *)list dataType] isEqual:@"JSNil"] || [list isEmpty]) {
             return [JSList new];
