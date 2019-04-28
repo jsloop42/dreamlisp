@@ -559,10 +559,13 @@ double dmod(double a, double n) {
 
 - (void)addKeywordFunctions {
     JSData *(^keyword)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        if ([[(JSData *)[xs first] dataType] isEqual:@"JSKeyword"]) {
-            return (JSData *)[xs first];
+        JSData *first = (JSData *)[xs first];
+        if ([[first dataType] isEqual:@"JSKeyword"]) {
+            return first;
+        } else if ([[first dataType] isEqual:@"JSString"]) {
+            return [[JSKeyword alloc] initWithString:[(JSString *)first value]];
         }
-        return [[JSKeyword alloc] initWithString:[(JSString *)[xs first] value]]; 
+        return [JSNil new];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:keyword] forKey:@"keyword"];
 

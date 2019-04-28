@@ -937,6 +937,15 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(keyword? 'abc)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(keyword? \"abc\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(keyword? \"\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@":1"], @":1");
+    XCTAssertEqualObjects([jsl rep:@"(keyword? :1)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(def! a \"abc\")"], @"\"abc\"");
+    XCTAssertEqualObjects([jsl rep:@"(keyword a)"], @":abc");
+    // testing fail conditions
+    XCTAssertEqualObjects([jsl rep:@"(keyword 1)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(keyword (atom 1))"], @"nil");
+    XCTAssertThrows([jsl rep:@"(keyword xyz)"], @"'xyz' not found");
+    XCTAssertEqualObjects([jsl rep:@"(keyword (atom 1))"], @"nil");
 }
 
 - (void)testQuote {
@@ -1347,8 +1356,8 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)test {
-    JSL *jsl = [JSL new];
-    XCTAssertEqualObjects([jsl rep:@":1"], @":1");
+    // JSL *jsl = [JSL new];
+
 }
 
 - (void)notestPerformanceJSListDropFirst {
