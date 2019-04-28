@@ -57,7 +57,7 @@
     if ([tokens count] <= 0) {
         return nil;
     }
-    Reader *reader = [[Reader alloc] initWithTokens:_tokens];
+    Reader *reader = [[Reader alloc] initWithTokens:tokens];
     return [reader readForm];
 }
 

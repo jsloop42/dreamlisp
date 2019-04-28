@@ -1348,7 +1348,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)test {
     JSL *jsl = [JSL new];
-
+    XCTAssertEqualObjects([jsl rep:@":1"], @":1");
 }
 
 - (void)notestPerformanceJSListDropFirst {
