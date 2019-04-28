@@ -14,6 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 @class JSData;
 
 extern NSString *ArityError;
+extern NSString *DataTypeMismatch;
+extern NSString *DataTypeMismatchWithArity;
 extern NSString *IndexOutOfBounds;
 extern NSString *JSLException;
 extern NSString *SymbolNotFound;

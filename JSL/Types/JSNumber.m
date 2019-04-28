@@ -17,6 +17,13 @@
 
 @synthesize meta = _meta;
 
++ (BOOL)isNumber:(id)object {
+    if ([object isKindOfClass:[self class]]) {
+        return YES;
+    }
+    return NO;
+}
+
 - (instancetype)initWithDouble:(double)number {
     self = [super init];
     if (self) {
@@ -85,6 +92,10 @@
 
 - (NSString *)dataType {
     return [self className];
+}
+
+- (NSString *)dataTypeName {
+    return @"number";
 }
 
 - (double)doubleValue {

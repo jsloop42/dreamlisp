@@ -260,8 +260,14 @@
     XCTAssertEqualObjects([jsl rep:@"(mod 5 3)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(mod 5 3.5)"], @"1.5");
     XCTAssertEqualObjects([jsl rep:@"(mod 5 -3.5)"], @"-2.0");
+    // zero argument
     XCTAssertEqualObjects([jsl rep:@"(+)"], @"0");
     XCTAssertEqualObjects([jsl rep:@"(*)"], @"1");
+    // one argument
+    XCTAssertEqualObjects([jsl rep:@"(* 3)"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(* 3.1415)"], @"3.1415");
+    XCTAssertEqualObjects([jsl rep:@"(/ 2)"], @"0.5");
+    XCTAssertEqualObjects([jsl rep:@"(/ 4)"], @"0.25");
 }
 
 - (void)testComparisonFunctions {
@@ -709,6 +715,11 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(str [(+ 21 12) 2 3 \"foo\"])"], @"\"[33 2 3 foo]\"");
     XCTAssertEqualObjects([jsl rep:@"(str [1 2 \"abc\" \"\\\"\"] \"def\")"], @"\"[1 2 abc \\\"]def\"");
     XCTAssertEqualObjects([jsl rep:@"(str [])"], @"\"[]\"");
+    // testing list functions that works with string
+    XCTAssertEqualObjects([jsl rep:@"(empty? \"abc\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(empty? \"\")"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(count \"\")"], @"0");
+    XCTAssertEqualObjects([jsl rep:@"(count \"abc\")"], @"3");
 }
 
 void testdoPrintCallback(id param, int tag, int counter, const char *s) {
@@ -1389,8 +1400,17 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(> (time-ms) start-time)"], @"true");
 }
 
+- (void)testErrorMessages {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'number'.\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1.0) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'number'.\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (empty? (atom 1)) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'atom'.\"");
+}
+
 - (void)test {
     JSL *jsl = [JSL new];
+
+    //XCTAssertEqualObjects([jsl rep:@"(/ 1 0)"], @"");
 
 }
 

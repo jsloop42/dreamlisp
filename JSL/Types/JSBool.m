@@ -35,6 +35,10 @@
     return [self className];
 }
 
+- (NSString *)dataTypeName {
+    return @"bool";
+}
+
 - (BOOL)isEqual:(JSBool *)boolean {
     return _flag == [boolean value];
 }

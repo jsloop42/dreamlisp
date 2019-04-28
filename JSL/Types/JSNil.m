@@ -9,19 +9,22 @@
 #import "JSNil.h"
 
 @implementation JSNil {
-    NSString *_dataType;
     JSData *_meta;
 }
 
-@synthesize dataType = _dataType;
 @synthesize meta = _meta;
 
 - (instancetype)init {
     self = [super init];
-    if (self) {
-        _dataType = [self className];
-    }
     return self;
+}
+
+- (NSString *)dataType {
+    return [self className];
+}
+
+- (NSString *)dataTypeName {
+    return @"nil";
 }
 
 - (BOOL)isEqual:(JSNil *)object {

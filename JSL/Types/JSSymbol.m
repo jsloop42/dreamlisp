@@ -36,6 +36,10 @@
     return [self className];
 }
 
+- (NSString *)dataTypeName {
+    return @"symbol";
+}
+
 - (NSString *)name {
     return _name;
 }

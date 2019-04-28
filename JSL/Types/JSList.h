@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSList : JSData
 @property (nonatomic, readwrite, copy) JSData *meta;
++ (BOOL)isList:(id)object;
 - (instancetype)init;
 - (instancetype)initWithArray:(NSArray *)list;
 - (instancetype)initWithMeta:(JSData *)meta list:(JSList *)list;

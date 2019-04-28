@@ -72,6 +72,10 @@
     return [self className];
 }
 
+- (NSString *)dataTypeName {
+    return @"keyword";
+}
+
 - (NSString *)value {
     return _string;
 }

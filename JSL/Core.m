@@ -91,6 +91,9 @@ double dmod(double a, double n) {
     [_ns setObject:multiply forKey:@"*"];
 
     JSFunction *divide = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
+        if ([args count] == 1) {
+            [args insertObject:[[JSNumber alloc] initWithDouble:1.0] atIndex:0];
+        }
         return calc(args, @selector(decimalNumberByDividingBy:));
     }];
     [_ns setObject:divide forKey:@"/"];
@@ -261,27 +264,51 @@ double dmod(double a, double n) {
     [_ns setObject:[[JSFunction alloc] initWithFn:listp] forKey:@"list?"];
 
     JSData *(^emptyp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        BOOL ret = YES;
         if ([xs count] != 1) {
             JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, [xs count]];
             [info throw];
         }
-        return [[JSBool alloc] initWithBool:[(JSList *)[xs first] isEmpty]];
+        JSData *first = (JSData *)[xs first];
+        if ([JSString isString:first]) {
+            ret = [(JSString *)first isEmpty];
+        } else if (![JSList isList:first]) {
+            JSError *info = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'list'", [first dataTypeName]];
+            [info throw];
+        } else {
+            ret = [(JSList *)first isEmpty];
+        }
+        return [[JSBool alloc] initWithBool:ret];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:emptyp] forKey:@"empty?"];
 
     JSData *(^count)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        NSUInteger ret = 0;
         if ([xs count] != 1) {
             JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, [xs count]];
             [info throw];
         }
-        if ([[(JSData *)[xs first] dataType] isEqual:@"JSNil"]) {
+        JSData *first = (JSData *)[xs first];
+        if ([[first dataType] isEqual:@"JSNil"]) {
             return [[JSNumber alloc] initWithInteger:0];
         }
-        return [[JSNumber alloc] initWithInteger:[(JSList *)[xs first] count]];
+        if ([JSString isString:first]) {
+            ret = [(JSString *)first count];
+        } else if (![JSList isList:first]) {
+            JSError *info = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'list'", [first dataTypeName]];
+            [info throw];
+        } else {
+            ret = [(JSList *)first count];
+        }
+        return [[JSNumber alloc] initWithInteger:ret];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:count] forKey:@"count"];
 
     JSData *(^cons)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
+        if ([xs count] != 2) {
+            JSError *info = [[JSError alloc] initWithFormat:ArityError, 2, [xs count]];
+            [info throw];
+        }
         JSData *data = (JSData *)[xs second];
         NSMutableArray *arr = [[(JSList *)data value] mutableCopy];
         [arr insertObject:(JSData *)[xs first] atIndex:0];
@@ -296,8 +323,14 @@ double dmod(double a, double n) {
         NSUInteger len = [xs count];
         NSUInteger jlen = 0;
         JSList *list = nil;
+        JSData *data = nil;
         for (i = 0; i < len; i++) {
-            list = (JSList *)[xs nth:i];
+            data = [xs nth:i];
+            if (![JSList isList:data] && ![JSVector isVector:data]) {
+                JSError *err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'list' or 'vector'", [data dataTypeName]];
+                [err throw];
+            }
+            list = (JSList *)data;
             jlen = [list count];
             for (j = 0; j < jlen; j++) {
                 [arr addObject:[list nth:j]];
@@ -312,11 +345,17 @@ double dmod(double a, double n) {
             JSError *info = [[JSError alloc] initWithFormat:ArityError, 2, [xs count]];
             [info throw];
         }
+        JSData *first = [xs first];
         JSData *second = [xs second];
-        if ([xs first] == nil || second == nil || [[second dataType] isNotEqualTo:@"JSNumber"]) {
-            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+        if (![JSList isList:first] && ![JSVector isVector:first]) {
+            JSError *err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'list' or 'vector'", 1, [first dataTypeName]];
+            [err throw];
         }
-        NSMutableArray *list = [(JSList *)[xs first] value];
+        if (![JSNumber isNumber:second]) {
+            JSError *err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'number'", 2, [second dataTypeName]];
+            [err throw];
+        }
+        NSMutableArray *list = [(JSList *)first value];
         JSNumber *num = (JSNumber *)second;
         NSUInteger n = [num integerValue];
         if (n >= [list count]) {

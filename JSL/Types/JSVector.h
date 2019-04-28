@@ -13,6 +13,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSVector: JSList
++ (BOOL)isVector:(id)object;
 - (instancetype)initWithArray:(NSArray *)list;
 - (instancetype)initWithMeta:(JSData *)meta vector:(JSVector *)vector;
 - (JSList *)list;

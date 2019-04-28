@@ -16,6 +16,13 @@
 @synthesize value = _string;
 @synthesize meta = _meta;
 
++ (BOOL)isString:(id)object {
+    if ([object isKindOfClass:[self class]]) {
+        return YES;
+    }
+    return NO;
+}
+
 - (instancetype)init {
     self = [super init];
     return self;
@@ -74,12 +81,24 @@
     return [self className];
 }
 
+- (NSString *)dataTypeName {
+    return @"string";
+}
+
 - (NSString *)value {
     return _string;
 }
 
 - (void)setValue:(NSString *)string {
     _string = string;
+}
+
+- (BOOL)isEmpty {
+    return [_string count] == 0;
+}
+
+- (NSUInteger)count {
+    return [_string length];
 }
 
 - (BOOL)isEqual:(JSString *)string {

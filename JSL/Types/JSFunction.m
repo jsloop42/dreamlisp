@@ -74,6 +74,10 @@
     return [self className];
 }
 
+- (NSString *)dataTypeName {
+    return @"function";
+}
+
 - (JSData *)apply {
     return _fn([NSMutableArray new]);
 }

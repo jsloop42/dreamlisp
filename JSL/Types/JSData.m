@@ -11,6 +11,7 @@
 @implementation JSData
 
 @synthesize dataType;
+@synthesize dataTypeName;
 @synthesize value;
 @synthesize meta;
 

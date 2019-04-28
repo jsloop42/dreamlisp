@@ -36,6 +36,10 @@
     return [self className];
 }
 
+- (NSString *)dataTypeName {
+    return @"atom";
+}
+
 - (JSData *)value {
     return _data;
 }

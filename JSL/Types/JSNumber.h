@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSNumber : JSData
 @property (nonatomic, readwrite, copy) JSData *meta;
++ (BOOL)isNumber:(id)object;
 - (instancetype)initWithDouble:(double)num;
 - (instancetype)initWithInt:(int)number;
 - (instancetype)initWithInteger:(NSUInteger)number;
@@ -28,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)string;
 - (BOOL)isEqual:(JSNumber *)num;
 - (NSUInteger)hash;
+- (NSString *)dataTypeName;
 @end
 
 NS_ASSUME_NONNULL_END

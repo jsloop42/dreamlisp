@@ -15,6 +15,13 @@
 
 @synthesize meta = _meta;
 
++ (BOOL)isVector:(id)object {
+    if ([object isKindOfClass:[self class]]) {
+        return YES;
+    }
+    return NO;
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -44,6 +51,10 @@
 
 - (NSString *)dataType {
     return [self className];
+}
+
+- (NSString *)dataTypeName {
+    return @"vector";
 }
 
 - (NSMutableArray *)map:(id (^)(id arg))block {

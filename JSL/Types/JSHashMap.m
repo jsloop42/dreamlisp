@@ -57,6 +57,10 @@
     return [self className];
 }
 
+- (NSString *)dataTypeName {
+    return @"hash-map";
+}
+
 - (void)fromArray:(NSArray *)array {
     NSUInteger i = 0, len = [array count];
     if (len % 2 != 0) {
