@@ -9,15 +9,15 @@
 #import "Reader.h"
 
 @implementation Reader {
-    NSMutableArray *tokens;
-    NSUInteger position;
+    NSMutableArray *_tokens;
+    NSUInteger _position;
 }
 
 - (instancetype)init {
     self = [super init];
     if (self) {
-        tokens = [NSMutableArray new];
-        position = 0;
+        _tokens = [NSMutableArray new];
+        _position = 0;
     }
     return self;
 }
@@ -25,36 +25,36 @@
 - (instancetype)initWithTokens:(NSMutableArray *)array {
     self = [super init];
     if (self) {
-        tokens = array;
-        position = 0;
+        _tokens = array;
+        _position = 0;
     }
     return self;
 }
 
 - (nullable NSString *)next {
-    if (position >= [tokens count]) {
+    if (_position >= [_tokens count]) {
         return nil;
     }
-    return tokens[position++];
+    return _tokens[_position++];
 }
 
 - (nullable NSString *)peek {
-    if (position >= [tokens count]) {
+    if (_position >= [_tokens count]) {
         return nil;
     }
-    return tokens[position];
+    return _tokens[_position];
 }
 
 - (void)pass {
-    if (position >= [tokens count]) {
+    if (_position >= [_tokens count]) {
         return;
     }
-    position++;
+    _position++;
 }
 
 - (nullable JSData *)readString:(NSString *)string {
-    NSMutableArray *_tokens = [self tokenize:string];
-    if ([_tokens count] <= 0) {
+    NSMutableArray *tokens = [self tokenize:string];
+    if ([tokens count] <= 0) {
         return nil;
     }
     Reader *reader = [[Reader alloc] initWithTokens:_tokens];
@@ -144,13 +144,13 @@
     NSString *pattern = @"[\\s,]*(~@|[\\[\\]{}()'`~^@]|\"(?:[\\\\].|[^\\\\\"])*\"?|;.*|[^\\s\\[\\]{}()'\"`@,;]+)";
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:NULL];
     NSArray *matches = [regex matchesInString:string options:0 range:NSMakeRange(0, [string length])];
-    NSMutableArray *_tokens = [NSMutableArray array];
+    NSMutableArray *tokenArr = [NSMutableArray array];
     for (NSTextCheckingResult *match in matches) {
         NSString * mstr = [string substringWithRange:[match rangeAtIndex:1]];
         if ([mstr characterAtIndex:0] == ';') { continue; }
-        [_tokens addObject:mstr];
+        [tokenArr addObject:mstr];
     }
-    return _tokens;
+    return tokenArr;
 }
 
 @end

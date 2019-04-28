@@ -11,7 +11,7 @@
 void (*callback)(id param, int tag, int counter, const char *s);
 id self;
 int _tag = 0;
-int counter = 0;
+int _counter = 0;
 
 void infoCallback(id param, int tag, void(*fn)(id param, int tag, int counter, const char *s)) {
     callback = fn;
@@ -23,7 +23,7 @@ void freeInfoCallback() {
     callback = NULL;
     self = NULL;
     _tag = 0;
-    counter = 0;
+    _counter = 0;
 }
 
 void info3(NSString *terminator, NSString *format, ...) {
@@ -31,7 +31,7 @@ void info3(NSString *terminator, NSString *format, ...) {
     va_start(args, format);
     NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
     if (self != nil && callback != nil) {
-        callback(self, _tag, ++counter, [message cStringUsingEncoding:NSUTF8StringEncoding]);
+        callback(self, _tag, ++_counter, [message cStringUsingEncoding:NSUTF8StringEncoding]);
     }
     va_end(args);
     fprintf(stdout,"%s%s", [message UTF8String], [terminator UTF8String]);
@@ -42,7 +42,7 @@ void info(NSString *format, ...) {
     va_start(args, format);
     NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
     if (self != nil && callback != nil) {
-        callback(self, _tag, ++counter, [message cStringUsingEncoding:NSUTF8StringEncoding]);
+        callback(self, _tag, ++_counter, [message cStringUsingEncoding:NSUTF8StringEncoding]);
     }
     va_end(args);
     fprintf(stdout,"%s\n", [message UTF8String]);

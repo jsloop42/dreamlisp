@@ -9,7 +9,7 @@
 #import "JSList.h"
 
 @implementation JSList {
-    NSMutableArray *array;
+    NSMutableArray *_array;
     JSData *_meta;
 }
 
@@ -18,7 +18,7 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        array = [NSMutableArray new];
+        _array = [NSMutableArray new];
     }
     return self;
 }
@@ -26,7 +26,7 @@
 - (instancetype)initWithArray:(NSArray *)list {
     self = [super init];
     if (self) {
-        array = [[NSMutableArray alloc] initWithArray:list];
+        _array = [[NSMutableArray alloc] initWithArray:list];
     }
     return self;
 }
@@ -34,7 +34,7 @@
 - (instancetype)initWithMeta:(JSData *)meta list:(JSList *)list {
     self = [super init];
     if (self) {
-        array = [list value];
+        _array = [list value];
         _meta = meta;
     }
     return self;
@@ -45,77 +45,77 @@
 }
 
 - (void)add:(JSData *)object {
-    [array addObject:object];
+    [_array addObject:object];
 }
 
 - (void)add:(JSData *)object atIndex:(NSUInteger)index {
-    [array insertObject:object atIndex:index];
+    [_array insertObject:object atIndex:index];
 }
 
 - (void)remove:(JSData *)object {
-    [array removeObject:object];
+    [_array removeObject:object];
 }
 
 - (void)removeAtIndex:(NSUInteger)index {
-    [array removeObjectAtIndex:index];
+    [_array removeObjectAtIndex:index];
 }
 
 - (void)setValue:(NSMutableArray *)aArray {
-    array = aArray;
+    _array = aArray;
 }
 
 - (NSMutableArray *)value {
-    return array;
+    return _array;
 }
 
 - (NSUInteger)count {
-    return [array count];
+    return [_array count];
 }
 
 - (JSData *)first {
-    return [array firstObject];
+    return [_array firstObject];
 }
 
 - (JSData *)second {
-    return [array objectAtIndex:1];
+    return [_array objectAtIndex:1];
 }
 
 - (JSData *)rest {
-    NSMutableArray *arr = [array mutableCopy];
+    NSMutableArray *arr = [_array mutableCopy];
     [arr removeObjectAtIndex:0];
     return [[JSList alloc] initWithArray:arr];
 }
 
 - (JSData *)last {
-    return [array objectAtIndex:[array count] - 1];
+    return [_array objectAtIndex:[_array count] - 1];
 }
 
 - (JSData *)dropLast {
-    NSMutableArray *arr = [array mutableCopy];
+    NSMutableArray *arr = [_array mutableCopy];
     [arr removeLastObject];
     return [[JSList alloc] initWithArray:arr];
 }
 
 - (JSData *)nth:(NSInteger)n {
-    return [array objectAtIndex:n];
+    return [_array objectAtIndex:n];
 }
 
 - (NSMutableArray *)map:(id (^)(id arg))block {
-    return [TypeUtils mapOnArray:array withBlock:block];
+    return [TypeUtils mapOnArray:_array withBlock:block];
 }
 
 - (BOOL)isEmpty {
-    return [array count] == 0;
+    return [_array count] == 0;
 }
 
 - (BOOL)isEqual:(JSList *)list {
-    NSUInteger len = [array count];
+    NSUInteger len = [_array count];
     NSUInteger i = 0;
     if (len != [list count]) {
         return NO;
     }
     for (i = 0; i < len; i++) {
-        if (![array[i] isEqual:[list nth:i]]) {
+        if (![_array[i] isEqual:[list nth:i]]) {
             return NO;
         }
     }
@@ -123,17 +123,17 @@
 }
 
 - (NSUInteger)hash {
-    return [array count];
+    return [_array count];
 }
 
 /** Returns a new list which the reverse of the current list. */
 - (JSList *)reverse {
-    return [[JSList alloc] initWithArray:[[[[array rest] reverseObjectEnumerator] allObjects] mutableCopy]];
+    return [[JSList alloc] initWithArray:[[[[_array rest] reverseObjectEnumerator] allObjects] mutableCopy]];
 }
 
 /** Drops n elements. */
 - (JSList *)drop:(NSInteger)n {
-    NSMutableArray *arr = [array mutableCopy];
+    NSMutableArray *arr = [_array mutableCopy];
     if (n > 0 && n <= [arr count]) {
         [arr removeObjectsInRange:NSMakeRange(0, n)];
         return [[JSList alloc] initWithArray:arr];
@@ -146,12 +146,12 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[JSList alloc] initWithArray:array];
+    id copy = [[JSList alloc] initWithArray:_array];
     return copy;
 }
 
 - (NSString *)description {
-    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [array description], _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [_array description], _meta];
 }
 
 @end

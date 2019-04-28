@@ -9,12 +9,12 @@
 #import "Env.h"
 
 @implementation Env {
-    Env *outer;
-    NSMutableDictionary *data;
+    Env *_outer;
+    NSMutableDictionary *_data;
 }
 
-@synthesize outer = outer;
-@synthesize data = data;
+@synthesize outer = _outer;
+@synthesize data = _data;
 
 - (instancetype)init {
     self = [super init];
@@ -28,7 +28,7 @@
     self = [super init];
     if (self) {
         [self bootstrap];
-        outer = env;
+        _outer = env;
     }
     return self;
 }
@@ -39,44 +39,44 @@
     NSUInteger i = 0;
     if (self) {
         [self bootstrap];
-        outer = env;
+        _outer = env;
         for (i = 0; i < len; i++) {
             NSString *sym = [(JSSymbol *)binds[i] name];
             if ([sym isEqual:@"&"]) {
                 if ([exprs count] > i) {
-                    [data setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:[(JSSymbol *)binds[i + 1] name]];
+                    [_data setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:[(JSSymbol *)binds[i + 1] name]];
                 } else {
-                    [data setObject:[[JSList alloc] initWithArray:@[]] forKey:[(JSSymbol *)binds[i + 1] name]];
+                    [_data setObject:[[JSList alloc] initWithArray:@[]] forKey:[(JSSymbol *)binds[i + 1] name]];
                 }
                 break;
             }
-            [data setObject:exprs[i] forKey:sym];
+            [_data setObject:exprs[i] forKey:sym];
         }
     }
     return self;
 }
 
 - (void)bootstrap {
-    data = [NSMutableDictionary new];
+    _data = [NSMutableDictionary new];
 }
 
 - (void)setObject:(JSData *)value forSymbol:(JSSymbol *)key {
-    [data setObject:value forKey:[key name]];
+    [_data setObject:value forKey:[key name]];
 }
 
 - (Env *)findEnvForKey:(JSSymbol *)key {
-    if ([data objectForKey:[key name]] != nil) {
+    if ([_data objectForKey:[key name]] != nil) {
         return self;
     }
-    return [outer findEnvForKey:key];
+    return [_outer findEnvForKey:key];
 }
 
 - (JSData *)objectForSymbol:(JSSymbol *)key {
     Env * env = [self findEnvForKey:key];
     if (env != nil) {
-        JSData *_data = [[env data] objectForKey:[key name]];
-        if (_data != nil) {
-            return _data;
+        JSData *val = [[env data] objectForKey:[key name]];
+        if (val != nil) {
+            return val;
         }
     }
     JSError *err = [[JSError alloc] initWithFormat:SymbolNotFound, [key name]];

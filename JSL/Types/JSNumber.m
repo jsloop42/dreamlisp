@@ -9,8 +9,8 @@
 #import "JSNumber.h"
 
 @implementation JSNumber {
-    NSDecimalNumber *n;
-    NSString *decimalPattern;
+    NSDecimalNumber *_n;
+    NSString *_decimalPattern;
     BOOL _isDouble;
     JSData *_meta;
 }
@@ -21,7 +21,7 @@
     self = [super init];
     if (self) {
         [self bootstrap];
-        n = [[NSDecimalNumber alloc] initWithDouble:number];
+        _n = [[NSDecimalNumber alloc] initWithDouble:number];
         _isDouble = YES;
     }
     return self;
@@ -31,7 +31,7 @@
     self = [super init];
     if (self) {
         [self bootstrap];
-        n = [[NSDecimalNumber alloc] initWithInt:number];
+        _n = [[NSDecimalNumber alloc] initWithInt:number];
         _isDouble = NO;
     }
     return self;
@@ -41,7 +41,7 @@
     self = [super init];
     if (self) {
         [self bootstrap];
-        n = [[NSDecimalNumber alloc] initWithInteger:number];
+        _n = [[NSDecimalNumber alloc] initWithInteger:number];
         _isDouble = NO;
     }
     return self;
@@ -51,8 +51,8 @@
     self = [super init];
     if (self) {
         [self bootstrap];
-        n = [[NSDecimalNumber alloc] initWithString:string];
-        _isDouble = [self checkDouble:[n stringValue]];
+        _n = [[NSDecimalNumber alloc] initWithString:string];
+        _isDouble = [self checkDouble:[_n stringValue]];
     }
     return self;
 }
@@ -61,8 +61,8 @@
     self = [super init];
     if (self) {
         [self bootstrap];
-        n = number;
-        _isDouble = [self checkDouble:[n stringValue]];
+        _n = number;
+        _isDouble = [self checkDouble:[_n stringValue]];
     }
     return self;
 }
@@ -71,16 +71,16 @@
     self = [super init];
     if (self) {
         [self bootstrap];
-        n = [number value];
+        _n = [number value];
         _meta = meta;
-        _isDouble = [self checkDouble:[n stringValue]];
+        _isDouble = [self checkDouble:[_n stringValue]];
     }
     return self;
 }
 
 
 - (void)bootstrap {
-    decimalPattern = @"\\d+(\\.\\d+)";
+    _decimalPattern = @"\\d+(\\.\\d+)";
 }
 
 - (NSString *)dataType {
@@ -88,23 +88,23 @@
 }
 
 - (double)doubleValue {
-    return [n doubleValue];
+    return [_n doubleValue];
 }
 
 - (int)intValue {
-    return [n intValue];
+    return [_n intValue];
 }
 
 - (NSUInteger)integerValue {
-    return [n integerValue];
+    return [_n integerValue];
 }
 
 - (NSDecimalNumber *)value {
-    return n;
+    return _n;
 }
 
 - (BOOL)checkDouble:(NSString *)string {
-    if ([Utils matchString:string withPattern:decimalPattern]) {
+    if ([Utils matchString:string withPattern:_decimalPattern]) {
         return YES;
     }
     return NO;
@@ -115,17 +115,17 @@
 }
 
 - (NSString *)string {
-    if (_isDouble && ![self checkDouble:[n stringValue]]) {
-        return [NSString stringWithFormat:@"%.01f", [n doubleValue]];
+    if (_isDouble && ![self checkDouble:[_n stringValue]]) {
+        return [NSString stringWithFormat:@"%.01f", [_n doubleValue]];
     }
-    return [n stringValue];
+    return [_n stringValue];
 }
 
 - (BOOL)isEqual:(JSNumber *)number {
-    return [n isEqualToNumber:[number value]];
+    return [_n isEqualToNumber:[number value]];
 }
 - (NSUInteger)hash {
-    return [n hash];
+    return [_n hash];
 }
 
 - (BOOL)hasMeta {
@@ -133,12 +133,12 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[JSNumber alloc] initWithNumber:n];
+    id copy = [[JSNumber alloc] initWithNumber:_n];
     return copy;
 }
 
 - (NSString *)description {
-    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, n, _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _n, _meta];
 }
 
 @end

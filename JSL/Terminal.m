@@ -14,7 +14,7 @@ NSString *_historyFile = @"/.jsl-history";
 @implementation Terminal {
     BOOL _isHistoryEnabled;
     NSString *_historyPath;
-    FileOps *fops;
+    FileOps *_fops;
 }
 
 - (instancetype)init {
@@ -27,16 +27,16 @@ NSString *_historyFile = @"/.jsl-history";
 
 - (void)bootstrap {
     _isHistoryEnabled = YES;
-    fops = [FileOps new];
+    _fops = [FileOps new];
     _historyPath = [NSHomeDirectory() stringByAppendingString:_historyFile];
     [self loadHistoryFile:_historyPath];
 }
 
 - (void)loadHistoryFile:(NSString *)path {
     @try {
-        [fops openFile:path];
-        while([fops hashNext]) {
-            NSString *line = [fops readLine];
+        [_fops openFile:path];
+        while([_fops hashNext]) {
+            NSString *line = [_fops readLine];
             if ([line length] > 0) {
                 add_history([line cStringUsingEncoding:NSUTF8StringEncoding]);
             }
@@ -62,7 +62,7 @@ NSString *_historyFile = @"/.jsl-history";
             add_history(input);
         }
         exp = [[NSString alloc] initWithUTF8String:input];
-        [fops append:[exp stringByAppendingString:@"\n"] completion:nil];
+        [_fops append:[exp stringByAppendingString:@"\n"] completion:nil];
         free(input);
     }
     return exp;

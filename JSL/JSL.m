@@ -9,10 +9,10 @@
 #import "JSL.h"
 
 @implementation JSL {
-    Reader *reader;
-    Printer *printer;
+    Reader *_reader;
+    Printer *_printer;
     Env *_env;
-    Core *core;
+    Core *_core;
 }
 
 @synthesize env = _env;
@@ -26,17 +26,17 @@
 }
 
 - (void)bootstrap {
-    reader = [Reader new];
-    printer = [Printer new];
+    _reader = [Reader new];
+    _printer = [Printer new];
     _env = [Env new];
-    core = [Core new];
+    _core = [Core new];
     [self setCoreFunctionsToREPL:_env];
     [self setEvalToREPL];
     [self setJSLFuns];
 }
 
 - (void)setCoreFunctionsToREPL:(Env *)env {
-    NSMutableDictionary *ns = [core namespace];
+    NSMutableDictionary *ns = [_core namespace];
     NSArray *keys = [ns allKeys];
     NSUInteger len = [keys count];
     NSUInteger i = 0;
@@ -75,7 +75,7 @@
 }
 
 - (JSData *)read:(NSString *)string {
-    return [reader readString:string];
+    return [_reader readString:string];
 }
 
 - (JSData *)evalAST:(JSData *)ast withEnv:(Env *)env {
@@ -278,7 +278,7 @@
 }
 
 - (NSString *)print:(JSData *)data {
-    return [printer printStringFor:data readably:YES];
+    return [_printer printStringFor:data readably:YES];
 }
 
 - (NSString *)rep:(NSString *)string {
@@ -306,7 +306,7 @@
         } else {
             JSData *data = (JSData *)[exception.userInfo valueForKey:@"jsdata"];
             if (data) {
-                desc = [[NSString alloc] initWithFormat:@"Error: %@", [printer printStringFor:data readably:readably]];
+                desc = [[NSString alloc] initWithFormat:@"Error: %@", [_printer printStringFor:data readably:readably]];
                 if (desc && log) {
                     error(@"%@", desc);
                 }

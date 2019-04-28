@@ -22,7 +22,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     NSUInteger _offset;
     NSUInteger _buff;
     NSFileManager *_fm;
-    dispatch_queue_t serialQueue;
+    dispatch_queue_t _serialQueue;
 }
 
 - (instancetype)init {
@@ -48,7 +48,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     _offset = 0;
     _buff = 0;
     _fm = [NSFileManager defaultManager];
-    serialQueue = dispatch_queue_create("jsl-fileops-queue", DISPATCH_QUEUE_SERIAL);
+    _serialQueue = dispatch_queue_create("jsl-fileops-queue", DISPATCH_QUEUE_SERIAL);
 }
 
 - (void)createFileIfNotExist:(NSString *)path {
@@ -105,7 +105,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 
 - (void)append:(NSString *)string completion:(void  (^ _Nullable)(void))callback {
     FileOps * __weak weakSelf = self;
-    dispatch_async(self->serialQueue, ^{
+    dispatch_async(self->_serialQueue, ^{
         FileOps *this = weakSelf;
         if (this) {
             if (!this->_appendHandle && this->_path) {
