@@ -12,6 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSBool : JSData
++ (BOOL)isBool:(id)object;
 - (instancetype)initWithBool:(BOOL)flag;
 - (instancetype)initWithJSBool:(JSBool *)object;
 - (BOOL)value;

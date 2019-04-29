@@ -12,6 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSSymbol: JSData
++ (BOOL)isSymbol:(id)object;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name;
 - (instancetype)initWithMeta:(JSData *)meta symbol:(JSSymbol *)symbol;

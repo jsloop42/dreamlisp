@@ -15,6 +15,13 @@
 
 @synthesize meta = _meta;
 
++ (BOOL)isSymbol:(id)object {
+    if ([object isKindOfClass:[self class]]) {
+        return YES;
+    }
+    return NO;
+}
+
 - (instancetype)initWithName:(NSString *)name {
     self = [super init];
     if (self) {

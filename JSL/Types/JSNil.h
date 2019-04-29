@@ -12,6 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSNil : JSData
++ (BOOL)isNil:(id)object;
 - (instancetype)init;
 - (BOOL)isEqual:(JSNil *)object;
 - (NSUInteger)hash;

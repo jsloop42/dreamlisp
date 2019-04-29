@@ -49,13 +49,7 @@ double dmod(double a, double n) {
     return a - n * floor(a / n);
 }
 
-- (JSNumber *)dataToNum:(JSData *)data {
-    if (![JSNumber isNumber:data]) {
-        JSError *err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'number'", [data dataTypeName]];
-        [err throw];
-    }
-    return (JSNumber *)data;
-}
+
 
 - (void)addArithmeticFunctions {
     JSData *(^calc)(NSMutableArray *args, SEL sel) = ^JSData *(NSMutableArray *args, SEL sel) {
@@ -67,21 +61,21 @@ double dmod(double a, double n) {
         if (len == 0) {
             @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
         } else if (len == 1) {
-            return [self dataToNum:args[0]];
+            return [Utils dataToNum:args[0]];
         }
         if (len >= 2) {
-            aNum = [self dataToNum:args[0]];
+            aNum = [Utils dataToNum:args[0]];
             if ([aNum isDouble]) { isDouble = YES; }
             NSDecimalNumber *n = [aNum value];
             if ([n respondsToSelector:sel]) {
-                aNum = [self dataToNum:args[1]];
+                aNum = [Utils dataToNum:args[1]];
                 if ([aNum isDouble]) { isDouble = YES; }
                 num = objc_msgSend(n, sel, [aNum value]);
             }
         }
         if (len > 2) {
             for (i = 2; i < len; i++) {
-                aNum = [self dataToNum:args[i]];
+                aNum = [Utils dataToNum:args[i]];
                 if ([aNum isDouble]) { isDouble = YES; }
                 num = objc_msgSend(num, sel, [aNum value]);
             }
@@ -98,7 +92,7 @@ double dmod(double a, double n) {
 
     JSFunction *subtract = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
         if ([args count] == 1) {
-            JSNumber *n = (JSNumber *)args[0];
+            JSNumber *n = [Utils dataToNum:args[0]];
             JSNumber *ret = nil;
             if ([n isDouble]) {
                 ret = [[JSNumber alloc] initWithDoubleNumber:[[NSDecimalNumber alloc] initWithDouble:(-1.0 * [n doubleValue])]];
@@ -130,8 +124,8 @@ double dmod(double a, double n) {
             JSError *info = [[JSError alloc] initWithFormat:ArityError, 2, [args count]];
             [info throw];
         }
-        JSNumber *lhs = (JSNumber *)[args first];
-        JSNumber *rhs = (JSNumber *)[args second];
+        JSNumber *lhs = [Utils dataToNum:[args first]];
+        JSNumber *rhs = [Utils dataToNum:[args second]];
         JSNumber *ret = nil;
         if ([lhs isDouble] || [rhs isDouble]) {
             ret = [[JSNumber alloc] initWithDouble:dmod([lhs doubleValue], [rhs doubleValue])];
@@ -144,24 +138,24 @@ double dmod(double a, double n) {
 }
 
 - (BOOL)isEqual:(JSData *)lhs rhs:(JSData *)rhs {
-    if ([[lhs dataType] isEqual:@"JSNumber"] && [[rhs dataType] isEqual:@"JSNumber"]) {
+    if ([JSNumber isNumber:lhs] && [JSNumber isNumber:rhs]) {
         return [(JSNumber *)lhs isEqual:(JSNumber *)rhs];
-    } else if ([[lhs dataType] isEqual:@"JSSymbol"] && [[rhs dataType] isEqual:@"JSSymbol"]) {
+    } else if ([JSSymbol isSymbol:lhs] && [JSSymbol isSymbol:rhs]) {
         return [(JSSymbol *)lhs isEqual:(JSSymbol *)rhs];
-    } else if ([[lhs dataType] isEqual:@"JSString"] && [[rhs dataType] isEqual:@"JSString"]) {
+    } else if ([JSString isString:lhs] && [JSString isString:rhs]) {
         return [(JSString *)lhs isEqual:(JSString *)rhs];
-    } else if ([[lhs dataType] isEqual:@"JSKeyword"] && [[rhs dataType] isEqual:@"JSKeyword"]) {
-        return [(JSString *)lhs isEqual:(JSString *)rhs];
-    } else if (([[lhs dataType] isEqual:@"JSList"] && [[rhs dataType] isEqual:@"JSList"]) ||
-               ([[lhs dataType] isEqual:@"JSList"] && [[rhs dataType] isEqual:@"JSVector"]) ||
-               ([[lhs dataType] isEqual:@"JSVector"] && [[rhs dataType] isEqual:@"JSList"]) ||
-               ([[lhs dataType] isEqual:@"JSVector"] && [[rhs dataType] isEqual:@"JSVector"])) {
+    } else if ([JSKeyword isKeyword:lhs] && [JSKeyword isKeyword:rhs]) {
+        return [(JSKeyword *)lhs isEqual:(JSKeyword *)rhs];
+    } else if (([JSList isList:lhs] && [JSList isList:rhs]) ||
+               ([JSList isList:lhs] && [JSVector isVector:rhs]) ||
+               ([JSVector isVector:lhs] && [JSList isList:rhs]) ||
+               ([JSVector isVector:lhs] && [JSVector isVector:rhs])) {
         return [(JSList *)lhs isEqual:(JSList *)rhs];
-    } else if ([[lhs dataType] isEqual:@"JSHashMap"] && [[rhs dataType] isEqual:@"JSHashMap"]) {
+    } else if ([JSHashMap isHashMap:lhs] && [JSHashMap isHashMap:rhs]) {
         return [(JSHashMap *)lhs isEqual:(JSHashMap *)rhs];
-    } else if ([[lhs dataType] isEqual:@"JSNil"] && [[rhs dataType] isEqual:@"JSNil"]) {
+    } else if ([JSNil isNil:lhs] && [JSNil isNil:rhs]) {
         return YES;
-    } else if ([[lhs dataType] isEqual:@"JSBool"] && [[rhs dataType] isEqual:@"JSBool"]) {
+    } else if ([JSBool isBool:lhs] && [JSBool isBool:rhs]) {
         return [(JSBool *)lhs isEqual:(JSBool *)rhs];
     }
     return NO;
@@ -683,7 +677,7 @@ double dmod(double a, double n) {
     JSData *(^keywordp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         if ([[(JSData *)[xs first] dataType] isEqual:@"JSKeyword"]
             || ([NSStringFromClass([(JSData *)[xs first] classForCoder]) isEqual:@"NSString"]
-                && [JSKeyword isKeyword:(NSString *)[xs first]])) {
+                && [JSKeyword isEncodedKeyword:(NSString *)[xs first]])) {
             return [[JSBool alloc] initWithBool:YES];
         }
         return [[JSBool alloc] initWithBool:NO];

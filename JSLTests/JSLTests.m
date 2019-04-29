@@ -1414,6 +1414,10 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)testErrorMessages {
     JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(try* (+ \"\") (catch* ex (str ex)))"], @"\"Data type error. Expecting 'number' but obtained 'string'.\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (+ []) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'number' but obtained 'vector'.\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (+ [] \"\") (catch* ex (str ex)))"], @"\"Data type error. Expecting 'number' but obtained 'vector'.\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (+ '()) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'number' but obtained 'list'.\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'number'.\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1.0) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'number'.\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (empty? (atom 1)) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'atom'.\"");
@@ -1421,8 +1425,8 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)test {
     JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(= :abc :abc)"], @"true");
     //XCTAssertEqualObjects([jsl rep:@"(/ 1 0)"], @"");
-
 }
 
 - (void)notestPerformanceJSListDropFirst {

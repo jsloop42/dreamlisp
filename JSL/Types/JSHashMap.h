@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSHashMap : JSData
 @property (nonatomic, readwrite, copy) JSData *meta;
++ (BOOL)isHashMap:(id)object;
 - (instancetype)init;
 - (instancetype)initWithMapTable:(NSMapTable *)table;
 - (instancetype)initWithArray:(NSArray *)array;

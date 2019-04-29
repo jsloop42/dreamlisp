@@ -14,6 +14,13 @@
 
 @synthesize meta = _meta;
 
++ (BOOL)isNil:(id)object {
+    if ([object isKindOfClass:[self class]]) {
+        return YES;
+    }
+    return NO;
+}
+
 - (instancetype)init {
     self = [super init];
     return self;

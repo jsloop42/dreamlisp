@@ -15,6 +15,13 @@
 
 @synthesize meta = _meta;
 
++ (BOOL)isBool:(id)object {
+    if ([object isKindOfClass:[self class]]) {
+        return YES;
+    }
+    return NO;
+}
+
 - (instancetype)initWithBool:(BOOL)flag {
     self = [super init];
     if (self) {

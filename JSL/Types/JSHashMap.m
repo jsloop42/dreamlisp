@@ -15,6 +15,13 @@
 
 @synthesize meta = _meta;
 
++ (BOOL)isHashMap:(id)object {
+    if ([object isKindOfClass:[self class]]) {
+        return YES;
+    }
+    return NO;
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {

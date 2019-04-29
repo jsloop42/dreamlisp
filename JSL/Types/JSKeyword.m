@@ -17,6 +17,13 @@
 @synthesize meta = _meta;
 
 + (BOOL)isKeyword:(id)string {
+    if ([string isKindOfClass:[self class]]) {
+        return YES;
+    }
+    return NO;
+}
+
++ (BOOL)isEncodedKeyword:(id)string {
     if ([string isKindOfClass:[NSString class]] && [[string substringToIndex:1] isEqual:@"\u029e"]) {
         return YES;
     }

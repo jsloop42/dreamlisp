@@ -126,7 +126,7 @@
 }
 
 - (BOOL)checkDouble:(NSString *)string {
-    if ([Utils matchString:string withPattern:_decimalPattern]) {
+    if ([TypeUtils matchString:string withPattern:_decimalPattern]) {
         return YES;
     }
     return NO;

@@ -51,6 +51,10 @@
     return [self className];
 }
 
+- (NSString *)dataTypeName {
+    return @"list";
+}
+
 - (void)add:(JSData *)object {
     [_array addObject:object];
 }

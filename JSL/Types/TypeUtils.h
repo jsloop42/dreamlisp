@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface TypeUtils: NSObject
 + (NSMutableArray *)mapOnArray:(NSMutableArray *)array withBlock:(id (^)(id arg))block;
++ (BOOL)matchString:(NSString *)string withPattern:(NSString *)pattern;
 @end
 
 NS_ASSUME_NONNULL_END
