@@ -49,6 +49,14 @@ double dmod(double a, double n) {
     return a - n * floor(a / n);
 }
 
+- (JSNumber *)dataToNum:(JSData *)data {
+    if (![JSNumber isNumber:data]) {
+        JSError *err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'number'", [data dataTypeName]];
+        [err throw];
+    }
+    return (JSNumber *)data;
+}
+
 - (void)addArithmeticFunctions {
     JSData *(^calc)(NSMutableArray *args, SEL sel) = ^JSData *(NSMutableArray *args, SEL sel) {
         NSDecimalNumber *num = [NSDecimalNumber new];
@@ -59,21 +67,21 @@ double dmod(double a, double n) {
         if (len == 0) {
             @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
         } else if (len == 1) {
-            return (JSNumber *)args[0];
+            return [self dataToNum:args[0]];
         }
         if (len >= 2) {
-            aNum = (JSNumber *)args[0];
+            aNum = [self dataToNum:args[0]];
             if ([aNum isDouble]) { isDouble = YES; }
             NSDecimalNumber *n = [aNum value];
             if ([n respondsToSelector:sel]) {
-                aNum = (JSNumber *)args[1];
+                aNum = [self dataToNum:args[1]];
                 if ([aNum isDouble]) { isDouble = YES; }
                 num = objc_msgSend(n, sel, [aNum value]);
             }
         }
         if (len > 2) {
             for (i = 2; i < len; i++) {
-                aNum = (JSNumber *)args[i];
+                aNum = [self dataToNum:args[i]];
                 if ([aNum isDouble]) { isDouble = YES; }
                 num = objc_msgSend(num, sel, [aNum value]);
             }
