@@ -15,6 +15,27 @@
 
 @synthesize meta = _meta;
 
++ (BOOL)isAtom:(id)object {
+    return [[object className] isEqual:[self className]];
+}
+
++ (JSAtom *)dataToAtom:(JSData *)data {
+    return [self dataToAtom:data position:-1];
+}
+
++ (JSAtom *)dataToAtom:(JSData *)data position:(NSInteger)position {
+    if (![JSAtom isAtom:data]) {
+        JSError *err = nil;
+        if (position > 0) {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'atom'", position, [data dataTypeName]];
+        } else {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'atom'", [data dataTypeName]];
+        }
+        [err throw];
+    }
+    return (JSAtom *)data;
+}
+
 - (instancetype)initWithData:(JSData *)data {
     self = [super init];
     if (self) {

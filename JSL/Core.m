@@ -49,8 +49,6 @@ double dmod(double a, double n) {
     return a - n * floor(a / n);
 }
 
-
-
 - (void)addArithmeticFunctions {
     JSData *(^calc)(NSMutableArray *args, SEL sel) = ^JSData *(NSMutableArray *args, SEL sel) {
         NSDecimalNumber *num = [NSDecimalNumber new];
@@ -59,40 +57,40 @@ double dmod(double a, double n) {
         BOOL isDouble = NO;
         JSNumber *aNum = nil;
         if (len == 0) {
-            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
+            [TypeUtils checkArity:args arity:1];
         } else if (len == 1) {
-            return [Utils dataToNum:args[0]];
+            return [JSNumber dataToNumber:args[0]];
         }
         if (len >= 2) {
-            aNum = [Utils dataToNum:args[0]];
-            if ([aNum isDouble]) { isDouble = YES; }
+            aNum = [JSNumber dataToNumber:args[0]];
+            if ([aNum isDouble]) isDouble = YES;
             NSDecimalNumber *n = [aNum value];
             if ([n respondsToSelector:sel]) {
-                aNum = [Utils dataToNum:args[1]];
-                if ([aNum isDouble]) { isDouble = YES; }
+                aNum = [JSNumber dataToNumber:args[1]];
+                if ([aNum isDouble]) isDouble = YES;
                 num = objc_msgSend(n, sel, [aNum value]);
             }
         }
         if (len > 2) {
             for (i = 2; i < len; i++) {
-                aNum = [Utils dataToNum:args[i]];
-                if ([aNum isDouble]) { isDouble = YES; }
+                aNum = [JSNumber dataToNumber:args[i]];
+                if ([aNum isDouble]) isDouble = YES;
                 num = objc_msgSend(num, sel, [aNum value]);
             }
         }
-        if (isDouble) { return [[JSNumber alloc] initWithDoubleNumber:num]; }
+        if (isDouble) return [[JSNumber alloc] initWithDoubleNumber:num];
         return [[JSNumber alloc] initWithNumber:num];
     };
 
     JSFunction *add = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
-        if ([args isEmpty]) { return [[JSNumber alloc] initWithInt:0]; }
+        if ([args isEmpty]) return [[JSNumber alloc] initWithInt:0];
         return calc(args, @selector(decimalNumberByAdding:));
     }];
     [_ns setObject:add forKey:@"+"];
 
     JSFunction *subtract = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
         if ([args count] == 1) {
-            JSNumber *n = [Utils dataToNum:args[0]];
+            JSNumber *n = [JSNumber dataToNumber:args[0]];
             JSNumber *ret = nil;
             if ([n isDouble]) {
                 ret = [[JSNumber alloc] initWithDoubleNumber:[[NSDecimalNumber alloc] initWithDouble:(-1.0 * [n doubleValue])]];
@@ -106,26 +104,21 @@ double dmod(double a, double n) {
     [_ns setObject:subtract forKey:@"-"];
 
     JSFunction *multiply = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
-        if ([args isEmpty]) { return [[JSNumber alloc] initWithInt:1]; }
+        if ([args isEmpty]) return [[JSNumber alloc] initWithInt:1];
         return calc(args, @selector(decimalNumberByMultiplyingBy:));
     }];
     [_ns setObject:multiply forKey:@"*"];
 
     JSFunction *divide = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
-        if ([args count] == 1) {
-            [args insertObject:[[JSNumber alloc] initWithInteger:1] atIndex:0];
-        }
+        if ([args count] == 1) [args insertObject:[[JSNumber alloc] initWithInteger:1] atIndex:0];
         return calc(args, @selector(decimalNumberByDividingBy:));
     }];
     [_ns setObject:divide forKey:@"/"];
 
     JSData *(^mod)(NSMutableArray *args) = ^JSData *(NSMutableArray *args) {
-        if ([args count] != 2) {
-            JSError *info = [[JSError alloc] initWithFormat:ArityError, 2, [args count]];
-            [info throw];
-        }
-        JSNumber *lhs = [Utils dataToNum:[args first]];
-        JSNumber *rhs = [Utils dataToNum:[args second]];
+        [TypeUtils checkArity:args arity:2];
+        JSNumber *lhs = [JSNumber dataToNumber:[args first]];
+        JSNumber *rhs = [JSNumber dataToNumber:[args second]];
         JSNumber *ret = nil;
         if ([lhs isDouble] || [rhs isDouble]) {
             ret = [[JSNumber alloc] initWithDouble:dmod([lhs doubleValue], [rhs doubleValue])];
@@ -172,8 +165,7 @@ double dmod(double a, double n) {
                 if (!ret) { break; }
             }
         } else if (len == 0) {
-            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, len];
-            [info throw];
+            [TypeUtils checkArity:args arity:1];
         }
         return [[JSBool alloc] initWithBool:ret];
     };
@@ -208,8 +200,7 @@ double dmod(double a, double n) {
                 if (!ret) { break; }
             }
         } else if (len == 0) {
-            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, len];
-            [info throw];
+            [TypeUtils checkArity:args arity:1];
         }
         return [[JSBool alloc] initWithBool:ret];
     }];
@@ -276,62 +267,32 @@ double dmod(double a, double n) {
     [_ns setObject:[[JSFunction alloc] initWithFn:list] forKey:@"list"];
 
     JSData *(^listp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        if ([xs count] != 1) {
-            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, [xs count]];
-            [info throw];
-        }
+        [TypeUtils checkArity:xs arity:1];
         return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSList"]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:listp] forKey:@"list?"];
 
     JSData *(^emptyp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         BOOL ret = YES;
-        if ([xs count] != 1) {
-            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, [xs count]];
-            [info throw];
-        }
+        [TypeUtils checkArity:xs arity:1];
         JSData *first = (JSData *)[xs first];
-        if ([JSString isString:first]) {
-            ret = [(JSString *)first isEmpty];
-        } else if (![JSList isList:first]) {
-            JSError *info = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'list'", [first dataTypeName]];
-            [info throw];
-        } else {
-            ret = [(JSList *)first isEmpty];
-        }
+        ret = [JSString isString:first] ? [(JSString *)first isEmpty] : [[JSList dataToList:first] isEmpty];
         return [[JSBool alloc] initWithBool:ret];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:emptyp] forKey:@"empty?"];
 
     JSData *(^count)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        NSUInteger ret = 0;
-        if ([xs count] != 1) {
-            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, [xs count]];
-            [info throw];
-        }
+        [TypeUtils checkArity:xs arity:1];
         JSData *first = (JSData *)[xs first];
-        if ([[first dataType] isEqual:@"JSNil"]) {
-            return [[JSNumber alloc] initWithInteger:0];
-        }
-        if ([JSString isString:first]) {
-            ret = [(JSString *)first count];
-        } else if (![JSList isList:first]) {
-            JSError *info = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'list'", [first dataTypeName]];
-            [info throw];
-        } else {
-            ret = [(JSList *)first count];
-        }
-        return [[JSNumber alloc] initWithInteger:ret];
+        if ([JSNil isNil:first]) return [[JSNumber alloc] initWithInteger:0];
+        return [[JSNumber alloc] initWithInteger:[JSString isString:first] ? [(JSString *)first count] : [[JSList dataToList:first] count]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:count] forKey:@"count"];
 
     JSData *(^cons)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        if ([xs count] != 2) {
-            JSError *info = [[JSError alloc] initWithFormat:ArityError, 2, [xs count]];
-            [info throw];
-        }
+        [TypeUtils checkArity:xs arity:2];
         JSData *data = (JSData *)[xs second];
-        NSMutableArray *arr = [[(JSList *)data value] mutableCopy];
+        NSMutableArray *arr = [[[JSList dataToList:data] value] mutableCopy];
         [arr insertObject:(JSData *)[xs first] atIndex:0];
         return [[JSList alloc] initWithArray:arr];
     };
@@ -347,11 +308,7 @@ double dmod(double a, double n) {
         JSData *data = nil;
         for (i = 0; i < len; i++) {
             data = [xs nth:i];
-            if (![JSList isList:data] && ![JSVector isVector:data]) {
-                JSError *err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'list' or 'vector'", [data dataTypeName]];
-                [err throw];
-            }
-            list = (JSList *)data;
+            list = [JSVector dataToList:data];
             jlen = [list count];
             for (j = 0; j < jlen; j++) {
                 [arr addObject:[list nth:j]];
@@ -362,67 +319,37 @@ double dmod(double a, double n) {
     [_ns setObject:[[JSFunction alloc] initWithFn:concat] forKey:@"concat"];
 
     JSData *(^nth)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        if ([xs count] != 2) {
-            JSError *info = [[JSError alloc] initWithFormat:ArityError, 2, [xs count]];
-            [info throw];
-        }
+        [TypeUtils checkArity:xs arity:2];
         JSData *first = [xs first];
         JSData *second = [xs second];
-        if (![JSList isList:first] && ![JSVector isVector:first]) {
-            JSError *err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'list' or 'vector'", 1, [first dataTypeName]];
-            [err throw];
-        }
-        if (![JSNumber isNumber:second]) {
-            JSError *err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'number'", 2, [second dataTypeName]];
-            [err throw];
-        }
-        NSMutableArray *list = [(JSList *)first value];
-        JSNumber *num = (JSNumber *)second;
+        NSMutableArray *list = [[JSVector dataToList:first position:1] value];
+        JSNumber *num = [JSNumber dataToNumber:second position:2];
         NSUInteger n = [num integerValue];
-        if (n >= [list count]) {
-            @throw [[NSException alloc] initWithName:JSL_INDEX_OUT_OF_BOUNDS reason:JSL_INDEX_OUT_OF_BOUNDS_MSG userInfo:nil];
-        }
+        [TypeUtils checkIndexBounds:list index:n];
         return [list nth:n];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:nth] forKey:@"nth"];
 
     JSData *(^first)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        if ([xs count] != 1) {
-            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, [xs count]];
-            [info throw];
-        }
+        [TypeUtils checkArity:xs arity:1];
         NSMutableArray *list = [xs first];
-        if ([xs isEmpty] || [[(JSData *)list dataType] isEqual:@"JSNil"]) {
-            return [JSNil new];
-        }
+        if ([xs isEmpty] || [JSNil isNil:list]) return [JSNil new];
         JSData *first = (JSData *)[list first];
-        if (first == nil) {
-            return [JSNil new];
-        }
-        return first;
+        return (first == nil) ? [JSNil new] : first;
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:first] forKey:@"first"];
 
     JSData *(^rest)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        if ([xs count] != 1) {
-            JSError *info = [[JSError alloc] initWithFormat:ArityError, 1, [xs count]];
-            [info throw];
-        }
+        [TypeUtils checkArity:xs arity:1];
         NSMutableArray *list = [xs first];
-        if ([[(JSData *)list dataType] isEqual:@"JSNil"] || [list isEmpty]) {
-            return [JSList new];
-        }
-        return (JSList *)[list rest];
+        return ([[(JSData *)list dataType] isEqual:@"JSNil"] || [list isEmpty]) ? [JSList new] : (JSList *)[list rest];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:rest] forKey:@"rest"];
 
     JSData *(^map)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSData *first = (JSData *)[xs first];
-        if (!first || [[first dataType] isNotEqualTo:@"JSFunction"]) {
-            @throw [[NSException alloc] initWithName:JSL_INDEX_OUT_OF_BOUNDS reason:JSL_INDEX_OUT_OF_BOUNDS_MSG userInfo:nil];
-        }
-        JSFunction *fn = (JSFunction *)first;
-        NSMutableArray *list = [(JSList *)[xs second] value];
+        JSFunction *fn = [JSFunction dataToFunction:first];
+        NSMutableArray *list = [[JSList dataToList:[xs second]] value];
         NSUInteger i = 0;
         NSUInteger len = [list count];
         NSMutableArray *ret = [NSMutableArray new];
@@ -437,11 +364,11 @@ double dmod(double a, double n) {
         JSData *first = (JSData *)[xs first];
         NSMutableArray *list = nil;
         NSMutableArray *rest = [xs rest];
-        if ([[first dataType] isEqual:@"JSVector"]) {
+        if ([JSVector isVector:first]) {
             list = [(JSVector *)first value];
             [list addObjectsFromArray:rest];
             return [[JSVector alloc] initWithArray:list];
-        } else if ([[first dataType] isEqual:@"JSList"]) {
+        } else if ([JSList isList:first]) {
             list = [(JSList *)first value];
         }
         return [[JSList alloc] initWithArray:[[rest reverse] arrayByAddingObjectsFromArray:list]];
@@ -450,29 +377,24 @@ double dmod(double a, double n) {
 
     JSData *(^sequentialp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSData *first = (JSData *)[xs first];
-        if ([[first dataType] isEqual:@"JSList"] || [[first dataType] isEqual:@"JSVector"]) {
-            return [[JSBool alloc] initWithBool:YES];
-        }
-        return [[JSBool alloc] initWithBool:NO];
+        return [[JSBool alloc] initWithBool:([JSList isList:first] || [JSVector isVector:first])];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:sequentialp] forKey:@"sequential?"];
 
     JSData *(^seq)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        if ([xs count] == 0) {
-            return [JSNil new];
-        }
+        if ([xs count] == 0) return [JSNil new];
         JSData *first = (JSData *)[xs first];
-        if ([[first dataType] isEqual:@"JSList"]) {
+        if ([JSList isList:first]) {
             JSList *list = (JSList *)first;
             if ([list count] == 0) return [JSNil new];
             return list;
         }
-        if ([[first dataType] isEqual:@"JSVector"]) {
+        if ([JSVector isVector:first]) {
             JSVector *vec = (JSVector *)first;
             if ([vec count] == 0) return [JSNil new];
             return [vec list];
         }
-        if ([[first dataType] isEqual:@"JSString"]) {
+        if ([JSString isString:first]) {
             NSMutableArray *arr = [NSMutableArray new];
             NSUInteger i = 0;
             JSString *str = (JSString *)first;
@@ -484,9 +406,7 @@ double dmod(double a, double n) {
             }
             return [[JSList alloc] initWithArray:arr];
         }
-        if ([[first dataType] isEqual:@"JSNil"]) {
-            return (JSNil *)first;
-        }
+        if ([JSNil isNil:first]) return (JSNil *)first;
         @throw [[NSException alloc] initWithName:JSL_NOT_A_SEQUENCE_ERROR reason:JSL_NOT_A_SEQUENCE_ERROR_MSG userInfo:nil];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:seq] forKey:@"seq"];
@@ -496,53 +416,38 @@ double dmod(double a, double n) {
     Core * __weak weakSelf = self;
     JSData *(^readString)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         Core *this = weakSelf;
-        JSData *first = (JSData *)[xs first];
-        if ([[first dataType] isNotEqualTo:@"JSString"]) {
-            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
-        }
-        return [this->_reader readString:[(JSString *)first value]];
+        return [this->_reader readString:[[JSString dataToString:[xs first]] value]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:readString] forKey:@"read-string"];
 
     JSData *(^slurp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        JSData *first = (JSData *)[xs first];
-        if ([[first dataType] isNotEqualTo:@"JSString"]) {
-            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
-        }
-        return [[JSString alloc] initWithContentsOfFile:[(JSString *)first value]];
+        return [[JSString alloc] initWithContentsOfFile:[[JSString dataToString:[xs first]] value]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:slurp] forKey:@"slurp"];
 }
 
 - (void)addAtomFunctions {
     JSData *(^atom)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        JSData *first = (JSData *)[xs first];
-        return [[JSAtom alloc] initWithData:first];
+        return [[JSAtom alloc] initWithData:[xs first]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:atom] forKey:@"atom"];
 
     JSData *(^atomp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        JSData *first = (JSData *)[xs first];
-        return [[JSBool alloc] initWithBool:[[first dataType] isEqual:@"JSAtom"]];
+        return [[JSBool alloc] initWithBool:[JSAtom isAtom:[xs first]]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:atomp] forKey:@"atom?"];
 
     JSData *(^deref)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSData *first = (JSData *)[xs first];
-        if ([[first dataType] isNotEqualTo:@"JSAtom"]) {
-            return [JSNil new];
-        }
-        return [(JSAtom *)first value];
+        return ![JSAtom isAtom:first] ? [JSNil new] : [(JSAtom *)first value];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:deref] forKey:@"deref"];
 
     JSData *(^reset)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSData *first = (JSData *)[xs first];
-        if ([[first dataType] isNotEqualTo:@"JSAtom"]) {
-            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
-        }
+        JSAtom *atom = [JSAtom dataToAtom:first];
         JSData *value = (JSData *)[xs second];
-        [(JSAtom *)first setValue:value];
+        [atom setValue:value];
         return value;
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:reset] forKey:@"reset!"];
@@ -550,11 +455,8 @@ double dmod(double a, double n) {
     JSData *(^swap)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSData *first = (JSData *)[xs first];
         JSData *second = (JSData *)[xs second];
-        if ([[first dataType] isNotEqualTo:@"JSAtom"] || [[second dataType] isNotEqualTo:@"JSFunction"]) {
-            @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
-        }
-        JSAtom *atom = (JSAtom *)first;
-        JSFunction *fn = (JSFunction *)second;
+        JSAtom *atom = [JSAtom dataToAtom:first];
+        JSFunction *fn = [JSFunction dataToFunction:second];
         NSMutableArray *more = [xs drop:2];
         [more insertObject:[atom value] atIndex:0];
         [atom setValue:[fn fn](more)];
@@ -579,9 +481,7 @@ double dmod(double a, double n) {
                 args = [args drop:1];
                 args = [args dropLast];
             }
-            if (args) {
-                params = args;
-            }
+            if (args) params = args;
             [params addObjectsFromArray:last];
             return [fn apply:params];
         }
@@ -592,49 +492,37 @@ double dmod(double a, double n) {
 
 - (void)addPredicateFunctions {
     JSData *(^nilp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSNil"]];
+        return [[JSBool alloc] initWithBool:[JSNil isNil:[xs first]]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:nilp] forKey:@"nil?"];
 
     JSData *(^truep)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        if ([[(JSData *)[xs first] dataType] isEqual:@"JSBool"] && [(JSBool *)[xs first] value] == YES) {
-            return [[JSBool alloc] initWithBool:YES];
-        }
-        return [[JSBool alloc] initWithBool:NO];
+        JSData *data = (JSData *)[xs first];
+        return [[JSBool alloc] initWithBool:([JSBool isBool:data] && [(JSBool *)data value] == YES)];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:truep] forKey:@"true?"];
 
     JSData *(^falsep)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        if ([[(JSData *)[xs first] dataType] isEqual:@"JSBool"] && [(JSBool *)[xs first] value] == NO) {
-            return [[JSBool alloc] initWithBool:YES];
-        }
-        return [[JSBool alloc] initWithBool:NO];
+        JSData *data = (JSData *)[xs first];
+        return [[JSBool alloc] initWithBool:([JSBool isBool:data] && [(JSBool *)data value] == NO)];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:falsep] forKey:@"false?"];
 
     JSData *(^stringp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        if ([[(JSData *)[xs first] dataType] isEqual:@"JSString"]) {
-            return [[JSBool alloc] initWithBool:YES];
-        }
-        return [[JSBool alloc] initWithBool:NO];
+        return [[JSBool alloc] initWithBool:[JSString isString:[xs first]]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:stringp] forKey:@"string?"];
 
     JSData *(^numberp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        if ([[(JSData *)[xs first] dataType] isEqual:@"JSNumber"]) {
-            return [[JSBool alloc] initWithBool:YES];
-        }
-        return [[JSBool alloc] initWithBool:NO];
+        return [[JSBool alloc] initWithBool:[JSNumber isNumber:[xs first]]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:numberp] forKey:@"number?"];
 
     JSData *(^fnp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSData * first = (JSData *)[xs first];
-        if ([[first dataType] isEqual:@"JSFunction"]) {
+        if ([JSFunction isFunction:first]) {
             JSFunction *fn = (JSFunction *)first;
-            if (![fn isMacro]) {
-                return [[JSBool alloc] initWithBool:YES];
-            }
+            if (![fn isMacro]) return [[JSBool alloc] initWithBool:YES];
         }
         return [[JSBool alloc] initWithBool:NO];
     };
@@ -642,17 +530,14 @@ double dmod(double a, double n) {
 
     JSData *(^macrop)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSData * first = (JSData *)[xs first];
-        if ([[first dataType] isEqual:@"JSFunction"] && [(JSFunction *)first isMacro]) {
-            return [[JSBool alloc] initWithBool:YES];
-        }
-        return [[JSBool alloc] initWithBool:NO];
+        return [[JSBool alloc] initWithBool:([JSFunction isFunction:first] && [(JSFunction *)first isMacro])];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:macrop] forKey:@"macro?"];
 }
 
 - (void)addSymbolFunctions {
     JSData *(^symbolp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSSymbol"]];
+        return [[JSBool alloc] initWithBool:[JSSymbol isSymbol:[xs first]]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:symbolp] forKey:@"symbol?"];
 
@@ -665,22 +550,14 @@ double dmod(double a, double n) {
 - (void)addKeywordFunctions {
     JSData *(^keyword)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSData *first = (JSData *)[xs first];
-        if ([[first dataType] isEqual:@"JSKeyword"]) {
-            return first;
-        } else if ([[first dataType] isEqual:@"JSString"]) {
-            return [[JSKeyword alloc] initWithString:[(JSString *)first value]];
-        }
-        return [JSNil new];
+        if ([JSKeyword isKeyword:first]) return first;
+        return ([JSString isString:first]) ? [[JSKeyword alloc] initWithString:[(JSString *)first value]] :[JSNil new];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:keyword] forKey:@"keyword"];
 
     JSData *(^keywordp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        if ([[(JSData *)[xs first] dataType] isEqual:@"JSKeyword"]
-            || ([NSStringFromClass([(JSData *)[xs first] classForCoder]) isEqual:@"NSString"]
-                && [JSKeyword isEncodedKeyword:(NSString *)[xs first]])) {
-            return [[JSBool alloc] initWithBool:YES];
-        }
-        return [[JSBool alloc] initWithBool:NO];
+        JSData *first = (JSData *)[xs first];
+        return [[JSBool alloc] initWithBool:([JSKeyword isKeyword:first] || ([NSString isString:first] && [JSKeyword isEncodedKeyword:(NSString *)first]))];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:keywordp] forKey:@"keyword?"];
 }
@@ -692,7 +569,7 @@ double dmod(double a, double n) {
     [_ns setObject:[[JSFunction alloc] initWithFn:vector] forKey:@"vector"];
 
     JSData *(^vectorp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSVector"]];
+        return [[JSBool alloc] initWithBool:[JSVector isVector:[xs first]]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:vectorp] forKey:@"vector?"];
 }
@@ -704,12 +581,12 @@ double dmod(double a, double n) {
     [_ns setObject:[[JSFunction alloc] initWithFn:hashmap] forKey:@"hash-map"];
 
     JSData *(^mapp)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        return [[JSBool alloc] initWithBool:[[(JSData *)[xs first] dataType] isEqual:@"JSHashMap"]];
+        return [[JSBool alloc] initWithBool:[JSHashMap isHashMap:[xs first]]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:mapp] forKey:@"map?"];
 
     JSData *(^assoc)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        JSHashMap *first = (JSHashMap *)[xs first];
+        JSHashMap *first = [JSHashMap dataToHashMap:[xs first]];
         NSMapTable *table = [[first value] mutableCopy];
         NSMapTable *rest = [[[JSHashMap alloc] initWithArray:[xs rest]] value];
         return [[JSHashMap alloc] initWithMapTable:[table assoc:rest]];
@@ -717,7 +594,7 @@ double dmod(double a, double n) {
     [_ns setObject:[[JSFunction alloc] initWithFn:assoc] forKey:@"assoc"];
 
     JSData *(^dissoc)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        JSHashMap *first = (JSHashMap *)[xs first];
+        JSHashMap *first = [JSHashMap dataToHashMap:[xs first]];
         NSArray *keys = [xs rest];
         NSMapTable *table = [[first value] mutableCopy];
         return [[JSHashMap alloc] initWithMapTable:[table dissoc:keys]];
@@ -726,29 +603,29 @@ double dmod(double a, double n) {
 
     JSData *(^get)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSData *data = (JSData *)[xs first];
-        if ([[data dataType] isEqual:@"JSHashMap"]) {
-            JSHashMap *first = (JSHashMap *)[xs first];
+        if ([JSHashMap isHashMap:data]) {
+            JSHashMap *first = (JSHashMap *)data;
             JSData *ret = (JSData *)[first objectForKey:[xs second]];
-            if (ret) { return ret; }
+            if (ret) return ret;
         }
         return [JSNil new];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:get] forKey:@"get"];
 
     JSData *(^contains)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        JSHashMap *first = (JSHashMap *)[xs first];
+        JSHashMap *first = [JSHashMap dataToHashMap:[xs first]];
         return [[JSBool alloc] initWithBool:[first containsKey:[xs second]]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:contains] forKey:@"contains?"];
 
     JSData *(^keys)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        JSHashMap *first = (JSHashMap *)[xs first];
+        JSHashMap *first = [JSHashMap dataToHashMap:[xs first]];
         return [[JSList alloc] initWithArray:[first allKeys]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:keys] forKey:@"keys"];
 
     JSData *(^vals)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
-        JSHashMap *first = (JSHashMap *)[xs first];
+        JSHashMap *first = [JSHashMap dataToHashMap:[xs first]];
         return [[JSList alloc] initWithArray:[first allObjects]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:vals] forKey:@"vals"];
@@ -758,8 +635,7 @@ double dmod(double a, double n) {
     Core * __weak weakSelf = self;
     JSData *(^readline)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         Core *this = weakSelf;
-        NSString *line = [this->_terminal readlineWithPrompt:[[(JSString *)[xs first] value] UTF8String]];
-        return [[JSString alloc] initWithString:line];
+        return [[JSString alloc] initWithString:[this->_terminal readlineWithPrompt:[[[JSString dataToString:[xs first]] value] UTF8String]]];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:readline] forKey:@"readline"];
 }
@@ -767,49 +643,26 @@ double dmod(double a, double n) {
 - (void)addMetaFunctions {
     JSData *(^meta)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSData *first = (JSData *)[xs first];
-        if ([[first dataType] isEqual:@"JSFunction"]) {
+        if ([JSFunction isFunction:first]) {
             JSFunction *fn = (JSFunction *)first;
-            if ([fn meta]) {
-                return [fn meta];
-            }
+            if ([fn meta]) return [fn meta];
         }
-        if ([first meta]) return [first meta];
-        return [JSNil new];
+        return [first meta] ? [first meta] : [JSNil new];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:meta] forKey:@"meta"];
 
     JSData *(^withMeta)(NSMutableArray *xs) = ^JSData *(NSMutableArray *xs) {
         JSData *first = (JSData *)[xs first];
         JSData *meta = (JSData *)[xs second];
-        NSString *dataType = [first dataType];
-        if ([dataType isEqual:@"JSFunction"]) {
-            JSFunction *fn = (JSFunction *)first;
-            return [[JSFunction alloc] initWithMeta:meta func:fn];
-        }
-        if ([dataType isEqual:@"JSString"]) {
-            return [[JSString alloc] initWithMeta:meta string:(JSString *)first];
-        }
-        if ([dataType isEqual:@"JSKeyword"]) {
-            return [[JSKeyword alloc] initWithMeta:meta keyword:(JSKeyword *)first];
-        }
-        if ([dataType isEqual:@"JSSymbol"]) {
-            return [[JSSymbol alloc] initWithMeta:meta symbol:(JSSymbol *)first];
-        }
-        if ([dataType isEqual:@"JSHashMap"]) {
-            return [[JSHashMap alloc] initWithMeta:meta hashmap:(JSHashMap *)first];
-        }
-        if ([dataType isEqual:@"JSList"]) {
-            return [[JSList alloc] initWithMeta:meta list:(JSList *)first];
-        }
-        if ([dataType isEqual:@"JSVector"]) {
-            return [[JSVector alloc] initWithMeta:meta vector:(JSVector *)first];
-        }
-        if ([dataType isEqual:@"JSNumber"]) {
-            return [[JSNumber alloc] initWithMeta:meta number:(JSNumber *)first];
-        }
-        if ([dataType isEqual:@"JSAtom"]) {
-            return [[JSAtom alloc] initWithMeta:meta atom:(JSAtom *)first];
-        }
+        if ([JSFunction isFunction:first]) return [[JSFunction alloc] initWithMeta:meta func:(JSFunction *)first];
+        if ([JSString isString:first]) return [[JSString alloc] initWithMeta:meta string:(JSString *)first];
+        if ([JSKeyword isKeyword:first]) return [[JSKeyword alloc] initWithMeta:meta keyword:(JSKeyword *)first];
+        if ([JSSymbol isSymbol:first]) return [[JSSymbol alloc] initWithMeta:meta symbol:(JSSymbol *)first];
+        if ([JSHashMap isHashMap:first]) return [[JSHashMap alloc] initWithMeta:meta hashmap:(JSHashMap *)first];
+        if ([JSList isList:first]) return [[JSList alloc] initWithMeta:meta list:(JSList *)first];
+        if ([JSVector isVector:first]) return [[JSVector alloc] initWithMeta:meta vector:(JSVector *)first];
+        if ([JSNumber isNumber:first]) return [[JSNumber alloc] initWithMeta:meta number:(JSNumber *)first];
+        if ([JSAtom isAtom:first]) return [[JSAtom alloc] initWithMeta:meta atom:(JSAtom *)first];
         return first;
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:withMeta] forKey:@"with-meta"];

@@ -13,8 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSKeyword : JSData
 @property (nonatomic, readwrite, copy) NSString *value;
-+ (BOOL)isKeyword:(id)string;
-+ (BOOL)isEncodedKeyword:(id)string;
++ (BOOL)isKeyword:(id)object;
++ (BOOL)isEncodedKeyword:(id)object;
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithKeyword:(NSString *)string;

@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "JSData.h"
+#import "JSError.h"
 #import "TypeUtils.h"
 #import "NSMutableArray+JSList.h"
 
@@ -16,6 +17,9 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSList : JSData
 @property (nonatomic, readwrite, copy) JSData *meta;
 + (BOOL)isList:(id)object;
++ (BOOL)isKindOfList:(id)object;
++ (JSList *)dataToList:(JSData *)data;
++ (JSList *)dataToList:(JSData *)data position:(NSInteger)position;
 - (instancetype)init;
 - (instancetype)initWithArray:(NSArray *)list;
 - (instancetype)initWithMeta:(JSData *)meta list:(JSList *)list;

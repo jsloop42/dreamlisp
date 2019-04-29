@@ -16,10 +16,24 @@
 @synthesize meta = _meta;
 
 + (BOOL)isHashMap:(id)object {
-    if ([object isKindOfClass:[self class]]) {
-        return YES;
+    return [[object className] isEqual:[self className]];
+}
+
++ (JSHashMap *)dataToHashMap:(JSData *)data {
+    return [self dataToHashMap:data position:-1];
+}
+
++ (JSHashMap *)dataToHashMap:(JSData *)data position:(NSInteger)position {
+    if (![self isHashMap:data]) {
+        JSError *err = nil;
+        if (position > 0) {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'hash-map'", position, [data dataTypeName]];
+        } else {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'hash-map'", [data dataTypeName]];
+        }
+        [err throw];
     }
-    return NO;
+    return (JSHashMap *)data;
 }
 
 - (instancetype)init {

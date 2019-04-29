@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "Types/Types.h"
+#import "JSData.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

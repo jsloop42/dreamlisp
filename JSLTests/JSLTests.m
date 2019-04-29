@@ -1120,7 +1120,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
             XCTAssertEqualObjects(message, @"\"exc is:\" \"'abc' not found\"");
             break;
         case 1:
-            XCTAssertEqualObjects(message, @"\"exc is:\" \"Index out of bounds\"");
+            XCTAssertEqualObjects(message, @"\"exc is:\" \"Index out of bounds. Obtained index is 1 but the total count is 0.\"");
             break;
         case 2:
             XCTAssertEqualObjects(message, @"\"exc is:\" [\"data\" \"foo\"]");
@@ -1425,7 +1425,6 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)test {
     JSL *jsl = [JSL new];
-    XCTAssertEqualObjects([jsl rep:@"(= :abc :abc)"], @"true");
     //XCTAssertEqualObjects([jsl rep:@"(/ 1 0)"], @"");
 }
 

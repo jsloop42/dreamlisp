@@ -8,13 +8,16 @@
 
 #import <Foundation/Foundation.h>
 #import "JSData.h"
-#import "TypeUtils.h"
+#import "Utils.h"
+#import "JSError.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSNumber : JSData
 @property (nonatomic, readwrite, copy) JSData *meta;
 + (BOOL)isNumber:(id)object;
++ (JSNumber *)dataToNumber:(JSData *)data;
++ (JSNumber *)dataToNumber:(JSData *)data position:(NSInteger)position;
 - (instancetype)initWithDouble:(double)num;
 - (instancetype)initWithInt:(int)number;
 - (instancetype)initWithInteger:(NSUInteger)number;

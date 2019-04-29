@@ -9,12 +9,17 @@
 #import <Foundation/Foundation.h>
 #import "JSData.h"
 #import "JSError.h"
+#import "Logger.h"
+#import "Constants.h"
+#import "NSMapTable+JSHashMap.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSHashMap : JSData
 @property (nonatomic, readwrite, copy) JSData *meta;
 + (BOOL)isHashMap:(id)object;
++ (JSHashMap *)dataToHashMap:(JSData *)data;
++ (JSHashMap *)dataToHashMap:(JSData *)data position:(NSInteger)position;
 - (instancetype)init;
 - (instancetype)initWithMapTable:(NSMapTable *)table;
 - (instancetype)initWithArray:(NSArray *)array;

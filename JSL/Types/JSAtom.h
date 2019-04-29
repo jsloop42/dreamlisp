@@ -8,10 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import "JSData.h"
+#import "JSError.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSAtom : JSData
++ (BOOL)isAtom:(id)object;
++ (JSAtom *)dataToAtom:(JSData *)data;
++ (JSAtom *)dataToAtom:(JSData *)data position:(NSInteger)position;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithData:(JSData *)data;
 - (instancetype)initWithMeta:(JSData *)meta atom:(JSAtom *)atom;

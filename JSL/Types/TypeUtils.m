@@ -18,9 +18,32 @@
     return acc;
 }
 
-+ (BOOL)matchString:(NSString *)string withPattern:(NSString *)pattern {
-    NSRange range = [string rangeOfString:pattern options:NSRegularExpressionSearch range:NSMakeRange(0, [string length])];
-    return range.location != NSNotFound;
+/**
+ Checks if the given list satisfies the arity count. Else throws an exception.
+
+ @param xs An array.
+ @param arity The argument count.
+ */
++ (void)checkArity:(NSMutableArray *)xs arity:(NSUInteger)arity {
+    if ([xs count] != arity) {
+        JSError *info = [[JSError alloc] initWithFormat:ArityError, arity, [xs count]];
+        [info throw];
+    }
+}
+
+/**
+ Checks if the given index is within the array bounds.
+
+ @param xs An array.
+ @param index The index to check.
+ @throw @c IndexOutOfBounds exception.
+ */
++ (void)checkIndexBounds:(NSMutableArray *)xs index:(NSUInteger)index {
+    NSUInteger count = [xs count];
+    if (index < 0 || index >= count) {
+        JSError *info = [[JSError alloc] initWithFormat:IndexOutOfBounds, index, count];
+        [info throw];
+    }
 }
 
 @end

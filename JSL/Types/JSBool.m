@@ -16,10 +16,7 @@
 @synthesize meta = _meta;
 
 + (BOOL)isBool:(id)object {
-    if ([object isKindOfClass:[self class]]) {
-        return YES;
-    }
-    return NO;
+    return [[object className] isEqual:[self className]];
 }
 
 - (instancetype)initWithBool:(BOOL)flag {

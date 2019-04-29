@@ -19,12 +19,4 @@
     return (double)(NSTimeInterval)[[NSDate date] timeIntervalSince1970] * 1000;
 }
 
-+ (JSNumber *)dataToNum:(JSData *)data {
-    if (![JSNumber isNumber:data]) {
-        JSError *err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'number'", [data dataTypeName]];
-        [err throw];
-    }
-    return (JSNumber *)data;
-}
-
 @end

@@ -18,10 +18,24 @@
 @synthesize meta = _meta;
 
 + (BOOL)isNumber:(id)object {
-    if ([object isKindOfClass:[self class]]) {
-        return YES;
+    return [[object className] isEqual:[self className]];
+}
+
++ (JSNumber *)dataToNumber:(JSData *)data {
+    return [self dataToNumber:data position:-1];
+}
+
++ (JSNumber *)dataToNumber:(JSData *)data position:(NSInteger)position {
+    if (![self isNumber:data]) {
+        JSError *err = nil;
+        if (position > 0) {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'number'", position, [data dataTypeName]];
+        } else {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'number'", [data dataTypeName]];
+        }
+        [err throw];
     }
-    return NO;
+    return (JSNumber *)data;
 }
 
 - (instancetype)initWithDouble:(double)number {
@@ -126,7 +140,7 @@
 }
 
 - (BOOL)checkDouble:(NSString *)string {
-    if ([TypeUtils matchString:string withPattern:_decimalPattern]) {
+    if ([Utils matchString:string withPattern:_decimalPattern]) {
         return YES;
     }
     return NO;

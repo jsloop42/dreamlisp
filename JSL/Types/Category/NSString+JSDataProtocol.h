@@ -11,6 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSString (JSDataProtocol)
++ (BOOL)isString:(id)object;
 - (BOOL)isEmpty;
 - (BOOL)isNotEmpty;
 - (NSUInteger)count;

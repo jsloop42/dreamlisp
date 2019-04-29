@@ -23,6 +23,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, copy, nullable) Env *env;
 @property (nonatomic, readwrite, assign, getter=isMacro) BOOL macro;
 @property (nonatomic, readwrite, copy, nullable) JSData *meta;
++ (BOOL)isFunction:(id)object;
++ (JSFunction *)dataToFunction:(JSData *)data;
++ (JSFunction *)dataToFunction:(JSData *)data position:(NSInteger)position;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithAst:(JSData *)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(JSData * _Nullable)meta
                          fn:(JSData *(^)(NSMutableArray *))fn;

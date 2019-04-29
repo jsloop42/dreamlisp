@@ -16,10 +16,30 @@
 @synthesize meta = _meta;
 
 + (BOOL)isVector:(id)object {
-    if ([object isKindOfClass:[self class]]) {
-        return YES;
+    return [[object className] isEqual:[self className]];
+}
+
+/**
+  Checks if the given data is of type `list` or `vector` and returns a `list`. Else throws an exception.
+
+  @param data The data which needs to be converted.
+  @return A list object.
+ */
++ (JSList *)dataToList:(JSData *)data {
+    return [self dataToList:data position:-1];
+}
+
++ (JSList *)dataToList:(JSData *)data position:(NSInteger)position {
+    if (![JSList isList:data] && ![JSVector isVector:data]) {
+        JSError *err = nil;
+        if (position > 0) {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'list' or 'vector'", position, [data dataTypeName]];
+        } else {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'list' or 'vector'", [data dataTypeName]];
+        }
+        [err throw];
     }
-    return NO;
+    return (JSList *)data;
 }
 
 - (instancetype)init {

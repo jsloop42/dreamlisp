@@ -16,10 +16,28 @@
 @synthesize meta = _meta;
 
 + (BOOL)isList:(id)object {
-    if ([object isKindOfClass:[self class]]) {
-        return YES;
+    return [[object className] isEqual:[self className]];
+}
+
++ (BOOL)isKindOfList:(id)object {
+    return [object isKindOfClass:[self class]];
+}
+
++ (JSList *)dataToList:(JSData *)data {
+    return [self dataToList:data position:-1];
+}
+
++ (JSList *)dataToList:(JSData *)data position:(NSInteger)position {
+    if (![JSList isKindOfList:data]) {
+        JSError *err = nil;
+        if (position > 0) {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'list'", position, [data dataTypeName]];
+        } else {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'list'", [data dataTypeName]];
+        }
+        [err throw];
     }
-    return NO;
+    return (JSList *)data;
 }
 
 - (instancetype)init {

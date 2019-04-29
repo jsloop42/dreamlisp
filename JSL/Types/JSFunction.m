@@ -24,6 +24,27 @@
 @synthesize macro = _isMacro;
 @synthesize meta = _meta;
 
++ (BOOL)isFunction:(id)object {
+    return [[object className] isEqual:[self className]];
+}
+
++ (JSFunction *)dataToFunction:(JSData *)data {
+    return [self dataToFunction:data position:-1];
+}
+
++ (JSFunction *)dataToFunction:(JSData *)data position:(NSInteger)position {
+    if (![self isFunction:data]) {
+        JSError *err = nil;
+        if (position > 0) {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'function'", position, [data dataTypeName]];
+        } else {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'function'", [data dataTypeName]];
+        }
+        [err throw];
+    }
+    return (JSFunction *)data;
+}
+
 - (instancetype)initWithAst:(JSData *)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(JSData * _Nullable)meta
                          fn:(JSData *(^)(NSMutableArray *))fn {
     self = [super init];

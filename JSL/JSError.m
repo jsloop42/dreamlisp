@@ -11,7 +11,7 @@
 NSString *ArityError = @"Arity error. Expected arity of %d, but passed %d.";
 NSString *DataTypeMismatch = @"Data type error. Expecting %@ but obtained '%@'.";
 NSString *DataTypeMismatchWithArity = @"Data type error. Expecting %@ for argument %d but obtained '%@'.";
-NSString *IndexOutOfBounds = @"Index out of bounds";
+NSString *IndexOutOfBounds = @"Index out of bounds. Obtained index is %d but the total count is %d.";
 NSString *JSLException = @"JSLException";
 NSString *SymbolNotFound = @"'%@' not found";
 

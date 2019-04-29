@@ -17,10 +17,24 @@
 @synthesize meta = _meta;
 
 + (BOOL)isString:(id)object {
-    if ([object isKindOfClass:[self class]]) {
-        return YES;
+    return [[object className] isEqual:[self className]];
+}
+
++ (JSString *)dataToString:(JSData *)data {
+    return [self dataToString:data position:-1];
+}
+
++ (JSString *)dataToString:(JSData *)data position:(NSInteger)position {
+    if (![self isString:data]) {
+        JSError *err = nil;
+        if (position > 0) {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'string'", position, [data dataTypeName]];
+        } else {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'string'", [data dataTypeName]];
+        }
+        [err throw];
     }
-    return NO;
+    return (JSString *)data;
 }
 
 - (instancetype)init {

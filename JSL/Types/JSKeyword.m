@@ -16,18 +16,12 @@
 @synthesize value = _string;
 @synthesize meta = _meta;
 
-+ (BOOL)isKeyword:(id)string {
-    if ([string isKindOfClass:[self class]]) {
-        return YES;
-    }
-    return NO;
++ (BOOL)isKeyword:(id)object {
+    return [[object className] isEqual:[self className]];
 }
 
-+ (BOOL)isEncodedKeyword:(id)string {
-    if ([string isKindOfClass:[NSString class]] && [[string substringToIndex:1] isEqual:@"\u029e"]) {
-        return YES;
-    }
-    return NO;
++ (BOOL)isEncodedKeyword:(id)object {
+    return [object isKindOfClass:[NSString class]] && [[object substringToIndex:1] isEqual:@"\u029e"];
 }
 
 - (instancetype)init {
