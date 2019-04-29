@@ -20,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithInteger:(NSUInteger)number;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithNumber:(NSDecimalNumber *)number;
+- (instancetype)initWithDoubleNumber:(NSDecimalNumber *)number;
 - (instancetype)initWithMeta:(JSData *)meta number:(JSNumber *)number;
 - (double)doubleValue;
 - (int)intValue;

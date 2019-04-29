@@ -264,9 +264,21 @@
     XCTAssertEqualObjects([jsl rep:@"(+)"], @"0");
     XCTAssertEqualObjects([jsl rep:@"(*)"], @"1");
     // one argument
+    XCTAssertEqualObjects([jsl rep:@"(+ 1)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(+ 5)"], @"5");
+    XCTAssertEqualObjects([jsl rep:@"(+ 7.0)"], @"7.0");
+    XCTAssertEqualObjects([jsl rep:@"(+ 31.1)"], @"31.1");
+    XCTAssertEqualObjects([jsl rep:@"(- 1)"], @"-1");
+    XCTAssertEqualObjects([jsl rep:@"(- 1.0)"], @"-1.0");
+    XCTAssertEqualObjects([jsl rep:@"(- 5.0)"], @"-5.0");
+    XCTAssertEqualObjects([jsl rep:@"(- 53.6)"], @"-53.6");
     XCTAssertEqualObjects([jsl rep:@"(* 3)"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(* 3.1415)"], @"3.1415");
+    XCTAssertEqualObjects([jsl rep:@"(/ 1)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(/ -1)"], @"-1");
+    XCTAssertEqualObjects([jsl rep:@"(/ 1.0)"], @"1.0");
     XCTAssertEqualObjects([jsl rep:@"(/ 2)"], @"0.5");
+    XCTAssertEqualObjects([jsl rep:@"(/ -2)"], @"-0.5");
     XCTAssertEqualObjects([jsl rep:@"(/ 4)"], @"0.25");
 }
 
@@ -1409,7 +1421,6 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)test {
     JSL *jsl = [JSL new];
-
     //XCTAssertEqualObjects([jsl rep:@"(/ 1 0)"], @"");
 
 }

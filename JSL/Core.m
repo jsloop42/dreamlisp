@@ -54,22 +54,31 @@ double dmod(double a, double n) {
         NSDecimalNumber *num = [NSDecimalNumber new];
         NSUInteger len = [args count];
         NSUInteger i = 0;
+        BOOL isDouble = NO;
+        JSNumber *aNum = nil;
         if (len == 0) {
             @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
         } else if (len == 1) {
             return (JSNumber *)args[0];
         }
         if (len >= 2) {
-            NSDecimalNumber *n = [(JSNumber *)args[0] value];
+            aNum = (JSNumber *)args[0];
+            if ([aNum isDouble]) { isDouble = YES; }
+            NSDecimalNumber *n = [aNum value];
             if ([n respondsToSelector:sel]) {
-                num = objc_msgSend(n, sel, [(JSNumber *)args[1] value]);
+                aNum = (JSNumber *)args[1];
+                if ([aNum isDouble]) { isDouble = YES; }
+                num = objc_msgSend(n, sel, [aNum value]);
             }
         }
         if (len > 2) {
             for (i = 2; i < len; i++) {
-                num = objc_msgSend(num, sel, [(JSNumber *)args[i] value]);
+                aNum = (JSNumber *)args[i];
+                if ([aNum isDouble]) { isDouble = YES; }
+                num = objc_msgSend(num, sel, [aNum value]);
             }
         }
+        if (isDouble) { return [[JSNumber alloc] initWithDoubleNumber:num]; }
         return [[JSNumber alloc] initWithNumber:num];
     };
 
@@ -80,6 +89,16 @@ double dmod(double a, double n) {
     [_ns setObject:add forKey:@"+"];
 
     JSFunction *subtract = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
+        if ([args count] == 1) {
+            JSNumber *n = (JSNumber *)args[0];
+            JSNumber *ret = nil;
+            if ([n isDouble]) {
+                ret = [[JSNumber alloc] initWithDoubleNumber:[[NSDecimalNumber alloc] initWithDouble:(-1.0 * [n doubleValue])]];
+            } else {
+                ret = [[JSNumber alloc] initWithNumber:[[NSDecimalNumber alloc] initWithInteger:(-1 * [n integerValue])]];
+            }
+            return ret;
+        }
         return calc(args, @selector(decimalNumberBySubtracting:));
     }];
     [_ns setObject:subtract forKey:@"-"];
@@ -92,7 +111,7 @@ double dmod(double a, double n) {
 
     JSFunction *divide = [[JSFunction alloc] initWithFn:^JSData *(NSMutableArray * args) {
         if ([args count] == 1) {
-            [args insertObject:[[JSNumber alloc] initWithDouble:1.0] atIndex:0];
+            [args insertObject:[[JSNumber alloc] initWithInteger:1] atIndex:0];
         }
         return calc(args, @selector(decimalNumberByDividingBy:));
     }];

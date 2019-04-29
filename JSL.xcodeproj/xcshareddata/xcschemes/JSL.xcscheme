@@ -76,11 +76,11 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "/Users/jsloop/dev/inc.jsl"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "aaa bbb ccc"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
       <EnvironmentVariables>

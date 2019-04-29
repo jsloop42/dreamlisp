@@ -59,7 +59,7 @@
     if (self) {
         [self bootstrap];
         _n = [[NSDecimalNumber alloc] initWithString:string];
-        _isDouble = [self checkDouble:[_n stringValue]];
+        _isDouble = [self checkDouble:string];
     }
     return self;
 }
@@ -73,6 +73,17 @@
     }
     return self;
 }
+
+- (instancetype)initWithDoubleNumber:(NSDecimalNumber *)number {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+        _n = number;
+        _isDouble = YES;
+    }
+    return self;
+}
+
 
 - (instancetype)initWithMeta:(JSData *)meta number:(JSNumber *)number {
     self = [super init];
