@@ -20,33 +20,25 @@
 - (nullable NSString *)printStringFor:(id<JSDataProtocol>)data readably:(BOOL)readably {
     if (data == nil) { return nil; }
     NSString *dataType = [data dataType];
-    if ([dataType isEqual:@"JSSymbol"]) {
+    if ([JSSymbol isSymbol:data]) {
         return [(JSSymbol *)data name];
-    } else if ([dataType isEqual:@"JSNumber"]) {
+    } else if ([JSNumber isNumber:data]) {
         return [(JSNumber *)data string];
     } else if ([dataType isEqual:@"NSNumber"] || [dataType isEqual:@"NSDecimalNumber"]) {
         return [[[JSNumber alloc] initWithNumber:(NSDecimalNumber *)data] string];
-    } else if ([dataType isEqual:@"JSString"]) {
+    } else if ([JSString isString:data]) {
         NSString *string = [(JSString *)data value];
-        if (readably) {
-            return [self readableStringFor:string];
-        }
-        return string;
+        return readably ? [self readableStringFor:string] : string;
     } else if ([dataType isEqual:@"NSString"]) {
         NSString *string = (NSString *)data;
-        if ([[string substringToIndex:1] isEqual:@"\u029e"]) {
-            return [string substringFromIndex:1];
-        }
-        if (readably) {
-            return [self readableStringFor:string];
-        }
-        return string;
-    } else if ([dataType isEqual:@"JSList"]) {
+        if ([[string substringToIndex:1] isEqual:@"\u029e"]) return [string substringFromIndex:1];
+        return readably ? [self readableStringFor:string] : string;
+    } else if ([JSList isList:data]) {
         NSMutableArray *xs = [(JSList *)data map:^NSString *(id<JSDataProtocol> obj) {
             return [self printStringFor:obj readably:readably];
         }];
         return [[NSString alloc] initWithFormat:@"(%@)", [xs componentsJoinedByString:@" "]];
-    } else if ([dataType isEqual:@"JSVector"]) {
+    } else if ([JSVector isVector:data]) {
         NSMutableArray *xs = [(JSVector *)data map:^NSString *(id<JSDataProtocol> obj) {
             return [self printStringFor:obj readably:readably];
         }];
@@ -56,7 +48,7 @@
             return [self printStringFor:obj readably:readably];
         }];
         return [[NSString alloc] initWithFormat:@"[%@]", [xs componentsJoinedByString:@" "]];
-    } else if ([dataType isEqual:@"JSHashMap"]) {
+    } else if ([JSHashMap isHashMap:data]) {
         NSUInteger i = 0;
         JSHashMap *hm = (JSHashMap *)data;
         NSArray *keys = [hm allKeys];
@@ -69,18 +61,15 @@
                                 [self printStringFor:(id<JSDataProtocol>)[hm objectForKey:key] readably:readably]]];
         }
         return [[NSString alloc] initWithFormat:@"{%@}", [xs componentsJoinedByString:@" "]];
-    } else if ([dataType isEqual:@"JSKeyword"]) {
+    } else if ([JSKeyword isKeyword:data]) {
         return [(JSKeyword *)data value];
-    } else if ([dataType isEqual:@"JSAtom"]) {
+    } else if ([JSAtom isAtom:data]) {
         return [self printStringFor:[[JSString alloc] initWithFormat:@"(atom %@)", [self printStringFor:[(JSAtom *)data value] readably:false]] readably:false];
-    } else if ([dataType isEqual:@"JSNil"]) {
+    } else if ([JSNil isNil:data]) {
         return @"nil";
-    } else if ([dataType isEqual:@"JSBool"]) {
-        if ([(JSBool *)data value]) {
-            return @"true";
-        }
-        return @"false";
-    } else if ([dataType isEqual:@"JSFunction"]) {
+    } else if ([JSBool isBool:data]) {
+        return [(JSBool *)data value] ? @"true" : @"false";
+    } else if ([JSFunction isFunction:data]) {
         return @"#<function>";
     }
     return JSL_ERROR_TYPE_MSG;

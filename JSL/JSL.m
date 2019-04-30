@@ -79,19 +79,20 @@
 }
 
 - (id<JSDataProtocol>)evalAST:(id<JSDataProtocol>)ast withEnv:(Env *)env {
-    if ([[ast dataType] isEqual:@"JSSymbol"]) {
+    // TODO: change data type check.
+    if ([JSSymbol isSymbol:ast]) {
         return [env objectForSymbol:(JSSymbol *)ast];
-    } else if ([[ast dataType] isEqual:@"JSList"]) {
+    } else if ([JSList isList:ast]) {
         NSMutableArray *arr = [(JSList *)ast map: ^id<JSDataProtocol>(id<JSDataProtocol> xs) {
             return [self eval:xs withEnv:env];
         }];
         return [[JSList alloc] initWithArray:arr];
-    } if ([[ast dataType] isEqual:@"JSVector"]) {
+    } if ([JSVector isVector:ast]) {
         NSMutableArray *arr = [(JSVector *)ast map: ^id<JSDataProtocol>(id<JSDataProtocol> xs) {
             return [self eval:xs withEnv:env];
         }];
         return [[JSVector alloc] initWithArray:arr];
-    } if ([[ast dataType] isEqual:@"JSHashMap"]) {
+    } if ([JSHashMap isHashMap:ast]) {
         NSMapTable *table = [(JSHashMap *)ast value];
         NSUInteger i = 0;
         NSArray *keys = [table allKeys];
@@ -105,7 +106,7 @@
 }
 
 - (BOOL)isPair:(id<JSDataProtocol>)ast {
-    if (([[ast dataType] isEqual:@"JSList"] && [(JSList *)ast count] > 0) || ([[ast dataType] isEqual:@"JSVector"] && [(JSVector *)ast count] > 0)) {
+    if (([JSList isList:ast] && [(JSList *)ast count] > 0) || ([JSVector isVector:ast] && [(JSVector *)ast count] > 0)) {
         return YES;
     }
     return NO;
@@ -117,12 +118,12 @@
     }
     NSMutableArray *xs = [(JSList *)ast value];
     id<JSDataProtocol> first = [xs first];
-    if ([[first dataType] isEqual:@"JSSymbol"] && [[(JSSymbol *)first name] isEqual:@"unquote"]) {
+    if ([JSSymbol isSymbol:first] && [[(JSSymbol *)first name] isEqual:@"unquote"]) {
         return [xs second];
     }
     if ([self isPair:first]) {
         NSMutableArray *list = [(JSList *)first value];
-        if (![list isEmpty] && [[[list first] dataType] isEqual:@"JSSymbol"] && [[(JSSymbol *)[list first] name] isEqual:@"splice-unquote"]) {
+        if (![list isEmpty] && [JSSymbol isSymbol:[list first]] && [[(JSSymbol *)[list first] name] isEqual:@"splice-unquote"]) {
             return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"concat"], [list second],
                                                     [self quasiQuote:[[JSList alloc] initWithArray:[xs rest]]]] mutableCopy]];
         }
@@ -132,14 +133,14 @@
 }
 
 - (BOOL)isMacroCall:(id<JSDataProtocol>)ast env:(Env *)env {
-    if ([[ast dataType] isEqual:@"JSList"]) {
+    if ([JSList isList:ast]) {
         NSMutableArray *xs = [(JSList *)ast value];
         id<JSDataProtocol> first = [xs first];
-        if (first && [[first dataType] isEqual:@"JSSymbol"]) {
+        if (first && [JSSymbol isSymbol:first]) {
             JSSymbol *sym = (JSSymbol *)first;
             if ([env findEnvForKey:sym]) {
                 id<JSDataProtocol> fnData = [env objectForSymbol:sym];
-                if ([[fnData dataType] isEqual:@"JSFunction"]) {
+                if ([JSFunction isFunction:fnData]) {
                     return [(JSFunction *)fnData isMacro];
                 }
             }
@@ -159,21 +160,17 @@
 
 - (id<JSDataProtocol>)eval:(id<JSDataProtocol>)ast withEnv:(Env *)env {
     while (true) {
-        if ([[ast dataType] isEqual:@"JSVector"]) {
+        if ([JSVector isVector:ast]) {
             NSMutableArray *xs = [(JSVector *)ast map:^id<JSDataProtocol>(id<JSDataProtocol> obj) {
                 return [self eval:obj withEnv:env];
             }];
             return [[JSVector alloc] initWithArray:xs];
-        } else if ([[ast dataType] isEqual:@"JSList"]) {
+        } else if ([JSList isList:ast]) {
             ast = [self macroExpand:ast withEnv:env];
-            if (![[ast dataType] isEqual:@"JSList"]) {
-                return [self evalAST:ast withEnv:env];
-            }
+            if (![JSList isList:ast]) return [self evalAST:ast withEnv:env];
             NSMutableArray *xs = [(JSList *)ast value];
-            if ([xs isEmpty]) {
-                return ast;
-            }
-            if ([[[xs first] dataType] isEqual:@"JSSymbol"]) {
+            if ([xs isEmpty]) return ast;
+            if ([JSSymbol isSymbol:[xs first]]) {
                 // special forms
                 JSSymbol *sym = (JSSymbol *)[xs first];
                 if ([[sym name] isEqual:@"def!"]) {
@@ -191,11 +188,12 @@
                     } @catch (NSException *exception) {
                         if ([xs count] > 2) {
                             JSList *catchxs = (JSList *)[xs nth:2];
-                            if ([[[catchxs first] dataType] isEqual:@"JSSymbol"] && [[(JSSymbol *)[catchxs first] name] isNotEqualTo:@"catch*"]) {
-                                @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:JSL_SYMBOL_NOT_FOUND_MSG userInfo:@{@"jsdata": [catchxs first]}];
+                            if ([JSSymbol isSymbol:[catchxs first]] && [[(JSSymbol *)[catchxs first] name] isNotEqualTo:@"catch*"]) {
+                                @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND
+                                                                  reason:JSL_SYMBOL_NOT_FOUND_MSG userInfo:@{@"jsdata": [catchxs first]}];
                             }
                             Env *catchEnv = [[Env alloc] initWithEnv:env binds:[@[(JSSymbol *)[catchxs second]] mutableCopy]
-                                                                 exprs:[@[[self exceptionInfo:exception]] mutableCopy]];
+                                                               exprs:[@[[self exceptionInfo:exception]] mutableCopy]];
                             return [self eval:[catchxs nth:2] withEnv:catchEnv];
                          }
                         @throw exception;
@@ -211,7 +209,7 @@
                     continue;
                 } else if ([[sym name] isEqual:@"if"]) {
                     id<JSDataProtocol> res = [self eval:[xs second] withEnv:env];
-                    if ([[res dataType] isEqual:@"JSNil"] || ([[res dataType] isEqual:@"JSBool"] && [(JSBool *)res value] == NO)) {
+                    if ([JSNil isNil:res] || ([JSBool isBool:res] && [(JSBool *)res value] == NO)) {
                         ast = [xs count] > 3 ? [xs nth:3] : [JSNil new];
                     } else {
                         ast = [xs nth:2];
@@ -225,8 +223,7 @@
                     return [[JSFunction alloc] initWithAst:[xs nth:2] params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
                 } else if ([[sym name] isEqual:@"let*"]) {
                     Env *letEnv = [[Env alloc] initWithEnv:env];
-                    NSMutableArray *bindings = [[(id<JSDataProtocol>)[xs second] dataType] isEqual:@"JSVector"] ?
-                                                    [(JSVector *)[xs second] value] : [(JSList *)[xs second] value];
+                    NSMutableArray *bindings = [JSVector isVector:[xs second]] ? [(JSVector *)[xs second] value] : [(JSList *)[xs second] value];
                     NSUInteger len = [bindings count];
                     NSUInteger i = 0;
                     for (i = 0; i < len; i += 2) {
@@ -246,19 +243,16 @@
             }
             // Function
             NSMutableArray *list = [(JSList *)[self evalAST:ast withEnv:env] value];
-            if ([[[list first] dataType] isNotEqualTo:@"JSFunction"]) {
-                @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:JSL_SYMBOL_NOT_FOUND_MSG userInfo:nil];
-            }
-            JSFunction *fn = (JSFunction *)[list first];
+            JSFunction *fn = [JSFunction dataToFunction:[list first]];
             NSMutableArray *rest = [list rest];
-            if ([fn ast] != nil) {
+            if ([fn ast]) {
                 ast = [fn ast];
                 env = [[Env alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest];
             } else {
                 return [fn apply:rest];
             }
             continue;
-        } else if ([[ast dataType] isEqual:@"JSHashMap"]) {
+        } else if ([JSHashMap isHashMap:ast]) {
             JSHashMap *dict = (JSHashMap *)ast;
             NSArray *keys = [dict allKeys];
             NSUInteger i = 0;
@@ -293,8 +287,7 @@
         NSString *desc = [info valueForKey:@"description"];
         if (desc) return [[JSString alloc] initWithString:desc];
     }
-    if ([exception.description isNotEmpty]) return [[JSString alloc] initWithString:exception.description];
-    return nil;
+    return ([exception.description isNotEmpty]) ? [[JSString alloc] initWithString:exception.description] : nil;
 }
 
 - (NSString *)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably {
@@ -307,19 +300,14 @@
             id<JSDataProtocol> data = (id<JSDataProtocol>)[exception.userInfo valueForKey:@"jsdata"];
             if (data) {
                 desc = [[NSString alloc] initWithFormat:@"Error: %@", [_printer printStringFor:data readably:readably]];
-                if (desc && log) {
-                    error(@"%@", desc);
-                }
+                if (desc && log) error(@"%@", desc);
             }
         }
     } else {
         desc = exception.description;
-        if (desc && log) {
-            error(@"%@", desc);
-        }
+        if (desc && log) error(@"%@", desc);
     }
     return desc;
 }
-
 
 @end

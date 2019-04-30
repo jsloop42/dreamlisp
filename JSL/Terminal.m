@@ -19,9 +19,7 @@ NSString *_historyFile = @"/.jsl-history";
 
 - (instancetype)init {
     self = [super init];
-    if (self) {
-        [self bootstrap];
-    }
+    if (self) [self bootstrap];
     return self;
 }
 
@@ -37,9 +35,7 @@ NSString *_historyFile = @"/.jsl-history";
         [_fops openFile:path];
         while([_fops hashNext]) {
             NSString *line = [_fops readLine];
-            if ([line length] > 0) {
-                add_history([line cStringUsingEncoding:NSUTF8StringEncoding]);
-            }
+            if ([line length] > 0) add_history([line cStringUsingEncoding:NSUTF8StringEncoding]);
         }
     } @catch (NSException *exception) {
         error(@"%@", exception.description);
@@ -58,9 +54,7 @@ NSString *_historyFile = @"/.jsl-history";
     char *input = readline(prompt);
     NSString *exp;
     if (input) {
-        if (_isHistoryEnabled) {
-            add_history(input);
-        }
+        if (_isHistoryEnabled) add_history(input);
         exp = [[NSString alloc] initWithUTF8String:input];
         [_fops append:[exp stringByAppendingString:@"\n"] completion:nil];
         free(input);

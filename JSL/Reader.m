@@ -32,40 +32,30 @@
 }
 
 - (nullable NSString *)next {
-    if (_position >= [_tokens count]) {
-        return nil;
-    }
+    if (_position >= [_tokens count]) return nil;
     return _tokens[_position++];
 }
 
 - (nullable NSString *)peek {
-    if (_position >= [_tokens count]) {
-        return nil;
-    }
+    if (_position >= [_tokens count]) return nil;
     return _tokens[_position];
 }
 
 - (void)pass {
-    if (_position >= [_tokens count]) {
-        return;
-    }
+    if (_position >= [_tokens count]) return;
     _position++;
 }
 
 - (nullable id<JSDataProtocol>)readString:(NSString *)string {
     NSMutableArray *tokens = [self tokenize:string];
-    if ([tokens count] <= 0) {
-        return nil;
-    }
+    if ([tokens count] <= 0) return nil;
     Reader *reader = [[Reader alloc] initWithTokens:tokens];
     return [reader readForm];
 }
 
 - (nullable id<JSDataProtocol>)readForm {
     NSString *token = [self peek];
-    if (token == nil) {
-        @throw [[NSException alloc] initWithName:JSL_TOKEN_EMPTY reason:JSL_TOKEN_EMPTY_MSG userInfo:nil];
-    }
+    if (token == nil) @throw [[NSException alloc] initWithName:JSL_TOKEN_EMPTY reason:JSL_TOKEN_EMPTY_MSG userInfo:nil];
     if ([token isEqual:@"("] || [token isEqual:@"["] || [token isEqual:@"{"]) {
         return [self readListStartingWith:token];
     } else if ([token isEqual:@"'"] || [token isEqual:@"`"] || [token isEqual:@"~"] || [token isEqual:@"~@"] || [token isEqual:@"@"]) {
@@ -147,7 +137,7 @@
     NSMutableArray *tokenArr = [NSMutableArray array];
     for (NSTextCheckingResult *match in matches) {
         NSString * mstr = [string substringWithRange:[match rangeAtIndex:1]];
-        if ([mstr characterAtIndex:0] == ';') { continue; }
+        if ([mstr characterAtIndex:0] == ';') continue;
         [tokenArr addObject:mstr];
     }
     return tokenArr;
