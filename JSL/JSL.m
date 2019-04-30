@@ -50,8 +50,8 @@
  Sets `eval` JSL function in the REPL environment.
 */
 - (void)setEvalToREPL{
-    JSData * (^fn)(NSMutableArray *arg) = ^JSData *(NSMutableArray *arg) {
-        return [self eval:(JSData *)arg[0] withEnv:[self env]];
+    id<JSDataProtocol>(^fn)(NSMutableArray *arg) = ^id<JSDataProtocol>(NSMutableArray *arg) {
+        return [self eval:(id<JSDataProtocol>)arg[0] withEnv:[self env]];
     };
     NSString *hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
     NSString *langVersion = [[NSString alloc] initWithFormat:@"JSL v%@ [%@]", JSLVersion, hostLangVersion];
@@ -74,20 +74,20 @@
     [self rep:@"(def! exit (fn* () (do (println \"Bye.\") (exit*))))"];
 }
 
-- (JSData *)read:(NSString *)string {
+- (id<JSDataProtocol>)read:(NSString *)string {
     return [_reader readString:string];
 }
 
-- (JSData *)evalAST:(JSData *)ast withEnv:(Env *)env {
+- (id<JSDataProtocol>)evalAST:(id<JSDataProtocol>)ast withEnv:(Env *)env {
     if ([[ast dataType] isEqual:@"JSSymbol"]) {
         return [env objectForSymbol:(JSSymbol *)ast];
     } else if ([[ast dataType] isEqual:@"JSList"]) {
-        NSMutableArray *arr = [(JSList *)ast map: ^JSData * (JSData *xs) {
+        NSMutableArray *arr = [(JSList *)ast map: ^id<JSDataProtocol>(id<JSDataProtocol> xs) {
             return [self eval:xs withEnv:env];
         }];
         return [[JSList alloc] initWithArray:arr];
     } if ([[ast dataType] isEqual:@"JSVector"]) {
-        NSMutableArray *arr = [(JSVector *)ast map: ^JSData * (JSData *xs) {
+        NSMutableArray *arr = [(JSVector *)ast map: ^id<JSDataProtocol>(id<JSDataProtocol> xs) {
             return [self eval:xs withEnv:env];
         }];
         return [[JSVector alloc] initWithArray:arr];
@@ -104,19 +104,19 @@
     return ast;
 }
 
-- (BOOL)isPair:(JSData *)ast {
+- (BOOL)isPair:(id<JSDataProtocol>)ast {
     if (([[ast dataType] isEqual:@"JSList"] && [(JSList *)ast count] > 0) || ([[ast dataType] isEqual:@"JSVector"] && [(JSVector *)ast count] > 0)) {
         return YES;
     }
     return NO;
 }
 
-- (JSData *)quasiQuote:(JSData *)ast {
+- (id<JSDataProtocol>)quasiQuote:(id<JSDataProtocol>)ast {
     if (![self isPair:ast]) {
         return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], ast] mutableCopy]];
     }
     NSMutableArray *xs = [(JSList *)ast value];
-    JSData *first = [xs first];
+    id<JSDataProtocol> first = [xs first];
     if ([[first dataType] isEqual:@"JSSymbol"] && [[(JSSymbol *)first name] isEqual:@"unquote"]) {
         return [xs second];
     }
@@ -131,14 +131,14 @@
                                             [self quasiQuote:[[JSList alloc] initWithArray:[xs rest]]]] mutableCopy]];
 }
 
-- (BOOL)isMacroCall:(JSData *)ast env:(Env *)env {
+- (BOOL)isMacroCall:(id<JSDataProtocol>)ast env:(Env *)env {
     if ([[ast dataType] isEqual:@"JSList"]) {
         NSMutableArray *xs = [(JSList *)ast value];
-        JSData *first = [xs first];
+        id<JSDataProtocol> first = [xs first];
         if (first && [[first dataType] isEqual:@"JSSymbol"]) {
             JSSymbol *sym = (JSSymbol *)first;
             if ([env findEnvForKey:sym]) {
-                JSData *fnData = [env objectForSymbol:sym];
+                id<JSDataProtocol> fnData = [env objectForSymbol:sym];
                 if ([[fnData dataType] isEqual:@"JSFunction"]) {
                     return [(JSFunction *)fnData isMacro];
                 }
@@ -148,7 +148,7 @@
     return NO;
 }
 
-- (JSData *)macroExpand:(JSData *)ast withEnv:(Env *)env {
+- (id<JSDataProtocol>)macroExpand:(id<JSDataProtocol>)ast withEnv:(Env *)env {
     while ([self isMacroCall:ast env:env]) {
         NSMutableArray *xs = [(JSList *)ast value];
         JSFunction *fn = (JSFunction *)[env objectForSymbol:(JSSymbol *)[xs first]];
@@ -157,10 +157,10 @@
     return ast;
 }
 
-- (JSData *)eval:(JSData *)ast withEnv:(Env *)env {
+- (id<JSDataProtocol>)eval:(id<JSDataProtocol>)ast withEnv:(Env *)env {
     while (true) {
         if ([[ast dataType] isEqual:@"JSVector"]) {
-            NSMutableArray *xs = [(JSVector *)ast map:^JSData *(JSData *obj) {
+            NSMutableArray *xs = [(JSVector *)ast map:^id<JSDataProtocol>(id<JSDataProtocol> obj) {
                 return [self eval:obj withEnv:env];
             }];
             return [[JSVector alloc] initWithArray:xs];
@@ -177,13 +177,13 @@
                 // special forms
                 JSSymbol *sym = (JSSymbol *)[xs first];
                 if ([[sym name] isEqual:@"def!"]) {
-                    JSData *val = [self eval:[xs nth:2] withEnv:env];
+                    id<JSDataProtocol> val = [self eval:[xs nth:2] withEnv:env];
                     [env setObject:val forSymbol:(JSSymbol *)[xs second]];
                     return val;
                 } else if ([[sym name] isEqual:@"defmacro!"]) {
                     JSFunction *fn = (JSFunction *)[self eval:[xs nth:2] withEnv:env];
                     JSFunction *macro = [[JSFunction alloc] initWithMacro:fn];
-                    [env setObject:(JSData *)macro forSymbol:(JSSymbol *)[xs second]];
+                    [env setObject:(id<JSDataProtocol>)macro forSymbol:(JSSymbol *)[xs second]];
                     return macro;
                 } else if ([[sym name] isEqual:@"try*"]) {
                     @try {
@@ -206,11 +206,11 @@
                     for (i = 1; i < len - 1; i++) {
                         [self eval:[xs nth:i] withEnv:env];
                     }
-                    JSData *last = [xs last];
+                    id<JSDataProtocol> last = [xs last];
                     ast = last ? last : [JSNil new];
                     continue;
                 } else if ([[sym name] isEqual:@"if"]) {
-                    JSData *res = [self eval:[xs second] withEnv:env];
+                    id<JSDataProtocol> res = [self eval:[xs second] withEnv:env];
                     if ([[res dataType] isEqual:@"JSNil"] || ([[res dataType] isEqual:@"JSBool"] && [(JSBool *)res value] == NO)) {
                         ast = [xs count] > 3 ? [xs nth:3] : [JSNil new];
                     } else {
@@ -218,14 +218,14 @@
                     }
                     continue;
                 } else if ([[sym name] isEqual:@"fn*"]) {
-                    JSData * (^fn)(NSMutableArray *) = ^JSData *(NSMutableArray * arg) {
+                    id<JSDataProtocol>(^fn)(NSMutableArray *) = ^id<JSDataProtocol>(NSMutableArray * arg) {
                         Env *fnEnv = [[Env alloc] initWithEnv:env binds:[(JSList *)[xs second] value] exprs:arg];
                         return [self eval:[xs nth:2] withEnv:fnEnv];
                     };
                     return [[JSFunction alloc] initWithAst:[xs nth:2] params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
                 } else if ([[sym name] isEqual:@"let*"]) {
                     Env *letEnv = [[Env alloc] initWithEnv:env];
-                    NSMutableArray *bindings = [[(JSData *)[xs second] dataType] isEqual:@"JSVector"] ?
+                    NSMutableArray *bindings = [[(id<JSDataProtocol>)[xs second] dataType] isEqual:@"JSVector"] ?
                                                     [(JSVector *)[xs second] value] : [(JSList *)[xs second] value];
                     NSUInteger len = [bindings count];
                     NSUInteger i = 0;
@@ -266,9 +266,9 @@
             JSHashMap *ret = [JSHashMap new];
             for (i = 0; i < len; i++) {
                 id key = keys[i];
-                JSData *val = (JSData *)[dict objectForKey:key];
-                JSData *object = (JSData *)[self eval:val withEnv:env];
-                [ret setObject:object forKey:[self eval:(JSData *)key withEnv:env]];
+                id<JSDataProtocol> val = (id<JSDataProtocol>)[dict objectForKey:key];
+                id<JSDataProtocol> object = (id<JSDataProtocol>)[self eval:val withEnv:env];
+                [ret setObject:object forKey:[self eval:(id<JSDataProtocol>)key withEnv:env]];
             }
             return ret;
         } else {
@@ -277,7 +277,7 @@
     }
 }
 
-- (NSString *)print:(JSData *)data {
+- (NSString *)print:(id<JSDataProtocol>)data {
     return [_printer printStringFor:data readably:YES];
 }
 
@@ -285,10 +285,10 @@
     return [self print:[self eval:[self read:string] withEnv:[self env]]];
 }
 
-- (nullable JSData *)exceptionInfo:(NSException *)exception {
+- (nullable id<JSDataProtocol>)exceptionInfo:(NSException *)exception {
     NSDictionary *info = exception.userInfo;
     if (info) {
-        JSData *data = (JSData *)[info objectForKey:@"jsdata"];
+        id<JSDataProtocol> data = (id<JSDataProtocol>)[info objectForKey:@"jsdata"];
         if (data) return data;
         NSString *desc = [info valueForKey:@"description"];
         if (desc) return [[JSString alloc] initWithString:desc];
@@ -304,7 +304,7 @@
         if (desc && log) {
             error(@"%@", desc);
         } else {
-            JSData *data = (JSData *)[exception.userInfo valueForKey:@"jsdata"];
+            id<JSDataProtocol> data = (id<JSDataProtocol>)[exception.userInfo valueForKey:@"jsdata"];
             if (data) {
                 desc = [[NSString alloc] initWithFormat:@"Error: %@", [_printer printStringFor:data readably:readably]];
                 if (desc && log) {

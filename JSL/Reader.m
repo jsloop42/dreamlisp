@@ -52,7 +52,7 @@
     _position++;
 }
 
-- (nullable JSData *)readString:(NSString *)string {
+- (nullable id<JSDataProtocol>)readString:(NSString *)string {
     NSMutableArray *tokens = [self tokenize:string];
     if ([tokens count] <= 0) {
         return nil;
@@ -61,7 +61,7 @@
     return [reader readForm];
 }
 
-- (nullable JSData *)readForm {
+- (nullable id<JSDataProtocol>)readForm {
     NSString *token = [self peek];
     if (token == nil) {
         @throw [[NSException alloc] initWithName:JSL_TOKEN_EMPTY reason:JSL_TOKEN_EMPTY_MSG userInfo:nil];
@@ -75,13 +75,13 @@
         return [[JSList alloc] initWithArray:ret];
     } else if ([token isEqual:@"^"]) {
         [self pass];
-        JSData *meta = [self readForm];
+        id<JSDataProtocol> meta = [self readForm];
         return [[JSList alloc] initWithArray: @[[[JSSymbol alloc] initWithName:@"with-meta"], [self readForm], meta]];
     }
     return [self readAtom];
 }
 
-- (nullable JSData *)readListStartingWith:(NSString *)leftParens {
+- (nullable id<JSDataProtocol>)readListStartingWith:(NSString *)leftParens {
     NSMutableArray *list = [NSMutableArray new];
     NSArray *rightParens = @[@")", @"]", @"}"];
     [self pass];
@@ -111,7 +111,7 @@
     return range.location != NSNotFound;
 }
 
-- (nullable JSData *)readAtom {
+- (nullable id<JSDataProtocol>)readAtom {
     NSString *token = [self next];
     NSString *stringPattern = @"\"(?:\\\\.|[^\\\\\"])*\"";
     NSString *stringUnclosed = @"\"(?:\\\\.|[^\\\\\"])*";

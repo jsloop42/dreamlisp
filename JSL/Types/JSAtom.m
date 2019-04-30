@@ -9,8 +9,8 @@
 #import "JSAtom.h"
 
 @implementation JSAtom {
-    JSData *_data;
-    JSData *_meta;
+    id<JSDataProtocol> _data;
+    id<JSDataProtocol> _meta;
 }
 
 @synthesize meta = _meta;
@@ -19,11 +19,11 @@
     return [[object className] isEqual:[self className]];
 }
 
-+ (JSAtom *)dataToAtom:(JSData *)data {
++ (JSAtom *)dataToAtom:(id<JSDataProtocol>)data {
     return [self dataToAtom:data position:-1];
 }
 
-+ (JSAtom *)dataToAtom:(JSData *)data position:(NSInteger)position {
++ (JSAtom *)dataToAtom:(id<JSDataProtocol>)data position:(NSInteger)position {
     if (![JSAtom isAtom:data]) {
         JSError *err = nil;
         if (position > 0) {
@@ -36,15 +36,13 @@
     return (JSAtom *)data;
 }
 
-- (instancetype)initWithData:(JSData *)data {
+- (instancetype)initWithData:(id<JSDataProtocol>)data {
     self = [super init];
-    if (self) {
-        _data = data;
-    }
+    if (self) _data = data;
     return self;
 }
 
-- (instancetype)initWithMeta:(JSData *)meta atom:(JSAtom *)atom {
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta atom:(JSAtom *)atom {
     self = [super init];
     if (self) {
         _data = [atom value];
@@ -61,11 +59,11 @@
     return @"atom";
 }
 
-- (JSData *)value {
+- (id<JSDataProtocol>)value {
     return _data;
 }
 
-- (void)setValue:(JSData *)data {
+- (void)setValue:(id<JSDataProtocol>)data {
     _data = data;
 }
 
@@ -82,8 +80,11 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[JSAtom alloc] initWithData:_data];
-    return copy;
+    return [[JSAtom alloc] initWithData:_data];    
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [[JSAtom allocWithZone:zone] initWithData:_data];
 }
 
 - (NSString *)description {

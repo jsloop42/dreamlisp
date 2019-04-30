@@ -12,20 +12,21 @@
     NSDecimalNumber *_n;
     NSString *_decimalPattern;
     BOOL _isDouble;
-    JSData *_meta;
+    id<JSDataProtocol> _meta;
 }
 
 @synthesize meta = _meta;
+@synthesize value;
 
 + (BOOL)isNumber:(id)object {
     return [[object className] isEqual:[self className]];
 }
 
-+ (JSNumber *)dataToNumber:(JSData *)data {
++ (JSNumber *)dataToNumber:(id<JSDataProtocol>)data {
     return [self dataToNumber:data position:-1];
 }
 
-+ (JSNumber *)dataToNumber:(JSData *)data position:(NSInteger)position {
++ (JSNumber *)dataToNumber:(id<JSDataProtocol>)data position:(NSInteger)position {
     if (![self isNumber:data]) {
         JSError *err = nil;
         if (position > 0) {
@@ -99,7 +100,7 @@
 }
 
 
-- (instancetype)initWithMeta:(JSData *)meta number:(JSNumber *)number {
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta number:(JSNumber *)number {
     self = [super init];
     if (self) {
         [self bootstrap];
@@ -169,8 +170,11 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[JSNumber alloc] initWithNumber:_n];
-    return copy;
+    return [[JSNumber alloc] initWithNumber:_n];
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [[JSNumber alloc] initWithNumber:_n];
 }
 
 - (NSString *)description {

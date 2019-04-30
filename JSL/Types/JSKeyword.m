@@ -10,7 +10,7 @@
 
 @implementation JSKeyword {
     NSString *_string;
-    JSData *_meta;
+    id<JSDataProtocol> _meta;
 }
 
 @synthesize value = _string;
@@ -60,7 +60,7 @@
     return self;
 }
 
-- (instancetype)initWithMeta:(JSData *)meta keyword:(JSKeyword *)keyword {
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta keyword:(JSKeyword *)keyword {
     self = [super init];
     if (self) {
         _string = [keyword value];
@@ -116,8 +116,11 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[JSKeyword alloc] initWithKeyword:[self string]];
-    return copy;
+    return [[JSKeyword alloc] initWithKeyword:[self string]];
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [[JSKeyword alloc] initWithKeyword:[self string]];
 }
 
 - (NSString *)description {

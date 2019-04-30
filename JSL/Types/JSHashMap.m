@@ -10,7 +10,7 @@
 
 @implementation JSHashMap {
     NSMapTable *_table;
-    JSData *_meta;
+    id<JSDataProtocol> _meta;
 }
 
 @synthesize meta = _meta;
@@ -19,11 +19,11 @@
     return [[object className] isEqual:[self className]];
 }
 
-+ (JSHashMap *)dataToHashMap:(JSData *)data {
++ (JSHashMap *)dataToHashMap:(id<JSDataProtocol>)data {
     return [self dataToHashMap:data position:-1];
 }
 
-+ (JSHashMap *)dataToHashMap:(JSData *)data position:(NSInteger)position {
++ (JSHashMap *)dataToHashMap:(id<JSDataProtocol>)data position:(NSInteger)position {
     if (![self isHashMap:data]) {
         JSError *err = nil;
         if (position > 0) {
@@ -61,7 +61,7 @@
     return self;
 }
 
-- (instancetype)initWithMeta:(JSData *)meta hashmap:(JSHashMap *)hashmap {
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta hashmap:(JSHashMap *)hashmap {
     self = [super init];
     if (self) {
         _table = [hashmap value];
@@ -89,15 +89,15 @@
         @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
     }
     for (i = 0; i < len; i = i + 2) {
-        [_table setObject:(JSData *)array[i + 1] forKey:array[i]];
+        [_table setObject:(id<JSDataProtocol>)array[i + 1] forKey:array[i]];
     }
 }
 
-- (JSData *)objectForKey:(id)key {
+- (id<JSDataProtocol>)objectForKey:(id)key {
     return [_table objectForKey:key];
 }
 
-- (void)setObject:(JSData *)object forKey:(id)key {
+- (void)setObject:(id<JSDataProtocol>)object forKey:(id)key {
     if ([_table containsKey:key]) {
         [_table removeObjectForKey:key];
     }
@@ -133,8 +133,8 @@
     if ([self count] != [hashmap count]) {
         return NO;
     }
-    JSData *lval = nil;
-    JSData *rval = nil;
+    NSObject<JSDataProtocol> *lval = nil;
+    id<JSDataProtocol> rval = nil;
     NSArray *keys = [self allKeys];
     NSUInteger i = 0;
     NSUInteger len = [keys count];
@@ -157,8 +157,7 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[JSHashMap alloc] initWithMapTable:_table];
-    return copy;
+    return [[JSHashMap alloc] initWithMapTable:_table];
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {

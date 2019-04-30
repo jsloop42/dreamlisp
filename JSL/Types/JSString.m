@@ -10,7 +10,7 @@
 
 @implementation JSString {
     NSString *_string;
-    JSData *_meta;
+    id<JSDataProtocol> _meta;
 }
 
 @synthesize value = _string;
@@ -20,11 +20,11 @@
     return [[object className] isEqual:[self className]];
 }
 
-+ (JSString *)dataToString:(JSData *)data {
++ (JSString *)dataToString:(id<JSDataProtocol>)data {
     return [self dataToString:data position:-1];
 }
 
-+ (JSString *)dataToString:(JSData *)data position:(NSInteger)position {
++ (JSString *)dataToString:(id<JSDataProtocol>)data position:(NSInteger)position {
     if (![self isString:data]) {
         JSError *err = nil;
         if (position > 0) {
@@ -82,7 +82,7 @@
     return self;
 }
 
-- (instancetype)initWithMeta:(JSData *)meta string:(JSString *)string {
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta string:(JSString *)string {
     self = [super init];
     if (self) {
         _string = [string value];
@@ -128,8 +128,11 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[JSString alloc] initWithString:_string];
-    return copy;
+    return [[JSString alloc] initWithString:_string];
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [[JSString alloc] initWithString:_string];
 }
 
 - (NSString *)description {

@@ -7,24 +7,23 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "JSData.h"
+#import "JSDataProtocol.h"
 #import "Utils.h"
 #import "JSError.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface JSNumber : JSData
-@property (nonatomic, readwrite, copy) JSData *meta;
+@interface JSNumber : NSObject <JSDataProtocol>
 + (BOOL)isNumber:(id)object;
-+ (JSNumber *)dataToNumber:(JSData *)data;
-+ (JSNumber *)dataToNumber:(JSData *)data position:(NSInteger)position;
++ (JSNumber *)dataToNumber:(id<JSDataProtocol>)data;
++ (JSNumber *)dataToNumber:(id<JSDataProtocol>)data position:(NSInteger)position;
 - (instancetype)initWithDouble:(double)num;
 - (instancetype)initWithInt:(int)number;
 - (instancetype)initWithInteger:(NSUInteger)number;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithNumber:(NSDecimalNumber *)number;
 - (instancetype)initWithDoubleNumber:(NSDecimalNumber *)number;
-- (instancetype)initWithMeta:(JSData *)meta number:(JSNumber *)number;
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta number:(JSNumber *)number;
 - (double)doubleValue;
 - (int)intValue;
 - (NSUInteger)integerValue;

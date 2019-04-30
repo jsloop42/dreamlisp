@@ -11,9 +11,9 @@
 
 #import <Foundation/Foundation.h>
 // JSTypes
+#import "JSDataProtocol.h"
 #import "JSAtom.h"
 #import "JSBool.h"
-#import "JSData.h"
 #import "JSFunction.h"
 #import "JSHashMap.h"
 #import "JSKeyword.h"

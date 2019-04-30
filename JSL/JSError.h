@@ -7,11 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "JSData.h"
+#import "JSDataProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
-
-@class JSData;
 
 extern NSString *ArityError;
 extern NSString *DataTypeMismatch;
@@ -24,7 +22,7 @@ extern NSString *SymbolNotFound;
 @property (nonatomic, readwrite) NSString *description;
 - (instancetype)initWithDescription:(NSString *)description;
 - (instancetype)initWithFormat:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2);
-- (instancetype)initWithData:(JSData *)data;
+- (instancetype)initWithData:(id<JSDataProtocol>)data;
 - (instancetype)initWithArray:(NSMutableArray *)array;
 - (NSMutableDictionary *)value;
 - (void)throw;

@@ -33,8 +33,6 @@
 		9E3055552261A162001D4597 /* TypeUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3055532261A162001D4597 /* TypeUtils.m */; };
 		9E3055602262633E001D4597 /* JSError.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30555F2262633E001D4597 /* JSError.m */; };
 		9E3055612262633E001D4597 /* JSError.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30555F2262633E001D4597 /* JSError.m */; };
-		9E33AAB12275767800A6EB98 /* JSData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB02275767800A6EB98 /* JSData.m */; };
-		9E33AAB22275767800A6EB98 /* JSData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB02275767800A6EB98 /* JSData.m */; };
 		9E33AAB52275775800A6EB98 /* JSString.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB42275775800A6EB98 /* JSString.m */; };
 		9E33AAB62275775800A6EB98 /* JSString.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB42275775800A6EB98 /* JSString.m */; };
 		9E33AAB9227577C000A6EB98 /* JSKeyword.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB8227577C000A6EB98 /* JSKeyword.m */; };
@@ -120,8 +118,7 @@
 		9E30555C2261C4DC001D4597 /* build */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build; sourceTree = "<group>"; };
 		9E30555E2262633E001D4597 /* JSError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSError.h; sourceTree = "<group>"; };
 		9E30555F2262633E001D4597 /* JSError.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSError.m; sourceTree = "<group>"; };
-		9E33AAAF2275767800A6EB98 /* JSData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSData.h; sourceTree = "<group>"; };
-		9E33AAB02275767800A6EB98 /* JSData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSData.m; sourceTree = "<group>"; };
+		9E33AAAF2275767800A6EB98 /* JSDataProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSDataProtocol.h; sourceTree = "<group>"; };
 		9E33AAB32275775800A6EB98 /* JSString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSString.h; sourceTree = "<group>"; };
 		9E33AAB42275775800A6EB98 /* JSString.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSString.m; sourceTree = "<group>"; };
 		9E33AAB7227577C000A6EB98 /* JSKeyword.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSKeyword.h; sourceTree = "<group>"; };
@@ -207,8 +204,7 @@
 				9E33AACC2275791300A6EB98 /* JSAtom.m */,
 				9E33AAD32275799200A6EB98 /* JSBool.h */,
 				9E33AAD42275799200A6EB98 /* JSBool.m */,
-				9E33AAAF2275767800A6EB98 /* JSData.h */,
-				9E33AAB02275767800A6EB98 /* JSData.m */,
+				9E33AAAF2275767800A6EB98 /* JSDataProtocol.h */,
 				9E33AAD7227579C000A6EB98 /* JSFunction.h */,
 				9E33AAD8227579C000A6EB98 /* JSFunction.m */,
 				9E9458592274F04F00A3D449 /* JSHashMap.h */,
@@ -428,7 +424,6 @@
 				9E33AAD52275799200A6EB98 /* JSBool.m in Sources */,
 				9E30553F22612AF1001D4597 /* NSMutableArray+JSList.m in Sources */,
 				9E3055542261A162001D4597 /* TypeUtils.m in Sources */,
-				9E33AAB12275767800A6EB98 /* JSData.m in Sources */,
 				9E3A9D6522568D4B00348529 /* Core.m in Sources */,
 				9E30554822619F3F001D4597 /* NSNumber+JSDataProtocol.m in Sources */,
 				9E3055502261A10F001D4597 /* NSArray+JSDataProtocol.m in Sources */,
@@ -467,7 +462,6 @@
 				9E33AAD62275799200A6EB98 /* JSBool.m in Sources */,
 				9E30554022612AF1001D4597 /* NSMutableArray+JSList.m in Sources */,
 				9E3055552261A162001D4597 /* TypeUtils.m in Sources */,
-				9E33AAB22275767800A6EB98 /* JSData.m in Sources */,
 				9E3A9D7222568DB100348529 /* Printer.m in Sources */,
 				9E30554922619F3F001D4597 /* NSNumber+JSDataProtocol.m in Sources */,
 				9E3055512261A10F001D4597 /* NSArray+JSDataProtocol.m in Sources */,

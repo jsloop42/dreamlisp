@@ -10,10 +10,11 @@
 
 @implementation JSBool {
     BOOL _flag;
-    JSData *_meta;
+    id<JSDataProtocol> _meta;
 }
 
 @synthesize meta = _meta;
+@synthesize value;
 
 + (BOOL)isBool:(id)object {
     return [[object className] isEqual:[self className]];
@@ -21,17 +22,13 @@
 
 - (instancetype)initWithBool:(BOOL)flag {
     self = [super init];
-    if (self) {
-        _flag = flag;
-    }
+    if (self) _flag = flag;
     return self;
 }
 
 - (instancetype)initWithJSBool:(JSBool *)object {
     self = [super init];
-    if (self) {
-        _flag = [object value];
-    }
+    if (self) _flag = [object value];
     return self;
 }
 
@@ -57,6 +54,14 @@
 
 - (BOOL)hasMeta {
     return _meta != nil;
+}
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    return [[JSBool allocWithZone:zone] initWithBool:_flag];
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [[JSBool allocWithZone:zone] initWithBool:_flag];
 }
 
 - (NSString *)description {

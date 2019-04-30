@@ -9,10 +9,11 @@
 #import "JSNil.h"
 
 @implementation JSNil {
-    JSData *_meta;
+    id<JSDataProtocol> _meta;
 }
 
 @synthesize meta = _meta;
+@synthesize value;
 
 + (BOOL)isNil:(id)object {
     return [[object className] isEqual:[self className]];
@@ -41,6 +42,14 @@
 
 - (BOOL)hasMeta {
     return _meta != nil;
+}
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    return [JSNil new];
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [JSNil new];
 }
 
 - (NSString *)description {

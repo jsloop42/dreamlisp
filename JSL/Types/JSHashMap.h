@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "JSData.h"
+#import "JSDataProtocol.h"
 #import "JSError.h"
 #import "Logger.h"
 #import "Constants.h"
@@ -15,24 +15,23 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface JSHashMap : JSData
-@property (nonatomic, readwrite, copy) JSData *meta;
+@interface JSHashMap : NSObject <JSDataProtocol>
 + (BOOL)isHashMap:(id)object;
-+ (JSHashMap *)dataToHashMap:(JSData *)data;
-+ (JSHashMap *)dataToHashMap:(JSData *)data position:(NSInteger)position;
++ (JSHashMap *)dataToHashMap:(id<JSDataProtocol>)data;
++ (JSHashMap *)dataToHashMap:(id<JSDataProtocol>)data position:(NSInteger)position;
 - (instancetype)init;
 - (instancetype)initWithMapTable:(NSMapTable *)table;
 - (instancetype)initWithArray:(NSArray *)array;
-- (instancetype)initWithMeta:(JSData *)meta hashmap:(JSHashMap *)hashmap;
-- (JSData *)objectForKey:(id)key;
-- (void)setObject:(JSData *)object forKey:(id)key;
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta hashmap:(JSHashMap *)hashmap;
+- (id<JSDataProtocol>)objectForKey:(id)key;
+- (void)setObject:(id<JSDataProtocol>)object forKey:(id)key;
 - (NSUInteger)count;
 - (NSMapTable *)value;
 - (void)setValue:(NSMapTable *)table;
 - (NSArray *)allKeys;
 - (NSArray *)allObjects;
 - (BOOL)containsKey:(id)key;
-- (BOOL)isEqual:(JSData *)hashmap;
+- (BOOL)isEqual:(id<JSDataProtocol>)hashmap;
 - (NSUInteger)hash;
 @end
 

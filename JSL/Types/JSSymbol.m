@@ -10,10 +10,11 @@
 
 @implementation JSSymbol {
     NSString *_name;
-    JSData *_meta;
+    id<JSDataProtocol> _meta;
 }
 
 @synthesize meta = _meta;
+@synthesize value;
 
 + (BOOL)isSymbol:(id)object {
     return [[object className] isEqual:[self className]];
@@ -27,7 +28,7 @@
     return self;
 }
 
-- (instancetype)initWithMeta:(JSData *)meta symbol:(JSSymbol *)symbol {
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta symbol:(JSSymbol *)symbol {
     self = [super init];
     if (self) {
         _name = [symbol name];
@@ -48,6 +49,10 @@
     return _name;
 }
 
+- (NSString *)value {
+    return _name;
+}
+
 - (BOOL)isEqual:(JSSymbol *)symbol {
     return [_name isEqualToString:[symbol name]];
 }
@@ -61,8 +66,11 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[JSSymbol alloc] initWithName:_name];
-    return copy;
+    return [[JSSymbol alloc] initWithName:_name];
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [[JSSymbol alloc] initWithName:_name];
 }
 
 - (NSString *)description {

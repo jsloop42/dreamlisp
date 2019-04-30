@@ -17,7 +17,7 @@
     return [NSString stringWithFormat:@"\"%@\"", readable];
 }
 
-- (nullable NSString *)printStringFor:(JSData *)data readably:(BOOL)readably {
+- (nullable NSString *)printStringFor:(id<JSDataProtocol>)data readably:(BOOL)readably {
     if (data == nil) { return nil; }
     NSString *dataType = [data dataType];
     if ([dataType isEqual:@"JSSymbol"]) {
@@ -42,17 +42,17 @@
         }
         return string;
     } else if ([dataType isEqual:@"JSList"]) {
-        NSMutableArray *xs = [(JSList *)data map:^NSString *(JSData *obj) {
+        NSMutableArray *xs = [(JSList *)data map:^NSString *(id<JSDataProtocol> obj) {
             return [self printStringFor:obj readably:readably];
         }];
         return [[NSString alloc] initWithFormat:@"(%@)", [xs componentsJoinedByString:@" "]];
     } else if ([dataType isEqual:@"JSVector"]) {
-        NSMutableArray *xs = [(JSVector *)data map:^NSString *(JSData *obj) {
+        NSMutableArray *xs = [(JSVector *)data map:^NSString *(id<JSDataProtocol> obj) {
             return [self printStringFor:obj readably:readably];
         }];
         return [[NSString alloc] initWithFormat:@"[%@]", [xs componentsJoinedByString:@" "]];
     } else if ([dataType isEqual:@"NSArray"]) {
-        NSMutableArray *xs = [(JSVector *)data map:^NSString *(JSData *obj) {
+        NSMutableArray *xs = [(JSVector *)data map:^NSString *(id<JSDataProtocol> obj) {
             return [self printStringFor:obj readably:readably];
         }];
         return [[NSString alloc] initWithFormat:@"[%@]", [xs componentsJoinedByString:@" "]];
@@ -65,8 +65,8 @@
         for (i = 0; i < len; i++) {
             id key = keys[i];
             [xs addObject:[[NSString alloc] initWithFormat:@"%@ %@",
-                                [self printStringFor:(JSData *)key readably:readably],
-                                [self printStringFor:(JSData *)[hm objectForKey:key] readably:readably]]];
+                                [self printStringFor:(id<JSDataProtocol>)key readably:readably],
+                                [self printStringFor:(id<JSDataProtocol>)[hm objectForKey:key] readably:readably]]];
         }
         return [[NSString alloc] initWithFormat:@"{%@}", [xs componentsJoinedByString:@" "]];
     } else if ([dataType isEqual:@"JSKeyword"]) {

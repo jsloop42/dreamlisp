@@ -46,7 +46,7 @@ NSString *SymbolNotFound = @"'%@' not found";
     return self;
 }
 
-- (instancetype)initWithData:(JSData *)data {
+- (instancetype)initWithData:(id<JSDataProtocol>)data {
     self = [super init];
     if (self) {
         [self bootstrap];

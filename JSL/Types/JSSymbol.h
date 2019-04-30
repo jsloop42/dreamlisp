@@ -7,15 +7,15 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "JSData.h"
+#import "JSDataProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface JSSymbol: JSData
+@interface JSSymbol: NSObject <JSDataProtocol>
 + (BOOL)isSymbol:(id)object;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name;
-- (instancetype)initWithMeta:(JSData *)meta symbol:(JSSymbol *)symbol;
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta symbol:(JSSymbol *)symbol;
 - (NSString *)name;
 - (BOOL)isEqual:(JSSymbol *)sym;
 - (NSUInteger)hash;

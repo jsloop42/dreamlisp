@@ -7,20 +7,20 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "JSData.h"
+#import "JSDataProtocol.h"
 #import "JSError.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface JSAtom : JSData
+@interface JSAtom : NSObject <JSDataProtocol>
 + (BOOL)isAtom:(id)object;
-+ (JSAtom *)dataToAtom:(JSData *)data;
-+ (JSAtom *)dataToAtom:(JSData *)data position:(NSInteger)position;
++ (JSAtom *)dataToAtom:(id<JSDataProtocol>)data;
++ (JSAtom *)dataToAtom:(id<JSDataProtocol>)data position:(NSInteger)position;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithData:(JSData *)data;
-- (instancetype)initWithMeta:(JSData *)meta atom:(JSAtom *)atom;
-- (void)setValue:(JSData *)data;
-- (JSData *)value;
+- (instancetype)initWithData:(id<JSDataProtocol>)data;
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta atom:(JSAtom *)atom;
+- (void)setValue:(id<JSDataProtocol>)data;
+- (id<JSDataProtocol>)value;
 - (BOOL)isEqual:(JSAtom *)atom;
 - (NSUInteger)hash;
 @end

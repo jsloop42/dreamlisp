@@ -33,6 +33,13 @@
     return self;
 }
 
+/**
+ Initializes environment with an outer environment and binds symbols with expressions.
+
+ @param env The outer environment.
+ @param binds A array of `JSSymbol` symbols.
+ @param exprs A array of `id<JSDataProtocol>` expressions.
+ */
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs {
     self = [super init];
     NSUInteger len = [binds count];
@@ -60,7 +67,7 @@
     _data = [NSMutableDictionary new];
 }
 
-- (void)setObject:(JSData *)value forSymbol:(JSSymbol *)key {
+- (void)setObject:(id<JSDataProtocol>)value forSymbol:(JSSymbol *)key {
     [_data setObject:value forKey:[key name]];
 }
 
@@ -71,10 +78,10 @@
     return [_outer findEnvForKey:key];
 }
 
-- (JSData *)objectForSymbol:(JSSymbol *)key {
+- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key {
     Env * env = [self findEnvForKey:key];
     if (env != nil) {
-        JSData *val = [[env data] objectForKey:[key name]];
+        id<JSDataProtocol>val = [[env data] objectForKey:[key name]];
         if (val != nil) {
             return val;
         }

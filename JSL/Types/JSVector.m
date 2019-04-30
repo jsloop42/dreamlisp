@@ -10,7 +10,7 @@
 
 @implementation JSVector {
     NSMutableArray *_array;
-    JSData *_meta;
+    id<JSDataProtocol> _meta;
 }
 
 @synthesize meta = _meta;
@@ -25,11 +25,11 @@
   @param data The data which needs to be converted.
   @return A list object.
  */
-+ (JSList *)dataToList:(JSData *)data {
++ (JSList *)dataToList:(id<JSDataProtocol>)data {
     return [self dataToList:data position:-1];
 }
 
-+ (JSList *)dataToList:(JSData *)data position:(NSInteger)position {
++ (JSList *)dataToList:(id<JSDataProtocol>)data position:(NSInteger)position {
     if (![JSList isList:data] && ![JSVector isVector:data]) {
         JSError *err = nil;
         if (position > 0) {
@@ -60,7 +60,7 @@
     return self;
 }
 
-- (instancetype)initWithMeta:(JSData *)meta vector:(JSVector *)vector {
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta vector:(JSVector *)vector {
     self = [super init];
     if (self) {
         _array = [vector value];
@@ -108,8 +108,11 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[JSVector alloc] initWithArray:_array];
-    return copy;
+    return [[JSVector alloc] initWithArray:_array];
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [[JSVector alloc] initWithArray:_array];
 }
 
 - (NSString *)description {

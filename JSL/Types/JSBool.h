@@ -7,11 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "JSData.h"
+#import "JSDataProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface JSBool : JSData
+@interface JSBool : NSObject <JSDataProtocol>
 + (BOOL)isBool:(id)object;
 - (instancetype)initWithBool:(BOOL)flag;
 - (instancetype)initWithJSBool:(JSBool *)object;

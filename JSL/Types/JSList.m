@@ -10,7 +10,7 @@
 
 @implementation JSList {
     NSMutableArray *_array;
-    JSData *_meta;
+    id<JSDataProtocol> _meta;
 }
 
 @synthesize meta = _meta;
@@ -23,11 +23,11 @@
     return [object isKindOfClass:[self class]];
 }
 
-+ (JSList *)dataToList:(JSData *)data {
++ (JSList *)dataToList:(id<JSDataProtocol>)data {
     return [self dataToList:data position:-1];
 }
 
-+ (JSList *)dataToList:(JSData *)data position:(NSInteger)position {
++ (JSList *)dataToList:(id<JSDataProtocol>)data position:(NSInteger)position {
     if (![JSList isKindOfList:data]) {
         JSError *err = nil;
         if (position > 0) {
@@ -56,7 +56,7 @@
     return self;
 }
 
-- (instancetype)initWithMeta:(JSData *)meta list:(JSList *)list {
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta list:(JSList *)list {
     self = [super init];
     if (self) {
         _array = [list value];
@@ -73,15 +73,15 @@
     return @"list";
 }
 
-- (void)add:(JSData *)object {
+- (void)add:(id<JSDataProtocol>)object {
     [_array addObject:object];
 }
 
-- (void)add:(JSData *)object atIndex:(NSUInteger)index {
+- (void)add:(id<JSDataProtocol>)object atIndex:(NSUInteger)index {
     [_array insertObject:object atIndex:index];
 }
 
-- (void)remove:(JSData *)object {
+- (void)remove:(id<JSDataProtocol>)object {
     [_array removeObject:object];
 }
 
@@ -101,31 +101,31 @@
     return [_array count];
 }
 
-- (JSData *)first {
+- (id<JSDataProtocol>)first {
     return [_array firstObject];
 }
 
-- (JSData *)second {
+- (id<JSDataProtocol>)second {
     return [_array objectAtIndex:1];
 }
 
-- (JSData *)rest {
+- (id<JSDataProtocol>)rest {
     NSMutableArray *arr = [_array mutableCopy];
     [arr removeObjectAtIndex:0];
     return [[JSList alloc] initWithArray:arr];
 }
 
-- (JSData *)last {
+- (id<JSDataProtocol>)last {
     return [_array objectAtIndex:[_array count] - 1];
 }
 
-- (JSData *)dropLast {
+- (id<JSDataProtocol>)dropLast {
     NSMutableArray *arr = [_array mutableCopy];
     [arr removeLastObject];
     return [[JSList alloc] initWithArray:arr];
 }
 
-- (JSData *)nth:(NSInteger)n {
+- (id<JSDataProtocol>)nth:(NSInteger)n {
     return [_array objectAtIndex:n];
 }
 
@@ -175,8 +175,11 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id copy = [[JSList alloc] initWithArray:_array];
-    return copy;
+    return [[JSList alloc] initWithArray:_array];
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [[JSList alloc] initWithArray:_array];
 }
 
 - (NSString *)description {

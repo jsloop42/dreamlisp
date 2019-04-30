@@ -7,17 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "JSData.h"
+#import "JSDataProtocol.h"
 #import "JSList.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface JSVector: JSList
+@interface JSVector: JSList <JSDataProtocol>
 + (BOOL)isVector:(id)object;
-+ (JSList *)dataToList:(JSData *)data;
-+ (JSList *)dataToList:(JSData *)data position:(NSInteger)position;
++ (JSList *)dataToList:(id<JSDataProtocol>)data;
++ (JSList *)dataToList:(id<JSDataProtocol>)data position:(NSInteger)position;
 - (instancetype)initWithArray:(NSArray *)list;
-- (instancetype)initWithMeta:(JSData *)meta vector:(JSVector *)vector;
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta vector:(JSVector *)vector;
 - (JSList *)list;
 - (BOOL)isEqual:(JSVector *)vector;
 - (NSUInteger)hash;

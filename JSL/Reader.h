@@ -12,17 +12,15 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class JSData;
-
 @interface Reader : NSObject
 - (instancetype)initWithTokens:(NSMutableArray *)array;
 - (nullable NSString *)next;
 - (nullable NSString *)peek;
 - (void)pass;
-- (nullable JSData *)readString:(NSString *)string;
-- (nullable JSData *)readForm;
-- (nullable JSData *)readListStartingWith:(NSString *)leftParens;
-- (nullable JSData *)readAtom;
+- (nullable id<JSDataProtocol>)readString:(NSString *)string;
+- (nullable id<JSDataProtocol>)readForm;
+- (nullable id<JSDataProtocol>)readListStartingWith:(NSString *)leftParens;
+- (nullable id<JSDataProtocol>)readAtom;
 - (NSMutableArray *)tokenize:(NSString *)string;
 @end
 

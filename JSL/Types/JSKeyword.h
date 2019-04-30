@@ -7,19 +7,18 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "JSData.h"
+#import "JSDataProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface JSKeyword : JSData
-@property (nonatomic, readwrite, copy) NSString *value;
+@interface JSKeyword : NSObject <JSDataProtocol>
 + (BOOL)isKeyword:(id)object;
 + (BOOL)isEncodedKeyword:(id)object;
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithKeyword:(NSString *)string;
 - (instancetype)initWithEncodedKeyword:(NSString *)keyword;
-- (instancetype)initWithMeta:(JSData *)meta keyword:(JSKeyword *)keyword;
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta keyword:(JSKeyword *)keyword;
 - (NSString *)string;
 - (NSString *)encoded;
 - (NSString *)decoded;

@@ -165,7 +165,7 @@
     Printer *printer = [Printer new];
     NSString *exp = @"{\"a\" \"abc\" \"b\" \"bcd\" \"c\" \"cde\"}";
     NSArray *inp = @[@"a", @"abc", @"b", @"bcd", @"c", @"cde"];
-    JSData * data = [reader readString:exp];
+    id<JSDataProtocol> data = [reader readString:exp];
     NSString *ret = [printer printStringFor:data readably:false];
     NSArray *arr = [[[ret stringByReplacingOccurrencesOfString:@"{" withString:@""] stringByReplacingOccurrencesOfString:@"}" withString:@""]
                     componentsSeparatedByString:@" "];
@@ -183,7 +183,7 @@
     JSNumber *aVal = [[JSNumber alloc] initWithInt:1];
     JSNumber *aKey = [[JSNumber alloc] initWithInt:2];
     [aDict setObject:aVal forKey:aKey];
-    JSData * aRet = [aDict objectForKey:aKey];
+    id<JSDataProtocol> aRet = [aDict objectForKey:aKey];
     NSArray *aKeys = [aDict allKeys];
     XCTAssertTrue([aKeys count] == 1);
     aRet = [aDict objectForKey:aKeys[0]];
@@ -1135,7 +1135,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     JSL *jsl = [JSL new];
     JSSymbol *sym = [JSSymbol new];
     XCTAssertFalse([sym hasMeta]);
-    JSData *meta = [[JSString alloc] initWithString:@"meta-string"];
+    id<JSDataProtocol> meta = [[JSString alloc] initWithString:@"meta-string"];
     JSSymbol *symMeta = [[JSSymbol alloc] initWithMeta:meta symbol:sym];
     XCTAssertNotNil([symMeta meta]);
     XCTAssertTrue([symMeta hasMeta]);

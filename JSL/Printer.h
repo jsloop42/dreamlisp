@@ -13,7 +13,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Printer : NSObject
-- (nullable NSString *)printStringFor:(JSData *)data readably:(BOOL)readably;
+- (nullable NSString *)printStringFor:(id<JSDataProtocol>)data readably:(BOOL)readably;
 @end
 
 NS_ASSUME_NONNULL_END
