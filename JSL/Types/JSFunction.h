@@ -42,6 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithMacro:(JSFunction *)func;
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta func:(JSFunction *)func;
 - (instancetype)initWithFunction:(JSFunction *)function;
+- (BOOL)isVariadic;
 - (id<JSDataProtocol>)apply;
 - (id<JSDataProtocol>)apply:(NSMutableArray *)args;
 @end

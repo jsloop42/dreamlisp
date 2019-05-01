@@ -58,7 +58,7 @@
         _env = env;
         _isMacro = isMacro;
         _meta = meta;
-        _argsCount = [_params count];
+        _argsCount = [self isVariadic] ? -1 : [_params count];
     }
     return self;
 }
@@ -114,6 +114,10 @@
 
 - (id<JSDataProtocol>)apply:(NSMutableArray *)args {
     return _fn(args);
+}
+
+- (BOOL)isVariadic {
+    return (_argsCount == -1) || ([_params count] >= 2 && [JSSymbol isSymbol:[_params nth:[_params count] - 2] withName:@"&"]);
 }
 
 - (BOOL)hasMeta {

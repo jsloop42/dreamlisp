@@ -255,9 +255,6 @@
             NSMutableArray *list = [(JSList *)[self evalAST:ast withEnv:env] value];
             JSFunction *fn = [JSFunction dataToFunction:[list first]];
             NSMutableArray *rest = [list rest];
-            if ([JSSymbol isSymbol:[xs first] withName:@"with-meta"]) {
-                
-            }
             if ([fn ast]) {
                 ast = [fn ast];
                 env = [[Env alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest];
