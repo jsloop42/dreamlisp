@@ -101,6 +101,30 @@
     return range.location != NSNotFound;
 }
 
+- (void)symbolParseError:(NSString *)token {
+    [[[JSError alloc] initWithFormat:SymbolParseError, token] throw];
+}
+
+- (JSSymbol *)symbolFromToken:(NSString *)token {
+    if ([token isEqual:@"/"]) return [[JSSymbol alloc] initWithName:token];
+    NSArray *symArr = [token componentsSeparatedByString:@"/"];
+    NSUInteger count = [symArr count];
+    JSSymbol *sym = nil;
+    NSString *arity = nil;
+    if (count > 2) [self symbolParseError:token];
+    if (count == 2) {
+        arity = symArr[1];
+        if ([arity isNotEmpty]) {
+            sym = [[JSSymbol alloc] initWithArity:[arity isEqual:@"n"] ? -1 : [arity integerValue] string:symArr[0]];
+        } else {
+            [self symbolParseError:token];
+        }
+    } else if (count == 1) {
+        sym = [[JSSymbol alloc] initWithName:token];
+    }
+    return sym;
+}
+
 - (nullable id<JSDataProtocol>)readAtom {
     NSString *token = [self next];
     NSString *stringPattern = @"\"(?:\\\\.|[^\\\\\"])*\"";
@@ -127,7 +151,7 @@
     } else if ([token isEqual:@"nil"]) {
         return [JSNil new];
     }
-    return [[JSSymbol alloc] initWithName:token];
+    return [self symbolFromToken:token];
 }
 
 - (NSMutableArray *)tokenize:(NSString *)string {

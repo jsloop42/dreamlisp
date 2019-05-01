@@ -22,6 +22,15 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, retain, nullable) NSMutableArray *params;
 @property (nonatomic, readwrite, copy, nullable) Env *env;
 @property (nonatomic, readwrite, assign, getter=isMacro) BOOL macro;
+/**
+  The arity count of the function. For variadic functions it returns @c n and @c n+m where @c m is the non-variadic arguments if present.
+
+ @code
+ (def! a (fn* (&more) nil))  ; a/n
+ (def! a (fn* (x y &more) nil))  ; a/n+2
+ @endcode
+ */
+@property (nonatomic, readwrite) NSInteger argsCount;
 + (BOOL)isFunction:(id)object;
 + (JSFunction *)dataToFunction:(id<JSDataProtocol>)data;
 + (JSFunction *)dataToFunction:(id<JSDataProtocol>)data position:(NSInteger)position;
@@ -29,6 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithAst:(id<JSDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<JSDataProtocol> _Nullable)meta
                          fn:(id<JSDataProtocol> (^)(NSMutableArray *))fn;
 - (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn;
+- (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn argCount:(NSInteger)count;
 - (instancetype)initWithMacro:(JSFunction *)func;
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta func:(JSFunction *)func;
 - (instancetype)initWithFunction:(JSFunction *)function;

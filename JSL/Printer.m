@@ -21,7 +21,7 @@
     if (data == nil) { return nil; }
     NSString *dataType = [data dataType];
     if ([JSSymbol isSymbol:data]) {
-        return [(JSSymbol *)data name];
+        return [(JSSymbol *)data string];
     } else if ([JSNumber isNumber:data]) {
         return [(JSNumber *)data string];
     } else if ([dataType isEqual:@"NSNumber"] || [dataType isEqual:@"NSDecimalNumber"]) {

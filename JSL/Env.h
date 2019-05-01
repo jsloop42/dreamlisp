@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface Env : NSObject
 @property (nonatomic, readwrite, copy) Env *outer;
-@property (nonatomic, readwrite, retain) NSMutableDictionary *data;
+@property (nonatomic, readwrite, retain) NSMapTable<JSSymbol *, id<JSDataProtocol>> *table;
 - (instancetype)initWithEnv:(Env *)env;
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs;
 - (void)setObject:(id<JSDataProtocol>)value forSymbol:(JSSymbol *)key;

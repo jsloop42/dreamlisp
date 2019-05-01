@@ -10,11 +10,11 @@
 
 @implementation Env {
     Env *_outer;
-    NSMutableDictionary *_data;
+    NSMapTable<JSSymbol *, id<JSDataProtocol>> *_table;
 }
 
 @synthesize outer = _outer;
-@synthesize data = _data;
+@synthesize table = _table;
 
 - (instancetype)init {
     self = [super init];
@@ -33,6 +33,14 @@
     return self;
 }
 
+- (JSSymbol *)setFunctionInfo:(id<JSDataProtocol>)object symbol:(JSSymbol *)symbol {
+    if ([JSFunction isFunction:object]) {
+        [symbol setIsFunction:YES];
+        [symbol setArity:[(JSFunction *)object argsCount]];
+    }
+    return symbol;
+}
+
 /**
  Initializes environment with an outer environment and binds symbols with expressions.
 
@@ -48,44 +56,42 @@
         [self bootstrap];
         _outer = env;
         for (i = 0; i < len; i++) {
-            NSString *sym = [(JSSymbol *)binds[i] name];
-            if ([sym isEqual:@"&"]) {
+            JSSymbol *sym = (JSSymbol *)binds[i];
+            if ([[sym name] isEqual:@"&"]) {
                 if ([exprs count] > i) {
-                    [_data setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:[(JSSymbol *)binds[i + 1] name]];
+                    [_table setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:(JSSymbol *)binds[i + 1]];
                 } else {
-                    [_data setObject:[[JSList alloc] initWithArray:@[]] forKey:[(JSSymbol *)binds[i + 1] name]];
+                    [_table setObject:[[JSList alloc] initWithArray:@[]] forKey:(JSSymbol *)binds[i + 1]];
                 }
                 break;
             }
-            [_data setObject:exprs[i] forKey:sym];
+            [_table setObject:exprs[i] forKey:[self setFunctionInfo:exprs[i] symbol:sym]];
         }
     }
     return self;
 }
 
 - (void)bootstrap {
-    _data = [NSMutableDictionary new];
+    _table =  [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
 }
 
 - (void)setObject:(id<JSDataProtocol>)value forSymbol:(JSSymbol *)key {
-    [_data setObject:value forKey:[key name]];
+    [_table setObject:value forKey:key];
 }
 
 - (Env *)findEnvForKey:(JSSymbol *)key {
-    if ([_data objectForKey:[key name]] != nil) {
-        return self;
-    }
+    if ([_table objectForKey:key]) return self;
     return [_outer findEnvForKey:key];
 }
 
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key {
     Env * env = [self findEnvForKey:key];
     if (env != nil) {
-        id<JSDataProtocol>val = [[env data] objectForKey:[key name]];
-        if (val != nil) {
-            return val;
-        }
+        id<JSDataProtocol>val = [[env table] objectForKey:key];
+        if (val != nil) return val;
     }
+    // Check for n arity symbol
+    if (![key hasNArity]) return [self objectForSymbol:[key toNArity]];
     JSError *err = [[JSError alloc] initWithFormat:SymbolNotFound, [key name]];
     @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:[err description] userInfo:[err value]];
 }

@@ -12,11 +12,15 @@
 NS_ASSUME_NONNULL_BEGIN
 
 extern NSString *ArityError;
+extern NSString *ArityAnyError;
 extern NSString *DataTypeMismatch;
 extern NSString *DataTypeMismatchWithArity;
+extern NSString *FunctionArityError;
 extern NSString *IndexOutOfBounds;
 extern NSString *JSLException;
+extern NSString *OddArityError;
 extern NSString *SymbolNotFound;
+extern NSString *SymbolParseError;
 
 @interface JSError : NSObject
 @property (nonatomic, readwrite) NSString *description;

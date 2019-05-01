@@ -15,9 +15,11 @@
     Env *_env;
     BOOL _isMacro;
     id<JSDataProtocol> _meta;
+    NSInteger _argsCount;
 }
 
 @synthesize fn = _fn;
+@synthesize argsCount = _argsCount;
 @synthesize ast = _ast;
 @synthesize params = _params;
 @synthesize env = _env;
@@ -56,6 +58,7 @@
         _env = env;
         _isMacro = isMacro;
         _meta = meta;
+        _argsCount = [_params count];
     }
     return self;
 }
@@ -63,6 +66,15 @@
 - (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn {
     self = [super init];
     if (self) _fn = fn;
+    return self;
+}
+
+- (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn argCount:(NSInteger)count {
+    self = [super init];
+    if (self) {
+        _fn = fn;
+        _argsCount = count;
+    }
     return self;
 }
 
@@ -74,7 +86,10 @@
 
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta func:(JSFunction *)func {
     self = [super init];
-    if (self) self = [self initWithAst:func.ast params:func.params env:func.env macro:func.isMacro meta:meta fn:func.fn];
+    if (self) {
+        self = [self initWithAst:func.ast params:func.params env:func.env macro:func.isMacro meta:meta fn:func.fn];
+        [self setArgsCount:[func argsCount]];
+    }
     return self;
 }
 

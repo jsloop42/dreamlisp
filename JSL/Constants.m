@@ -10,7 +10,7 @@
 
 @implementation Constants
 
-NSString * const JSLVersion = @"1.1";
+NSString * const JSLVersion = @"1.2";
 
 #pragma mark Error constant
 

@@ -11,19 +11,59 @@
 @implementation JSSymbol {
     NSString *_name;
     id<JSDataProtocol> _meta;
+    NSInteger _arity;
+    BOOL _isFunction;
+    BOOL _hasNArity;
 }
 
+@synthesize arity = _arity;
+@synthesize isFunction = _isFunction;
+@synthesize hasNArity = _hasNArity;
 @synthesize meta = _meta;
-@synthesize value;
+@synthesize value = _name;
 
 + (BOOL)isSymbol:(id)object {
     return [[object className] isEqual:[self className]];
+}
+
++ (BOOL)isSymbol:(id)object withName:(NSString *)name {
+    return [self isSymbol:object] ? [[(JSSymbol *)object value] isEqual:name] : NO;
+}
+
++ (JSSymbol *)symbolWithArityCheck:(JSSymbol *)symbol withObject:(id)object {
+    return [JSFunction isFunction:object] ? [[JSSymbol alloc] initWithArity:[(JSFunction *)object argsCount] symbol:symbol] : symbol;
 }
 
 - (instancetype)initWithName:(NSString *)name {
     self = [super init];
     if (self) {
         _name = name;
+        _arity = -2;
+        [self updateArity];
+    }
+    return self;
+}
+
+- (instancetype)initWithArity:(NSInteger)arity symbol:(JSSymbol *)symbol {
+    if (arity < -1) [[[JSError alloc] initWithDescription:FunctionArityError] throw];
+    self = [super init];
+    if (self) {
+        _name = [symbol name];
+        _meta = [symbol meta];
+        _arity = arity;
+        _isFunction = YES;
+        _hasNArity = [symbol hasNArity];
+    }
+    return self;
+}
+
+- (instancetype)initWithArity:(NSInteger)arity string:(NSString *)string {
+    if (arity < -1) [[[JSError alloc] initWithDescription:FunctionArityError] throw];
+    self = [super init];
+    if (self) {
+        _name = string;
+        _arity = arity;
+        [self updateArity];
     }
     return self;
 }
@@ -32,9 +72,26 @@
     self = [super init];
     if (self) {
         _name = [symbol name];
+        _isFunction = [symbol isFunction];
+        _hasNArity = [symbol hasNArity];
         _meta = meta;
     }
     return self;
+}
+
+- (instancetype)initWithMeta:(_Nullable id<JSDataProtocol>)meta name:(NSString *)name {
+    self = [super init];
+    if (self) {
+        _name = name;
+        _meta = meta;
+        [self updateArity];
+    }
+    return self;
+}
+
+- (void)updateArity {
+    _hasNArity = _arity == -1;
+    _isFunction = _arity >= -1;
 }
 
 - (NSString *)dataType {
@@ -53,12 +110,24 @@
     return _name;
 }
 
-- (BOOL)isEqual:(JSSymbol *)symbol {
-    return [_name isEqualToString:[symbol name]];
+- (JSSymbol *)toNArity {
+    _arity = -1;
+    [self updateArity];
+    return self;
+}
+
+- (NSString *)string {
+    if (_arity <= -2) return _name;
+    return [[NSString alloc] initWithFormat:@"%@/%@", _name, (_arity == -1) ? @"n" : [[NSString alloc] initWithFormat:@"%ld", _arity]];
+}
+
+- (BOOL)isEqual:(id)symbol {
+    if (![JSSymbol isSymbol:symbol]) return NO;
+    return [_name isEqual:[symbol name]] && _arity == [symbol arity];
 }
 
 - (NSUInteger)hash {
-    return [_name hash];
+    return [_name hash] + _arity + 2;
 }
 
 - (BOOL)hasMeta {

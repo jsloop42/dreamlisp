@@ -25,10 +25,16 @@
  @param arity The argument count.
  */
 + (void)checkArity:(NSMutableArray *)xs arity:(NSUInteger)arity {
-    if ([xs count] != arity) {
-        JSError *info = [[JSError alloc] initWithFormat:ArityError, arity, [xs count]];
-        [info throw];
-    }
+    return [self checkArityCount:[xs count] arity:arity];
+}
+
++ (void)checkArityCount:(NSUInteger)count arity:(NSUInteger)arity {
+    if (count != arity) [[[JSError alloc] initWithFormat:ArityError, arity, count] throw];
+}
+
++ (void)checkArity:(NSMutableArray *)xs arities:(NSArray *)arities {
+    NSInteger count = [xs count];
+    if (![arities containsObject:@(count)]) [[[JSError alloc] initWithFormat:ArityAnyError, [arities componentsJoinedByString:@" | "], count] throw];
 }
 
 /**

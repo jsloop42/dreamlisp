@@ -83,11 +83,9 @@
 }
 
 - (void)fromArray:(NSArray *)array {
-    NSUInteger i = 0, len = [array count];
-    if (len % 2 != 0) {
-        error(@"JSError: Odd number of elements in the array.");
-        @throw [[NSException alloc] initWithName:JSL_INVALID_ARGUMENT reason:JSL_INVALID_ARGUMENT_MSG userInfo:nil];
-    }
+    NSUInteger i = 0;
+    NSUInteger len = [array count];
+    if (len % 2 != 0) [[[JSError alloc] initWithFormat:OddArityError, len] throw];
     for (i = 0; i < len; i = i + 2) {
         [_table setObject:(id<JSDataProtocol>)array[i + 1] forKey:array[i]];
     }
@@ -98,9 +96,7 @@
 }
 
 - (void)setObject:(id<JSDataProtocol>)object forKey:(id)key {
-    if ([_table containsKey:key]) {
-        [_table removeObjectForKey:key];
-    }
+    if ([_table containsKey:key]) [_table removeObjectForKey:key];
     [_table setObject:object forKey:key];
 //    assert([_table objectForKey:key] != nil);
 }
@@ -130,9 +126,7 @@
 }
 
 - (BOOL)isEqual:(JSHashMap *)hashmap {
-    if ([self count] != [hashmap count]) {
-        return NO;
-    }
+    if ([self count] != [hashmap count]) return NO;
     NSObject<JSDataProtocol> *lval = nil;
     id<JSDataProtocol> rval = nil;
     NSArray *keys = [self allKeys];
@@ -141,9 +135,7 @@
     for (i = 0; i < len; i++) {
         lval = [_table objectForKey:keys[i]];
         rval = [hashmap objectForKey:keys[i]];
-        if (!lval || !rval || [lval isNotEqualTo:rval]) {
-            return NO;
-        }
+        if (!lval || !rval || [lval isNotEqualTo:rval]) return NO;
     }
     return YES;
 }

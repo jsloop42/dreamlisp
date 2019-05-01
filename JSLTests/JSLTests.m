@@ -644,6 +644,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(fib 1)"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(fib 2)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(fib 4)"], @"5");
+    XCTAssertEqualObjects([jsl rep:@"((fn* (& more) more) 2)"], @"(2)");
     XCTAssertEqualObjects([jsl rep:@"((fn* (& more) (count more)) 1 2 3)"], @"3");
     XCTAssertEqualObjects([jsl rep:@"((fn* (& more) (list? more)) 1 2 3)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"((fn* (& more) (count more)) 1)"], @"1");
@@ -661,6 +662,14 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(apply (fn* (& more) (list? more)) [1 2 3])"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn* (& more) (list? more)) [])"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn* (a & more) (list? more)) [1])"], @"true");
+}
+
+- (void)testMultiArityFunctions {
+    JSL *jsl = [JSL new];
+    [jsl rep:@"(def! a (fn* () 0))"];
+    [jsl rep:@"(def! a (fn* (x) 1))"];
+    XCTAssertEqualObjects([jsl rep:@"(a)"], @"0");
+    XCTAssertEqualObjects([jsl rep:@"(a 3)"], @"1");
 }
 
 - (void)testNotFunction {
@@ -1103,7 +1112,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     infoCallback(self, 1, &errorHandleFn);
     XCTAssertEqualObjects([jsl rep:@"(try* (nth [] 1) (catch* exc (prn \"exc is:\" exc)))"], @"nil");
     freeInfoCallback();
-    XCTAssertEqualObjects([jsl rep:@"(try* (map throw (list \"my err\")) (catch* exc exc))"], @"\"my err\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (map throw/1 (list \"my err\")) (catch* exc exc))"], @"\"my err\"");
     infoCallback(self, 2, &errorHandleFn);
     XCTAssertEqualObjects([jsl rep:@"(try* (throw [\"data\" \"foo\"]) (catch* exc (do (prn \"exc is:\" exc) 7)))"], @"7");
     freeInfoCallback();
@@ -1147,25 +1156,25 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(meta (with-meta (fn* (a) a) {\"b\" 1}))"], @"{\"b\" 1}");
     XCTAssertEqualObjects([jsl rep:@"(meta (with-meta (fn* (a) a) \"abc\"))"], @"\"abc\"");
     [jsl rep:@"(def! l-wm (with-meta (fn* (a) a) {\"b\" 2}))"];
-    XCTAssertEqualObjects([jsl rep:@"(meta l-wm)"], @"{\"b\" 2}");
-    XCTAssertEqualObjects([jsl rep:@"(meta (with-meta l-wm {\"new_meta\" 123}))"], @"{\"new_meta\" 123}");
-    XCTAssertEqualObjects([jsl rep:@"(meta l-wm)"], @"{\"b\" 2}");
+    XCTAssertEqualObjects([jsl rep:@"(meta l-wm/1)"], @"{\"b\" 2}");
+    XCTAssertEqualObjects([jsl rep:@"(meta (with-meta l-wm/1 {\"new_meta\" 123}))"], @"{\"new_meta\" 123}");
+    XCTAssertEqualObjects([jsl rep:@"(meta l-wm/1)"], @"{\"b\" 2}");
     [jsl rep:@"(def! f-wm (with-meta (fn* [a] (+ 1 a)) {\"abc\" 1}))"];
-    XCTAssertEqualObjects([jsl rep:@"(meta f-wm)"], @"{\"abc\" 1}");
-    XCTAssertEqualObjects([jsl rep:@"(meta (with-meta f-wm {\"new_meta\" 123}))"], @"{\"new_meta\" 123}");
-    XCTAssertEqualObjects([jsl rep:@"(meta f-wm)"], @"{\"abc\" 1}");
+    XCTAssertEqualObjects([jsl rep:@"(meta f-wm/1)"], @"{\"abc\" 1}");
+    XCTAssertEqualObjects([jsl rep:@"(meta (with-meta f-wm/1 {\"new_meta\" 123}))"], @"{\"new_meta\" 123}");
+    XCTAssertEqualObjects([jsl rep:@"(meta f-wm/1)"], @"{\"abc\" 1}");
     [jsl rep:@"(def! f-wm2 ^{\"abc\" 1} (fn* [a] (+ 1 a)))"];
-    XCTAssertEqualObjects([jsl rep:@"(meta f-wm2)"], @"{\"abc\" 1}");
+    XCTAssertEqualObjects([jsl rep:@"(meta f-wm2/1)"], @"{\"abc\" 1}");
     XCTAssertEqualObjects([jsl rep:@"(meta +)"], @"nil");
     // testing closures and metadata
     [jsl rep:@"(def! gen-plusX (fn* (x) (with-meta (fn* (b) (+ x b)) {\"meta\" 1})))"];
     [jsl rep:@"(def! plus7 (gen-plusX 7))"];
     [jsl rep:@"(def! plus8 (gen-plusX 8))"];
     XCTAssertEqualObjects([jsl rep:@"(plus7 8)"], @"15");
-    XCTAssertEqualObjects([jsl rep:@"(meta plus7)"], @"{\"meta\" 1}");
-    XCTAssertEqualObjects([jsl rep:@"(meta plus8)"], @"{\"meta\" 1}");
-    XCTAssertEqualObjects([jsl rep:@"(meta (with-meta plus7 {\"meta\" 2}))"], @"{\"meta\" 2}");
-    XCTAssertEqualObjects([jsl rep:@"(meta plus8)"], @"{\"meta\" 1}");
+    XCTAssertEqualObjects([jsl rep:@"(meta plus7/1)"], @"{\"meta\" 1}");
+    XCTAssertEqualObjects([jsl rep:@"(meta plus8/1)"], @"{\"meta\" 1}");
+    XCTAssertEqualObjects([jsl rep:@"(meta (with-meta plus7/1 {\"meta\" 2}))"], @"{\"meta\" 2}");
+    XCTAssertEqualObjects([jsl rep:@"(meta plus8/1)"], @"{\"meta\" 1}");
     // testing metadata on collection
     XCTAssertEqualObjects([jsl rep:@"(meta [1 2 3])"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(with-meta [1 2 3] {\"a\" 1})"], @"[1 2 3]");
@@ -1184,7 +1193,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     // testing metadata on builtin functions
     XCTAssertEqualObjects([jsl rep:@"(meta +)"], @"nil");
     [jsl rep:@"(def! f-wm3 ^{\"def\" 2} +)"];
-    XCTAssertEqualObjects([jsl rep:@"(meta f-wm3)"], @"{\"def\" 2}");
+    XCTAssertEqualObjects([jsl rep:@"(meta f-wm3/n)"], @"{\"def\" 2}");
     XCTAssertEqualObjects([jsl rep:@"(meta +)"], @"nil");
 }
 
@@ -1260,7 +1269,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(deref a)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(reset! a 3)"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(deref a)"], @"3");
-    XCTAssertEqualObjects([jsl rep:@"(swap! a inc3)"], @"6");
+    XCTAssertEqualObjects([jsl rep:@"(swap! a inc3/1)"], @"6");
     XCTAssertEqualObjects([jsl rep:@"(deref a)"], @"6");
     XCTAssertEqualObjects([jsl rep:@"(swap! a (fn* (a) a))"], @"6");
     XCTAssertEqualObjects([jsl rep:@"(swap! a (fn* (a) (* 2 a)))"], @"12");
@@ -1269,7 +1278,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     // testing swap! closure interaction
     [jsl rep:@"(def! inc-it (fn* (a) (+ 1 a)))"];
     [jsl rep:@"(def! atm (atom 7))"];
-    [jsl rep:@"(def! f (fn* () (swap! atm inc-it)))"];
+    [jsl rep:@"(def! f (fn* () (swap! atm inc-it/1)))"];
     XCTAssertEqualObjects([jsl rep:@"(f)"], @"8");
     XCTAssertEqualObjects([jsl rep:@"(f)"], @"9");
     // testing `@` deref reader macro
@@ -1311,7 +1320,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(nil? true)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(true? true)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(true? false)"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(true? true?)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(true? true?/1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(true? 1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(true? \"a\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(true? :a)"], @"false");
@@ -1327,19 +1336,19 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(apply prn (list 1 2 \"3\" (list)))"], @"nil");
     freeInfoCallback();
     infoCallback(self, 1, &predicateFn);
-    XCTAssertEqualObjects([jsl rep:@"(apply prn 1 2 (list \"3\" (list)))"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(apply prn/n 1 2 (list \"3\" (list)))"], @"nil");
     freeInfoCallback();
     infoCallback(self, 2, &predicateFn);
-    XCTAssertEqualObjects([jsl rep:@"(apply prn 1 2 [\"3\" 4])"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(apply prn/n 1 2 [\"3\" 4])"], @"nil");
     freeInfoCallback();
     XCTAssertEqualObjects([jsl rep:@"(apply list (list))"], @"()");
-    XCTAssertEqualObjects([jsl rep:@"(apply symbol? (list (quote two)))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(apply symbol?/1 (list (quote two)))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn* (a b) (+ a b)) (list 2 3))"], @"5");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn* (a b) (+ a b)) 4 (list 5))"], @"9");
     XCTAssertEqualObjects([jsl rep:@"(def! nums (list 1 2 3))"], @"(1 2 3)");
     [jsl rep:@"(def! double (fn* (a) (* 2 a)))"];
     XCTAssertEqualObjects([jsl rep:@"(double 3)"], @"6");
-    XCTAssertEqualObjects([jsl rep:@"(map double nums)"], @"(2 4 6)");
+    XCTAssertEqualObjects([jsl rep:@"(map double/1 nums)"], @"(2 4 6)");
     XCTAssertEqualObjects([jsl rep:@"(map (fn* (x) (symbol? x)) (list 1 (quote two) \"three\"))"], @"(false true false)");
     XCTAssertEqualObjects([jsl rep:@"(symbol? :abc)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(symbol? 'abc)"], @"true");
@@ -1354,7 +1363,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(keyword \"abc\")"], @":abc");
     XCTAssertEqualObjects([jsl rep:@"(sequential? (list 1 2 3))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(sequential? [15])"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"(sequential? sequential?)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(sequential? sequential?/1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(sequential? nil)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(sequential? \"abc\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(map? {})"], @"true");
@@ -1376,13 +1385,13 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(number? \"123\")"], @"false");
     [jsl rep:@"(def! add1 (fn* (x) (+ x 1)))"];
     XCTAssertEqualObjects([jsl rep:@"(fn? +)"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"(fn? add1)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(fn? add1/1)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(fn? cond)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(fn? \"+\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(fn? :+)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(macro? cond)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(macro? +)"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(macro? add1)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(macro? add1/1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(macro? \"+\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(macro? :+)"], @"false");
 }
@@ -1424,8 +1433,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)test {
-    JSL *jsl = [JSL new];
-    //XCTAssertEqualObjects([jsl rep:@"(/ 1 0)"], @"");
+//    JSL *jsl = [JSL new];
 }
 
 - (void)notestPerformanceJSListDropFirst {

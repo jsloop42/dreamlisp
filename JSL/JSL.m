@@ -42,7 +42,8 @@
     NSUInteger i = 0;
     for (i = 0; i < len; i++) {
         NSString *key = keys[i];
-        [env setObject:[ns objectForKey:key] forSymbol:[[JSSymbol alloc] initWithName:key]];
+        JSFunction *fn = (JSFunction *)[ns objectForKey:key];
+        [env setObject:fn forSymbol:[[JSSymbol alloc] initWithArity:[fn argsCount] string:key]];
     }
 }
 
@@ -55,7 +56,7 @@
     };
     NSString *hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
     NSString *langVersion = [[NSString alloc] initWithFormat:@"JSL v%@ [%@]", JSLVersion, hostLangVersion];
-    [[self env] setObject:[[JSFunction alloc] initWithFn:fn] forSymbol:[[JSSymbol alloc] initWithName:@"eval"]];
+    [[self env] setObject:[[JSFunction alloc] initWithFn:fn argCount:1] forSymbol:[[JSSymbol alloc] initWithArity:1 string:@"eval"]];
     [[self env] setObject:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
     [[self env] setObject:[[JSString alloc] initWithFormat:@"%@", hostLangVersion] forSymbol:[[JSSymbol alloc] initWithName:@"*host-language*"]];
     [[self env] setObject:[[JSString alloc] initWithFormat:@"%@", langVersion] forSymbol:[[JSSymbol alloc] initWithName:@"*version*"]];
@@ -79,13 +80,21 @@
 }
 
 - (id<JSDataProtocol>)evalAST:(id<JSDataProtocol>)ast withEnv:(Env *)env {
-    // TODO: change data type check.
     if ([JSSymbol isSymbol:ast]) {
         return [env objectForSymbol:(JSSymbol *)ast];
     } else if ([JSList isList:ast]) {
-        NSMutableArray *arr = [(JSList *)ast map: ^id<JSDataProtocol>(id<JSDataProtocol> xs) {
-            return [self eval:xs withEnv:env];
-        }];
+        JSList *list = (JSList *)ast;
+        NSUInteger count = [list count];
+        NSUInteger i = 0;
+        NSUInteger j = 0;
+        NSMutableArray *arr = [NSMutableArray new];
+        if ([JSSymbol isSymbol:[list first]]) {
+            [arr addObject:[self eval:[[JSSymbol alloc] initWithArity:count - 1 symbol:[list first]] withEnv:env]];
+            j = 1;
+        }
+        for(i = j; j < count; j = j + 1) {
+            [arr addObject:[self eval:[list nth:j] withEnv:env]];
+        }
         return [[JSList alloc] initWithArray:arr];
     } if ([JSVector isVector:ast]) {
         NSMutableArray *arr = [(JSVector *)ast map: ^id<JSDataProtocol>(id<JSDataProtocol> xs) {
@@ -175,7 +184,7 @@
                 JSSymbol *sym = (JSSymbol *)[xs first];
                 if ([[sym name] isEqual:@"def!"]) {
                     id<JSDataProtocol> val = [self eval:[xs nth:2] withEnv:env];
-                    [env setObject:val forSymbol:(JSSymbol *)[xs second]];
+                    [env setObject:val forSymbol:[JSSymbol symbolWithArityCheck:[xs second] withObject:val]];
                     return val;
                 } else if ([[sym name] isEqual:@"defmacro!"]) {
                     JSFunction *fn = (JSFunction *)[self eval:[xs nth:2] withEnv:env];
@@ -227,7 +236,8 @@
                     NSUInteger len = [bindings count];
                     NSUInteger i = 0;
                     for (i = 0; i < len; i += 2) {
-                        [letEnv setObject:[self eval:[bindings nth: i + 1] withEnv:letEnv] forSymbol:(JSSymbol *)[bindings nth:i]];
+                        id<JSDataProtocol> val = [self eval:[bindings nth: i + 1] withEnv:letEnv];
+                        [letEnv setObject:val forSymbol:[JSSymbol symbolWithArityCheck:[bindings nth:i] withObject:val]];
                     }
                     ast = [xs nth:2];
                     env = letEnv;
@@ -245,6 +255,9 @@
             NSMutableArray *list = [(JSList *)[self evalAST:ast withEnv:env] value];
             JSFunction *fn = [JSFunction dataToFunction:[list first]];
             NSMutableArray *rest = [list rest];
+            if ([JSSymbol isSymbol:[xs first] withName:@"with-meta"]) {
+                
+            }
             if ([fn ast]) {
                 ast = [fn ast];
                 env = [[Env alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest];

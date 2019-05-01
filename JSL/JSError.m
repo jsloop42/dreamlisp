@@ -9,11 +9,15 @@
 #import "JSError.h"
 
 NSString *ArityError = @"Arity error. Expected arity of %d, but passed %d.";
+NSString *ArityAnyError = @"Arity error. Expected any arity of %@, but passed %d.";
 NSString *DataTypeMismatch = @"Data type error. Expecting %@ but obtained '%@'.";
 NSString *DataTypeMismatchWithArity = @"Data type error. Expecting %@ for argument %d but obtained '%@'.";
+NSString *FunctionArityError = @"Arity mismatch. Expecting function but obtained a symbol.";
 NSString *IndexOutOfBounds = @"Index out of bounds. Obtained index is %d but the total count is %d.";
 NSString *JSLException = @"JSLException";
+NSString *OddArityError = @"Invalid argument count of %d. Expecting even number of arguments, but obtained odd.";
 NSString *SymbolNotFound = @"'%@' not found";
+NSString *SymbolParseError = @"Symbol parse error for %@.";
 
 @implementation JSError {
     NSString *_description;
