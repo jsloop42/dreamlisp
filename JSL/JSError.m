@@ -14,7 +14,9 @@ NSString *DataTypeMismatch = @"Data type error. Expecting %@ but obtained '%@'."
 NSString *DataTypeMismatchWithArity = @"Data type error. Expecting %@ for argument %d but obtained '%@'.";
 NSString *FunctionArityError = @"Arity mismatch. Expecting function but obtained a symbol.";
 NSString *IndexOutOfBounds = @"Index out of bounds. Obtained index is %d but the total count is %d.";
+NSString *InvalidDataType = @"Invalid datatype.";
 NSString *JSLException = @"JSLException";
+NSString *JSLUnderlyingException = @"JSLUnderlyingException";
 NSString *OddArityError = @"Invalid argument count of %d. Expecting even number of arguments, but obtained odd.";
 NSString *SymbolNotFound = @"'%@' not found";
 NSString *SymbolParseError = @"Symbol parse error for %@.";
@@ -56,6 +58,16 @@ NSString *SymbolParseError = @"Symbol parse error for %@.";
         [self bootstrap];
         _description = JSLException;
         [_errDict setObject:data forKey:@"jsdata"];
+    }
+    return self;
+}
+
+- (instancetype)initWithUserInfo:(NSDictionary *)data {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+        _description = JSLUnderlyingException;
+        _errDict = [data mutableCopy];
     }
     return self;
 }

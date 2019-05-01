@@ -198,8 +198,7 @@
                         if ([xs count] > 2) {
                             JSList *catchxs = (JSList *)[xs nth:2];
                             if ([JSSymbol isSymbol:[catchxs first]] && [[(JSSymbol *)[catchxs first] name] isNotEqualTo:@"catch*"]) {
-                                @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND
-                                                                  reason:JSL_SYMBOL_NOT_FOUND_MSG userInfo:@{@"jsdata": [catchxs first]}];
+                                [[[JSError alloc] initWithData:[catchxs first]] throw];
                             }
                             Env *catchEnv = [[Env alloc] initWithEnv:env binds:[@[(JSSymbol *)[catchxs second]] mutableCopy]
                                                                exprs:[@[[self exceptionInfo:exception]] mutableCopy]];
@@ -303,15 +302,19 @@
 - (NSString *)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably {
     NSString *desc = nil;
     if (exception.userInfo != nil) {
-        desc = [exception.userInfo valueForKey:@"description"];
+        NSDictionary *info = exception.userInfo;
+        desc = [info valueForKey:@"description"];
         if (desc && log) {
             error(@"%@", desc);
-        } else {
-            id<JSDataProtocol> data = (id<JSDataProtocol>)[exception.userInfo valueForKey:@"jsdata"];
+        } else if ([[info allKeys] containsObject:@"jsdata"]) {
+            id<JSDataProtocol> data = (id<JSDataProtocol>)[info valueForKey:@"jsdata"];
             if (data) {
                 desc = [[NSString alloc] initWithFormat:@"Error: %@", [_printer printStringFor:data readably:readably]];
                 if (desc && log) error(@"%@", desc);
             }
+        } else if ([[info allKeys] containsObject:@"NSUnderlyingError"]) {
+            NSError *err = [info valueForKey:@"NSUnderlyingError"];
+            error(@"%@", [err localizedDescription]);
         }
     } else {
         desc = exception.description;

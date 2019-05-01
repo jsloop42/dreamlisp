@@ -72,6 +72,6 @@
     } else if ([JSFunction isFunction:data]) {
         return @"#<function>";
     }
-    return JSL_ERROR_TYPE_MSG;
+    return InvalidDataType;
 }
 @end

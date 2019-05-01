@@ -67,9 +67,7 @@
     if (self) {
         NSError *err = nil;
         _string = [[NSString alloc] initWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:&err];
-        if (!_string && err) {
-            @throw [[NSException alloc] initWithName:JSL_FILE_READ_ERROR reason:JSL_FILE_READ_ERROR_MSG userInfo:nil];
-        }
+        if (!_string && err) [[[JSError alloc] initWithUserInfo:[err userInfo]] throw];
     }
     return self;
 }

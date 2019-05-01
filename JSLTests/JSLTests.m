@@ -1241,6 +1241,12 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
         [fops delete:@"/tmp/jsl-test.txt"];
     }];
     XCTAssertNil([jsl rep:@"(read-string \";\")"]);
+    // File read exception
+    @try {
+        [jsl rep:@"(slurp \"foo\")"];
+    } @catch (NSException *excep) {
+        XCTAssertTrue([Utils matchString:[jsl printException:excep log:YES readably:YES] withPattern:@".*No such file or directory.*"]);
+    }
 }
 
 - (void)testLoadFile {
