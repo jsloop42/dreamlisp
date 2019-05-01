@@ -12,11 +12,13 @@
     NSString *_name;
     id<JSDataProtocol> _meta;
     NSInteger _arity;
+    NSInteger _initialArity;
     BOOL _isFunction;
     BOOL _hasNArity;
 }
 
 @synthesize arity = _arity;
+@synthesize initialArity = _initialArity;
 @synthesize isFunction = _isFunction;
 @synthesize hasNArity = _hasNArity;
 @synthesize meta = _meta;
@@ -39,6 +41,7 @@
     if (self) {
         _name = name;
         _arity = -2;
+        _initialArity = -2;
         [self updateArity];
     }
     return self;
@@ -51,6 +54,7 @@
         _name = [symbol name];
         _meta = [symbol meta];
         _arity = arity;
+        _initialArity = arity;
         _isFunction = YES;
         _hasNArity = [symbol hasNArity];
     }
@@ -63,6 +67,7 @@
     if (self) {
         _name = string;
         _arity = arity;
+        _initialArity = arity;
         [self updateArity];
     }
     return self;
@@ -117,8 +122,8 @@
 }
 
 - (NSString *)string {
-    if (_arity <= -2) return _name;
-    return [[NSString alloc] initWithFormat:@"%@/%@", _name, (_arity == -1) ? @"n" : [[NSString alloc] initWithFormat:@"%ld", _arity]];
+    if (_initialArity <= -2) return _name;
+    return [[NSString alloc] initWithFormat:@"%@/%@", _name, (_initialArity == -1) ? @"n" : [[NSString alloc] initWithFormat:@"%ld", _initialArity]];
 }
 
 - (BOOL)isEqual:(id)symbol {

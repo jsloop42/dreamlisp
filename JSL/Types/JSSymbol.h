@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSSymbol: NSObject <JSDataProtocol>
 @property (nonatomic, readwrite) NSInteger arity;
+@property (nonatomic, readwrite) NSInteger initialArity;
 @property (nonatomic, readwrite) BOOL isFunction;
 @property (nonatomic, readwrite) BOOL hasNArity;
 + (BOOL)isSymbol:(id)object;

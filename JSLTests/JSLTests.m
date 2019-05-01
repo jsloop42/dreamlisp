@@ -589,7 +589,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"MYNUM"], @"222");
     // env lookup error
     @try {
-        XCTAssertThrowsSpecificNamed([jsl rep:@"(abc 1 2 3)"], NSException, JSL_SYMBOL_NOT_FOUND, @"Symbol not found");
+        XCTAssertThrowsSpecificNamed([jsl rep:@"(abc 1 2 3)"], NSException, JSLException, @"Symbol not found");
     } @catch (NSException *exception) {
         XCTAssertTrue([Utils matchString:[exception.userInfo objectForKey:@"description"] withPattern:@".*\\'?abc\\'? not found.*"]);
     }
@@ -670,6 +670,10 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     [jsl rep:@"(def! a (fn* (x) 1))"];
     XCTAssertEqualObjects([jsl rep:@"(a)"], @"0");
     XCTAssertEqualObjects([jsl rep:@"(a 3)"], @"1");
+    // variadic function
+    XCTAssertEqualObjects([jsl rep:@"(def! x (fn* (& more) more)))"], @"#<function>");
+    XCTAssertEqualObjects([jsl rep:@"x/n"], @"#<function>");
+    XCTAssertEqualObjects([jsl rep:@"(first (x 1 2 3 4))"], @"1");
 }
 
 - (void)testNotFunction {
@@ -1126,7 +1130,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertNotNil(message);
     switch (tag) {
         case 0:
-            XCTAssertEqualObjects(message, @"\"exc is:\" \"'abc' not found\"");
+            XCTAssertEqualObjects(message, @"\"exc is:\" \"'abc/2' not found\"");
             break;
         case 1:
             XCTAssertEqualObjects(message, @"\"exc is:\" \"Index out of bounds. Obtained index is 1 but the total count is 0.\"");
@@ -1430,6 +1434,12 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'number'.\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1.0) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'number'.\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (empty? (atom 1)) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'atom'.\"");
+    // Function not found
+    @try {
+        XCTAssertThrowsSpecificNamed([jsl rep:@"(last [1 2 3])"], NSException, JSLException, @"'last/1' not found");
+    } @catch (NSException *exception) {
+        XCTAssertTrue([Utils matchString:[exception.userInfo objectForKey:@"description"] withPattern:@"'last/1'? not found."]);
+    }
 }
 
 - (void)test {

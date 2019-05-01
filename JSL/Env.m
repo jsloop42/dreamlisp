@@ -92,8 +92,8 @@
     }
     // Check for n arity symbol
     if (![key hasNArity]) return [self objectForSymbol:[key toNArity]];
-    JSError *err = [[JSError alloc] initWithFormat:SymbolNotFound, [key name]];
-    @throw [[NSException alloc] initWithName:JSL_SYMBOL_NOT_FOUND reason:[err description] userInfo:[err value]];
+    [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
+    return nil;
 }
 
 @end
