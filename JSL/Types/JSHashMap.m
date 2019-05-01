@@ -153,9 +153,7 @@
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
-    id copy = [[JSHashMap allocWithZone:zone] init];
-    [(JSHashMap *)copy setValue:_table];
-    return copy;
+    return [[JSHashMap alloc] initWithMapTable:_table];
 }
 
 - (NSString *)description {

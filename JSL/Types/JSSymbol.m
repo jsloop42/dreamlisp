@@ -148,7 +148,7 @@
 }
 
 - (NSString *)description {
-    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _name, _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - %@ meta: %@>", NSStringFromClass([self class]), self, _name, _meta];
 }
 
 @end
