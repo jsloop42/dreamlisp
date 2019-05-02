@@ -615,6 +615,8 @@ double dmod(double a, double n) {
     [_ns setObject:[[JSFunction alloc] initWithFn:mapp argCount:1] forKey:@"map?"];
 
     id<JSDataProtocol>(^assoc)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:3 predicate:ArityPredicateMin];
+        [TypeUtils checkArity:xs arity:3 predicate:ArityPredicateOdd];
         JSHashMap *first = [JSHashMap dataToHashMap:[xs first]];
         NSMapTable *table = [[first value] mutableCopy];
         NSMapTable *rest = [[[JSHashMap alloc] initWithArray:[xs rest]] value];

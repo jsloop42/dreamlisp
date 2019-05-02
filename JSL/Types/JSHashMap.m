@@ -85,7 +85,7 @@
 - (void)fromArray:(NSArray *)array {
     NSUInteger i = 0;
     NSUInteger len = [array count];
-    if (len % 2 != 0) [[[JSError alloc] initWithFormat:OddArityError, len] throw];
+    if (len % 2 != 0) [[[JSError alloc] initWithFormat:ArityOddError, len] throw];
     for (i = 0; i < len; i = i + 2) {
         [_table setObject:(id<JSDataProtocol>)array[i + 1] forKey:array[i]];
     }

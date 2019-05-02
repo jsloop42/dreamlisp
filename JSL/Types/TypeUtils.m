@@ -38,6 +38,48 @@
 }
 
 /**
+  The given array should satisfy the arity count for the given predicate.
+  @param xs An array contains arguments.
+  @param arity The arity count which needs to be checked against.
+  @param predicate The condition that should be met.
+  @throw @c ArityError
+ */
++ (void)checkArity:(NSMutableArray *)xs arity:(NSUInteger)arity predicate:(enum ArityPredicate)predicate {
+    NSUInteger count = [xs count];
+    switch (predicate) {
+        case ArityPredicateEq:
+            if (count != arity) [[[JSError alloc] initWithFormat:ArityError, arity, count] throw];
+            break;
+        case ArityPredicateGreaterThan:
+            if (count <= arity) [[[JSError alloc] initWithFormat:ArityGreaterThanError, arity, count] throw];
+            break;
+        case ArityPredicateGreaterThanOrEq:
+            if (count < arity) [[[JSError alloc] initWithFormat:ArityGreaterThanOrEqualError, arity, count] throw];
+            break;
+        case ArityPredicateLessThan:
+            if (count >= arity) [[[JSError alloc] initWithFormat:ArityLessThanError, arity, count] throw];
+            break;
+        case ArityPredicateLessThanOrEq:
+            if (count > arity) [[[JSError alloc] initWithFormat:ArityLessThanOrEqualError, arity, count] throw];
+            break;
+        case ArityPredicateMax:
+            if (count > arity) [[[JSError alloc] initWithFormat:ArityMaxError, arity, count] throw];
+            break;
+        case ArityPredicateMin:
+            if (count < arity) [[[JSError alloc] initWithFormat:ArityMinError, arity, count] throw];
+            break;
+        case ArityPredicateMultiple:
+            if (count % arity != 0) [[[JSError alloc] initWithFormat:ArityMultipleError, arity, count] throw];
+            break;
+        case ArityPredicateOdd:
+            if (count % 2 == 0) [[[JSError alloc] initWithFormat:ArityOddError, count] throw];
+            break;
+        default:
+            break;
+    }
+}
+
+/**
  Checks if the given index is within the array bounds.
 
  @param xs An array.

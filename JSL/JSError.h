@@ -13,6 +13,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 extern NSString *ArityError;
 extern NSString *ArityAnyError;
+extern NSString *ArityGreaterThanError;
+extern NSString *ArityGreaterThanOrEqualError;
+extern NSString *ArityLessThanError;
+extern NSString *ArityLessThanOrEqualError;
+extern NSString *ArityMaxError;
+extern NSString *ArityMinError;
+extern NSString *ArityMultipleError;
+extern NSString *ArityOddError;
 extern NSString *DataTypeMismatch;
 extern NSString *DataTypeMismatchWithArity;
 extern NSString *FunctionArityError;
@@ -20,7 +28,6 @@ extern NSString *IndexOutOfBounds;
 extern NSString *InvalidDataType;
 extern NSString *JSLException;
 extern NSString *JSLUnderlyingException;
-extern NSString *OddArityError;
 extern NSString *SymbolNotFound;
 extern NSString *SymbolParseError;
 

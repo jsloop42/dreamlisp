@@ -8,8 +8,16 @@
 
 #import "JSError.h"
 
-NSString *ArityError = @"Arity error. Expected arity of %d, but passed %d.";
-NSString *ArityAnyError = @"Arity error. Expected any arity of %@, but passed %d.";
+NSString *ArityError = @"Arity error. Expected arity of %d, but obtained %d.";
+NSString *ArityAnyError = @"Arity error. Expected any arity of %@, but obtained %d.";
+NSString *ArityGreaterThanError = @"Arity error. Expected arity to be greater than %d, but obtained %d.";
+NSString *ArityGreaterThanOrEqualError = @"Arity error. Expected arity to be greater than or equal to %d, but obtained %d.";
+NSString *ArityLessThanError = @"Arity error. Expected arity to be less than %d, but obtained %d.";
+NSString *ArityLessThanOrEqualError = @"Arity error. Expected arity to be less than or equal to %d, but obtained %d.";
+NSString *ArityMaxError = @"Arity error. Expected a maximum arity of %d, but obtained %d.";
+NSString *ArityMinError = @"Arity error. Expected a minimum arity of %d, but obtained %d.";
+NSString *ArityMultipleError = @"Arity error. Expected arity in mutliples of %d, but obtained %d.";
+NSString *ArityOddError = @"Arity error. Expected arity to be odd, but obtained %d.";
 NSString *DataTypeMismatch = @"Data type error. Expecting %@ but obtained '%@'.";
 NSString *DataTypeMismatchWithArity = @"Data type error. Expecting %@ for argument %d but obtained '%@'.";
 NSString *FunctionArityError = @"Arity mismatch. Expecting function but obtained a symbol.";
@@ -17,7 +25,6 @@ NSString *IndexOutOfBounds = @"Index out of bounds. Obtained index is %d but the
 NSString *InvalidDataType = @"Invalid datatype.";
 NSString *JSLException = @"JSLException";
 NSString *JSLUnderlyingException = @"JSLUnderlyingException";
-NSString *OddArityError = @"Invalid argument count of %d. Expecting even number of arguments, but obtained odd.";
 NSString *SymbolNotFound = @"'%@' not found";
 NSString *SymbolParseError = @"Symbol parse error for %@.";
 

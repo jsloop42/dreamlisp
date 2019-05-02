@@ -1449,7 +1449,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)test {
-//    JSL *jsl = [JSL new];
+    JSL *jsl = [JSL new];
 }
 
 - (void)notestPerformanceJSListDropFirst {
