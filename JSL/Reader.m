@@ -61,12 +61,12 @@
     } else if ([token isEqual:@"'"] || [token isEqual:@"`"] || [token isEqual:@"~"] || [token isEqual:@"~@"] || [token isEqual:@"@"]) {
         NSDictionary *readerMacros = @{@"'": @"quote", @"`": @"quasiquote", @"~": @"unquote", @"~@": @"splice-unquote", @"@": @"deref"};
         [self pass];
-        NSArray *ret =  @[[[JSSymbol alloc] initWithName:readerMacros[token]], [self readForm]];
+        NSArray *ret =  @[[[JSSymbol alloc] initWithArity:1 string:readerMacros[token]], [self readForm]];
         return [[JSList alloc] initWithArray:ret];
     } else if ([token isEqual:@"^"]) {
         [self pass];
         id<JSDataProtocol> meta = [self readForm];
-        return [[JSList alloc] initWithArray: @[[[JSSymbol alloc] initWithName:@"with-meta"], [self readForm], meta]];
+        return [[JSList alloc] initWithArray: @[[[JSSymbol alloc] initWithArity:2 string:@"with-meta"], [self readForm], meta]];
     }
     return [self readAtom];
 }

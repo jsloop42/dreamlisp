@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithMeta:(_Nullable id<JSDataProtocol>)meta name:(NSString *)name;
 - (NSString *)name;
 - (JSSymbol *)toNArity;
+- (JSSymbol *)resetArity;
 - (NSString *)string;
 - (BOOL)isEqual:(id)sym;
 - (NSUInteger)hash;

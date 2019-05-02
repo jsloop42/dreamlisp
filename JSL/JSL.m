@@ -115,21 +115,14 @@
 }
 
 - (BOOL)isPair:(id<JSDataProtocol>)ast {
-    if (([JSList isList:ast] && [(JSList *)ast count] > 0) || ([JSVector isVector:ast] && [(JSVector *)ast count] > 0)) {
-        return YES;
-    }
-    return NO;
+    return ([JSList isList:ast] && [(JSList *)ast count] > 0) || ([JSVector isVector:ast] && [(JSVector *)ast count] > 0);
 }
 
 - (id<JSDataProtocol>)quasiQuote:(id<JSDataProtocol>)ast {
-    if (![self isPair:ast]) {
-        return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], ast] mutableCopy]];
-    }
+    if (![self isPair:ast]) return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], ast] mutableCopy]];
     NSMutableArray *xs = [(JSList *)ast value];
     id<JSDataProtocol> first = [xs first];
-    if ([JSSymbol isSymbol:first] && [[(JSSymbol *)first name] isEqual:@"unquote"]) {
-        return [xs second];
-    }
+    if ([JSSymbol isSymbol:first] && [[(JSSymbol *)first name] isEqual:@"unquote"]) return [xs second];
     if ([self isPair:first]) {
         NSMutableArray *list = [(JSList *)first value];
         if (![list isEmpty] && [JSSymbol isSymbol:[list first]] && [[(JSSymbol *)[list first] name] isEqual:@"splice-unquote"]) {
@@ -146,12 +139,10 @@
         NSMutableArray *xs = [(JSList *)ast value];
         id<JSDataProtocol> first = [xs first];
         if (first && [JSSymbol isSymbol:first]) {
-            JSSymbol *sym = (JSSymbol *)first;
+            JSSymbol *sym = [[JSSymbol alloc] initWithArity:[xs count] - 1 symbol:first];
             if ([env findEnvForKey:sym]) {
                 id<JSDataProtocol> fnData = [env objectForSymbol:sym];
-                if ([JSFunction isFunction:fnData]) {
-                    return [(JSFunction *)fnData isMacro];
-                }
+                if ([JSFunction isFunction:fnData]) return [(JSFunction *)fnData isMacro];
             }
         }
     }
@@ -161,7 +152,7 @@
 - (id<JSDataProtocol>)macroExpand:(id<JSDataProtocol>)ast withEnv:(Env *)env {
     while ([self isMacroCall:ast env:env]) {
         NSMutableArray *xs = [(JSList *)ast value];
-        JSFunction *fn = (JSFunction *)[env objectForSymbol:(JSSymbol *)[xs first]];
+        JSFunction *fn = (JSFunction *)[env objectForSymbol:[[JSSymbol alloc] initWithArity:[xs count] - 1 symbol:[xs first]]];
         ast = [fn apply:[xs rest]];
     }
     return ast;
@@ -189,7 +180,7 @@
                 } else if ([[sym name] isEqual:@"defmacro!"]) {
                     JSFunction *fn = (JSFunction *)[self eval:[xs nth:2] withEnv:env];
                     JSFunction *macro = [[JSFunction alloc] initWithMacro:fn];
-                    [env setObject:(id<JSDataProtocol>)macro forSymbol:(JSSymbol *)[xs second]];
+                    [env setObject:macro forSymbol:[JSSymbol symbolWithArityCheck:[xs second] withObject:macro]];
                     return macro;
                 } else if ([[sym name] isEqual:@"try*"]) {
                     @try {

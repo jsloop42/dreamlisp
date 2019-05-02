@@ -121,6 +121,12 @@
     return self;
 }
 
+- (JSSymbol *)resetArity {
+    _arity = _initialArity;
+    [self updateArity];
+    return self;
+}
+
 - (NSString *)string {
     if (_initialArity <= -2) return _name;
     return [[NSString alloc] initWithFormat:@"%@/%@", _name, (_initialArity == -1) ? @"n" : [[NSString alloc] initWithFormat:@"%ld", _initialArity]];

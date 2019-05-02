@@ -80,8 +80,12 @@
 }
 
 - (Env *)findEnvForKey:(JSSymbol *)key {
-    if ([_table objectForKey:key]) return self;
-    return [_outer findEnvForKey:key];
+    if ([_table objectForKey:key]) {
+        return self;
+    } else if (![key hasNArity]) {
+        return [self findEnvForKey:[key toNArity]];
+    }
+    return _outer ? [_outer findEnvForKey:[key resetArity]] : nil;
 }
 
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key {

@@ -1075,6 +1075,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     JSL *jsl = [JSL new];
     [jsl rep:@"(defmacro! one (fn* () 1))"];
     XCTAssertEqualObjects([jsl rep:@"(one)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(macro? one/0)"], @"true");
     [jsl rep:@"(defmacro! two (fn* () 2))"];
     XCTAssertEqualObjects([jsl rep:@"(two)"], @"2");
     [jsl rep:@"(defmacro! unless (fn* (pred a b) `(if ~pred ~b ~a)))"];

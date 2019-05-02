@@ -63,6 +63,7 @@
 		9E3A9D7222568DB100348529 /* Printer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7022568DB100348529 /* Printer.m */; };
 		9E3A9D7522568DBD00348529 /* Reader.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7422568DBD00348529 /* Reader.m */; };
 		9E3A9D7622568DBD00348529 /* Reader.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7422568DBD00348529 /* Reader.m */; };
+		9E3F324B227B694400B56B6A /* core.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
 		9E5D7B4B225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
 		9E5D7B4C225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
 		9E6F444822578E5600777A24 /* JSL.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F444722578E5600777A24 /* JSL.m */; };
@@ -153,6 +154,7 @@
 		9E3A9D7022568DB100348529 /* Printer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Printer.m; sourceTree = "<group>"; };
 		9E3A9D7322568DBD00348529 /* Reader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Reader.h; sourceTree = "<group>"; };
 		9E3A9D7422568DBD00348529 /* Reader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Reader.m; sourceTree = "<group>"; };
+		9E3F324A227B694300B56B6A /* core.jsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = core.jsl; sourceTree = "<group>"; };
 		9E5D7B49225B947E00970453 /* Terminal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Terminal.h; sourceTree = "<group>"; };
 		9E5D7B4A225B947E00970453 /* Terminal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Terminal.m; sourceTree = "<group>"; };
 		9E6F444622578E5600777A24 /* JSL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSL.h; sourceTree = "<group>"; };
@@ -278,6 +280,7 @@
 				9E5D7B4A225B947E00970453 /* Terminal.m */,
 				9E281CE8225890B10038A5AF /* Utils.h */,
 				9E281CE9225890B10038A5AF /* Utils.m */,
+				9E3F324A227B694300B56B6A /* core.jsl */,
 			);
 			path = JSL;
 			sourceTree = "<group>";
@@ -396,6 +399,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E3F324B227B694400B56B6A /* core.jsl in Resources */,
 				9E281CFD225A60770038A5AF /* tests in Resources */,
 				9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */,
 				9E281CFF225A60770038A5AF /* runtest.py in Resources */,
