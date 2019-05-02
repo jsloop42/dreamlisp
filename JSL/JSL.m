@@ -70,6 +70,7 @@
                "(throw \"odd number of forms to cond\")) (cond ~@(rest (rest xs)))))))"];
     [self rep:@"(def! *gensym-counter* (atom 0))"];
     [self rep:@"(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"];
+    [self rep:@"(def! gensym (fn* (sym) (symbol (str \"G__\" sym \"__\" (count (str sym))))))"];
     [self rep:@"(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs))" \
                "(if ~condvar ~condvar (or ~@(rest xs)))))))))"];
     [self rep:@"(def! exit (fn* () (do (println \"Bye.\") (exit*))))"];
