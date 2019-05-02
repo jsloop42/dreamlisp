@@ -59,8 +59,4 @@
     return nil;
 }
 
-- (NSString *)description {
-    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@>", NSStringFromClass([self class]), self, [self componentsJoinedByString:@", "]];
-}
-
 @end

@@ -10,15 +10,4 @@
 
 @implementation NSMutableDictionary (JSHashMap)
 
-- (NSString *)description {
-    NSMutableArray *arr = [NSMutableArray new];
-    NSArray *keys = [self allKeys];
-    NSUInteger len = [keys count];
-    NSUInteger i = 0;
-    for (i = 0; i < len; i++) {
-        [arr addObject:[[NSString alloc] initWithFormat:@"%@: %@", keys[i], [self objectForKey:keys[i]]]];
-    }
-    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@>", NSStringFromClass([self class]), self, [arr componentsJoinedByString:@", "]];
-}
-
 @end
