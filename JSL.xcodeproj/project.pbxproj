@@ -53,6 +53,8 @@
 		9E33AAD62275799200A6EB98 /* JSBool.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD42275799200A6EB98 /* JSBool.m */; };
 		9E33AAD9227579C000A6EB98 /* JSFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD8227579C000A6EB98 /* JSFunction.m */; };
 		9E33AADA227579C000A6EB98 /* JSFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD8227579C000A6EB98 /* JSFunction.m */; };
+		9E38FC78227DDE8000405BE5 /* SymbolTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E38FC77227DDE8000405BE5 /* SymbolTable.m */; };
+		9E38FC79227DDE8000405BE5 /* SymbolTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E38FC77227DDE8000405BE5 /* SymbolTable.m */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D5A22568B1300348529 /* JSLTests.m */; };
 		9E3A9D6522568D4B00348529 /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6422568D4B00348529 /* Core.m */; };
@@ -140,6 +142,8 @@
 		9E33AAD42275799200A6EB98 /* JSBool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSBool.m; sourceTree = "<group>"; };
 		9E33AAD7227579C000A6EB98 /* JSFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSFunction.h; sourceTree = "<group>"; };
 		9E33AAD8227579C000A6EB98 /* JSFunction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSFunction.m; sourceTree = "<group>"; };
+		9E38FC76227DDE8000405BE5 /* SymbolTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SymbolTable.h; sourceTree = "<group>"; };
+		9E38FC77227DDE8000405BE5 /* SymbolTable.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SymbolTable.m; sourceTree = "<group>"; };
 		9E3A9D4A22568AFC00348529 /* JSL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = JSL; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E3A9D4D22568AFC00348529 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9E3A9D5822568B1300348529 /* JSLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -276,6 +280,8 @@
 				9E3A9D7022568DB100348529 /* Printer.m */,
 				9E3A9D7322568DBD00348529 /* Reader.h */,
 				9E3A9D7422568DBD00348529 /* Reader.m */,
+				9E38FC76227DDE8000405BE5 /* SymbolTable.h */,
+				9E38FC77227DDE8000405BE5 /* SymbolTable.m */,
 				9E5D7B49225B947E00970453 /* Terminal.h */,
 				9E5D7B4A225B947E00970453 /* Terminal.m */,
 				9E281CE8225890B10038A5AF /* Utils.h */,
@@ -419,6 +425,7 @@
 				9E33AAD12275796300A6EB98 /* JSNil.m in Sources */,
 				9E2491EA226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */,
 				9E6F444822578E5600777A24 /* JSL.m in Sources */,
+				9E38FC78227DDE8000405BE5 /* SymbolTable.m in Sources */,
 				9E3A9D6D22568D8D00348529 /* Env.m in Sources */,
 				9E281CEA225890B10038A5AF /* Utils.m in Sources */,
 				9E33AAC12275786D00A6EB98 /* JSList.m in Sources */,
@@ -457,6 +464,7 @@
 				9E33AAD22275796300A6EB98 /* JSNil.m in Sources */,
 				9E2491EB226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */,
 				9E6F444922578E5600777A24 /* JSL.m in Sources */,
+				9E38FC79227DDE8000405BE5 /* SymbolTable.m in Sources */,
 				9E5D7B4C225B947E00970453 /* Terminal.m in Sources */,
 				9E3A9D6E22568D8D00348529 /* Env.m in Sources */,
 				9E33AAC22275786D00A6EB98 /* JSList.m in Sources */,

@@ -12,6 +12,7 @@
 #import "NSString+JSDataProtocol.h"
 #import "NSMutableArray+JSList.h"
 #import "JSError.h"
+#import "SymbolTable.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -24,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isSymbol:(id)object;
 + (BOOL)isSymbol:(id)object withName:(NSString *)name;
 + (JSSymbol *)symbolWithArityCheck:(JSSymbol *)symbol withObject:(id)object;
-+ (JSList *)updateBindingsForAST:(JSList *)ast symbols:(NSMutableArray<JSSymbol *> * _Nullable)symbols;
++ (JSList *)updateBindingsForAST:(JSList *)ast;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name;
 - (instancetype)initWithArity:(NSInteger)arity symbol:(JSSymbol *)symbol;

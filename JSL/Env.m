@@ -89,6 +89,10 @@
 }
 
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key {
+    return [self objectForSymbol:key isFromSymbolTable:NO];
+}
+
+- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isFromSymbolTable:(BOOL)isFromSymbolTable {
     Env * env = [self findEnvForKey:key];
     if (env != nil) {
         id<JSDataProtocol>val = [[env table] objectForKey:key];
@@ -96,8 +100,13 @@
     }
     // Check for n arity symbol
     if (![key hasNArity]) return [self objectForSymbol:[key toNArity]];
+    if (!isFromSymbolTable) {
+        JSSymbol *sym = [SymbolTable symbol:key];
+        if (sym) return [self objectForSymbol:sym isFromSymbolTable:YES];
+    }
     [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
     return nil;
 }
+
 
 @end

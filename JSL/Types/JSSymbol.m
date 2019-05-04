@@ -8,7 +8,7 @@
 
 #import "JSSymbol.h"
 
-NSUInteger genSymCount = 0;
+NSArray *keywords = nil;
 
 @implementation JSSymbol {
     NSString *_name;
@@ -29,6 +29,12 @@ NSUInteger genSymCount = 0;
 @synthesize value = _name;
 @synthesize initialValue = _initialName;
 
++ (void)initialize {
+    if (self == [self class]) {
+        keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"macroexpand", @"try*", @"catch*"];
+    }
+}
+
 + (BOOL)isSymbol:(id)object {
     return [[object className] isEqual:[self className]];
 }
@@ -41,16 +47,17 @@ NSUInteger genSymCount = 0;
     return [JSFunction isFunction:object] ? [[JSSymbol alloc] initWithArity:[(JSFunction *)object argsCount] symbol:symbol] : symbol;
 }
 
-+ (JSSymbol * _Nullable)updateSymbol:(JSSymbol *)symbol array:(NSMutableArray<JSSymbol *> *)array {
+/** If the given symbol is present in the symbol table, updates the given symbol to match. */
++ (JSSymbol * _Nullable)updateSymbol:(JSSymbol *)symbol {
     JSSymbol *aSym = nil;
-    if ((aSym = [self containsSymbol:symbol array:array]) != nil) {
+    if ((aSym = [self containsSymbol:symbol]) != nil) {
         [symbol setValue:[aSym value]];
         return symbol;
     }
     return nil;
 }
 
-+ (JSHashMap * _Nullable)updateBindingsForHashMap:(JSHashMap *)ast symbols:(NSMutableArray *)symbols {
++ (JSHashMap * _Nullable)updateBindingsForHashMap:(JSHashMap *)ast {
     NSArray *keys = [ast allKeys];
     NSUInteger len = [keys count];
     NSUInteger i = 0;
@@ -61,12 +68,12 @@ NSUInteger genSymCount = 0;
     return ast;
 }
 
-+ (JSVector *)updateBindingsForVector:(JSVector *)ast symbols:(NSMutableArray *)symbols {
++ (JSVector *)updateBindingsForVector:(JSVector *)ast {
     NSMutableArray<id<JSDataProtocol>> *arr = [ast value];
     NSLock *arrLock = [NSLock new];
     [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id<JSDataProtocol>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         JSSymbol *aSym = nil;
-        if ([JSSymbol isSymbol:obj] && ((aSym = [self updateSymbol:obj array:symbols]) != nil)) {
+        if ([JSSymbol isSymbol:obj] && ((aSym = [self updateSymbol:obj]) != nil)) {
             [arrLock lock];
             [arr update:aSym atIndex:idx];
             [arrLock unlock];
@@ -76,62 +83,108 @@ NSUInteger genSymCount = 0;
     return ast;
 }
 
-+ (JSSymbol * _Nullable)containsSymbol:(JSSymbol *)symbol array:(NSMutableArray<JSSymbol *> *)array {
-    NSString *name = [symbol value];
-    NSUInteger index = [array indexOfObjectWithOptions:NSEnumerationConcurrent passingTest:^BOOL(JSSymbol * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        return [[obj initialValue] isEqual:name];
-    }];
-    return (index != NSNotFound) ? array[index] : nil;
+/** Matches and updates gensym symbols. */
++ (JSSymbol *)matchAndSet:(JSSymbol *)symbol {
+    JSSymbol *match = nil;
+    if ((match = [self containsSymbol:symbol]) != nil) {
+        if ([symbol isGensym]) {
+            [SymbolTable removeSymbol:match];
+            [SymbolTable setSymbol:[symbol autoGensym]];
+        }
+    } else {
+        // Skip symbols in function position if it is not matched by argument
+        if ([symbol position] != 0) [SymbolTable setSymbol:[symbol autoGensym]];
+    }
+    return symbol;
 }
 
-+ (JSList *)updateBindingsForAST:(JSList *)ast symbols:(NSMutableArray<JSSymbol *> * _Nullable)symbols {
++ (JSSymbol * _Nullable)containsSymbol:(JSSymbol *)symbol {
+    return [SymbolTable symbol:symbol];
+}
+
++ (JSList *)updateBindingsForAST:(JSList *)ast {
     if (![JSList isList:ast]) return ast;
     NSUInteger len = [ast count];
     NSUInteger i = 0;
-    if (!symbols) symbols = [NSMutableArray new];
     for (i = 0; i < len; i++) {
         id<JSDataProtocol> elem = [ast nth:i];
         if ([JSSymbol isSymbol:elem]) {
             JSSymbol *sym = (JSSymbol *)elem;
-            if ([sym isEqualToName:@"let*"] && [sym position] == 0) {  // (let* exp)
+            if ([sym position] == 0 && [sym isEqualToName:@"let*"]) {  // (let* exp)
                 NSMutableArray *bindings = [(JSList *)[ast nth:i + 1] value]; // bindings -> list or vector
                 NSUInteger j = 0;
                 NSUInteger blen = [bindings count];
                 // Check if any of the symbols are redefined
                 id<JSDataProtocol> aSym = nil;
-                JSSymbol *match = nil;
                 for (j = 0; j < blen; j += 2) {
                     aSym = bindings[j];
                     if ([JSList isList:aSym]) {
-                        aSym = [self updateBindingsForAST:aSym symbols:symbols];
+                        aSym = [self updateBindingsForAST:aSym];
                     } else if ([JSSymbol isSymbol:aSym]) {
-                        JSSymbol *bSym = (JSSymbol *)aSym;
-                        if ([(JSSymbol *)bSym isGensym] && ((match = [self containsSymbol:bSym array:symbols]) != nil)) [symbols removeObject:match];
-                        [symbols addObject:[bSym autoGensym]];
+                        //[self matchAndSet:aSym];
+                        JSSymbol *elem = (JSSymbol *)aSym;
+                        [self updateSymbol:elem];  // let* binding symbols
+                        if (![elem isGensym]) {
+                            [elem autoGensym];
+                            [SymbolTable setSymbol:elem];
+                        }
                     }
-                    id<JSDataProtocol> exp = [self updateBindingsForAST:bindings[j + 1] symbols:symbols];
+                    id<JSDataProtocol> exp = [self updateBindingsForAST:bindings[j + 1]];
                     if ([JSSymbol isSymbol:exp withName:@"let*"]) {
-                        exp = [self updateBindingsForAST:exp symbols:symbols];
+                        exp = [self updateBindingsForAST:exp];
                     } else if ([JSList isList:exp]) {
-                        exp = [self updateBindingsForAST:exp symbols:symbols];
+                        exp = [self updateBindingsForAST:exp];
                     } else if ([JSVector isVector:exp]) {
-                        exp = [self updateBindingsForVector:exp symbols:symbols];
+                        exp = [self updateBindingsForVector:exp];
                     } else if ([JSHashMap isHashMap:exp]) {
-                        exp = [self updateBindingsForHashMap:exp symbols:symbols];
+                        exp = [self updateBindingsForHashMap:exp];
                     }
                 }
                 i++;
                 continue;
-            } else if ([sym position] != 0) {
-                JSSymbol *aSym = [self updateSymbol:sym array:symbols];
-                if (aSym) [ast update:aSym atIndex:i];
+            } else if ([sym position] == 0 && ([sym isEqualToName:@"def!"] || [sym isEqualToName:@"defmacro!"])) {
+                i++;
+                [SymbolTable setSymbol:[ast nth:i]];  // def! binding name
+                continue;
+            } else if ([sym position] == 0 && [sym isEqualToName:@"fn*"]) {
+                i++;
+                JSList* elem = [ast nth:i];  // fn arguments
+                NSMutableArray *arr = [elem value];
+                NSMutableArray *symArgs = [NSMutableArray new];
+                NSLock *lock = [NSLock new];
+                NSInteger __block ampIndex = -1;  // & index
+                [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    id<JSDataProtocol> arg = arr[idx];
+                    if ([JSSymbol isSymbol:arg]) {
+                        JSSymbol *aSym = (JSSymbol *)arg;
+                        if ([[aSym value] isEqual:@"&"]) ampIndex = idx;
+                        arg = [aSym autoGensym];
+                        [SymbolTable setSymbol:arg];
+                    }
+                    [lock lock];
+                    [symArgs setObject:arg atIndexedSubscript:idx];
+                    [lock unlock];
+                }];
+                if (ampIndex > -1) [symArgs removeObjectAtIndex:ampIndex];  // Remove '&' variadic symbol
+                [elem setValue:symArgs];
+                [ast update:elem atIndex:i];
+                continue;
+            } else if ([sym position] == 0 && [keywords containsObject:sym]) {
+                continue;
+            } else {
+//                JSSymbol *aSym = [self updateSymbol:sym array:symbols];
+//                if (aSym) [ast update:aSym atIndex:i];
+                [self updateSymbol:[ast nth:i]];
             }
+//            else {
+//                [self matchAndUpdate:[ast nth:i] array:symbols];
+//            }
         } else if ([JSList isList:elem]) {  // (fn, args)
-            elem = [self updateBindingsForAST:elem symbols:symbols];
+            elem = [self updateBindingsForAST:elem];
         } else if ([JSVector isVector:elem]) {
-            elem = [self updateBindingsForVector:elem symbols:symbols];
+            elem = [self updateBindingsForVector:elem];
         } else if ([JSHashMap isHashMap:elem]) {
-            elem = [self updateBindingsForHashMap:elem symbols:symbols];
+            elem = [self updateBindingsForHashMap:elem];
         }
     }
     return ast;
@@ -165,7 +218,6 @@ NSUInteger genSymCount = 0;
         _position = position;
         _hasNArity = [symbol hasNArity];
         [self updateArity];
-        [self gensym];
     }
     return self;
 }
@@ -235,18 +287,21 @@ NSUInteger genSymCount = 0;
 }
 
 - (JSSymbol *)gensym {
-    NSUInteger count = [_name count] - 1;
-    if ([[_name substringFromIndex:count] isEqual:@"#"] && _position == 0) {
-        _name = [[NSString alloc] initWithFormat:@"%@__%ld__auto__", [_name substringToIndex:count], ++genSymCount];
+    NSUInteger count = [_name count];
+    //NSUInteger count = [_name count] - 1;
+    //if ([[_name substringFromIndex:count] isEqual:@"#"] && _position == 0) {
+    if (_position == 0) {
+        _name = [[NSString alloc] initWithFormat:@"%@__%ld__auto__", [_name substringToIndex:count], [SymbolTable counter]];
     }
     return self;
 }
 
 - (JSSymbol *)autoGensym {
-    NSUInteger count = [_name count] - 1;
-    if ([[_name substringFromIndex:count] isEqual:@"#"]) {
-        _name = [[NSString alloc] initWithFormat:@"%@__%ld__auto__", [_name substringToIndex:count], ++genSymCount];
-    }
+    NSUInteger count = [_name count];
+    //NSUInteger count = [_name count] - 1;
+    //if ([[_name substringFromIndex:count] isEqual:@"#"]) {
+        _name = [[NSString alloc] initWithFormat:@"%@__%ld__auto__", [_name substringToIndex:count], [SymbolTable counter]];
+    //}
     return self;
 }
 

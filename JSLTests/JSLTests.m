@@ -1029,7 +1029,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (nil))"], @"(nil)");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (unquote 7))"], @"7");
     XCTAssertEqualObjects([jsl rep:@"(def! a 8)"], @"8");
-    XCTAssertEqualObjects([jsl rep:@"(quasiquote a)"], @"a");
+    XCTAssertTrue([[jsl rep:@"(quasiquote a)"] containsString:@"__auto__"]);
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (unquote a))"], @"8");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 a 3))"], @"(1 a 3)");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 (unquote a) 3))"], @"(1 8 3)");
@@ -1447,6 +1447,12 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     }
 }
 
+- (void)testHygenicSymbols {
+    JSL *jsl = [JSL new];
+    [jsl rep:@"(def! n 10) (+ n 1)"];
+    [jsl rep:@"(def! x (+ n 5))"];  // n is not gensymed
+}
+
 - (void)testMisc {
     JSL *jsl = [JSL new];
     XCTAssertEqualObjects([jsl rep:@"nil"], @"nil");
@@ -1476,7 +1482,6 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)test {
     JSL *jsl = [JSL new];
-    [jsl rep:@"(let* (a# 1) a#)"];
 }
 
 - (void)notestPerformanceJSListDropFirst {

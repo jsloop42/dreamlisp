@@ -125,7 +125,7 @@
         return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], arg] mutableCopy]];
     }
     JSList *lst = (JSList *)ast;
-    lst = [JSSymbol updateBindingsForAST:lst symbols:nil];
+    //lst = [JSSymbol updateBindingsForAST:lst symbols:nil];
     NSMutableArray *xs = [lst value];
     id<JSDataProtocol> first = [xs first];
     if ([JSSymbol isSymbol:first] && [[(JSSymbol *)first name] isEqual:@"unquote"]) return [xs second];
@@ -197,6 +197,7 @@
                             if ([JSSymbol isSymbol:[catchxs first]] && [[(JSSymbol *)[catchxs first] name] isNotEqualTo:@"catch*"]) {
                                 [[[JSError alloc] initWithData:[catchxs first]] throw];
                             }
+                            //catchxs = [JSSymbol updateBindingsForAST:catchxs symbols:nil];
                             Env *catchEnv = [[Env alloc] initWithEnv:env binds:[@[(JSSymbol *)[catchxs second]] mutableCopy]
                                                                exprs:[@[[self exceptionInfo:exception]] mutableCopy]];
                             return [self eval:[catchxs nth:2] withEnv:catchEnv];
@@ -227,7 +228,7 @@
                     };
                     return [[JSFunction alloc] initWithAst:[xs nth:2] params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
                 } else if ([[sym name] isEqual:@"let*"]) {
-                    [JSSymbol updateBindingsForAST:ast symbols:nil];
+                    //ast = [JSSymbol updateBindingsForAST:ast symbols:nil];
                     Env *letEnv = [[Env alloc] initWithEnv:env];
                     NSMutableArray *bindings = [JSVector isVector:[xs second]] ? [(JSVector *)[xs second] value] : [(JSList *)[xs second] value];
                     NSUInteger len = [bindings count];
@@ -237,7 +238,6 @@
                         [letEnv setObject:val forSymbol:[JSSymbol symbolWithArityCheck:[bindings nth:i] withObject:val]];
                     }
                     ast = [xs nth:2];
-                    debug(@"debug: %@", ast);
                     env = letEnv;
                     continue;
                 } else if ([[sym name] isEqual:@"quote"]) {
@@ -286,7 +286,9 @@
 }
 
 - (NSString *)rep:(NSString *)string {
-    return [self print:[self eval:[self read:string] withEnv:[self env]]];
+    id<JSDataProtocol> exp = [self read:string];
+    exp = [JSSymbol updateBindingsForAST:exp];
+    return [self print:[self eval:exp withEnv:[self env]]];
 }
 
 - (nullable id<JSDataProtocol>)exceptionInfo:(NSException *)exception {
