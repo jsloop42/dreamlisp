@@ -14,6 +14,14 @@
     return @"NSMutableArray";
 }
 
+- (void)add:(id)object atIndex:(NSUInteger)index {
+    [self insertObject:object atIndex:index];
+}
+
+- (void)update:(id)object atIndex:(NSUInteger)index {
+    [self replaceObjectAtIndex:index withObject:object];
+}
+
 - (id)first {
     return [self firstObject];
 }

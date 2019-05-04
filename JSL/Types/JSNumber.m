@@ -13,6 +13,7 @@
     NSString *_decimalPattern;
     BOOL _isDouble;
     id<JSDataProtocol> _meta;
+    NSInteger _position;
 }
 
 @synthesize meta = _meta;
@@ -99,7 +100,6 @@
     return self;
 }
 
-
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta number:(JSNumber *)number {
     self = [super init];
     if (self) {
@@ -111,7 +111,6 @@
     return self;
 }
 
-
 - (void)bootstrap {
     _decimalPattern = @"\\d+(\\.\\d+)";
 }
@@ -122,6 +121,15 @@
 
 - (NSString *)dataTypeName {
     return @"number";
+}
+
+- (NSInteger)position {
+    return _position;
+}
+
+- (id<JSDataProtocol>)setPosition:(NSInteger)position {
+    _position = position;
+    return self;
 }
 
 - (double)doubleValue {

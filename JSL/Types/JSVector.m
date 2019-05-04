@@ -11,9 +11,11 @@
 @implementation JSVector {
     NSMutableArray *_array;
     id<JSDataProtocol> _meta;
+    NSInteger _position;
 }
 
 @synthesize meta = _meta;
+@synthesize value = _array;
 
 + (BOOL)isVector:(id)object {
     return [[object className] isEqual:[self className]];
@@ -77,8 +79,21 @@
     return @"vector";
 }
 
+- (NSInteger)position {
+    return _position;
+}
+
+- (id<JSDataProtocol>)setPosition:(NSInteger)position {
+    _position = position;
+    return self;
+}
+
 - (NSMutableArray *)map:(id (^)(id arg))block {
     return [TypeUtils mapOnArray:_array withBlock:block];
+}
+
+- (void)enumerateConcurrent:(void (^)(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop))block {
+    [_array enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:block];
 }
 
 - (JSList *)list {
@@ -88,13 +103,9 @@
 - (BOOL)isEqual:(JSVector *)vector {
     NSUInteger len = [_array count];
     NSUInteger i = 0;
-    if (len != [vector count]) {
-        return NO;
-    }
+    if (len != [vector count]) return NO;
     for (i = 0; i < len; i++) {
-        if (![_array[i] isEqual:[vector nth:i]]) {
-            return NO;
-        }
+        if (![_array[i] isEqual:[vector nth:i]]) return NO;
     }
     return YES;
 }

@@ -11,6 +11,7 @@
 @implementation JSHashMap {
     NSMapTable *_table;
     id<JSDataProtocol> _meta;
+    NSInteger _position;
 }
 
 @synthesize meta = _meta;
@@ -80,6 +81,15 @@
 
 - (NSString *)dataTypeName {
     return @"hash-map";
+}
+
+- (NSInteger)position {
+    return _position;
+}
+
+- (id<JSDataProtocol>)setPosition:(NSInteger)position {
+    _position = position;
+    return self;
 }
 
 - (void)fromArray:(NSArray *)array {

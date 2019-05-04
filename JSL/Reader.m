@@ -61,12 +61,13 @@
     } else if ([token isEqual:@"'"] || [token isEqual:@"`"] || [token isEqual:@"~"] || [token isEqual:@"~@"] || [token isEqual:@"@"]) {
         NSDictionary *readerMacros = @{@"'": @"quote", @"`": @"quasiquote", @"~": @"unquote", @"~@": @"splice-unquote", @"@": @"deref"};
         [self pass];
-        NSArray *ret =  @[[[JSSymbol alloc] initWithArity:1 string:readerMacros[token]], [self readForm]];
+        NSArray *ret =  @[[[JSSymbol alloc] initWithArity:1 position:0 string:readerMacros[token]], [[self readForm] setPosition:1]];
         return [[JSList alloc] initWithArray:ret];
     } else if ([token isEqual:@"^"]) {
         [self pass];
         id<JSDataProtocol> meta = [self readForm];
-        return [[JSList alloc] initWithArray: @[[[JSSymbol alloc] initWithArity:2 string:@"with-meta"], [self readForm], meta]];
+        return [[JSList alloc] initWithArray: @[[[JSSymbol alloc] initWithArity:2 position:0 string:@"with-meta"],
+                                                [[self readForm] setPosition:1], [meta setPosition:2]]];
     }
     return [self readAtom];
 }
@@ -75,25 +76,26 @@
     NSMutableArray *list = [NSMutableArray new];
     NSArray *rightParens = @[@")", @"]", @"}"];
     [self pass];
+    NSUInteger count = 0;
     while (![rightParens containsObject:[self peek]]) {
         if ([self peek] != nil) {
-            [list addObject:[self readForm]];
+            [list addObject:[[self readForm] setPosition:count++]];
         } else {
             @throw [[NSException alloc] initWithName:JSL_PARENS_MISMATCH reason:JSL_PARENS_MISMATCH_MSG userInfo:nil];
         }
     }
     if ([leftParens isEqual:@"("] && [[self peek] isEqual:@")"]) {
         [self pass];
-        return [[JSList alloc] initWithArray:list];
+        return [[[JSList alloc] initWithArray:list] setPosition:0];
     } else if ([leftParens isEqual:@"["] && [[self peek] isEqual:@"]"]) {
         [self pass];
-        return [[JSVector alloc] initWithArray:list];
+        return [[[JSVector alloc] initWithArray:list] setPosition:0];
     } else if ([leftParens isEqual:@"{"] && [[self peek] isEqual:@"}"]) {
         [self pass];
-        return [[JSHashMap alloc] initWithArray:list];
+        return [[[JSHashMap alloc] initWithArray:list] setPosition:0];
     }
     [self pass];
-    return [[JSList alloc] initWithArray:list];
+    return [[[JSList alloc] initWithArray:list] setPosition:0];
 }
 
 - (BOOL)matchString:(NSString *)string withPattern:(NSString *)pattern {

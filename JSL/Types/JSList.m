@@ -11,9 +11,11 @@
 @implementation JSList {
     NSMutableArray *_array;
     id<JSDataProtocol> _meta;
+    NSInteger _position;
 }
 
 @synthesize meta = _meta;
+@synthesize value = _array;
 
 + (BOOL)isList:(id)object {
     return [[object className] isEqual:[self className]];
@@ -73,6 +75,15 @@
     return @"list";
 }
 
+- (NSInteger)position {
+    return _position;
+}
+
+- (id<JSDataProtocol>)setPosition:(NSInteger)position {
+    _position = position;
+    return self;
+}
+
 - (void)add:(id<JSDataProtocol>)object {
     [_array addObject:object];
 }
@@ -81,20 +92,16 @@
     [_array insertObject:object atIndex:index];
 }
 
+- (void)update:(id<JSDataProtocol>)object atIndex:(NSUInteger)index {
+    [_array replaceObjectAtIndex:index withObject:object];
+}
+
 - (void)remove:(id<JSDataProtocol>)object {
     [_array removeObject:object];
 }
 
 - (void)removeAtIndex:(NSUInteger)index {
     [_array removeObjectAtIndex:index];
-}
-
-- (void)setValue:(NSMutableArray *)aArray {
-    _array = aArray;
-}
-
-- (NSMutableArray *)value {
-    return _array;
 }
 
 - (NSUInteger)count {
@@ -131,6 +138,10 @@
 
 - (NSMutableArray *)map:(id (^)(id arg))block {
     return [TypeUtils mapOnArray:_array withBlock:block];
+}
+
+- (void)enumerateConcurrent:(void (^)(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop))block; {
+    [_array enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:block];
 }
 
 - (BOOL)isEmpty {

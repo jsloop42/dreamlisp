@@ -74,6 +74,7 @@ function build() {
 		exit -1
 	fi
     cp $(tail -4 $buildlog | head -1 | rev | cut -d " " -f1 | rev) $bin/$ret
+    cp $bin/$ret ~/bin/
 }
 
 (build $@) & spinner

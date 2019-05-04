@@ -16,6 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) id value;
 @property (nonatomic, readwrite) id<JSDataProtocol> meta;
 - (BOOL)hasMeta;
+- (NSInteger)position;
+- (id<JSDataProtocol>)setPosition:(NSInteger)position;
 @end
 
 NS_ASSUME_NONNULL_END

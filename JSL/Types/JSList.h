@@ -24,10 +24,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta list:(JSList *)list;
 - (void)add:(id<JSDataProtocol>)object;
 - (void)add:(id<JSDataProtocol>)object atIndex:(NSUInteger)index;
+- (void)update:(id<JSDataProtocol>)object atIndex:(NSUInteger)index;
 - (void)remove:(id<JSDataProtocol>)object;
 - (void)removeAtIndex:(NSUInteger)index;
-- (void)setValue:(NSMutableArray *)aArray;
-- (NSMutableArray *)value;
 - (NSUInteger)count;
 - (id<JSDataProtocol>)first;
 - (id<JSDataProtocol>)second;
@@ -36,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (id<JSDataProtocol>)dropLast;
 - (id<JSDataProtocol>)nth:(NSInteger)n;
 - (NSMutableArray *)map:(id (^)(id arg))block;
+- (void)enumerateConcurrent:(void (^)(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop))block;
 - (BOOL)isEmpty;
 - (BOOL)isEqual:(JSList *)list;
 - (NSUInteger)hash;

@@ -1094,6 +1094,31 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     // testing gensym
     XCTAssertEqualObjects([jsl rep:@"(= (gensym) (gensym))"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(let* [or_FIXME 23] (or false (+ or_FIXME 100)))"], @"123");
+    // testing identifier capture
+    [jsl rep:@"(defmacro! pow2 (fn* (a) `(let* (x 2) (* ~a x))))"];
+    [jsl rep:@"(def! inc2 (fn* (x) (pow2 x)))"];
+    XCTAssertNotEqualObjects([jsl rep:@"(inc2 5)"], @"10");
+    // testing auto gensym reader macro
+    [jsl rep:@"(defmacro! pow2* (fn* (a) `(let* (x# 2) (* ~a x#))))"];
+    [jsl rep:@"(def! inc2* (fn* (x) (pow2* x)))"];
+    XCTAssertEqualObjects([jsl rep:@"(inc2* 5)"], @"10");
+    [jsl rep:@"(defmacro! p1 (fn* (a) `(let* (x# 10) (* ~a x#))))"];
+    [jsl rep:@"(defmacro! p2 (fn* (a) `(let* (x# 2) (p1 (* ~a x#)))))"];
+    [jsl rep:@"(def! n (fn* (x) (p2 x)))"];
+    XCTAssertEqualObjects([jsl rep:@"(n 4)"], @"80");
+    XCTAssertEqualObjects([jsl rep:@"(n 10)"], @"200");
+    [jsl rep:@"(defmacro! p3 (fn* (a) `(let* (x# 5) (p2 (* ~a x#)))))"];
+    [jsl rep:@"(def! n (fn* (x) (p3 x)))"];
+    XCTAssertEqualObjects([jsl rep:@"(n 4)"], @"400");
+    XCTAssertEqualObjects([jsl rep:@"(n 5)"], @"500");
+    XCTAssertTrue([[jsl rep:@"`local-sym#"] containsString:@"__auto__"]);
+    NSString *str = [jsl rep:@"`(let* [x# [1 2 3]] (let* (y# (first x#)) y#))"];
+    NSString *xSym1 = [str substringWithRange:NSMakeRange(7, 12)];
+    NSString *ySym1 = [str substringWithRange:NSMakeRange(36, 12)];
+    NSString *xSym2 = [str substringWithRange:NSMakeRange(56, 12)];
+    NSString *ySym2 = [str substringWithRange:NSMakeRange(71, 12)];
+    XCTAssertEqualObjects(xSym1, xSym2);
+    XCTAssertEqualObjects(ySym1, ySym2);
 }
 
 void errorHandleFn(id param, int tag, int counter, const char *s) {
@@ -1451,6 +1476,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)test {
     JSL *jsl = [JSL new];
+    [jsl rep:@"(let* (a# 1) a#)"];
 }
 
 - (void)notestPerformanceJSListDropFirst {

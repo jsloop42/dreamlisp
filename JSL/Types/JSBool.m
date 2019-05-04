@@ -11,6 +11,7 @@
 @implementation JSBool {
     BOOL _flag;
     id<JSDataProtocol> _meta;
+    NSInteger _position;
 }
 
 @synthesize meta = _meta;
@@ -38,6 +39,15 @@
 
 - (NSString *)dataTypeName {
     return @"bool";
+}
+
+- (NSInteger)position {
+    return _position;
+}
+
+- (id<JSDataProtocol>)setPosition:(NSInteger)position {
+    _position = position;
+    return self;
 }
 
 - (BOOL)isEqual:(JSBool *)boolean {

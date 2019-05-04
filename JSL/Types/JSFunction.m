@@ -16,6 +16,7 @@
     BOOL _isMacro;
     id<JSDataProtocol> _meta;
     NSInteger _argsCount;
+    NSInteger _position;
 }
 
 @synthesize fn = _fn;
@@ -106,6 +107,15 @@
 
 - (NSString *)dataTypeName {
     return @"function";
+}
+
+- (NSInteger)position {
+    return _position;
+}
+
+- (id<JSDataProtocol>)setPosition:(NSInteger)position {
+    _position = position;
+    return self;
 }
 
 - (id<JSDataProtocol>)apply {

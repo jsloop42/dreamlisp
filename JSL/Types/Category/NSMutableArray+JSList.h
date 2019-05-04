@@ -11,6 +11,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSMutableArray (JSList)
+- (void)add:(id)object atIndex:(NSUInteger)index;
+- (void)update:(id)object atIndex:(NSUInteger)index;
 - (id)first;
 - (id)second;
 - (NSMutableArray *)rest;

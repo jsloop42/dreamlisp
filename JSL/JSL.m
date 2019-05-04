@@ -69,8 +69,8 @@
     [self rep:@"(defmacro! cond (fn* (& xs) (if (> (count xs) 0) `(if ~(first xs) ~(if (> (count xs) 1) (nth xs 1) " \
                "(throw \"odd number of forms to cond\")) (cond ~@(rest (rest xs)))))))"];
     [self rep:@"(def! *gensym-counter* (atom 0))"];
-    [self rep:@"(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"];
-    [self rep:@"(def! gensym (fn* (sym) (symbol (str \"G__\" sym \"__\" (count (str sym))))))"];
+    [self rep:@"(def! gensym (fn* () (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"];
+    [self rep:@"(def! gensym (fn* (sym) (symbol (str sym (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"];
     [self rep:@"(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs))" \
                "(if ~condvar ~condvar (or ~@(rest xs)))))))))"];
     [self rep:@"(def! exit (fn* () (do (println \"Bye.\") (exit*))))"];
@@ -120,8 +120,13 @@
 }
 
 - (id<JSDataProtocol>)quasiQuote:(id<JSDataProtocol>)ast {
-    if (![self isPair:ast]) return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], ast] mutableCopy]];
-    NSMutableArray *xs = [(JSList *)ast value];
+    if (![self isPair:ast]) {
+        id<JSDataProtocol>arg = [JSSymbol isSymbol:ast] ? [(JSSymbol *)ast gensym] : ast;
+        return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], arg] mutableCopy]];
+    }
+    JSList *lst = (JSList *)ast;
+    lst = [JSSymbol updateBindingsForAST:lst symbols:nil];
+    NSMutableArray *xs = [lst value];
     id<JSDataProtocol> first = [xs first];
     if ([JSSymbol isSymbol:first] && [[(JSSymbol *)first name] isEqual:@"unquote"]) return [xs second];
     if ([self isPair:first]) {
@@ -222,6 +227,7 @@
                     };
                     return [[JSFunction alloc] initWithAst:[xs nth:2] params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
                 } else if ([[sym name] isEqual:@"let*"]) {
+                    [JSSymbol updateBindingsForAST:ast symbols:nil];
                     Env *letEnv = [[Env alloc] initWithEnv:env];
                     NSMutableArray *bindings = [JSVector isVector:[xs second]] ? [(JSVector *)[xs second] value] : [(JSList *)[xs second] value];
                     NSUInteger len = [bindings count];
@@ -231,12 +237,15 @@
                         [letEnv setObject:val forSymbol:[JSSymbol symbolWithArityCheck:[bindings nth:i] withObject:val]];
                     }
                     ast = [xs nth:2];
+                    debug(@"debug: %@", ast);
                     env = letEnv;
                     continue;
                 } else if ([[sym name] isEqual:@"quote"]) {
                     return [xs second];
                 } else if ([[sym name] isEqual:@"quasiquote"]) {
-                    ast = [self quasiQuote:[xs second]];
+                    id<JSDataProtocol> exp = [xs second];
+                    exp = [JSSymbol isSymbol:exp] ? [(JSSymbol *)exp autoGensym] : exp;
+                    ast = [self quasiQuote:exp];
                     continue;
                 } else if ([[sym name] isEqual:@"macroexpand"]) {
                     return [self macroExpand:[xs second] withEnv:env];

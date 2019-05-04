@@ -18,6 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (JSList *)dataToList:(id<JSDataProtocol>)data position:(NSInteger)position;
 - (instancetype)initWithArray:(NSArray *)list;
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta vector:(JSVector *)vector;
+- (NSMutableArray *)map:(id (^)(id arg))block;
+- (void)enumerateConcurrent:(void (^)(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop))block;
 - (JSList *)list;
 - (BOOL)isEqual:(JSVector *)vector;
 - (NSUInteger)hash;

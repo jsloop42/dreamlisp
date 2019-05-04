@@ -11,6 +11,7 @@
 @implementation JSKeyword {
     NSString *_string;
     id<JSDataProtocol> _meta;
+    NSInteger _position;
 }
 
 @synthesize value = _string;
@@ -75,6 +76,15 @@
 
 - (NSString *)dataTypeName {
     return @"keyword";
+}
+
+- (NSInteger)position {
+    return _position;
+}
+
+- (id<JSDataProtocol>)setPosition:(NSInteger)position {
+    _position = position;
+    return self;
 }
 
 - (NSString *)value {
