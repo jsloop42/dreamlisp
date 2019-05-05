@@ -376,14 +376,12 @@
                 [table setSymbol:[ast nth:i]];
                 continue;
             } else if ([sym position] == 0 && [sym isEqualToName:@"defmacro!"]) {
-                //                i++;
-                //                [SymbolTable setSymbol:[ast nth:i]];  // add binding name to main table
-                //                i++;
-                //                [SymbolTable startMacroScope];
-                //                [self updateBindingsForAST:[ast nth:i]];
-                //                [SymbolTable stopMacroScope];
-                //                [SymbolTable resetMacroScope];
-                //                return ast;
+                i++;
+                [table setSymbol:[ast nth:i]];  // add binding name to main table
+                SymbolTable *macroTable = [[SymbolTable alloc] initWithTable:table];
+                i++;
+                [self updateBindingsForAST:[ast nth:i] table:macroTable];
+                return ast;
             } else if ([sym position] == 0 && [sym isEqualToName:@"fn*"]) {
                 SymbolTable *fnTable = [[SymbolTable alloc] initWithTable:table];
                 i++;
