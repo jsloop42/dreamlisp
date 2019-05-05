@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface Utils : NSObject
 + (BOOL)matchString:(NSString *)string withPattern:(NSString *)pattern;
 + (double)timestamp;
+- (instancetype)init NS_UNAVAILABLE;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -12,7 +12,7 @@
 #import "NSString+JSDataProtocol.h"
 #import "NSMutableArray+JSList.h"
 #import "JSError.h"
-#import "SymbolTable.h"
+#import "State.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -22,10 +22,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) NSString *initialValue;
 @property (nonatomic, readwrite) BOOL isFunction;
 @property (nonatomic, readonly) BOOL hasNArity;
++ (instancetype)new NS_UNAVAILABLE;
 + (BOOL)isSymbol:(id)object;
 + (BOOL)isSymbol:(id)object withName:(NSString *)name;
 + (JSSymbol *)symbolWithArityCheck:(JSSymbol *)symbol withObject:(id)object;
-+ (JSList *)updateBindingsForAST:(JSList *)ast;
+// Should not instantiate with empty name
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name;
 - (instancetype)initWithArity:(NSInteger)arity symbol:(JSSymbol *)symbol;

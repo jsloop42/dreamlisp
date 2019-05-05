@@ -8,75 +8,83 @@
 
 #import "SymbolTable.h"
 
-static NSMapTable<NSString *, JSSymbol *> *_table;
-static NSUInteger _genSymCounter = 0;
-static BOOL _startExpCapture = NO;
-static NSMapTable<NSString *, JSSymbol *> *_expTable;
+@implementation SymbolTable {
+    SymbolTable *_outer;
+    NSMapTable<NSString *, JSSymbol *> *_table;
+    BOOL _startMacroScope;
+    NSMapTable<NSString *, JSSymbol *> *_expTable;
+}
 
-@implementation SymbolTable
-
+@synthesize outer = _outer;
 @synthesize table = _table;
 @synthesize expTable = _expTable;
 
-+ (void)initialize {
-    if (self == [self class]) {
-        _table = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
-        _expTable = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
     }
+    return self;
 }
 
-+ (JSSymbol * _Nullable)symbol:(JSSymbol *)symbol {
-    NSString *key = (NSString *)[symbol initialValue];
-    return _startExpCapture ? [_expTable objectForKey:key] : [_table objectForKey:key];
+- (instancetype)initWithTable:(SymbolTable *)table {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+        _outer = table;
+        _startMacroScope = [table isMacroScope];
+    }
+    return self;
 }
 
-+ (void)setSymbol:(JSSymbol *)symbol {
-    NSString *key = (NSString *)[symbol initialValue];
-    _startExpCapture ? [_expTable setObject:symbol forKey:key] : [_table setObject:symbol forKey:key];
+- (void)bootstrap {
+    _table = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    _expTable = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    _startMacroScope = NO;
 }
 
-+ (void)removeSymbol:(JSSymbol *)symbol {
+- (JSSymbol * _Nullable)symbolForKey:(NSString *)name inTable:(SymbolTable *)symTable {
+    if (!symTable) return nil;
+    JSSymbol *sym = [[symTable table] objectForKey:name];
+    return sym ? sym : [self symbolForKey:name inTable:[symTable outer]];
+}
+
+- (JSSymbol * _Nullable)symbol:(JSSymbol *)symbol {
+    return [self symbolForKey:[symbol initialValue] inTable:self];
+}
+
+- (void)setSymbol:(JSSymbol *)symbol {
     NSString *key = (NSString *)[symbol initialValue];
-    _startExpCapture ? [_expTable removeObjectForKey:key] : [_table removeObjectForKey:key];
+    _startMacroScope ? [_expTable setObject:symbol forKey:key] : [_table setObject:symbol forKey:key];
 }
 
 /** Starts tracking symbols bounded within a lexical scope */
-+ (void)startExpressionSymbolCapture {
-    _startExpCapture = YES;
+- (void)startMacroScope {
+    _startMacroScope = YES;
 }
 
-+ (void)stopExpressionSymbolCapture {
-    _startExpCapture = NO;
+- (void)stopMacroScope {
+    _startMacroScope = NO;
 }
 
-+ (BOOL)isCapture {
-    return _startExpCapture;
+- (BOOL)isMacroScope {
+    return _startMacroScope;
 }
 
-+ (void)clearSymbolCapture {
+- (void)resetMacroScope {
     [_expTable removeAllObjects];
 }
 
-+ (NSUInteger)count {
+- (NSUInteger)count {
     return [_table count];
 }
 
-+ (NSUInteger)captureCount {
+- (NSUInteger)macroScopeCount {
     return [_expTable count];
 }
 
-+ (NSString *)description {
+- (NSString *)description {
     return [[_table description] stringByAppendingFormat:@"\n%@", [_expTable description]];
-}
-
-/** Increments the auto gensymn counter. */
-+ (NSUInteger)counter {
-    return ++_genSymCounter;
-}
-
-/** Return the current auto gensymn counter. */
-+ (NSInteger)currentCounter {
-    return _genSymCounter;
 }
 
 @end

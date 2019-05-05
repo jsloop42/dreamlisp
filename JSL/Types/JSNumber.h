@@ -14,9 +14,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSNumber : NSObject <JSDataProtocol>
++ (instancetype)new NS_UNAVAILABLE;
 + (BOOL)isNumber:(id)object;
 + (JSNumber *)dataToNumber:(id<JSDataProtocol>)data;
 + (JSNumber *)dataToNumber:(id<JSDataProtocol>)data position:(NSInteger)position;
+- (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithDouble:(double)num;
 - (instancetype)initWithInt:(int)number;
 - (instancetype)initWithInteger:(NSUInteger)number;

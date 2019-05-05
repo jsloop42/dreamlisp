@@ -11,15 +11,18 @@
 @implementation Env {
     Env *_outer;
     NSMapTable<JSSymbol *, id<JSDataProtocol>> *_table;
+    SymbolTable *_symTable;
 }
 
 @synthesize outer = _outer;
 @synthesize table = _table;
+@synthesize symbolTable = _symTable;
 
-- (instancetype)init {
+- (instancetype)initWithTable:(SymbolTable *)table {
     self = [super init];
     if (self) {
         [self bootstrap];
+        _symTable = table;
     }
     return self;
 }
@@ -28,6 +31,7 @@
     self = [super init];
     if (self) {
         [self bootstrap];
+        _symTable = [env symbolTable];
         _outer = env;
     }
     return self;
@@ -93,7 +97,7 @@
 }
 
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isFromSymbolTable:(BOOL)isFromSymbolTable {
-    Env * env = [self findEnvForKey:key];
+    Env *env = [self findEnvForKey:key];
     if (env != nil) {
         id<JSDataProtocol>val = [[env table] objectForKey:key];
         if (val != nil) return val;
@@ -101,7 +105,7 @@
     // Check for n arity symbol
     if (![key hasNArity]) return [self objectForSymbol:[key toNArity]];
     if (!isFromSymbolTable) {
-        JSSymbol *sym = [SymbolTable symbol:key];
+        JSSymbol *sym = [_symTable symbol:key];
         if (sym) {
             [sym copyProperties:key];
             return [self objectForSymbol:sym isFromSymbolTable:YES];

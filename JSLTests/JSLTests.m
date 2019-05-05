@@ -65,7 +65,7 @@
     XCTAssertEqualObjects([kwd encoded], @"\u029e:abc");
     kwd = [[JSKeyword alloc] initWithEncodedKeyword:@"\u029e:abc"];
     XCTAssertEqualObjects([kwd value], @":abc");
-    XCTAssertFalse([JSKeyword isKeyword:[JSNumber new]]);
+    XCTAssertFalse([JSKeyword isKeyword:[[JSNumber alloc] initWithInt:1]]);
     XCTAssertFalse([JSKeyword isKeyword:[JSString new]]);
 }
 
@@ -96,8 +96,9 @@
 - (void)testPrintString {
     Printer *prn = [Printer new];
     // Function
-    JSFunction *fn = [[JSFunction alloc] initWithAst:[JSNil new] params:[NSMutableArray new] env:[Env new] macro:false meta:[JSNil new]
-                                                  fn:^id(id arg){return nil;}];
+    JSFunction *fn = [[JSFunction alloc] initWithAst:[JSNil new] params:[NSMutableArray new]
+                      env:[[Env alloc] initWithTable:[SymbolTable new]]
+                      macro:false meta:[JSNil new] fn:^id(id arg) { return nil; }];
     XCTAssertEqualObjects([prn printStringFor:fn readably:true], @"#<function>");
     // Symbol
     JSSymbol *sym = [[JSSymbol alloc] initWithName:@"greet"];
@@ -558,7 +559,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testEnv {
-    Env *env = [Env new];
+    Env *env = [[Env alloc] initWithTable:[SymbolTable new]];
     JSString *obj = [[JSString alloc] initWithString:@"123"];
     JSSymbol *key = [[JSSymbol alloc] initWithName:@"key"];
     [env setObject:obj forSymbol:key];
@@ -1165,7 +1166,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
 
 - (void)testMeta {
     JSL *jsl = [JSL new];
-    JSSymbol *sym = [JSSymbol new];
+    JSSymbol *sym = [[JSSymbol alloc] initWithName:@""];
     XCTAssertFalse([sym hasMeta]);
     id<JSDataProtocol> meta = [[JSString alloc] initWithString:@"meta-string"];
     JSSymbol *symMeta = [[JSSymbol alloc] initWithMeta:meta symbol:sym];
@@ -1238,7 +1239,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
 
 - (NSString *)pathForFile:(NSString *)filename {
     NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *path = [[NSString alloc] initWithFormat:@"%@/JSLTests.xctest/Contents/Resources/tests/%@", [fm currentDirectoryPath], filename];
+    NSString *path = [[NSString alloc] initWithFormat:@"%@/JSLTests.xctest/Contents/Resources/jsl/%@", [fm currentDirectoryPath], filename];
     if ([fm fileExistsAtPath:path]) {
         return path;
     }
@@ -1473,8 +1474,26 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     }
 }
 
+- (void)testScopeWithFile {
+    JSL *jsl = [JSL new];
+    NSString *scopePath = [self pathForFile:@"scope.jsl"];
+    XCTAssertTrue([scopePath isNotEmpty]);
+    [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", scopePath]];
+    XCTAssertEqualObjects([jsl rep:@"(f1 4 6)"], @"30");
+}
+
+- (void)testScope {
+    JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(def! a 4)"], @"4");
+    XCTAssertEqualObjects([jsl rep:@"(def! c 1)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(def! d (atom 3))"], @"(atom 3)");
+    [jsl rep:@"(def! f1 (fn* (a b) (do (+ a b c (deref d)) (let* (x 6 z (+ a c) f (fn* (x) (* x x))) (* x z)))))"];
+    XCTAssertEqualObjects([jsl rep:@"(f1 4 6)"], @"30");
+}
+
 - (void)test {
     JSL *jsl = [JSL new];
+    XCTAssertEqualObjects([jsl rep:@"(let* (a 5 b 6) [3 4 a [b 7] 8])"], @"[3 4 5 [6 7] 8]");
 }
 
 - (void)notestPerformanceJSListDropFirst {

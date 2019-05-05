@@ -13,6 +13,8 @@
     Printer *_printer;
     Env *_env;
     Core *_core;
+    SymbolTable *_symTable;
+    NSArray *keywords;
 }
 
 @synthesize env = _env;
@@ -28,8 +30,10 @@
 - (void)bootstrap {
     _reader = [Reader new];
     _printer = [Printer new];
-    _env = [Env new];
     _core = [Core new];
+    _symTable = [SymbolTable new];
+    _env = [[Env alloc] initWithTable:_symTable];
+    keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"macroexpand", @"try*", @"catch*"];
     [self setCoreFunctionsToREPL:_env];
     [self setEvalToREPL];
     [self setJSLFuns];
@@ -51,8 +55,11 @@
  Sets `eval` JSL function in the REPL environment.
 */
 - (void)setEvalToREPL{
+    JSL * __weak weakSelf = self;
     id<JSDataProtocol>(^fn)(NSMutableArray *arg) = ^id<JSDataProtocol>(NSMutableArray *arg) {
-        return [self eval:(id<JSDataProtocol>)arg[0] withEnv:[self env]];
+        JSL *this = weakSelf;
+        id<JSDataProtocol> ast = (id<JSDataProtocol>)arg[0];
+        return [self eval:[self updateBindingsForAST:ast table:this->_symTable] withEnv:[self env]];
     };
     NSString *hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
     NSString *langVersion = [[NSString alloc] initWithFormat:@"JSL v%@ [%@]", JSLVersion, hostLangVersion];
@@ -282,13 +289,153 @@
     }
 }
 
+/** If the given symbol is present in the symbol table, updates the given symbol to match. */
+- (JSSymbol * _Nullable)updateSymbol:(JSSymbol *)symbol table:(SymbolTable *)table {
+    JSSymbol *aSym = [table symbol:symbol];
+    if (aSym) {
+        [symbol setValue:[aSym value]];
+        return symbol;
+    }
+    return nil;
+}
+
+- (JSHashMap * _Nullable)updateBindingsForHashMap:(JSHashMap *)ast table:(SymbolTable *)table {
+    NSArray *keys = [ast allKeys];
+    NSUInteger len = [keys count];
+    NSUInteger i = 0;
+    id<JSDataProtocol> obj = nil;
+    for (i = 0; i < len; i++) {
+        //obj =
+    }
+    return ast;
+}
+
+- (JSVector *)updateBindingsForVector:(JSVector *)ast table:(SymbolTable *)table {
+    NSMutableArray<id<JSDataProtocol>> *arr = [ast value];
+    NSLock *arrLock = [NSLock new];
+    [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id<JSDataProtocol>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        JSSymbol *aSym = nil;
+        // Update only the symbols in the vector for which there is a match in the symbol table
+        if ([JSSymbol isSymbol:obj] && ((aSym = [self updateSymbol:obj table:table]) != nil)) {
+            [arrLock lock];
+            [arr update:aSym atIndex:idx];
+            [arrLock unlock];
+        } else if ([JSVector isVector:obj]) {
+            obj = [self updateBindingsForVector:obj table:table];
+        } else if ([JSList isList:obj]) {
+            obj = [self updateBindingsForAST:obj table:table];
+        } else if ([JSHashMap isHashMap:obj]) {
+            obj = [self updateBindingsForHashMap:obj table:table];
+        }
+    }];
+    [ast setValue:arr];
+    return ast;
+}
+
+- (JSList *)updateBindingsForAST:(JSList *)ast table:(SymbolTable *)table {
+    if (![JSList isList:ast]) return ast;
+    NSUInteger len = [ast count];
+    NSUInteger i = 0;
+    for (i = 0; i < len; i++) {
+        id<JSDataProtocol> elem = [ast nth:i];
+        if ([JSSymbol isSymbol:elem]) {
+            JSSymbol *sym = (JSSymbol *)elem;
+            if ([sym position] == 0 && [sym isEqualToName:@"let*"]) {  // (let* exp)
+                SymbolTable *letTable = [[SymbolTable alloc] initWithTable:table];
+                NSMutableArray *bindings = [(JSList *)[ast nth:i + 1] value]; // bindings -> list or vector (let* (x 1 y 2) ..)
+                NSUInteger j = 0;
+                NSUInteger blen = [bindings count];
+                // Check if any of the symbols are redefined
+                id<JSDataProtocol> aSym = nil;
+                for (j = 0; j < blen; j += 2) {
+                    // NOTE: pattern matching can be done here for let destructuring
+                    aSym = bindings[j];
+                    if ([JSSymbol isSymbol:aSym]) {
+                        JSSymbol *elem = (JSSymbol *)aSym;
+                        [elem autoGensym];  // let* binding symbols are gensymed always
+                        [letTable setSymbol:elem];
+                    }
+                    id<JSDataProtocol> exp = [self updateBindingsForAST:bindings[j + 1] table:letTable];
+                    if ([JSSymbol isSymbol:exp withName:@"let*"]) {
+                        SymbolTable *innerLet = [[SymbolTable alloc] initWithTable:letTable];
+                        exp = [self updateBindingsForAST:exp table:innerLet];
+                        letTable = innerLet; // for the new nested let scope
+                    } else if ([JSList isList:exp]) {
+                        exp = [self updateBindingsForAST:exp table:letTable];
+                    } else if ([JSVector isVector:exp]) {
+                        exp = [self updateBindingsForVector:exp table:letTable];
+                    } else if ([JSHashMap isHashMap:exp]) {
+                        exp = [self updateBindingsForHashMap:exp table:letTable];
+                    }
+                }
+                table = letTable; // for the let scope
+                i++;
+                continue;
+            } else if ([sym position] == 0 && [sym isEqualToName:@"def!"]) {
+                i++;
+                [table setSymbol:[ast nth:i]];
+                continue;
+            } else if ([sym position] == 0 && [sym isEqualToName:@"defmacro!"]) {
+                //                i++;
+                //                [SymbolTable setSymbol:[ast nth:i]];  // add binding name to main table
+                //                i++;
+                //                [SymbolTable startMacroScope];
+                //                [self updateBindingsForAST:[ast nth:i]];
+                //                [SymbolTable stopMacroScope];
+                //                [SymbolTable resetMacroScope];
+                //                return ast;
+            } else if ([sym position] == 0 && [sym isEqualToName:@"fn*"]) {
+                SymbolTable *fnTable = [[SymbolTable alloc] initWithTable:table];
+                i++;
+                JSList* elem = [ast nth:i];  // fn arguments
+                NSMutableArray *arr = [elem value];
+                NSMutableArray *symArgs = [arr mutableCopy];
+                NSLock *lock = [NSLock new];
+                [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    id<JSDataProtocol> arg = arr[idx];
+                    if ([JSSymbol isSymbol:arg]) {
+                        JSSymbol *aSym = (JSSymbol *)arg;
+                        if ([[aSym value] isNotEqualTo:@"&"]) {
+                            arg = [aSym autoGensym];
+                            [fnTable setSymbol:arg];
+                        }
+                    }
+                    [lock lock];
+                    [symArgs setObject:arg atIndexedSubscript:idx];
+                    [lock unlock];
+                }];
+                [elem setValue:symArgs];  //update the args list with gensymed version
+                [ast update:elem atIndex:i];  // TODO: remove this -> mutable ast?
+                table = fnTable;
+                continue;
+//          } else if ([sym position] == 0 && [sym isEqualToName:@"swap!"]) {
+
+            } else if ([sym position] == 0 && [sym isEqualToName:@"apply"]) {
+
+            } else if ([sym position] == 0 && [keywords containsObject:sym]) {
+                continue;
+            } else {
+                // Update symbol in the list if there is a binding found
+                [self updateSymbol:[ast nth:i] table:table];
+            }
+        } else if ([JSList isList:elem]) {  // (fn, args)
+            elem = [self updateBindingsForAST:elem table:table];
+        } else if ([JSVector isVector:elem]) {
+            elem = [self updateBindingsForVector:elem table:table];
+        } else if ([JSHashMap isHashMap:elem]) {
+            elem = [self updateBindingsForHashMap:elem table:table];
+        }
+    }
+    return ast;
+}
+
 - (NSString *)print:(id<JSDataProtocol>)data {
     return [_printer printStringFor:data readably:YES];
 }
 
 - (NSString *)rep:(NSString *)string {
     id<JSDataProtocol> exp = [self read:string];
-    exp = [JSSymbol updateBindingsForAST:exp];
+    exp = [self updateBindingsForAST:exp table:_symTable];
     return [self print:[self eval:exp withEnv:[self env]]];
 }
 

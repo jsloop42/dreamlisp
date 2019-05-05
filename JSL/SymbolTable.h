@@ -16,19 +16,19 @@ NS_ASSUME_NONNULL_BEGIN
 @class JSSymbol;
 
 @interface SymbolTable : NSObject
+@property (nonatomic, readwrite) SymbolTable *outer;
 @property (nonatomic, readonly) NSMapTable<NSString *, JSSymbol *> *table;
 @property (nonatomic, readonly) NSMapTable<NSString *, JSSymbol *> *expTable;
-+ (JSSymbol * _Nullable)symbol:(JSSymbol *)symbol;
-+ (void)setSymbol:(JSSymbol *)symbol;
-+ (void)removeSymbol:(JSSymbol *)symbol;
-+ (void)startExpressionSymbolCapture;
-+ (void)stopExpressionSymbolCapture;
-+ (void)clearSymbolCapture;
-+ (BOOL)isCapture;
-+ (NSUInteger)count;
-+ (NSUInteger)captureCount;
-+ (NSUInteger)counter;
-+ (NSInteger)currentCounter;
+- (instancetype)init;
+- (instancetype)initWithTable:(SymbolTable *)table;
+- (JSSymbol * _Nullable)symbol:(JSSymbol *)symbol;
+- (void)setSymbol:(JSSymbol *)symbol;
+- (void)startMacroScope;
+- (void)stopMacroScope;
+- (void)resetMacroScope;
+- (BOOL)isMacroScope;
+- (NSUInteger)count;
+- (NSUInteger)macroScopeCount;
 @end
 
 NS_ASSUME_NONNULL_END

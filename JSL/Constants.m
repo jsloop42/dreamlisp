@@ -8,8 +8,6 @@
 
 #import "Constants.h"
 
-@implementation Constants
-
 NSString * const JSLVersion = @"2.1";
 
 #pragma mark Error constant
@@ -35,4 +33,3 @@ NSString * const JSL_INVALID_ARGUMENT_MSG = @"Invalid argument";
 NSString * const JSL_INDEX_OUT_OF_BOUNDS_MSG = @"Index out of bounds";
 NSString * const JSL_FILE_READ_ERROR_MSG = @"File read error";
 NSString * const JSL_NOT_A_SEQUENCE_ERROR_MSG = @"seq called on non-sequence";
-@end

@@ -31,6 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
  @endcode
  */
 @property (nonatomic, readwrite) NSInteger argsCount;
++ (instancetype)new NS_UNAVAILABLE;
 + (BOOL)isFunction:(id)object;
 + (JSFunction *)dataToFunction:(id<JSDataProtocol>)data;
 + (JSFunction *)dataToFunction:(id<JSDataProtocol>)data position:(NSInteger)position;

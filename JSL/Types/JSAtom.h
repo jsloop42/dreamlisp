@@ -13,6 +13,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSAtom : NSObject <JSDataProtocol>
++ (instancetype)new NS_UNAVAILABLE;
 + (BOOL)isAtom:(id)object;
 + (JSAtom *)dataToAtom:(id<JSDataProtocol>)data;
 + (JSAtom *)dataToAtom:(id<JSDataProtocol>)data position:(NSInteger)position;
