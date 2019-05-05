@@ -150,22 +150,21 @@ NSArray *keywords = nil;
                 i++;
                 JSList* elem = [ast nth:i];  // fn arguments
                 NSMutableArray *arr = [elem value];
-                NSMutableArray *symArgs = [NSMutableArray new];
+                NSMutableArray *symArgs = [arr mutableCopy];
                 NSLock *lock = [NSLock new];
-                NSInteger __block ampIndex = -1;  // & index
                 [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                     id<JSDataProtocol> arg = arr[idx];
                     if ([JSSymbol isSymbol:arg]) {
                         JSSymbol *aSym = (JSSymbol *)arg;
-                        if ([[aSym value] isEqual:@"&"]) ampIndex = idx;
-                        arg = [aSym autoGensym];
-                        [SymbolTable setSymbol:arg];
+                        if ([[aSym value] isNotEqualTo:@"&"]) {
+                            arg = [aSym autoGensym];
+                            [SymbolTable setSymbol:arg];
+                        }
                     }
                     [lock lock];
                     [symArgs setObject:arg atIndexedSubscript:idx];
                     [lock unlock];
                 }];
-                if (ampIndex > -1) [symArgs removeObjectAtIndex:ampIndex];  // Remove '&' variadic symbol
                 [elem setValue:symArgs];
                 [ast update:elem atIndex:i];
                 continue;
