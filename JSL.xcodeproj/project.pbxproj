@@ -55,6 +55,9 @@
 		9E33AADA227579C000A6EB98 /* JSFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD8227579C000A6EB98 /* JSFunction.m */; };
 		9E38FC78227DDE8000405BE5 /* SymbolTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E38FC77227DDE8000405BE5 /* SymbolTable.m */; };
 		9E38FC79227DDE8000405BE5 /* SymbolTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E38FC77227DDE8000405BE5 /* SymbolTable.m */; };
+		9E38FC7D227F075F00405BE5 /* jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E38FC7C227F075F00405BE5 /* jsl */; };
+		9E38FC81227F343800405BE5 /* State.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E38FC80227F343800405BE5 /* State.m */; };
+		9E38FC82227F343800405BE5 /* State.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E38FC80227F343800405BE5 /* State.m */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D5A22568B1300348529 /* JSLTests.m */; };
 		9E3A9D6522568D4B00348529 /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6422568D4B00348529 /* Core.m */; };
@@ -144,6 +147,9 @@
 		9E33AAD8227579C000A6EB98 /* JSFunction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSFunction.m; sourceTree = "<group>"; };
 		9E38FC76227DDE8000405BE5 /* SymbolTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SymbolTable.h; sourceTree = "<group>"; };
 		9E38FC77227DDE8000405BE5 /* SymbolTable.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SymbolTable.m; sourceTree = "<group>"; };
+		9E38FC7C227F075F00405BE5 /* jsl */ = {isa = PBXFileReference; lastKnownFileType = folder; path = jsl; sourceTree = "<group>"; };
+		9E38FC7F227F343800405BE5 /* State.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = State.h; sourceTree = "<group>"; };
+		9E38FC80227F343800405BE5 /* State.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = State.m; sourceTree = "<group>"; };
 		9E3A9D4A22568AFC00348529 /* JSL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = JSL; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E3A9D4D22568AFC00348529 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9E3A9D5822568B1300348529 /* JSLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -280,6 +286,8 @@
 				9E3A9D7022568DB100348529 /* Printer.m */,
 				9E3A9D7322568DBD00348529 /* Reader.h */,
 				9E3A9D7422568DBD00348529 /* Reader.m */,
+				9E38FC7F227F343800405BE5 /* State.h */,
+				9E38FC80227F343800405BE5 /* State.m */,
 				9E38FC76227DDE8000405BE5 /* SymbolTable.h */,
 				9E38FC77227DDE8000405BE5 /* SymbolTable.m */,
 				9E5D7B49225B947E00970453 /* Terminal.h */,
@@ -294,6 +302,7 @@
 		9E3A9D5922568B1300348529 /* JSLTests */ = {
 			isa = PBXGroup;
 			children = (
+				9E38FC7C227F075F00405BE5 /* jsl */,
 				9E281CF9225A60760038A5AF /* tests */,
 				9E281CFC225A60760038A5AF /* Makefile */,
 				9E281CFA225A60760038A5AF /* run_argv_test.sh */,
@@ -409,6 +418,7 @@
 				9E281CFD225A60770038A5AF /* tests in Resources */,
 				9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */,
 				9E281CFF225A60770038A5AF /* runtest.py in Resources */,
+				9E38FC7D227F075F00405BE5 /* jsl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -422,6 +432,7 @@
 				9E30554C2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */,
 				9E33AAC5227578A700A6EB98 /* JSVector.m in Sources */,
 				9E33AAB52275775800A6EB98 /* JSString.m in Sources */,
+				9E38FC81227F343800405BE5 /* State.m in Sources */,
 				9E33AAD12275796300A6EB98 /* JSNil.m in Sources */,
 				9E2491EA226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */,
 				9E6F444822578E5600777A24 /* JSL.m in Sources */,
@@ -461,6 +472,7 @@
 				9E30554D2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */,
 				9E33AAC6227578A700A6EB98 /* JSVector.m in Sources */,
 				9E33AAB62275775800A6EB98 /* JSString.m in Sources */,
+				9E38FC82227F343800405BE5 /* State.m in Sources */,
 				9E33AAD22275796300A6EB98 /* JSNil.m in Sources */,
 				9E2491EB226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */,
 				9E6F444922578E5600777A24 /* JSL.m in Sources */,
