@@ -102,7 +102,10 @@
     if (![key hasNArity]) return [self objectForSymbol:[key toNArity]];
     if (!isFromSymbolTable) {
         JSSymbol *sym = [SymbolTable symbol:key];
-        if (sym) return [self objectForSymbol:sym isFromSymbolTable:YES];
+        if (sym) {
+            [sym copyProperties:key];
+            return [self objectForSymbol:sym isFromSymbolTable:YES];
+        };
     }
     [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
     return nil;

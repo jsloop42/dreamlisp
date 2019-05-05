@@ -41,6 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (JSSymbol *)toNArity;
 - (JSSymbol *)resetArity;
 - (NSString *)string;
+- (void)copyProperties:(JSSymbol *)symbol;
 - (BOOL)isEqualToName:(NSString *)name;
 - (BOOL)isEqual:(id)sym;
 - (NSUInteger)hash;

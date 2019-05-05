@@ -121,7 +121,8 @@
 
 - (id<JSDataProtocol>)quasiQuote:(id<JSDataProtocol>)ast {
     if (![self isPair:ast]) {
-        id<JSDataProtocol>arg = [JSSymbol isSymbol:ast] ? [(JSSymbol *)ast gensym] : ast;
+        //id<JSDataProtocol>arg = [JSSymbol isSymbol:ast] ? [(JSSymbol *)ast gensym] : ast;
+        id<JSDataProtocol>arg = ast;
         return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], arg] mutableCopy]];
     }
     JSList *lst = (JSList *)ast;
@@ -244,7 +245,7 @@
                     return [xs second];
                 } else if ([[sym name] isEqual:@"quasiquote"]) {
                     id<JSDataProtocol> exp = [xs second];
-                    exp = [JSSymbol isSymbol:exp] ? [(JSSymbol *)exp autoGensym] : exp;
+                    //exp = [JSSymbol isSymbol:exp] ? [(JSSymbol *)exp autoGensym] : exp;
                     ast = [self quasiQuote:exp];
                     continue;
                 } else if ([[sym name] isEqual:@"macroexpand"]) {

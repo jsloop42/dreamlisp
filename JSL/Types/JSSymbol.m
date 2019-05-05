@@ -142,10 +142,19 @@ NSArray *keywords = nil;
                 }
                 i++;
                 continue;
-            } else if ([sym position] == 0 && ([sym isEqualToName:@"def!"] || [sym isEqualToName:@"defmacro!"])) {
+            } else if ([sym position] == 0 && [sym isEqualToName:@"def!"]) {
                 i++;
-                [SymbolTable setSymbol:[ast nth:i]];  // def! binding name
+                [SymbolTable setSymbol:[ast nth:i]];
                 continue;
+            } else if ([sym position] == 0 && [sym isEqualToName:@"defmacro!"]) {
+                i++;
+                [SymbolTable setSymbol:[ast nth:i]];  // add binding name to main table
+                i++;
+                [SymbolTable startExpressionSymbolCapture];
+                [self updateBindingsForAST:[ast nth:i]];
+                [SymbolTable stopExpressionSymbolCapture];
+                [SymbolTable clearSymbolCapture];
+                return ast;
             } else if ([sym position] == 0 && [sym isEqualToName:@"fn*"]) {
                 i++;
                 JSList* elem = [ast nth:i];  // fn arguments
@@ -268,11 +277,6 @@ NSArray *keywords = nil;
     _position = -1;
 }
 
-- (void)updateArity {
-    _hasNArity = _arity == -1;
-    _isFunction = _arity >= -1;
-}
-
 - (NSString *)dataType {
     return [self className];
 }
@@ -333,9 +337,23 @@ NSArray *keywords = nil;
     return self;
 }
 
+- (void)updateArity {
+    _hasNArity = _arity == -1;
+    _isFunction = _arity >= -1;
+}
+
 - (NSString *)string {
     if (_initialArity <= -2) return _name;
     return [[NSString alloc] initWithFormat:@"%@/%@", _name, (_initialArity == -1) ? @"n" : [[NSString alloc] initWithFormat:@"%ld", _initialArity]];
+}
+
+- (void)copyProperties:(JSSymbol *)symbol {
+    _initialArity = [symbol initialArity];
+    _arity = _initialArity;
+    _isFunction = [symbol isFunction];
+    _meta = [symbol meta];
+    _position = [symbol position];
+    [self updateArity];
 }
 
 - (BOOL)isEqualToName:(NSString *)name {

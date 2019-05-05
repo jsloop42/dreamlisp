@@ -1029,7 +1029,6 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (nil))"], @"(nil)");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (unquote 7))"], @"7");
     XCTAssertEqualObjects([jsl rep:@"(def! a 8)"], @"8");
-    XCTAssertTrue([[jsl rep:@"(quasiquote a)"] containsString:@"__auto__"]);
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (unquote a))"], @"8");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 a 3))"], @"(1 a 3)");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 (unquote a) 3))"], @"(1 8 3)");
@@ -1064,13 +1063,6 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"`[1 ~@c 3]"], @"(1 1 \"b\" \"d\" 3)");
 }
 
-- (void)testQuine {
-    JSL *jsl = [JSL new];
-    XCTAssertEqualObjects(
-        [jsl rep:@"((fn* [q] (quasiquote ((unquote q) (quote (unquote q))))) (quote (fn* [q] (quasiquote ((unquote q) (quote (unquote q)))))))"],
-                 @"((fn* [q] (quasiquote ((unquote q) (quote (unquote q))))) (quote (fn* [q] (quasiquote ((unquote q) (quote (unquote q)))))))");
-}
-
 - (void)testMacro {
     JSL *jsl = [JSL new];
     [jsl rep:@"(defmacro! one (fn* () 1))"];
@@ -1094,31 +1086,32 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     // testing gensym
     XCTAssertEqualObjects([jsl rep:@"(= (gensym) (gensym))"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(let* [or_FIXME 23] (or false (+ or_FIXME 100)))"], @"123");
-    // testing identifier capture
+    // testing no symbol capture
     [jsl rep:@"(defmacro! pow2 (fn* (a) `(let* (x 2) (* ~a x))))"];
     [jsl rep:@"(def! inc2 (fn* (x) (pow2 x)))"];
-    XCTAssertNotEqualObjects([jsl rep:@"(inc2 5)"], @"10");
+    XCTAssertEqualObjects([jsl rep:@"(inc2 5)"], @"10");
     // testing auto gensym reader macro
     [jsl rep:@"(defmacro! pow2* (fn* (a) `(let* (x# 2) (* ~a x#))))"];
     [jsl rep:@"(def! inc2* (fn* (x) (pow2* x)))"];
     XCTAssertEqualObjects([jsl rep:@"(inc2* 5)"], @"10");
+    // Testing nested macros
+    // x# is not a gensym reader macro, but it is auto gensymed
     [jsl rep:@"(defmacro! p1 (fn* (a) `(let* (x# 10) (* ~a x#))))"];
     [jsl rep:@"(defmacro! p2 (fn* (a) `(let* (x# 2) (p1 (* ~a x#)))))"];
     [jsl rep:@"(def! n (fn* (x) (p2 x)))"];
     XCTAssertEqualObjects([jsl rep:@"(n 4)"], @"80");
     XCTAssertEqualObjects([jsl rep:@"(n 10)"], @"200");
-    [jsl rep:@"(defmacro! p3 (fn* (a) `(let* (x# 5) (p2 (* ~a x#)))))"];
+    [jsl rep:@"(defmacro! p3 (fn* (a) `(let* (x 5) (p2 (* ~a x)))))"];
     [jsl rep:@"(def! n (fn* (x) (p3 x)))"];
     XCTAssertEqualObjects([jsl rep:@"(n 4)"], @"400");
     XCTAssertEqualObjects([jsl rep:@"(n 5)"], @"500");
-    XCTAssertTrue([[jsl rep:@"`local-sym#"] containsString:@"__auto__"]);
-    NSString *str = [jsl rep:@"`(let* [x# [1 2 3]] (let* (y# (first x#)) y#))"];
-    NSString *xSym1 = [str substringWithRange:NSMakeRange(7, 12)];
-    NSString *ySym1 = [str substringWithRange:NSMakeRange(36, 12)];
-    NSString *xSym2 = [str substringWithRange:NSMakeRange(56, 12)];
-    NSString *ySym2 = [str substringWithRange:NSMakeRange(71, 12)];
-    XCTAssertEqualObjects(xSym1, xSym2);
-    XCTAssertEqualObjects(ySym1, ySym2);
+    XCTAssertEqualObjects([jsl rep:@"`local-sym#"], @"local-sym#");  // no auto gensym creation if not bounded to var
+    // (let* (x#__9__auto__ (1 2 3)) (let* (y#__10__auto__ (first x#__9__auto__)) y#__10__auto__))
+    [jsl rep:@"(defmacro! nested-let (fn* () `(let* [x# '(1 2 3)] (let* (y# (first x#)) y#))))"];
+    XCTAssertEqualObjects([jsl rep:@"(nested-let)"], @"1");
+    // (let* (x__6__auto__ (1 2 3)) (let* (y__11__auto__ (first x__6__auto__)) y__11__auto__))
+    [jsl rep:@"(defmacro! nested-let-1 (fn* () `(let* [x '(1 2 3)] (let* (y (first x)) y))))"];
+    XCTAssertEqualObjects([jsl rep:@"(nested-let-1)"], @"1");
 }
 
 void errorHandleFn(id param, int tag, int counter, const char *s) {
