@@ -341,17 +341,22 @@ double dmod(double a, double n) {
 
     id<JSDataProtocol>(^first)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
-        NSMutableArray *list = [xs first];
+        id<JSDataProtocol> list = [xs first];
         if ([xs isEmpty] || [JSNil isNil:list]) return [JSNil new];
-        id<JSDataProtocol> first = (id<JSDataProtocol>)[list first];
+        id<JSDataProtocol> first = nil;
+        if ([JSList isKindOfList:list]) {
+            first = (id<JSDataProtocol>)[(JSList *)list first];
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'list' or 'vector'", 1, [list dataTypeName]] throw];
+        }
         return (first == nil) ? [JSNil new] : first;
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:first argCount:1] forKey:@"first"];
 
     id<JSDataProtocol>(^rest)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
-        NSMutableArray *list = [xs first];
-        return ([[(id<JSDataProtocol>)list dataType] isEqual:@"JSNil"] || [list isEmpty]) ? [JSList new] : (JSList *)[list rest];
+        JSList *list = [JSVector dataToList:[xs first] position:1];
+        return ([JSNil isNil:list] || [list isEmpty]) ? [JSList new] : (JSList *)[list rest];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:rest argCount:1] forKey:@"rest"];
 
