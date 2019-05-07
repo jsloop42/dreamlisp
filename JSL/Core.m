@@ -355,8 +355,10 @@ double dmod(double a, double n) {
 
     id<JSDataProtocol>(^rest)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
-        JSList *list = [JSVector dataToList:[xs first] position:1];
-        return ([JSNil isNil:list] || [list isEmpty]) ? [JSList new] : (JSList *)[list rest];
+        id<JSDataProtocol> data = [xs first];
+        if ([JSNil isNil:data]) return [JSList new];
+        JSList *list = [JSVector dataToList:data position:1];
+        return [list isEmpty] ? [JSList new] : (JSList *)[list rest];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:rest argCount:1] forKey:@"rest"];
 
