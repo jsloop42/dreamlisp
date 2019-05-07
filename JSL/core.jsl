@@ -1,0 +1,13 @@
+;; A macro to define macros
+(defmacro! defmacro (fn* (symname args & form)
+ `(defmacro! ~symname (fn* ~args (do ~@form)))))
+
+;; Evaluates expressions one at a time. If an expression returns false, the function returns with the result else continues evaluation till the last expression
+;; is evaluated.
+(defmacro or () nil)
+(defmacro or (x) x)
+(defmacro or (x & more) `(let* (res ~x) (if res res (or ~@more))))
+
+;; A macro to define functions
+(defmacro defun (symname args & form)
+  `(def! ~symname (fn* ~args (do ~@form))))

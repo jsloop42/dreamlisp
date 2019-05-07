@@ -33,6 +33,7 @@
 		9E3055552261A162001D4597 /* TypeUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3055532261A162001D4597 /* TypeUtils.m */; };
 		9E3055602262633E001D4597 /* JSError.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30555F2262633E001D4597 /* JSError.m */; };
 		9E3055612262633E001D4597 /* JSError.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30555F2262633E001D4597 /* JSError.m */; };
+		9E30B8DE2281F6F000D4D737 /* core.jsl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
 		9E33AAB52275775800A6EB98 /* JSString.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB42275775800A6EB98 /* JSString.m */; };
 		9E33AAB62275775800A6EB98 /* JSString.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB42275775800A6EB98 /* JSString.m */; };
 		9E33AAB9227577C000A6EB98 /* JSKeyword.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB8227577C000A6EB98 /* JSKeyword.m */; };
@@ -85,12 +86,13 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		9E3A9D4822568AFC00348529 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			buildActionMask = 12;
+			dstPath = .;
+			dstSubfolderSpec = 16;
 			files = (
+				9E30B8DE2281F6F000D4D737 /* core.jsl in CopyFiles */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
