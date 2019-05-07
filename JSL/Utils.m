@@ -10,6 +10,11 @@
 
 @implementation Utils
 
++ (BOOL)matchString:(NSString *)string withExpression:(NSRegularExpression *)pattern {
+    NSArray *matches = [pattern matchesInString:string options:0 range:NSMakeRange(0, [string length])];
+    return ![matches isEmpty];
+}
+
 + (BOOL)matchString:(NSString *)string withPattern:(NSString *)pattern {
     NSRange range = [string rangeOfString:pattern options:NSRegularExpressionSearch range:NSMakeRange(0, [string length])];
     return range.location != NSNotFound;

@@ -11,11 +11,22 @@
 @implementation Reader {
     NSMutableArray *_tokens;
     NSUInteger _position;
+    NSString *_stringPattern;
+    NSString *_stringUnclosedPattern;
+    NSString *_numPattern;
+    NSString *_keywordPattern;
+    NSString *_tokenPattern;
+    NSRegularExpression *_stringExp;
+    NSRegularExpression *_stringUnclosedExp;
+    NSRegularExpression *_numExp;
+    NSRegularExpression *_keywordExp;
+    NSRegularExpression *_tokenExp;
 }
 
 - (instancetype)init {
     self = [super init];
     if (self) {
+        [self bootstrap];
         _tokens = [NSMutableArray new];
         _position = 0;
     }
@@ -25,10 +36,24 @@
 - (instancetype)initWithTokens:(NSMutableArray *)array {
     self = [super init];
     if (self) {
+        [self bootstrap];
         _tokens = array;
         _position = 0;
     }
     return self;
+}
+
+- (void)bootstrap {
+    _stringPattern = @"\"(?:\\\\.|[^\\\\\"])*\"";
+    _stringUnclosedPattern = @"\"(?:\\\\.|[^\\\\\"])*";
+    _numPattern = @"^-?\\d+(\\.\\d+)?$";
+    _keywordPattern = @"^:";
+    _stringExp = [NSRegularExpression regularExpressionWithPattern:_stringPattern options:0 error:nil];
+    _stringUnclosedExp = [NSRegularExpression regularExpressionWithPattern:_stringUnclosedPattern options:0 error:nil];
+    _numExp = [NSRegularExpression regularExpressionWithPattern:_numPattern options:0 error:nil];
+    _keywordExp = [NSRegularExpression regularExpressionWithPattern:_keywordPattern options:0 error:nil];
+    _tokenPattern = @"[\\s,]*(~@|[\\[\\]{}()'`~^@]|\"(?:[\\\\].|[^\\\\\"])*\"?|;.*|[^\\s\\[\\]{}()'\"`@,;]+)";
+    _tokenExp = [NSRegularExpression regularExpressionWithPattern:_tokenPattern options:0 error:nil];
 }
 
 - (nullable NSString *)next {
@@ -98,11 +123,6 @@
     return [[[JSList alloc] initWithArray:list] setPosition:0];
 }
 
-- (BOOL)matchString:(NSString *)string withPattern:(NSString *)pattern {
-    NSRange range = [string rangeOfString:pattern options:NSRegularExpressionSearch range:NSMakeRange(0, [string length])];
-    return range.location != NSNotFound;
-}
-
 - (void)symbolParseError:(NSString *)token {
     [[[JSError alloc] initWithFormat:SymbolParseError, token] throw];
 }
@@ -129,22 +149,19 @@
 
 - (nullable id<JSDataProtocol>)readAtom {
     NSString *token = [self next];
-    NSString *stringPattern = @"\"(?:\\\\.|[^\\\\\"])*\"";
-    NSString *stringUnclosed = @"\"(?:\\\\.|[^\\\\\"])*";
-    NSString *numPattern = @"^-?\\d+(\\.\\d+)?$";
-    NSString *keywordPattern = @"^:";
-    if ([self matchString:token withPattern:numPattern]) {
+
+    if ([Utils matchString:token withExpression:_numExp]) {
         return [[JSNumber alloc] initWithString:token];
-    } else if ([self matchString:token withPattern:keywordPattern]) {
+    } else if ([Utils matchString:token withExpression:_keywordExp]) {
         return [[JSKeyword alloc] initWithKeyword:token];
-    } else if ([self matchString:token withPattern:stringPattern]) {
+    } else if ([Utils matchString:token withExpression:_stringExp]) {
         NSString *stripped = [token substringWithRange:NSMakeRange(1, [token length] - 2)];
         NSString* ret = [[[[stripped stringByReplacingOccurrencesOfString:@"\\\\" withString:@"\u029e"]
                          stringByReplacingOccurrencesOfString:@"\\\"" withString:@"\""]
                          stringByReplacingOccurrencesOfString:@"\\n" withString:@"\n"]
                          stringByReplacingOccurrencesOfString:@"\u029e" withString:@"\\"];
         return  [[JSString alloc] initWithString:ret];
-    } else if ([self matchString:token withPattern:stringUnclosed]) {
+    } else if ([Utils matchString:token withExpression:_stringUnclosedExp]) {
         @throw [[NSException alloc] initWithName:JSL_QUOTE_MARK_MISMATCH reason:JSL_QUOTE_MARK_MISMATCH_MSG userInfo:nil];
     } else if ([token isEqual:@"true"]) {
         return [[JSBool alloc] initWithBool:true];
@@ -157,9 +174,7 @@
 }
 
 - (NSMutableArray *)tokenize:(NSString *)string {
-    NSString *pattern = @"[\\s,]*(~@|[\\[\\]{}()'`~^@]|\"(?:[\\\\].|[^\\\\\"])*\"?|;.*|[^\\s\\[\\]{}()'\"`@,;]+)";
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:NULL];
-    NSArray *matches = [regex matchesInString:string options:0 range:NSMakeRange(0, [string length])];
+    NSArray *matches = [_tokenExp matchesInString:string options:0 range:NSMakeRange(0, [string length])];
     NSMutableArray *tokenArr = [NSMutableArray array];
     for (NSTextCheckingResult *match in matches) {
         NSString * mstr = [string substringWithRange:[match rangeAtIndex:1]];

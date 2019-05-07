@@ -11,6 +11,7 @@
 @implementation JSNumber {
     NSDecimalNumber *_n;
     NSString *_decimalPattern;
+    NSRegularExpression *_decimalExp;
     BOOL _isDouble;
     id<JSDataProtocol> _meta;
     NSInteger _position;
@@ -113,6 +114,7 @@
 
 - (void)bootstrap {
     _decimalPattern = @"\\d+(\\.\\d+)";
+    _decimalExp = [NSRegularExpression regularExpressionWithPattern:_decimalPattern options:0 error:nil];
 }
 
 - (NSString *)dataType {
@@ -149,7 +151,7 @@
 }
 
 - (BOOL)checkDouble:(NSString *)string {
-    if ([Utils matchString:string withPattern:_decimalPattern]) {
+    if ([Utils matchString:string withExpression:_decimalExp]) {
         return YES;
     }
     return NO;
