@@ -82,6 +82,27 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     }
 }
 
+- (NSMutableArray<NSString *> *)loadFileFromPath:(NSArray *)locations isConcurrent:(BOOL)isConcurrent {
+    NSMutableArray *contents = [locations mutableCopy];
+    NSLock *lock = [NSLock new];
+    if (isConcurrent) {
+        [locations enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [lock lock];
+            [contents add:[NSString stringWithContentsOfFile:locations[idx] encoding:NSUTF8StringEncoding error:nil] atIndex:idx];
+            [lock unlock];
+        }];
+    } else {
+        [locations enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [contents add:[NSString stringWithContentsOfFile:locations[idx] encoding:NSUTF8StringEncoding error:nil] atIndex:idx];
+        }];
+    }
+    return contents;
+}
+
+- (NSString *)currentPath {
+    return [_fm currentDirectoryPath];
+}
+
 - (BOOL)hashNext {
     return _start < _buff;
 }
