@@ -14,7 +14,10 @@
     Env *_env;
     Core *_core;
     SymbolTable *_symTable;
-    NSArray *keywords;
+    NSArray *_keywords;
+    BOOL _isQusiquoteMode;
+    BOOL _shouldUnquote;
+    FileOps *_fileOps;
 }
 
 @synthesize env = _env;
@@ -33,10 +36,14 @@
     _core = [Core new];
     _symTable = [SymbolTable new];
     _env = [[Env alloc] initWithTable:_symTable];
-    keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"macroexpand", @"try*", @"catch*"];
+    _fileOps = [FileOps new];
+    _isQusiquoteMode = NO;
+    _shouldUnquote = NO;
+    _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*"];
     [self setCoreFunctionsToREPL:_env];
     [self setEvalToREPL];
-    [self setJSLFuns];
+    //[self setJSLFuns];
+    //[self loadCoreLib];
 }
 
 - (void)setCoreFunctionsToREPL:(Env *)env {
@@ -81,6 +88,14 @@
     [self rep:@"(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs))" \
                "(if ~condvar ~condvar (or ~@(rest xs)))))))))"];
     [self rep:@"(def! exit (fn* () (do (println \"Bye.\") (exit*))))"];
+}
+
+- (void)loadCoreLib {
+    NSString *cwd = [_fileOps currentPath];
+    NSString *corelib = [[NSString alloc] initWithFormat:@"%@/core.jsl", cwd];
+    [[_fileOps loadFileFromPath:@[corelib] isConcurrent:YES] enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [self rep:obj];
+    }];
 }
 
 - (id<JSDataProtocol>)read:(NSString *)string {
@@ -289,6 +304,8 @@
     }
 }
 
+#pragma mark Auto gensym
+
 /** If the given symbol is present in the symbol table, updates the given symbol to match. */
 - (JSSymbol * _Nullable)updateSymbol:(JSSymbol *)symbol table:(SymbolTable *)table {
     JSSymbol *aSym = [table symbol:symbol];
@@ -320,20 +337,15 @@
             [arrLock lock];
             [arr update:aSym atIndex:idx];
             [arrLock unlock];
-        } else if ([JSVector isVector:obj]) {
-            obj = [self updateBindingsForVector:obj table:table];
-        } else if ([JSList isList:obj]) {
-            obj = [self updateBindingsForAST:obj table:table];
-        } else if ([JSHashMap isHashMap:obj]) {
-            obj = [self updateBindingsForHashMap:obj table:table];
+        } else {
+            [self updateBindingsForAST:obj table:table];
         }
     }];
     [ast setValue:arr];
     return ast;
 }
 
-- (JSList *)updateBindingsForAST:(JSList *)ast table:(SymbolTable *)table {
-    if (![JSList isList:ast]) return ast;
+- (JSList *)updateBindingsForList:(JSList *)ast table:(SymbolTable *)table {
     NSUInteger len = [ast count];
     NSUInteger i = 0;
     for (i = 0; i < len; i++) {
@@ -355,33 +367,52 @@
                         [elem autoGensym];  // let* binding symbols are gensymed always
                         [letTable setSymbol:elem];
                     }
-                    id<JSDataProtocol> exp = [self updateBindingsForAST:bindings[j + 1] table:letTable];
-                    if ([JSSymbol isSymbol:exp withName:@"let*"]) {
-                        SymbolTable *innerLet = [[SymbolTable alloc] initWithTable:letTable];
-                        exp = [self updateBindingsForAST:exp table:innerLet];
-                        letTable = innerLet; // for the new nested let scope
-                    } else if ([JSList isList:exp]) {
-                        exp = [self updateBindingsForAST:exp table:letTable];
-                    } else if ([JSVector isVector:exp]) {
-                        exp = [self updateBindingsForVector:exp table:letTable];
-                    } else if ([JSHashMap isHashMap:exp]) {
-                        exp = [self updateBindingsForHashMap:exp table:letTable];
-                    }
+                    // value part of the let*
+                    [self updateBindingsForAST:bindings[j + 1] table:letTable];
                 }
                 table = letTable; // for the let scope
                 i++;
                 continue;
             } else if ([sym position] == 0 && [sym isEqualToName:@"def!"]) {
                 i++;
-                [table setSymbol:[ast nth:i]];
+                if (_isQusiquoteMode) [table setSymbol:[ast nth:i]];
                 continue;
             } else if ([sym position] == 0 && [sym isEqualToName:@"defmacro!"]) {
                 i++;
-                [table setSymbol:[ast nth:i]];  // add binding name to main table
-                SymbolTable *macroTable = [[SymbolTable alloc] initWithTable:table];
+                if (_isQusiquoteMode) {
+                    [table setSymbol:[ast nth:i]];  // add binding name to main table
+                    SymbolTable *macroTable = [[SymbolTable alloc] initWithTable:table];
+                    i++;
+                    [self updateBindingsForAST:[ast nth:i] table:macroTable];
+                    return ast;
+                }
+                continue;
+            } else if ([sym position] == 0 && [sym isEqualToName:@"quasiquote"]) {
                 i++;
-                [self updateBindingsForAST:[ast nth:i] table:macroTable];
-                return ast;
+                if (!_isQusiquoteMode) {
+                    // In quasiquote mode, generate symbols unless unquote is found, where only lookup is to be performed
+                    _isQusiquoteMode = YES;
+                    _shouldUnquote = YES;
+                    id<JSDataProtocol> symForm = [self updateBindingsForAST:[ast nth:i] table:table];
+                    _isQusiquoteMode = NO;
+                    _shouldUnquote = NO;
+                    [ast update:symForm atIndex:i];
+                } else {
+                    // already in quasiquote mode => should not unquote, write as is
+                    _shouldUnquote = NO;
+                }
+                continue;
+            } else if ([sym position] == 0 && ([sym isEqualToName:@"unquote"] || [sym isEqualToName:@"splice-unquote"])) {
+                if (_isQusiquoteMode && _shouldUnquote) {
+                    NSMutableArray *arr = [ast value];
+                    [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                        if (idx != 0) {
+                            [self updateMacroBindingsForAST:obj table:table];
+                        }
+                    }];
+                } else {
+                    //@throw
+                }
             } else if ([sym position] == 0 && [sym isEqualToName:@"fn*"]) {
                 SymbolTable *fnTable = [[SymbolTable alloc] initWithTable:table];
                 i++;
@@ -410,21 +441,84 @@
 
             } else if ([sym position] == 0 && [sym isEqualToName:@"apply"]) {
 
-            } else if ([sym position] == 0 && [keywords containsObject:sym]) {
+            } else if ([sym position] == 0 && [_keywords containsObject:sym]) {
                 continue;
             } else {
                 // Update symbol in the list if there is a binding found
                 [self updateSymbol:[ast nth:i] table:table];
             }
-        } else if ([JSList isList:elem]) {  // (fn, args)
-            elem = [self updateBindingsForAST:elem table:table];
-        } else if ([JSVector isVector:elem]) {
-            elem = [self updateBindingsForVector:elem table:table];
-        } else if ([JSHashMap isHashMap:elem]) {
-            elem = [self updateBindingsForHashMap:elem table:table];
+        } else {
+            // element is not a symbol
+            [self updateBindingsForAST:elem table:table];
         }
     }
     return ast;
+}
+
+- (JSSymbol *)updateBindingsForSymbol:(JSSymbol *)symbol table:(SymbolTable *)table {
+    // called when list functions at 0th place which doesn't match the special forms, other symbols
+    [self updateSymbol:symbol table:table];
+    return symbol;
+}
+
+- (JSHashMap *)updateMacroBindingsForHashMap:(JSHashMap *)hashmap table:(SymbolTable *)table {
+    if (_isQusiquoteMode) {
+    }
+    return hashmap;
+}
+
+- (JSVector *)updateMacroBindingsForVector:(JSVector *)xs table:(SymbolTable *)table {
+    if (_isQusiquoteMode) {
+        NSMutableArray *arr = [xs value];
+        [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([JSSymbol isSymbol:obj]) {
+                [self updateBindingsForSymbol:obj table:table];
+            } else {
+                [self updateMacroBindingsForAST:obj table:table];
+            }
+        }];
+    }
+    return xs;
+}
+
+- (JSList *)updateMacroBindingsForList:(JSList *)xs table:(SymbolTable *)table {
+    if (_isQusiquoteMode) {
+        NSMutableArray *arr = [xs value];
+        [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([JSSymbol isSymbol:obj]) {
+                [self updateBindingsForSymbol:obj table:table];
+            } else {
+                [self updateMacroBindingsForAST:obj table:table];
+            }
+        }];
+    }
+    return xs;
+}
+
+- (id<JSDataProtocol>)updateMacroBindingsForAST:(id<JSDataProtocol>)xs table:(SymbolTable *)table {
+    if ([JSList isList:xs]) {
+        [self updateMacroBindingsForList:xs table:table];
+    } else if ([JSVector isVector:xs]) {
+        [self updateMacroBindingsForVector:xs table:table];
+    } else if ([JSHashMap isHashMap:xs]) {
+        [self updateMacroBindingsForHashMap:xs table:table];
+    } else if ([JSSymbol isSymbol:xs]) {
+        [self updateBindingsForSymbol:xs table:table];
+    }
+    return xs;
+}
+
+- (id<JSDataProtocol>)updateBindingsForAST:(id<JSDataProtocol>)xs table:(SymbolTable *)table {
+    if ([JSList isList:xs]) {
+        [self updateBindingsForList:xs table:table];
+    } else if ([JSVector isVector:xs]) {
+        [self updateBindingsForVector:xs table:table];
+    } else if ([JSHashMap isHashMap:xs]) {
+        [self updateBindingsForHashMap:xs table:table];
+    } else if ([JSSymbol isSymbol:xs]) {
+        [self updateBindingsForSymbol:xs table:table];
+    }
+    return xs;
 }
 
 - (NSString *)print:(id<JSDataProtocol>)data {

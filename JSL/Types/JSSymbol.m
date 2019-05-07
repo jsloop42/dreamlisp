@@ -131,16 +131,14 @@
 }
 
 - (JSSymbol *)gensym {
-    NSUInteger count = [_name count];
     if (_position == 0) {
-        _name = [[NSString alloc] initWithFormat:@"%@__%ld__auto__", [_name substringToIndex:count], [State counter]];
+        _name = [[NSString alloc] initWithFormat:@"%@__%ld__auto__", [_name substringToIndex:[_name count]], [State counter]];
     }
     return self;
 }
 
 - (JSSymbol *)autoGensym {
-    NSUInteger count = [_name count];
-    _name = [[NSString alloc] initWithFormat:@"%@__%ld__auto__", [_name substringToIndex:count], [State counter]];
+    _name = [[NSString alloc] initWithFormat:@"%@__%ld__auto__", [_name substringToIndex:[_name count]], [State counter]];
     return self;
 }
 

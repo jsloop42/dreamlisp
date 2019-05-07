@@ -663,6 +663,9 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(apply (fn* (& more) (list? more)) [1 2 3])"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn* (& more) (list? more)) [])"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn* (a & more) (list? more)) [1])"], @"true");
+    // test bindings
+    [jsl rep:@"(def! a (fn* (x) (let* (y x z (* x x)) (+ y z))))"];
+    XCTAssertEqualObjects([jsl rep:@"(a 10)"], @"110");
 }
 
 - (void)testMultiArityFunctions {
@@ -1466,6 +1469,8 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'number'.\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1.0) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'number'.\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (empty? (atom 1)) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'atom'.\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (first true) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' or 'vector' for argument 1 but" \
+                          " obtained 'bool'.\"");
     // Function not found
     @try {
         XCTAssertThrowsSpecificNamed([jsl rep:@"(last [1 2 3])"], NSException, JSLException, @"'last/1' not found");
@@ -1493,7 +1498,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)test {
     JSL *jsl = [JSL new];
-    XCTAssertEqualObjects([jsl rep:@"(let* (a 5 b 6) [3 4 a [b 7] 8])"], @"[3 4 5 [6 7] 8]");
+    //XCTAssertEqualObjects([jsl rep:@"(let* (a 5 b 6) [3 4 a [b 7] 8])"], @"[3 4 5 [6 7] 8]");
 }
 
 - (void)notestPerformanceJSListDropFirst {
