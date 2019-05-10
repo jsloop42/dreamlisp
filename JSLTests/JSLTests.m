@@ -1498,7 +1498,12 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)test {
     JSL *jsl = [JSL new];
-    //XCTAssertEqualObjects([jsl rep:@"(let* (a 5 b 6) [3 4 a [b 7] 8])"], @"[3 4 5 [6 7] 8]");
+    //[jsl rep:@"`(fn* (x) `(let* (y 4) `(let* (z ~y) (+ ~x z))))"];
+    @try {
+        [jsl rep:@"`(fn* (symname args & form) `(defmacro! ~symname (fn* ~args (do ~@form))))"];
+    } @catch (NSException *excep) {
+        [jsl printException:excep log:YES readably:YES];
+    }
 }
 
 - (void)notestPerformanceJSListDropFirst {
