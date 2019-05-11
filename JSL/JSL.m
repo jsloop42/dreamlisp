@@ -42,9 +42,9 @@
     _quasiquoteDepth = 0;
     _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*"];
     [self setCoreFunctionsToREPL:_env];
+    [self setLoadFileToREPL];
     [self setEvalToREPL];
-    [self setJSLFuns];
-    //[self loadCoreLib];
+    [self loadCoreLib];
 }
 
 - (void)setCoreFunctionsToREPL:(Env *)env {
@@ -78,32 +78,36 @@
     [[self env] setObject:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
 }
 
-- (void)setJSLFuns {
-    [self rep:@"(def! not (fn* (a) (if a false true)))"];
-    [self rep:@"(def! load-file (fn* (x) (eval (read-string (str \"(do \" (slurp x) \")\")))))"];
-    [self rep:@"(defmacro! cond (fn* (& xs) (if (> (count xs) 0) `(if ~(first xs) ~(if (> (count xs) 1) (nth xs 1) " \
-               "(throw \"odd number of forms to cond\")) (cond ~@(rest (rest xs)))))))"];
-    [self rep:@"(def! *gensym-counter* (atom 0))"];
-    [self rep:@"(def! gensym (fn* () (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"];
-    [self rep:@"(def! gensym (fn* (sym) (symbol (str sym (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))"];
-    [self rep:@"(defmacro! defmacro (fn* (symname args & form) `(defmacro! ~symname (fn* ~args (do ~@form)))))"];
-    [self rep:@"(defmacro or () nil)"];
-    [self rep:@"(defmacro or (x) x)"];
-    [self rep:@"(defmacro or (x & more) `(let* (res ~x) (if res res (or ~@more))))"];
-//    [self rep:@"(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs))" \
-//               "(if ~condvar ~condvar (or ~@(rest xs)))))))))"];
-    [self rep:@"(def! exit (fn* () (do (println \"Bye.\") (exit*))))"];
+- (void)setLoadFileToREPL {
+    JSL * __weak weakSelf = self;
+    id<JSDataProtocol>(^loadFile)(NSMutableArray *arg) = ^id<JSDataProtocol>(NSMutableArray *arg) {
+        JSL *this = weakSelf;
+        NSString *path = [[JSString dataToString:arg[0]] value];
+        [[this->_fileOps loadFileFromPath:[@[path] mutableCopy] isConcurrent:NO isLookup:NO]
+         enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [this rep:[obj content]];
+        }];
+        [self rep:[[NSString alloc] initWithFormat:@"(println \"#(ok %@)\")", [path lastPathComponent]]];
+        return nil;
+    };
+    [[self env] setObject:[[JSFunction alloc] initWithFn:loadFile argCount:1] forSymbol:[[JSSymbol alloc] initWithArity:1 string:@"load-file"]];
+}
+
+- (NSString *)coreLibPath:(NSString *)path {
+    return [[NSString alloc] initWithFormat:@"%@/core.jsl", path];
 }
 
 - (void)loadCoreLib {
-    NSString *cwd = [_fileOps currentPath];
-    NSString *corelib = [[NSString alloc] initWithFormat:@"%@/core.jsl", cwd];
-    [[_fileOps loadFileFromPath:@[corelib] isConcurrent:YES] enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [self rep:obj];
+    NSMutableArray *paths = [NSMutableArray new];
+    [paths addObject:[self coreLibPath:[_fileOps currentDirectoryPath]]];
+    [paths addObject:[self coreLibPath:[_fileOps bundlePath]]];
+    [[_fileOps loadFileFromPath:paths isConcurrent:YES isLookup:YES] enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx,
+                                                                                                  BOOL * _Nonnull stop) {
+        [self rep:[obj content]];
     }];
 }
 
-- (id<JSDataProtocol>)read:(NSString *)string {
+- (NSMutableArray<id<JSDataProtocol>> *)read:(NSString *)string {
     return [_reader readString:string];
 }
 
@@ -148,12 +152,10 @@
 
 - (id<JSDataProtocol>)quasiQuote:(id<JSDataProtocol>)ast {
     if (![self isPair:ast]) {
-        //id<JSDataProtocol>arg = [JSSymbol isSymbol:ast] ? [(JSSymbol *)ast gensym] : ast;
         id<JSDataProtocol>arg = ast;
         return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], arg] mutableCopy]];
     }
     JSList *lst = (JSList *)ast;
-    //lst = [JSSymbol updateBindingsForAST:lst symbols:nil];
     NSMutableArray *xs = [lst value];
     id<JSDataProtocol> first = [xs first];
     if ([JSSymbol isSymbol:first] && [[(JSSymbol *)first name] isEqual:@"unquote"]) return [xs second];
@@ -225,7 +227,6 @@
                             if ([JSSymbol isSymbol:[catchxs first]] && [[(JSSymbol *)[catchxs first] name] isNotEqualTo:@"catch*"]) {
                                 [[[JSError alloc] initWithData:[catchxs first]] throw];
                             }
-                            //catchxs = [JSSymbol updateBindingsForAST:catchxs symbols:nil];
                             Env *catchEnv = [[Env alloc] initWithEnv:env binds:[@[(JSSymbol *)[catchxs second]] mutableCopy]
                                                                exprs:[@[[self exceptionInfo:exception]] mutableCopy]];
                             return [self eval:[catchxs nth:2] withEnv:catchEnv];
@@ -256,7 +257,6 @@
                     };
                     return [[JSFunction alloc] initWithAst:[xs nth:2] params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
                 } else if ([[sym name] isEqual:@"let*"]) {
-                    //ast = [JSSymbol updateBindingsForAST:ast symbols:nil];
                     Env *letEnv = [[Env alloc] initWithEnv:env];
                     NSMutableArray *bindings = [JSVector isVector:[xs second]] ? [(JSVector *)[xs second] value] : [(JSList *)[xs second] value];
                     NSUInteger len = [bindings count];
@@ -272,7 +272,6 @@
                     return [xs second];
                 } else if ([[sym name] isEqual:@"quasiquote"]) {
                     id<JSDataProtocol> exp = [xs second];
-                    //exp = [JSSymbol isSymbol:exp] ? [(JSSymbol *)exp autoGensym] : exp;
                     ast = [self quasiQuote:exp];
                     continue;
                 } else if ([[sym name] isEqual:@"macroexpand"]) {
@@ -327,7 +326,6 @@
     NSUInteger i = 0;
     id<JSDataProtocol> obj = nil;
     for (i = 0; i < len; i++) {
-        //obj =
     }
     return ast;
 }
@@ -379,8 +377,10 @@
                 i++;
                 continue;
             } else if ([sym position] == 0 && [sym isEqualToName:@"def!"]) {
-                i++;
-                if (_isQuasiquoteMode) [table setSymbol:[ast nth:i]];  // Setting the def! bind name to symbol table
+                if (!_isQuasiquoteMode) {
+                    i++;
+                    [table setSymbol:[ast nth:i]];  // Setting the def! bind name to symbol table
+                }
                 continue;
             } else if ([sym position] == 0 && [sym isEqualToName:@"defmacro!"]) {
                 if (!_isQuasiquoteMode) {  // process defmacro! else, move to next symbol
@@ -397,16 +397,6 @@
                 i++;
                 _quasiquoteDepth += 1;
                 _isQuasiquoteMode = YES;
-                // TODO:
-                // 1. user> (eval `(let* (a 1) `(let* (b 3) (+ b a))))
-                // (let* (b__5__auto__ 3) (+ b__5__auto__ a__3__auto____4__auto__))
-                //                                        ^_ symbol
-                //
-                // 2. `(let* (a 1) (do (println a))))
-                // (let* (a__17__auto__ 1) (do (println a__17__auto__)))  -> should be (let* (a__17__auto__ 1) (do (println a)))
-                // Here (println a) should resolve to global. To print the value, unquote is needed. `(let* (a 1) (do (println ~a)))), which should give
-                // (let* (a__17__auto__ 1) (do (println a__17__auto__)))
-
                 // RULE: If no ~ or ~@ then no symbol lookup takes place - all are treated global. If ' encountered, no symbol lookup.
                 id<JSDataProtocol> symForm = [self updateBindingsForAST:[ast nth:i] table:table];
                 _quasiquoteDepth -= 1;
@@ -424,6 +414,7 @@
                         }
                     }];
                 } else {
+                    // TODO:
                     //@throw
                 }
             } else if ([sym position] == 0 && [sym isEqualToName:@"fn*"]) {
@@ -449,12 +440,8 @@
                     }
                     [symArgs setObject:arg atIndexedSubscript:i];
                 }
-                //[elem setValue:symArgs];  //update the args list with gensymed version
-                //[ast update:elem atIndex:i];  // TODO: remove this -> mutable ast?
                 table = fnTable;
                 continue;
-//          } else if ([sym position] == 0 && [sym isEqualToName:@"swap!"]) {
-
             } else if ([sym position] == 0 && [sym isEqualToName:@"apply"]) {
 
             } else if ([sym position] == 0 && [_keywords containsObject:[sym name]]) {
@@ -550,9 +537,15 @@
 }
 
 - (NSString *)rep:(NSString *)string {
-    id<JSDataProtocol> exp = [self read:string];
-    exp = [self updateBindingsForAST:exp table:_symTable];
-    return [self print:[self eval:exp withEnv:[self env]]];
+    NSMutableArray<id<JSDataProtocol>> *exps = [self read:string];
+    NSUInteger len = [exps count];
+    NSUInteger i = 0;
+    NSString *ret = nil;
+    for (i = 0; i < len; i++) {
+        [self updateBindingsForAST:exps[i] table:_symTable];
+        ret = [self print:[self eval:exps[i] withEnv:[self env]]];
+    }
+    return ret;
 }
 
 - (nullable id<JSDataProtocol>)exceptionInfo:(NSException *)exception {

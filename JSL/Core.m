@@ -436,7 +436,8 @@ double dmod(double a, double n) {
     id<JSDataProtocol>(^readString)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         Core *this = weakSelf;
-        return [this->_reader readString:[[JSString dataToString:[xs first]] value]];
+        NSMutableArray *exprs = [this->_reader readString:[[JSString dataToString:[xs first]] value]];
+        return ([exprs count] == 0) ? [JSNil new] : exprs[0];
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:readString argCount:1] forKey:@"read-string"];
 

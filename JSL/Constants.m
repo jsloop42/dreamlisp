@@ -8,7 +8,7 @@
 
 #import "Constants.h"
 
-NSString * const JSLVersion = @"2.1";
+NSString * const JSLVersion = @"3.0";
 
 #pragma mark Error constant
 

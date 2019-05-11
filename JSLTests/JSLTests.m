@@ -133,7 +133,7 @@
     Reader *reader = [Reader new];
     Printer *printer = [Printer new];
     NSString *(^print)(NSString *) = ^NSString *(NSString *exp) {
-        return [printer printStringFor:[reader readString:exp] readably:true];
+        return [printer printStringFor:[reader readString:exp][0] readably:true];
     };
     XCTAssertEqualObjects(print(@"(1 2 3)"), @"(1 2 3)");
     XCTAssertEqualObjects(print(@"[1 2 3]"), @"[1 2 3]");
@@ -166,7 +166,7 @@
     Printer *printer = [Printer new];
     NSString *exp = @"{\"a\" \"abc\" \"b\" \"bcd\" \"c\" \"cde\"}";
     NSArray *inp = @[@"a", @"abc", @"b", @"bcd", @"c", @"cde"];
-    id<JSDataProtocol> data = [reader readString:exp];
+    id<JSDataProtocol> data = [reader readString:exp][0];
     NSString *ret = [printer printStringFor:data readably:false];
     NSArray *arr = [[[ret stringByReplacingOccurrencesOfString:@"{" withString:@""] stringByReplacingOccurrencesOfString:@"}" withString:@""]
                     componentsSeparatedByString:@" "];
@@ -675,7 +675,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(a)"], @"0");
     XCTAssertEqualObjects([jsl rep:@"(a 3)"], @"1");
     // variadic function
-    XCTAssertEqualObjects([jsl rep:@"(def! x (fn* (& more) more)))"], @"#<function>");
+    XCTAssertEqualObjects([jsl rep:@"(def! x (fn* (& more) more))"], @"#<function>");
     XCTAssertEqualObjects([jsl rep:@"x/n"], @"#<function>");
     XCTAssertEqualObjects([jsl rep:@"(first (x 1 2 3 4))"], @"1");
 }
@@ -1255,7 +1255,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(read-string \"(1 2 (3 4) nil)\")"], @"(1 2 (3 4) nil)");
     XCTAssertEqualObjects([jsl rep:@"(read-string \"(+ 2 3)\")"], @"(+ 2 3)");
     XCTAssertEqualObjects([jsl rep:@"(read-string \"7 ;; comment\")"], @"7");
-    XCTAssertNil([jsl rep:@"(read-string \";; comment\")"]);
+    XCTAssertEqualObjects([jsl rep:@"(read-string \";; comment\")"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(eval (read-string \"(+ 2 3)\"))"], @"5");
     [fops createFileIfNotExist:@"/tmp/jsl-test.txt"];
     [fops append:@"A line of text\n" completion: ^{
@@ -1263,7 +1263,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
         [fops closeFile];
         [fops delete:@"/tmp/jsl-test.txt"];
     }];
-    XCTAssertNil([jsl rep:@"(read-string \";\")"]);
+    XCTAssertEqualObjects([jsl rep:@"(read-string \";\")"], @"nil");
     // File read exception
     @try {
         [jsl rep:@"(slurp \"foo\")"];
@@ -1479,6 +1479,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     }
 }
 
+/** The expressions loaded and evaluated from file should be added to the env just like it is evaluated from REPL. */
 - (void)testScopeWithFile {
     JSL *jsl = [JSL new];
     NSString *scopePath = [self pathForFile:@"scope.jsl"];
@@ -1497,13 +1498,12 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)test {
-    JSL *jsl = [JSL new];
-    //[jsl rep:@"`(fn* (x) `(let* (y 4) `(let* (z ~y) (+ ~x z))))"];
-    @try {
-        [jsl rep:@"`(fn* (symname args & form) `(defmacro! ~symname (fn* ~args (do ~@form))))"];
-    } @catch (NSException *excep) {
-        [jsl printException:excep log:YES readably:YES];
-    }
+    JSL *jsl = [JSL new];    
+    //@try {
+        [jsl rep:@"(def! x (fn* (& more) more))"];
+    //} @catch (NSException *excep) {
+        //[jsl printException:excep log:YES readably:YES];
+    //}
 }
 
 - (void)notestPerformanceJSListDropFirst {

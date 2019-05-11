@@ -12,13 +12,19 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@interface FileResult : NSObject
+@property (nonatomic, readonly) NSUInteger index;
+@property (nonatomic, readonly) NSString *content;
+@end
+
 @interface FileOps : NSObject
 - (instancetype)init;
 - (void)createFileIfNotExist:(NSString *)path;
 - (void)openFile:(NSString *)path;
 - (void)closeFile;
-- (NSMutableArray<NSString *> *)loadFileFromPath:(NSArray *)locations isConcurrent:(BOOL)isConcurrent;
-- (NSString *)currentPath;
+- (NSMutableArray<FileResult *> *)loadFileFromPath:(NSMutableArray *)locations isConcurrent:(BOOL)isConcurrent isLookup:(BOOL)isLookup;
+- (NSString *)currentDirectoryPath;
+- (NSString *)bundlePath;
 - (BOOL)hashNext;
 - (NSString *)readLine;
 - (void)append:(NSString *)string completion:(void  (^ _Nullable)(void))callback;

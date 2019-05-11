@@ -11,3 +11,27 @@
 ;; A macro to define functions
 (defmacro defun (symname args & form)
   `(def! ~symname (fn* ~args (do ~@form))))
+
+(def! greet (fn* () (println "hello")))
+
+;; Negates the given boolean value
+(def! not (fn* (a) (if a false true)))
+
+;; Evaluates the expression and if true, evaluates the corresponding form, else continues with the next expression
+(defmacro! cond (fn* (& xs)
+  (if (> (count xs) 0)
+   `(if ~(first xs)
+     ~(if (> (count xs) 1)
+       (nth xs 1)
+       (throw "Odd number of forms to cond"))
+    (cond ~@(rest (rest xs)))))))
+
+;; A counter to generate unique symbol name
+(def! *gensym-counter* (atom 0))
+
+;; Generate unique symbol name
+(def! gensym (fn* () (symbol (str "G__" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))
+(def! gensym (fn* (sym) (symbol (str sym (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))
+
+;; Exit the REPL
+(def! exit (fn* () (do (println "Bye.") (exit*))))

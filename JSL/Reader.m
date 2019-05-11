@@ -23,6 +23,8 @@
     NSRegularExpression *_tokenExp;
 }
 
+@synthesize position = _position;
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -71,16 +73,28 @@
     _position++;
 }
 
-- (nullable id<JSDataProtocol>)readString:(NSString *)string {
+- (nullable NSMutableArray<id<JSDataProtocol>> *)readString:(NSString *)string {
     NSMutableArray *tokens = [self tokenize:string];
     if ([tokens count] <= 0) return nil;
     Reader *reader = [[Reader alloc] initWithTokens:tokens];
-    return [reader readForm];
+    NSMutableArray *exprs = [NSMutableArray new];
+    // Evaluate more than one expressions if encountered
+    while ([reader position] < [tokens count]) {
+        [exprs addObject:[reader readForm]];
+    }
+    return exprs;
 }
 
 - (nullable id<JSDataProtocol>)readForm {
     NSString *token = [self peek];
-    if (token == nil) @throw [[NSException alloc] initWithName:JSL_TOKEN_EMPTY reason:JSL_TOKEN_EMPTY_MSG userInfo:nil];
+    if (token == nil) {
+        NSUInteger count = [_tokens count];
+        while (_position < count) {
+            token = [self peek];
+            if (token) break;
+        }
+        if (_position == count) @throw [[NSException alloc] initWithName:JSL_TOKEN_EMPTY reason:JSL_TOKEN_EMPTY_MSG userInfo:nil];
+    }
     if ([token isEqual:@"("] || [token isEqual:@"["] || [token isEqual:@"{"]) {
         return [self readListStartingWith:token];
     } else if ([token isEqual:@"'"] || [token isEqual:@"`"] || [token isEqual:@"~"] || [token isEqual:@"~@"] || [token isEqual:@"@"]) {
@@ -149,7 +163,6 @@
 
 - (nullable id<JSDataProtocol>)readAtom {
     NSString *token = [self next];
-
     if ([Utils matchString:token withExpression:_numExp]) {
         return [[JSNumber alloc] initWithString:token];
     } else if ([Utils matchString:token withExpression:_keywordExp]) {

@@ -11,6 +11,24 @@
 NSString * const READ_ERROR = @"READ_ERROR";
 NSString * const READ_ERROR_MSG = @"Error reading file.";
 
+@implementation FileResult {
+    NSUInteger _index;
+    NSString *_content;
+}
+
+@synthesize index = _index;
+@synthesize content = _content;
+
+-(void)setIndex:(NSUInteger)index {
+    _index = index;
+}
+
+-(void)setContent:(NSString * _Nonnull)content {
+    _content = content;
+}
+
+@end
+
 @implementation FileOps {
     NSString *_path;
     NSURL *_filePath;
@@ -82,25 +100,46 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     }
 }
 
-- (NSMutableArray<NSString *> *)loadFileFromPath:(NSArray *)locations isConcurrent:(BOOL)isConcurrent {
-    NSMutableArray *contents = [locations mutableCopy];
+/**
+  Load file from the given paths.
+  @param locations An array containing path string
+  @param isConcurrent Should the loading be done concurrently. Concurrent option does not present loading order.
+  @param isLookup Is the file loading lookup based, in which case, the process will stop after the first successful load.
+  @return contents An array containing @c FileResult objects.
+ */
+- (NSMutableArray<FileResult *> *)loadFileFromPath:(NSMutableArray *)locations isConcurrent:(BOOL)isConcurrent isLookup:(BOOL)isLookup {
+    NSMutableArray<FileResult *> *contents = [NSMutableArray new];
     NSLock *lock = [NSLock new];
-    if (isConcurrent) {
-        [locations enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [lock lock];
-            [contents add:[NSString stringWithContentsOfFile:locations[idx] encoding:NSUTF8StringEncoding error:nil] atIndex:idx];
-            [lock unlock];
-        }];
-    } else {
-        [locations enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [contents add:[NSString stringWithContentsOfFile:locations[idx] encoding:NSUTF8StringEncoding error:nil] atIndex:idx];
-        }];
-    }
+    NSEnumerationOptions opt = isConcurrent ? NSEnumerationConcurrent : 0;
+    FileOps * __weak weakSelf = self;
+    [locations enumerateObjectsWithOptions:opt usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        FileOps *this = weakSelf;
+        NSString *path = locations[idx];
+        if ([this->_fm fileExistsAtPath:path]) {
+            FileResult *result = [FileResult new];
+            [result setIndex:idx];
+            [result setContent:[NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil]];
+            if (isConcurrent) [lock lock];
+            if (isLookup && [contents count] == 0) {
+                [contents addObject:result];
+                *stop = YES;
+            } else if (!isLookup) {
+                [contents addObject:result];
+            }
+            if (isConcurrent) [lock unlock];
+        }
+    }];
     return contents;
 }
 
-- (NSString *)currentPath {
+/** Returns the current working directory. */
+- (NSString *)currentDirectoryPath {
     return [_fm currentDirectoryPath];
+}
+
+/** Return the path from where the executable is placed. */
+- (NSString *)bundlePath {
+    return [[NSBundle mainBundle] bundlePath];
 }
 
 - (BOOL)hashNext {

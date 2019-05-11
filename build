@@ -5,6 +5,7 @@ buildlog="build.log"
 proj="JSL.xcodeproj"
 scheme="JSL"
 config="Release"
+corelib="core.jsl"
 
 function getFilename() {
     if [[ "$1" == "0" ]]; then
@@ -75,6 +76,7 @@ function build() {
 	fi
     cp $(tail -4 $buildlog | head -1 | rev | cut -d " " -f1 | rev) $bin/$ret
     cp $bin/$ret ~/bin/
+    cp JSL/core.jsl ~/bin/
 }
 
 (build $@) & spinner
