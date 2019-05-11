@@ -19,6 +19,7 @@
     NSUInteger _quasiquoteDepth;
     NSUInteger _unquoteDepth;
     FileOps *_fileOps;
+    dispatch_queue_t _queue;
 }
 
 @synthesize env = _env;
@@ -38,6 +39,7 @@
     _fileOps = [FileOps new];
     _isQuasiquoteMode = NO;
     _quasiquoteDepth = 0;
+    _queue = dispatch_queue_create("jsl-dispatch-queu", nil);
     _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*"];
     [self setCoreFunctionsToREPL:_env];
     [self setLoadFileToREPL];
@@ -318,30 +320,30 @@
 }
 
 - (JSHashMap * _Nullable)updateBindingsForHashMap:(JSHashMap *)ast table:(SymbolTable *)table {
-    NSArray *keys = [ast allKeys];
+    NSMapTable *dict = [ast value];
+    NSArray *keys = [dict allKeys];
     NSUInteger len = [keys count];
     NSUInteger i = 0;
-    id<JSDataProtocol> obj = nil;
     for (i = 0; i < len; i++) {
+        dispatch_async(_queue, ^{
+            [self updateBindingsForAST:keys[i] table:table];
+        });
+        dispatch_async(_queue, ^{
+            [self updateBindingsForAST:[dict objectForKey:keys[i]] table:table];
+        });
     }
     return ast;
 }
 
 - (JSVector *)updateBindingsForVector:(JSVector *)ast table:(SymbolTable *)table {
-    NSMutableArray<id<JSDataProtocol>> *arr = [ast value];
-    NSLock *arrLock = [NSLock new];
-    [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id<JSDataProtocol>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        JSSymbol *aSym = nil;
+    [[ast value] enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id<JSDataProtocol>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         // Update only the symbols in the vector for which there is a match in the symbol table
-        if ([JSSymbol isSymbol:obj] && ((aSym = [self updateSymbol:obj table:table]) != nil)) {
-            [arrLock lock];
-            [arr update:aSym atIndex:idx];
-            [arrLock unlock];
+        if ([JSSymbol isSymbol:obj]) {
+            [self updateSymbol:obj table:table];
         } else {
             [self updateBindingsForAST:obj table:table];
         }
     }];
-    [ast setValue:arr];
     return ast;
 }
 
@@ -411,8 +413,7 @@
                         }
                     }];
                 } else {
-                    // TODO:
-                    //@throw
+                    [[[JSError alloc] initWithFormat:MacroSymbolNotFound, [sym name]] throw];
                 }
             } else if ([sym position] == 0 && [sym isEqualToName:@"fn*"]) {
                 SymbolTable *fnTable = [[SymbolTable alloc] initWithTable:table];
@@ -482,20 +483,6 @@
     return hashmap;
 }
 
-- (JSVector *)updateUnquoteBindingsForVector:(JSVector *)xs table:(SymbolTable *)table {
-    if (_isQuasiquoteMode) {
-        NSMutableArray *arr = [xs value];
-        [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if ([JSSymbol isSymbol:obj]) {
-                [self updateSymbol:obj table:table];
-            } else {
-                [self updateUnquoteBindingsForAST:obj table:table];
-            }
-        }];
-    }
-    return xs;
-}
-
 // `(let* [x 3] `(let* [x 1] (+ x (first [1 2 3]))))
 // `(let* [x 3] `(let* [x 1] (+ x (first [1 2 3])))) -> `(let* [x 1] (+ x (first [1 2 3]))) -> 2
 - (JSList *)updateUnqoteBindingsForList:(JSList *)xs table:(SymbolTable *)table {
@@ -520,9 +507,9 @@
     if ([JSList isList:xs]) {
         [self updateUnqoteBindingsForList:xs table:table];
     } else if ([JSVector isVector:xs]) {
-        [self updateUnquoteBindingsForVector:xs table:table];
+        [self updateBindingsForVector:xs table:table];
     } else if ([JSHashMap isHashMap:xs]) {
-        [self updateMacroBindingsForHashMap:xs table:table];
+        [self updateBindingsForHashMap:xs table:table];
     } else if ([JSSymbol isSymbol:xs]) {
         [self updateBindingsForSymbol:xs table:table];
     }

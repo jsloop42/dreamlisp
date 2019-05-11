@@ -28,6 +28,7 @@ extern NSString *IndexOutOfBounds;
 extern NSString *InvalidDataType;
 extern NSString *JSLException;
 extern NSString *JSLUnderlyingException;
+extern NSString *MacroSymbolNotFound;
 extern NSString *SymbolNotFound;
 extern NSString *SymbolParseError;
 

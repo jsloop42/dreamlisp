@@ -1109,13 +1109,25 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     [jsl rep:@"(def! n (fn* (x) (p3 x)))"];
     XCTAssertEqualObjects([jsl rep:@"(n 4)"], @"400");
     XCTAssertEqualObjects([jsl rep:@"(n 5)"], @"500");
-    XCTAssertEqualObjects([jsl rep:@"`local-sym#"], @"local-sym#");  // no auto gensym creation if not bounded to var
+    XCTAssertEqualObjects([jsl rep:@"`local-sym#"], @"local-sym#");  // not gensym reader macro
     // (let* (x#__9__auto__ (1 2 3)) (let* (y#__10__auto__ (first x#__9__auto__)) y#__10__auto__))
     [jsl rep:@"(defmacro! nested-let (fn* () `(let* [x# '(1 2 3)] (let* (y# (first x#)) y#))))"];
     XCTAssertEqualObjects([jsl rep:@"(nested-let)"], @"1");
     // (let* (x__6__auto__ (1 2 3)) (let* (y__11__auto__ (first x__6__auto__)) y__11__auto__))
     [jsl rep:@"(defmacro! nested-let-1 (fn* () `(let* [x '(1 2 3)] (let* (y (first x)) y))))"];
     XCTAssertEqualObjects([jsl rep:@"(nested-let-1)"], @"1");
+    // macro with hash-map
+    [jsl rep:@"(defmacro! hm (fn* (k v) `(hash-map ~k ~v)))"];
+    XCTAssertEqualObjects([jsl rep:@"(hm 1 '(3 4 5))"], @"{1 (3 4 5)}");
+    [jsl rep:@"(defmacro! hm1 (fn* (k v) `(let* (x ~v) (hash-map ~k (first x)))))"];
+    XCTAssertEqualObjects([jsl rep:@"(hm1 1 '(3 4 5))"], @"{1 3}");
+    [jsl rep:@"(defmacro! p (fn* (x) `(let* (z ~x) (list z 4 5 6 7))))"];
+    XCTAssertEqualObjects([jsl rep:@"(p 3)"], @"(3 4 5 6 7)");
+    XCTAssertEqualObjects([jsl rep:@"(hm 2 (p 3))"], @"{2 (3 4 5 6 7)}");
+    XCTAssertEqualObjects([jsl rep:@"(hm1 2 (p 3))"], @"{2 3}");
+    [jsl rep:@"(defmacro! p (fn* (x) `(let* (z (atom 3)) (list z 4 5 6 7))))"];
+    XCTAssertEqualObjects([jsl rep:@"(hm :b @(first(p 3)))"], @"{:b 3}");
+    XCTAssertEqualObjects([jsl rep:@"(hm1 :a (p 5))"], @"{:a (atom 3)}");
 }
 
 void errorHandleFn(id param, int tag, int counter, const char *s) {
@@ -1156,7 +1168,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
             XCTAssertEqualObjects(message, @"\"exc is:\" \"'abc/2' not found\"");
             break;
         case 1:
-            XCTAssertEqualObjects(message, @"\"exc is:\" \"Index out of bounds. Obtained index is 1 but the total count is 0.\"");
+            XCTAssertEqualObjects(message, @"\"exc is:\" \"Index 1 is out of bounds of 0\"");
             break;
         case 2:
             XCTAssertEqualObjects(message, @"\"exc is:\" [\"data\" \"foo\"]");
@@ -1462,15 +1474,15 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)testErrorMessages {
     JSL *jsl = [JSL new];
-    XCTAssertEqualObjects([jsl rep:@"(try* (+ \"\") (catch* ex (str ex)))"], @"\"Data type error. Expecting 'number' but obtained 'string'.\"");
-    XCTAssertEqualObjects([jsl rep:@"(try* (+ []) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'number' but obtained 'vector'.\"");
-    XCTAssertEqualObjects([jsl rep:@"(try* (+ [] \"\") (catch* ex (str ex)))"], @"\"Data type error. Expecting 'number' but obtained 'vector'.\"");
-    XCTAssertEqualObjects([jsl rep:@"(try* (+ '()) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'number' but obtained 'list'.\"");
-    XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'number'.\"");
-    XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1.0) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'number'.\"");
-    XCTAssertEqualObjects([jsl rep:@"(try* (empty? (atom 1)) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' but obtained 'atom'.\"");
-    XCTAssertEqualObjects([jsl rep:@"(try* (first true) (catch* ex (str ex)))"], @"\"Data type error. Expecting 'list' or 'vector' for argument 1 but" \
-                          " obtained 'bool'.\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (+ \"\") (catch* ex (str ex)))"], @"\"Expected 'number' but obtained 'string'\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (+ []) (catch* ex (str ex)))"], @"\"Expected 'number' but obtained 'vector'\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (+ [] \"\") (catch* ex (str ex)))"], @"\"Expected 'number' but obtained 'vector'\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (+ '()) (catch* ex (str ex)))"], @"\"Expected 'number' but obtained 'list'\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1) (catch* ex (str ex)))"], @"\"Expected 'list' but obtained 'number'\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1.0) (catch* ex (str ex)))"], @"\"Expected 'list' but obtained 'number'\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (empty? (atom 1)) (catch* ex (str ex)))"], @"\"Expected 'list' but obtained 'atom'\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (first true) (catch* ex (str ex)))"], @"\"Expected 'list' or 'vector' for argument 1 but" \
+                          " obtained 'bool'\"");
     // Function not found
     @try {
         XCTAssertThrowsSpecificNamed([jsl rep:@"(last [1 2 3])"], NSException, JSLException, @"'last/1' not found");

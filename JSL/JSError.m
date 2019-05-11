@@ -8,25 +8,26 @@
 
 #import "JSError.h"
 
-NSString *ArityError = @"Arity error. Expected arity of %d, but obtained %d.";
-NSString *ArityAnyError = @"Arity error. Expected any arity of %@, but obtained %d.";
-NSString *ArityGreaterThanError = @"Arity error. Expected arity to be greater than %d, but obtained %d.";
-NSString *ArityGreaterThanOrEqualError = @"Arity error. Expected arity to be greater than or equal to %d, but obtained %d.";
-NSString *ArityLessThanError = @"Arity error. Expected arity to be less than %d, but obtained %d.";
-NSString *ArityLessThanOrEqualError = @"Arity error. Expected arity to be less than or equal to %d, but obtained %d.";
-NSString *ArityMaxError = @"Arity error. Expected a maximum arity of %d, but obtained %d.";
-NSString *ArityMinError = @"Arity error. Expected a minimum arity of %d, but obtained %d.";
-NSString *ArityMultipleError = @"Arity error. Expected arity in mutliples of %d, but obtained %d.";
-NSString *ArityOddError = @"Arity error. Expected arity to be odd, but obtained %d.";
-NSString *DataTypeMismatch = @"Data type error. Expecting %@ but obtained '%@'.";
-NSString *DataTypeMismatchWithArity = @"Data type error. Expecting %@ for argument %d but obtained '%@'.";
-NSString *FunctionArityError = @"Arity mismatch. Expecting function but obtained a symbol.";
-NSString *IndexOutOfBounds = @"Index out of bounds. Obtained index is %d but the total count is %d.";
-NSString *InvalidDataType = @"Invalid datatype.";
+NSString *ArityError = @"Expected arity of %d, but obtained %d";
+NSString *ArityAnyError = @"Expected any arity of %@, but obtained %d";
+NSString *ArityGreaterThanError = @"Expected arity to be greater than %d, but obtained %d";
+NSString *ArityGreaterThanOrEqualError = @"Expected arity to be greater than or equal to %d, but obtained %d";
+NSString *ArityLessThanError = @"Expected arity to be less than %d, but obtained %d";
+NSString *ArityLessThanOrEqualError = @"Expected arity to be less than or equal to %d, but obtained %d";
+NSString *ArityMaxError = @"Expected a maximum arity of %d, but obtained %d";
+NSString *ArityMinError = @"Expected a minimum arity of %d, but obtained %d";
+NSString *ArityMultipleError = @"Expected arity in multiples of %d, but obtained %d";
+NSString *ArityOddError = @"Expected arity to be odd, but obtained %d";
+NSString *DataTypeMismatch = @"Expected %@ but obtained '%@'";
+NSString *DataTypeMismatchWithArity = @"Expected %@ for argument %d but obtained '%@'";
+NSString *FunctionArityError = @"Expected function but obtained a symbol";
+NSString *IndexOutOfBounds = @"Index %d is out of bounds of %d";
+NSString *InvalidDataType = @"Invalid datatype";
 NSString *JSLException = @"JSLException";
 NSString *JSLUnderlyingException = @"JSLUnderlyingException";
+NSString *MacroSymbolNotFound = @"'%@' not found, used outside quasiquote";
 NSString *SymbolNotFound = @"'%@' not found";
-NSString *SymbolParseError = @"Symbol parse error for %@.";
+NSString *SymbolParseError = @"Symbol parse error for %@";
 
 @implementation JSError {
     NSString *_description;
