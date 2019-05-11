@@ -45,9 +45,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 
 - (instancetype)init {
     self = [super init];
-    if (self) {
-        [self bootstrap];
-    }
+    if (self) [self bootstrap];
     return self;
 }
 
@@ -71,33 +69,23 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 
 - (void)createFileIfNotExist:(NSString *)path {
     _path = path;
-    if (![_fm fileExistsAtPath:_path]) {
-        [_fm createFileAtPath:_path contents:nil attributes:nil];
-    }
+    if (![_fm fileExistsAtPath:_path]) [_fm createFileAtPath:_path contents:nil attributes:nil];
 }
 
 - (void)openFile:(NSString *)path {
     _path = path;
     _filePath = [NSURL fileURLWithPath:_path];
     _fileData = [NSData dataWithContentsOfURL:_filePath];
-    if (!_fileData) {
-        @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
-    }
+    if (!_fileData) @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
     NSError *err = nil;
     _fileHandle = [NSFileHandle fileHandleForReadingFromURL:_filePath error:&err];
-    if (!_fileHandle && err) {
-        @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
-    }
+    if (!_fileHandle && err) @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
     _buff = [_fileData length];
 }
 
 - (void)closeFile {
-    if (_fileHandle) {
-        [_fileHandle closeFile];
-    }
-    if (_appendHandle) {
-        [_appendHandle closeFile];
-    }
+    if (_fileHandle) [_fileHandle closeFile];
+    if (_appendHandle) [_appendHandle closeFile];
 }
 
 /**
@@ -180,9 +168,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
             } else {
                 @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
             }
-            if (callback) {
-                callback();
-            }
+            if (callback) callback();
         }
     });
 }
@@ -190,9 +176,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 - (BOOL)delete:(NSString *)path {
     NSError *err = nil;
     BOOL ret = [_fm removeItemAtPath:path error:&err];
-    if (!ret && err) {
-        error(@"Error: %@", err.description);
-    }
+    if (!ret && err) error(@"Error: %@", err.description);
     return ret;
 }
 

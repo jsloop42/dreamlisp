@@ -25,9 +25,7 @@
 
 - (instancetype)init {
     self = [super init];
-    if (self) {
-        [self bootstrap];
-    }
+    if (self) [self bootstrap];
     return self;
 }
 
@@ -49,14 +47,13 @@
 
 - (void)setCoreFunctionsToREPL:(Env *)env {
     NSMutableDictionary *ns = [_core namespace];
-    NSArray *keys = [ns allKeys];
-    NSUInteger len = [keys count];
-    NSUInteger i = 0;
-    for (i = 0; i < len; i++) {
-        NSString *key = keys[i];
-        JSFunction *fn = (JSFunction *)[ns objectForKey:key];
+    NSLock *lock = [NSLock new];
+    [ns enumerateKeysAndObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        JSFunction *fn = [ns objectForKey:key];
+        [lock lock];
         [env setObject:fn forSymbol:[[JSSymbol alloc] initWithArity:[fn argsCount] string:key]];
-    }
+        [lock unlock];
+    }];
 }
 
 /**
