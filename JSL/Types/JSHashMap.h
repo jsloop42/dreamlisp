@@ -17,8 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSHashMap : NSObject <JSDataProtocol>
 + (BOOL)isHashMap:(id)object;
-+ (JSHashMap *)dataToHashMap:(id<JSDataProtocol>)data;
-+ (JSHashMap *)dataToHashMap:(id<JSDataProtocol>)data position:(NSInteger)position;
++ (JSHashMap *)dataToHashMap:(id<JSDataProtocol>)data fnName:(NSString *)fnName;
++ (JSHashMap *)dataToHashMap:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)init;
 - (instancetype)initWithMapTable:(NSMapTable *)table;
 - (instancetype)initWithArray:(NSArray *)array;

@@ -25,17 +25,17 @@
     return [object isKindOfClass:[self class]];
 }
 
-+ (JSList *)dataToList:(id<JSDataProtocol>)data {
-    return [self dataToList:data position:-1];
++ (JSList *)dataToList:(id<JSDataProtocol>)data fnName:(NSString *)fnName {
+    return [self dataToList:data position:-1 fnName:fnName];
 }
 
-+ (JSList *)dataToList:(id<JSDataProtocol>)data position:(NSInteger)position {
++ (JSList *)dataToList:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
     if (![JSList isKindOfList:data]) {
         JSError *err = nil;
         if (position > 0) {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'list'", position, [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'list'", position, [data dataTypeName]];
         } else {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'list'", [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'list'", [data dataTypeName]];
         }
         [err throw];
     }

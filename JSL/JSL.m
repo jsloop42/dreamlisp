@@ -81,7 +81,7 @@
     JSL * __weak weakSelf = self;
     id<JSDataProtocol>(^loadFile)(NSMutableArray *arg) = ^id<JSDataProtocol>(NSMutableArray *arg) {
         JSL *this = weakSelf;
-        NSString *path = [[JSString dataToString:arg[0]] value];
+        NSString *path = [[JSString dataToString:arg[0] fnName:@"load-file/1"] value];
         [[this->_fileOps loadFileFromPath:[@[path] mutableCopy] isConcurrent:NO isLookup:NO]
          enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [this rep:[obj content]];

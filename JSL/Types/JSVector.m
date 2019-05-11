@@ -22,22 +22,24 @@
 }
 
 /**
-  Checks if the given data is of type `list` or `vector` and returns a `list`. Else throws an exception.
+ Checks if the given data is of type `list` or `vector` and returns a `list`. Else throws an exception.
 
-  @param data The data which needs to be converted.
-  @return A list object.
+ @param data The data which needs to be converted.
+ @param fnName The calling function name
+ @return A list object.
  */
-+ (JSList *)dataToList:(id<JSDataProtocol>)data {
-    return [self dataToList:data position:-1];
+
++ (JSList *)dataToList:(id<JSDataProtocol>)data fnName:(NSString *)fnName {
+    return [self dataToList:data position:-1 fnName:fnName];
 }
 
-+ (JSList *)dataToList:(id<JSDataProtocol>)data position:(NSInteger)position {
++ (JSList *)dataToList:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
     if (![JSList isList:data] && ![JSVector isVector:data]) {
         JSError *err = nil;
         if (position > 0) {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'list' or 'vector'", position, [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'list' or 'vector'", position, [data dataTypeName]];
         } else {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'list' or 'vector'", [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'list' or 'vector'", [data dataTypeName]];
         }
         [err throw];
     }

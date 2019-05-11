@@ -1478,11 +1478,10 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(try* (+ []) (catch* ex (str ex)))"], @"\"Expected 'number' but obtained 'vector'\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (+ [] \"\") (catch* ex (str ex)))"], @"\"Expected 'number' but obtained 'vector'\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (+ '()) (catch* ex (str ex)))"], @"\"Expected 'number' but obtained 'list'\"");
-    XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1) (catch* ex (str ex)))"], @"\"Expected 'list' but obtained 'number'\"");
-    XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1.0) (catch* ex (str ex)))"], @"\"Expected 'list' but obtained 'number'\"");
-    XCTAssertEqualObjects([jsl rep:@"(try* (empty? (atom 1)) (catch* ex (str ex)))"], @"\"Expected 'list' but obtained 'atom'\"");
-    XCTAssertEqualObjects([jsl rep:@"(try* (first true) (catch* ex (str ex)))"], @"\"Expected 'list' or 'vector' for argument 1 but" \
-                          " obtained 'bool'\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1) (catch* ex (str ex)))"], @"\"'empty?/1' requires 'list' but obtained 'number'\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (empty? 1.0) (catch* ex (str ex)))"], @"\"'empty?/1' requires 'list' but obtained 'number'\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (empty? (atom 1)) (catch* ex (str ex)))"], @"\"'empty?/1' requires 'list' but obtained 'atom'\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (first true) (catch* ex (str ex)))"], @"\"'first/1' requires 'list' or 'vector' for argument 1 but obtained 'bool'\"");
     // Function not found
     @try {
         XCTAssertThrowsSpecificNamed([jsl rep:@"(last [1 2 3])"], NSException, JSLException, @"'last/1' not found");

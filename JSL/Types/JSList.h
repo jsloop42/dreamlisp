@@ -17,8 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSList : NSObject <JSDataProtocol>
 + (BOOL)isList:(id)object;
 + (BOOL)isKindOfList:(id)object;
-+ (JSList *)dataToList:(id<JSDataProtocol>)data;
-+ (JSList *)dataToList:(id<JSDataProtocol>)data position:(NSInteger)position;
++ (JSList *)dataToList:(id<JSDataProtocol>)data fnName:(NSString *)fnName;
++ (JSList *)dataToList:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)init;
 - (instancetype)initWithArray:(NSArray *)list;
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta list:(JSList *)list;

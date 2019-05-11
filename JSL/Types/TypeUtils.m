@@ -21,7 +21,7 @@
 /**
  Checks if the given list satisfies the arity count. Else throws an exception.
 
- @param xs An array.
+ @param xs The arguments array.
  @param arity The argument count.
  */
 + (void)checkArity:(NSMutableArray *)xs arity:(NSUInteger)arity {
@@ -29,6 +29,28 @@
 }
 
 + (void)checkArityCount:(NSUInteger)count arity:(NSUInteger)arity {
+    if (count != arity) [[[JSError alloc] initWithFormat:ArityError, arity, count] throw];
+}
+
+/**
+ Check arity with arguments array and caller function. If it does not match, throws an error.
+
+ @param xs The arguments array.
+ @param arity Expected arity.
+ @param fnName The caller function name
+ */
++ (void)checkArity:(NSMutableArray *)xs arity:(NSUInteger)arity fnName:(NSString *)fnName {
+    return [self checkArityCount:[xs count] arity:arity fnName:fnName];
+}
+
+/**
+  Check arity with count and caller function. If it does not match, throws an error.
+
+  @param count The obtained argument count.
+  @param arity Expected arity.
+  @param fnName The caller function name
+ */
++ (void)checkArityCount:(NSUInteger)count arity:(NSUInteger)arity fnName:(NSString *)fnName {
     if (count != arity) [[[JSError alloc] initWithFormat:ArityError, arity, count] throw];
 }
 

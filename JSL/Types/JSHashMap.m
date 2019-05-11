@@ -20,17 +20,17 @@
     return [[object className] isEqual:[self className]];
 }
 
-+ (JSHashMap *)dataToHashMap:(id<JSDataProtocol>)data {
-    return [self dataToHashMap:data position:-1];
++ (JSHashMap *)dataToHashMap:(id<JSDataProtocol>)data fnName:(NSString *)fnName {
+    return [self dataToHashMap:data position:-1 fnName:fnName];
 }
 
-+ (JSHashMap *)dataToHashMap:(id<JSDataProtocol>)data position:(NSInteger)position {
-    if (![self isHashMap:data]) {
++ (JSHashMap *)dataToHashMap:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
+    if (![JSHashMap isHashMap:data]) {
         JSError *err = nil;
         if (position > 0) {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'hash-map'", position, [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'hash-map'", position, [data dataTypeName]];
         } else {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'hash-map'", [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'hash-map'", [data dataTypeName]];
         }
         [err throw];
     }

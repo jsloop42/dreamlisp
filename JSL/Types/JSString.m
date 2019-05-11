@@ -21,17 +21,17 @@
     return [[object className] isEqual:[self className]];
 }
 
-+ (JSString *)dataToString:(id<JSDataProtocol>)data {
-    return [self dataToString:data position:-1];
++ (JSString *)dataToString:(id<JSDataProtocol>)data fnName:(NSString *)fnName {
+    return [self dataToString:data position:-1 fnName:fnName];
 }
 
-+ (JSString *)dataToString:(id<JSDataProtocol>)data position:(NSInteger)position {
-    if (![self isString:data]) {
++ (JSString *)dataToString:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
+    if (![JSString isString:data]) {
         JSError *err = nil;
         if (position > 0) {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'string'", position, [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'string'", position, [data dataTypeName]];
         } else {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'string'", [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'string'", [data dataTypeName]];
         }
         [err throw];
     }

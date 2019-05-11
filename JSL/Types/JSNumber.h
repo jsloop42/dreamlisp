@@ -18,6 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isNumber:(id)object;
 + (JSNumber *)dataToNumber:(id<JSDataProtocol>)data;
 + (JSNumber *)dataToNumber:(id<JSDataProtocol>)data position:(NSInteger)position;
++ (JSNumber *)dataToNumber:(id<JSDataProtocol>)data fnName:(NSString *)fnName;
++ (JSNumber *)dataToNumber:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithDouble:(double)num;
 - (instancetype)initWithInt:(int)number;

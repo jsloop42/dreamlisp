@@ -24,6 +24,23 @@
     return [[object className] isEqual:[self className]];
 }
 
++ (JSNumber *)dataToNumber:(id<JSDataProtocol>)data fnName:(NSString *)fnName {
+    return [self dataToNumber:data position:-1 fnName:fnName];
+}
+
++ (JSNumber *)dataToNumber:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
+    if (![JSNumber isNumber:data]) {
+        JSError *err = nil;
+        if (position > 0) {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'number'", position, [data dataTypeName]];
+        } else {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'number'", [data dataTypeName]];
+        }
+        [err throw];
+    }
+    return (JSNumber *)data;
+}
+
 + (JSNumber *)dataToNumber:(id<JSDataProtocol>)data {
     return [self dataToNumber:data position:-1];
 }

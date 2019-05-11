@@ -14,8 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSVector: JSList <JSDataProtocol>
 + (BOOL)isVector:(id)object;
-+ (JSList *)dataToList:(id<JSDataProtocol>)data;
-+ (JSList *)dataToList:(id<JSDataProtocol>)data position:(NSInteger)position;
++ (JSList *)dataToList:(id<JSDataProtocol>)data fnName:(NSString *)fnName;
++ (JSList *)dataToList:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)initWithArray:(NSArray *)list;
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta vector:(JSVector *)vector;
 - (NSMutableArray *)map:(id (^)(id arg))block;

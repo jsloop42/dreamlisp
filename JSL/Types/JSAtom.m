@@ -20,17 +20,17 @@
     return [[object className] isEqual:[self className]];
 }
 
-+ (JSAtom *)dataToAtom:(id<JSDataProtocol>)data {
-    return [self dataToAtom:data position:-1];
++ (JSAtom *)dataToAtom:(id<JSDataProtocol>)data fnName:(NSString *)fnName {
+    return [self dataToAtom:data position:-1 fnName:fnName];
 }
 
-+ (JSAtom *)dataToAtom:(id<JSDataProtocol>)data position:(NSInteger)position {
++ (JSAtom *)dataToAtom:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
     if (![JSAtom isAtom:data]) {
         JSError *err = nil;
         if (position > 0) {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'atom'", position, [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'atom'", position, [data dataTypeName]];
         } else {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'atom'", [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'atom'", [data dataTypeName]];
         }
         [err throw];
     }
