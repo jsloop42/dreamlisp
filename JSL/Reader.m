@@ -54,7 +54,17 @@
     _stringUnclosedExp = [NSRegularExpression regularExpressionWithPattern:_stringUnclosedPattern options:0 error:nil];
     _numExp = [NSRegularExpression regularExpressionWithPattern:_numPattern options:0 error:nil];
     _keywordExp = [NSRegularExpression regularExpressionWithPattern:_keywordPattern options:0 error:nil];
-    _tokenPattern = @"[\\s,]*(~@|[\\[\\]{}()'`~^@]|\"(?:[\\\\].|[^\\\\\"])*\"?|;.*|[^\\s\\[\\]{}()'\"`@,;]+)";
+    /**
+      [\s,]* Matches any number of white spaces or commas. This is not captured, so it will be ignored and not tokenized.
+      ~@ Captures the special two-characters ~@ (splice-unquote) and tokenized.
+      [\[\]{}()'`~^@] Captures any special single character, one of []{}()'`~^@ and tokenized.
+      "(?:\\.|[^\\"])*"? Starts capturing at a double quote and stops at the next double quote unless it was preceded by backslash in which case it includes it
+                         until the next double-token and is tokenized. This will also match unbalanced strings with no ending double quote.
+     ;.* Captures any sequence of character starting with ; and is tokenized.
+     [^\s\[\]{}()"`,;]* Captures a sequence of zero or more non special characters (eg: symbols, numbers, "true", "false" and "nil") and is sort of the inverse
+                         of the one above that captures special characters and is tokenized.
+     */
+    _tokenPattern = @"[\\s,]*(~@|[\\[\\]{}()'`~^@]|\"(?:[\\\\].|[^\\\\\"])*\"?|;.*|[^\\s\\[\\]{}()\"`,;]+)";
     _tokenExp = [NSRegularExpression regularExpressionWithPattern:_tokenPattern options:0 error:nil];
 }
 

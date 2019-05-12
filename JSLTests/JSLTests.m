@@ -443,6 +443,17 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     }
 }
 
+- (void)testDef {
+    JSL *jsl = [JSL new];
+    // def! with quote in symbol name
+    XCTAssertEqualObjects([jsl rep:@"(def! x 10)"], @"10");
+    XCTAssertEqualObjects([jsl rep:@"x"], @"10");
+    XCTAssertEqualObjects([jsl rep:@"(def! a' 1)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"a'"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(def! b' '(11 12 13 14))"], @"(11 12 13 14)");
+    XCTAssertEqualObjects([jsl rep:@"b'"], @"(11 12 13 14)");
+}
+
 - (void)testList {
     JSL *jsl = [JSL new];
     XCTAssertEqualObjects([jsl rep:@"()"], @"()");
@@ -669,6 +680,10 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     // test anonymous function print
     XCTAssertEqualObjects([jsl rep:@"(fn* (& more) 1)"], @"#<fn/n>");
     XCTAssertEqualObjects([jsl rep:@"(fn* (a) 1)"], @"#<fn/1>");
+    // symbols with quote in name
+    XCTAssertEqualObjects([jsl rep:@"(def! c' 10)"], @"10");
+    XCTAssertEqualObjects([jsl rep:@"(def! f' (fn* (x) (+ c' x)))"], @"f'/1");
+    XCTAssertEqualObjects([jsl rep:@"(f' 7)"], @"17");
 }
 
 - (void)testMultiArityFunctions {
@@ -1134,6 +1149,10 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     // test macro definition print
     XCTAssertEqualObjects([jsl rep:@"(defmacro! a (fn* (x) `(+ 1 ~x)))"], @"a/1");
     XCTAssertEqualObjects([jsl rep:@"(defmacro! a (fn* (& more) `(first (list ~@more))))"], @"a/n");
+    // misc
+    XCTAssertEqualObjects([jsl rep:@"(defun inc (x) (+ x 1))"], @"inc/1");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro apply1 (x) `(apply inc/1 ~x))"], @"apply1/1");
+    XCTAssertEqualObjects([jsl rep:@"(apply1 [3])"], @"4");
 }
 
 void errorHandleFn(id param, int tag, int counter, const char *s) {
@@ -1524,7 +1543,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 - (void)test {
     JSL *jsl = [JSL new];    
     //@try {
-        [jsl rep:@"(def! x (fn* (& more) more))"];
+        //[jsl rep:@""];
     //} @catch (NSException *excep) {
         //[jsl printException:excep log:YES readably:YES];
     //}

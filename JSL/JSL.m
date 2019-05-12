@@ -441,8 +441,6 @@
                 }
                 table = fnTable;
                 continue;
-            } else if ([sym position] == 0 && [sym isEqualToName:@"apply"]) {
-
             } else if ([sym position] == 0 && [_keywords containsObject:[sym name]]) {
                 continue;
             } else {
