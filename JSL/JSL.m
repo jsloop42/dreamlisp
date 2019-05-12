@@ -47,6 +47,7 @@
     [self loadCoreLib];
 }
 
+/** Adds functions defined in @c Core module to the environment. */
 - (void)setCoreFunctionsToREPL:(Env *)env {
     NSMutableDictionary *module = [_core module];
     NSLock *lock = [NSLock new];
@@ -58,9 +59,7 @@
     }];
 }
 
-/**
- Sets `eval` JSL function in the REPL environment.
-*/
+/** Add @c eval function to the environment. */
 - (void)setEvalToREPL{
     JSL * __weak weakSelf = self;
     id<JSDataProtocol>(^fn)(NSMutableArray *arg) = ^id<JSDataProtocol>(NSMutableArray *arg) {
@@ -77,6 +76,7 @@
     [[self env] setObject:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
 }
 
+/** Add @c load-file to the environment, which loads and evaluates the expressions contained in the file. */
 - (void)setLoadFileToREPL {
     JSL * __weak weakSelf = self;
     id<JSDataProtocol>(^loadFile)(NSMutableArray *arg) = ^id<JSDataProtocol>(NSMutableArray *arg) {
@@ -93,10 +93,12 @@
                                                                                                                                      string:@"load-file"]];
 }
 
+/** Construct core lib file path. */
 - (NSString *)coreLibPath:(NSString *)path {
     return [[NSString alloc] initWithFormat:@"%@/core.jsl", path];
 }
 
+/** Load core lib @c core.jsl from the search path. This paths includes the current working directory and the bundle directory in order. */
 - (void)loadCoreLib {
     NSMutableArray *paths = [NSMutableArray new];
     [paths addObject:[self coreLibPath:[_fileOps currentDirectoryPath]]];
@@ -107,10 +109,12 @@
     }];
 }
 
+/** Converts the given string expression to AST */
 - (NSMutableArray<id<JSDataProtocol>> *)read:(NSString *)string {
     return [_reader readString:string];
 }
 
+/** Evaluate the AST with the given environment. */
 - (id<JSDataProtocol>)evalAST:(id<JSDataProtocol>)ast withEnv:(Env *)env {
     if ([JSSymbol isSymbol:ast]) {
         return [env objectForSymbol:(JSSymbol *)ast];
@@ -145,10 +149,12 @@
     return ast;
 }
 
+/** Checks if the given ast is either a non-empty list or vector. */
 - (BOOL)isPair:(id<JSDataProtocol>)ast {
     return ([JSList isList:ast] && [(JSList *)ast count] > 0) || ([JSVector isVector:ast] && [(JSVector *)ast count] > 0);
 }
 
+/** Process quasiquote. */
 - (id<JSDataProtocol>)quasiQuote:(id<JSDataProtocol>)ast {
     if (![self isPair:ast]) {
         id<JSDataProtocol>arg = ast;
@@ -169,6 +175,7 @@
                                             [self quasiQuote:[[JSList alloc] initWithArray:[xs rest]]]] mutableCopy]];
 }
 
+/** Checks if the given ast is list with macro at function position. */
 - (BOOL)isMacroCall:(id<JSDataProtocol>)ast env:(Env *)env {
     if ([JSList isList:ast]) {
         NSMutableArray *xs = [(JSList *)ast value];
@@ -184,6 +191,7 @@
     return NO;
 }
 
+/** Expands a macro call. */
 - (id<JSDataProtocol>)macroExpand:(id<JSDataProtocol>)ast withEnv:(Env *)env {
     while ([self isMacroCall:ast env:env]) {
         NSMutableArray *xs = [(JSList *)ast value];
@@ -193,6 +201,7 @@
     return ast;
 }
 
+/** Evaluate the expression with the given environment. */
 - (id<JSDataProtocol>)eval:(id<JSDataProtocol>)ast withEnv:(Env *)env {
     while (true) {
         if ([JSVector isVector:ast]) {
@@ -319,6 +328,7 @@
     return nil;
 }
 
+/** Updates bindings for key and value of the given hash map. */
 - (JSHashMap * _Nullable)updateBindingsForHashMap:(JSHashMap *)ast table:(SymbolTable *)table {
     NSMapTable *dict = [ast value];
     NSArray *keys = [dict allKeys];
@@ -335,9 +345,9 @@
     return ast;
 }
 
+/** Update only the symbols in the vector for which there is a match in the symbol table. */
 - (JSVector *)updateBindingsForVector:(JSVector *)ast table:(SymbolTable *)table {
     [[ast value] enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id<JSDataProtocol>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        // Update only the symbols in the vector for which there is a match in the symbol table
         if ([JSSymbol isSymbol:obj]) {
             [self updateSymbol:obj table:table];
         } else {
@@ -454,8 +464,8 @@
     return ast;
 }
 
+/** Update symbol bindings if found, when list functions at 0th place which doesn't match the special forms, or for other symbols in other positions. */
 - (JSSymbol *)updateBindingsForSymbol:(JSSymbol *)symbol table:(SymbolTable *)table {
-    // called when list functions at 0th place which doesn't match the special forms, other symbols
     [self updateSymbol:symbol table:table];
     return symbol;
 }
@@ -475,14 +485,12 @@
 
 // MARK: - Quasiquote
 
-- (JSHashMap *)updateMacroBindingsForHashMap:(JSHashMap *)hashmap table:(SymbolTable *)table {
-    if (_isQuasiquoteMode) {
-    }
-    return hashmap;
-}
+/**
+ Updates binding when an unquote is found within quasiquote.
 
-// `(let* [x 3] `(let* [x 1] (+ x (first [1 2 3]))))
-// `(let* [x 3] `(let* [x 1] (+ x (first [1 2 3])))) -> `(let* [x 1] (+ x (first [1 2 3]))) -> 2
+ `(let* [x 3] `(let* [x 1] (+ x (first [1 2 3]))))
+ `(let* [x 3] `(let* [x 1] (+ x (first [1 2 3])))) ; -> `(let* [x 1] (+ x (first [1 2 3]))) ; -> 2
+ */
 - (JSList *)updateUnqoteBindingsForList:(JSList *)xs table:(SymbolTable *)table {
     if (_isQuasiquoteMode) {
         NSMutableArray *arr = [xs value];
@@ -518,6 +526,7 @@
     return [_printer printStringFor:data readably:YES];
 }
 
+/** Read-eval-print function. */
 - (NSString * _Nullable)rep:(NSString *)string {
     NSMutableArray<id<JSDataProtocol>> *exps = [self read:string];
     NSUInteger len = [exps count];
@@ -530,6 +539,7 @@
     return ret;
 }
 
+/** Returns an expression from the given exception. */
 - (nullable id<JSDataProtocol>)exceptionInfo:(NSException *)exception {
     NSDictionary *info = exception.userInfo;
     if (info) {
@@ -541,6 +551,7 @@
     return ([exception.description isNotEmpty]) ? [[JSString alloc] initWithString:exception.description] : nil;
 }
 
+/** Prints the given exception details to stdout. */
 - (NSString * _Nullable)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably {
     NSString *desc = nil;
     if (exception.userInfo != nil) {
