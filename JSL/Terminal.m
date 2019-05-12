@@ -8,13 +8,16 @@
 
 #import "Terminal.h"
 
-const char *_prompt = "user> ";
-NSString *_historyFile = @"/.jsl-history";
+static const char *_prompt = "user> ";
+static NSString *_appHome = @"/.jsl";
+static NSString *_historyFile = @"/jsl-history";
 
 @implementation Terminal {
+    FileOps *_fops;
     BOOL _isHistoryEnabled;
     NSString *_historyPath;
-    FileOps *_fops;
+    NSString *_homeDir;
+    NSString *_appHomeDir;
 }
 
 - (instancetype)init {
@@ -24,10 +27,20 @@ NSString *_historyFile = @"/.jsl-history";
 }
 
 - (void)bootstrap {
-    _isHistoryEnabled = YES;
     _fops = [FileOps new];
-    _historyPath = [NSHomeDirectory() stringByAppendingString:_historyFile];
+    _isHistoryEnabled = YES;
+    _homeDir = NSHomeDirectory();
+    _appHomeDir = [_homeDir stringByAppendingString:_appHome];
+    _historyPath = [_appHomeDir stringByAppendingString:_historyFile];
+    [self checkPath];
     [self loadHistoryFile:_historyPath];
+}
+
+-(void)checkPath {
+    if (![_fops isDirectoryExists:_appHomeDir]) {
+        [_fops createDirectoryWithIntermediate:_appHomeDir];
+    }
+    [_fops createFileIfNotExist:_historyPath];
 }
 
 - (void)loadHistoryFile:(NSString *)path {

@@ -72,6 +72,18 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     if (![_fm fileExistsAtPath:_path]) [_fm createFileAtPath:_path contents:nil attributes:nil];
 }
 
+- (BOOL)isDirectoryExists:(NSString *)path {
+    BOOL isDir = YES;
+    return [_fm fileExistsAtPath:path isDirectory:&isDir];
+}
+
+- (void)createDirectoryWithIntermediate:(NSString *)path {
+    NSError *err = nil;
+    BOOL ret = NO;
+    ret = [_fm createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&err];
+    if (!ret || err) [[[JSError alloc] initWithUserInfo:[err userInfo]] throw];
+}
+
 /** Opens the given file setting handlers for reading the file. */
 - (void)openFile:(NSString *)path {
     _path = path;

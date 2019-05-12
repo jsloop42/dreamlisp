@@ -19,6 +19,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface FileOps : NSObject
 - (instancetype)init;
+- (BOOL)isDirectoryExists:(NSString *)path;
+- (void)createDirectoryWithIntermediate:(NSString *)path;
 - (void)createFileIfNotExist:(NSString *)path;
 - (void)openFile:(NSString *)path;
 - (void)closeFile;
