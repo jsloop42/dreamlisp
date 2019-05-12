@@ -37,6 +37,7 @@
     return self;
 }
 
+/** If the symbol is associated with a function, update the symbol with function details. */
 - (JSSymbol *)setFunctionInfo:(id<JSDataProtocol>)object symbol:(JSSymbol *)symbol {
     if ([JSFunction isFunction:object]) {
         [symbol setIsFunction:YES];
@@ -83,6 +84,7 @@
     [_table setObject:value forKey:key];
 }
 
+/** Recursively checks the environments for the given symbol until a match is found or the environment is the outermost, which is nil. */
 - (Env *)findEnvForKey:(JSSymbol *)key {
     if ([_table objectForKey:key]) {
         return self;
@@ -96,6 +98,7 @@
     return [self objectForSymbol:key isFromSymbolTable:NO];
 }
 
+/** Retrieves the matching element for the given key from the environment if found. If not checks the symbol table if enabled. Else throws an exception. */
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isFromSymbolTable:(BOOL)isFromSymbolTable {
     Env *env = [self findEnvForKey:key];
     if (env != nil) {
@@ -114,6 +117,5 @@
     [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
     return nil;
 }
-
 
 @end
