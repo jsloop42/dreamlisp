@@ -23,6 +23,7 @@
     NSRegularExpression *_tokenExp;
 }
 
+/** The current token position */
 @synthesize position = _position;
 
 - (instancetype)init {
@@ -68,21 +69,25 @@
     _tokenExp = [NSRegularExpression regularExpressionWithPattern:_tokenPattern options:0 error:nil];
 }
 
+/** Return the next token incrementing the position. */
 - (nullable NSString *)next {
     if (_position >= [_tokens count]) return nil;
     return _tokens[_position++];
 }
 
+/** Returns the next token without incrementing the position. */
 - (nullable NSString *)peek {
     if (_position >= [_tokens count]) return nil;
     return _tokens[_position];
 }
 
+/** Increments the token position. */
 - (void)pass {
     if (_position >= [_tokens count]) return;
     _position++;
 }
 
+/** Converts the string expressions into an array of AST */
 - (nullable NSMutableArray<id<JSDataProtocol>> *)readString:(NSString *)string {
     NSMutableArray *tokens = [self tokenize:string];
     if ([tokens count] <= 0) return nil;
@@ -171,6 +176,7 @@
     return sym;
 }
 
+/** Read individual elements. */
 - (nullable id<JSDataProtocol>)readAtom {
     NSString *token = [self next];
     if ([Utils matchString:token withExpression:_numExp]) {
