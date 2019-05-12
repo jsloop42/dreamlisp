@@ -17,6 +17,8 @@
     id<JSDataProtocol> _meta;
     NSInteger _argsCount;
     NSInteger _position;
+    /** The name with arity associated with the function. */
+    NSString *_name;
 }
 
 @synthesize fn = _fn;
@@ -27,6 +29,7 @@
 @synthesize macro = _isMacro;
 @synthesize meta = _meta;
 @synthesize value;  // not used
+@synthesize name = _name;
 
 + (BOOL)isFunction:(id)object {
     return [[object className] isEqual:[self className]];
@@ -50,7 +53,7 @@
 }
 
 - (instancetype)initWithAst:(id<JSDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<JSDataProtocol> _Nullable)meta
-                         fn:(id<JSDataProtocol> (^)(NSMutableArray *))fn {
+                         fn:(id<JSDataProtocol> (^)(NSMutableArray *))fn name:(NSString *)name {
     self = [super init];
     if (self) {
         _fn = fn;
@@ -60,35 +63,48 @@
         _isMacro = isMacro;
         _meta = meta;
         _argsCount = [self isVariadic] ? -1 : [_params count];
+        _name = name;
     }
     return self;
 }
 
-- (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn {
+
+- (instancetype)initWithAst:(id<JSDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<JSDataProtocol> _Nullable)meta
+                         fn:(id<JSDataProtocol> (^)(NSMutableArray *))fn {
     self = [super init];
-    if (self) _fn = fn;
+    if (self) self = [self initWithAst:ast params:params env:env macro:isMacro meta:meta fn:fn name:@""];
     return self;
 }
 
-- (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn argCount:(NSInteger)count {
+- (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn name:(NSString *)name {
+    self = [super init];
+    if (self) {
+        _fn = fn;
+        _name = name;
+    }
+    return self;
+}
+
+- (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn argCount:(NSInteger)count name:(NSString *)name {
     self = [super init];
     if (self) {
         _fn = fn;
         _argsCount = count;
+        _name = name;
     }
     return self;
 }
 
 - (instancetype)initWithMacro:(JSFunction *)func {
     self = [super init];
-    if (self) self = [self initWithAst:func.ast params:func.params env:func.env macro:YES meta:func.meta fn:func.fn];
+    if (self) self = [self initWithAst:func.ast params:func.params env:func.env macro:YES meta:func.meta fn:func.fn name:func.name];
     return self;
 }
 
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta func:(JSFunction *)func {
     self = [super init];
     if (self) {
-        self = [self initWithAst:func.ast params:func.params env:func.env macro:func.isMacro meta:meta fn:func.fn];
+        self = [self initWithAst:func.ast params:func.params env:func.env macro:func.isMacro meta:meta fn:func.fn name:func.name];
         [self setArgsCount:[func argsCount]];
     }
     return self;
@@ -97,7 +113,8 @@
 - (instancetype)initWithFunction:(JSFunction *)function {
     self = [super init];
     if (self)
-        self = [self initWithAst:[function ast] params:[function params] env:[function env] macro:[function isMacro] meta:[function meta] fn:[function fn]];
+        self = [self initWithAst:function.ast params:function.params env:function.env macro:function.isMacro meta:function.meta fn:function.fn
+                            name:function.name];
     return self;
 }
 
@@ -128,6 +145,12 @@
 
 - (BOOL)isVariadic {
     return (_argsCount == -1) || ([_params count] >= 2 && [JSSymbol isSymbol:[_params nth:[_params count] - 2] withName:@"&"]);
+}
+
+- (NSString *)name {
+    return [_name isEmpty]
+            ? [[NSString alloc] initWithFormat:@"#<fn/%@>", _argsCount == -1 ? @"n" : [[NSString alloc] initWithFormat:@"%ld", _argsCount]]
+            : _name;
 }
 
 - (BOOL)hasMeta {

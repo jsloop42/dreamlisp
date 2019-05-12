@@ -70,7 +70,7 @@
     };
     NSString *hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
     NSString *langVersion = [[NSString alloc] initWithFormat:@"JSL v%@ [%@]", JSLVersion, hostLangVersion];
-    [[self env] setObject:[[JSFunction alloc] initWithFn:fn argCount:1] forSymbol:[[JSSymbol alloc] initWithArity:1 string:@"eval"]];
+    [[self env] setObject:[[JSFunction alloc] initWithFn:fn argCount:1 name:@"eval/1"] forSymbol:[[JSSymbol alloc] initWithArity:1 string:@"eval"]];
     [[self env] setObject:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
     [[self env] setObject:[[JSString alloc] initWithFormat:@"%@", hostLangVersion] forSymbol:[[JSSymbol alloc] initWithName:@"*host-language*"]];
     [[self env] setObject:[[JSString alloc] initWithFormat:@"%@", langVersion] forSymbol:[[JSSymbol alloc] initWithName:@"*version*"]];
@@ -89,7 +89,8 @@
         [self rep:[[NSString alloc] initWithFormat:@"(println \"#(ok %@)\")", [path lastPathComponent]]];
         return nil;
     };
-    [[self env] setObject:[[JSFunction alloc] initWithFn:loadFile argCount:1] forSymbol:[[JSSymbol alloc] initWithArity:1 string:@"load-file"]];
+    [[self env] setObject:[[JSFunction alloc] initWithFn:loadFile argCount:1 name:@"load-file/1"] forSymbol:[[JSSymbol alloc] initWithArity:1
+                                                                                                                                     string:@"load-file"]];
 }
 
 - (NSString *)coreLibPath:(NSString *)path {

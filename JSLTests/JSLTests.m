@@ -98,8 +98,8 @@
     // Function
     JSFunction *fn = [[JSFunction alloc] initWithAst:[JSNil new] params:[NSMutableArray new]
                       env:[[Env alloc] initWithTable:[SymbolTable new]]
-                      macro:false meta:[JSNil new] fn:^id(id arg) { return nil; }];
-    XCTAssertEqualObjects([prn printStringFor:fn readably:true], @"#<function>");
+                      macro:false meta:[JSNil new] fn:^id(id arg) { return nil; } name:@"nil-fn/0"];
+    XCTAssertEqualObjects([prn printStringFor:fn readably:true], @"nil-fn/0");
     // Symbol
     JSSymbol *sym = [[JSSymbol alloc] initWithName:@"greet"];
     XCTAssertEqualObjects([prn printStringFor:sym readably:true], @"greet");
@@ -631,17 +631,17 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"((fn* (f x) (f x)) (fn* (a) (+ 1 a)) 7)"], @"8");
     // closure
     XCTAssertEqualObjects([jsl rep:@"(((fn* (a) (fn* (b) (+ a b))) 5) 7)"], @"12");
-    XCTAssertEqualObjects([jsl rep:@"(def! gen-plus5 (fn* () (fn* (b) (+ 5 b))))"], @"#<function>");
-    XCTAssertEqualObjects([jsl rep:@"(def! plus5 (gen-plus5))"], @"#<function>");
+    XCTAssertEqualObjects([jsl rep:@"(def! gen-plus5 (fn* () (fn* (b) (+ 5 b))))"], @"gen-plus5/0");
+    XCTAssertEqualObjects([jsl rep:@"(def! plus5 (gen-plus5))"], @"plus5/1");
     XCTAssertEqualObjects([jsl rep:@"(plus5 7)"], @"12");
-    XCTAssertEqualObjects([jsl rep:@"(def! gen-plusX (fn* (x) (fn* (b) (+ x b))))"], @"#<function>");
-    XCTAssertEqualObjects([jsl rep:@"(def! plus7 (gen-plusX 7))"], @"#<function>");
+    XCTAssertEqualObjects([jsl rep:@"(def! gen-plusX (fn* (x) (fn* (b) (+ x b))))"], @"gen-plusX/1");
+    XCTAssertEqualObjects([jsl rep:@"(def! plus7 (gen-plusX 7))"], @"plus7/1");
     XCTAssertEqualObjects([jsl rep:@"(plus7 8)"], @"15");
-    XCTAssertEqualObjects([jsl rep:@"(def! sumdown (fn* (N) (if (> N 0) (+ N (sumdown  (- N 1))) 0)))"], @"#<function>");
+    XCTAssertEqualObjects([jsl rep:@"(def! sumdown (fn* (N) (if (> N 0) (+ N (sumdown  (- N 1))) 0)))"], @"sumdown/1");
     XCTAssertEqualObjects([jsl rep:@"(sumdown 1)"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(sumdown 2)"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(sumdown 6)"], @"21");
-    XCTAssertEqualObjects([jsl rep:@"(def! fib (fn* (N) (if (= N 0) 1 (if (= N 1) 1 (+ (fib (- N 1)) (fib (- N 2)))))))"], @"#<function>");
+    XCTAssertEqualObjects([jsl rep:@"(def! fib (fn* (N) (if (= N 0) 1 (if (= N 1) 1 (+ (fib (- N 1)) (fib (- N 2)))))))"], @"fib/1");
     XCTAssertEqualObjects([jsl rep:@"(fib 1)"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(fib 2)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(fib 4)"], @"5");
@@ -666,6 +666,9 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     // test bindings
     [jsl rep:@"(def! a (fn* (x) (let* (y x z (* x x)) (+ y z))))"];
     XCTAssertEqualObjects([jsl rep:@"(a 10)"], @"110");
+    // test anonymous function print
+    XCTAssertEqualObjects([jsl rep:@"(fn* (& more) 1)"], @"#<fn/n>");
+    XCTAssertEqualObjects([jsl rep:@"(fn* (a) 1)"], @"#<fn/1>");
 }
 
 - (void)testMultiArityFunctions {
@@ -675,8 +678,8 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(a)"], @"0");
     XCTAssertEqualObjects([jsl rep:@"(a 3)"], @"1");
     // variadic function
-    XCTAssertEqualObjects([jsl rep:@"(def! x (fn* (& more) more))"], @"#<function>");
-    XCTAssertEqualObjects([jsl rep:@"x/n"], @"#<function>");
+    XCTAssertEqualObjects([jsl rep:@"(def! x (fn* (& more) more))"], @"x/n");
+    XCTAssertEqualObjects([jsl rep:@"x/n"], @"x/n");
     XCTAssertEqualObjects([jsl rep:@"(first (x 1 2 3 4))"], @"1");
 }
 
@@ -778,7 +781,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     JSL *jsl = [JSL new];
     XCTAssertEqualObjects([jsl rep:@"(do (def! a 6) 7 (+ a 8))"], @"14");
     XCTAssertEqualObjects([jsl rep:@"a"], @"6");
-    XCTAssertEqualObjects([jsl rep:@"(def! DO (fn* (a) 7))"], @"#<function>");
+    XCTAssertEqualObjects([jsl rep:@"(def! DO (fn* (a) 7))"], @"DO/1");
     XCTAssertEqualObjects([jsl rep:@"(DO 3)"], @"7");
     // printing
     infoCallback(self, 0, &testdoPrintCallback);
@@ -1128,6 +1131,9 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     [jsl rep:@"(defmacro! p (fn* (x) `(let* (z (atom 3)) (list z 4 5 6 7))))"];
     XCTAssertEqualObjects([jsl rep:@"(hm :b @(first(p 3)))"], @"{:b 3}");
     XCTAssertEqualObjects([jsl rep:@"(hm1 :a (p 5))"], @"{:a (atom 3)}");
+    // test macro definition print
+    XCTAssertEqualObjects([jsl rep:@"(defmacro! a (fn* (x) `(+ 1 ~x)))"], @"a/1");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro! a (fn* (& more) `(first (list ~@more))))"], @"a/n");
 }
 
 void errorHandleFn(id param, int tag, int counter, const char *s) {

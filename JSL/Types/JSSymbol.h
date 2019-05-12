@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) NSString *initialValue;
 @property (nonatomic, readwrite) BOOL isFunction;
 @property (nonatomic, readonly) BOOL hasNArity;
+@property (nonatomic, readwrite) NSString *fnName;
 + (instancetype)new NS_UNAVAILABLE;
 + (BOOL)isSymbol:(id)object;
 + (BOOL)isSymbol:(id)object withName:(NSString *)name;

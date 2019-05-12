@@ -31,6 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
  @endcode
  */
 @property (nonatomic, readwrite) NSInteger argsCount;
+@property (nonatomic, readwrite) NSString *name;
 + (instancetype)new NS_UNAVAILABLE;
 + (BOOL)isFunction:(id)object;
 + (JSFunction *)dataToFunction:(id<JSDataProtocol>)data;
@@ -38,8 +39,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithAst:(id<JSDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<JSDataProtocol> _Nullable)meta
                          fn:(id<JSDataProtocol> (^)(NSMutableArray *))fn;
-- (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn;
-- (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn argCount:(NSInteger)count;
+- (instancetype)initWithAst:(id<JSDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<JSDataProtocol> _Nullable)meta
+                         fn:(id<JSDataProtocol> (^)(NSMutableArray *))fn name:(NSString *)name;
+- (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn name:(NSString *)name;
+- (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn argCount:(NSInteger)count name:(NSString *)name;
 - (instancetype)initWithMacro:(JSFunction *)func;
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta func:(JSFunction *)func;
 - (instancetype)initWithFunction:(JSFunction *)function;

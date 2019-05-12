@@ -70,7 +70,8 @@
     } else if ([JSBool isBool:data]) {
         return [(JSBool *)data value] ? @"true" : @"false";
     } else if ([JSFunction isFunction:data]) {
-        return @"#<function>";
+        JSFunction *fn = (JSFunction *)data;
+        return [[fn name] isNotEmpty] ? [fn name] : @"#fn";
     }
     return InvalidDataType;
 }

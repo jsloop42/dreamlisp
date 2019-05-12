@@ -17,6 +17,8 @@
     BOOL _isFunction;
     BOOL _hasNArity;
     NSInteger _position;
+    /** Function name with arity if the symbol is bound to a function */
+    NSString *_fnName;
 }
 
 @synthesize arity = _arity;
@@ -26,6 +28,7 @@
 @synthesize meta = _meta;
 @synthesize value = _name;
 @synthesize initialValue = _initialName;
+@synthesize fnName = _fnName;
 
 + (BOOL)isSymbol:(id)object {
     return [[object className] isEqual:[self className]];
@@ -35,8 +38,22 @@
     return [self isSymbol:object] ? [[(JSSymbol *)object value] isEqual:name] : NO;
 }
 
+/**
+  Update the symbol with function info and function with the bounded symbol info.
+
+  @param symbol A symbol.
+  @param object The object bound to the symbol. The object will be updated in place if it is a function.
+  @return symbol The symbol with updates if any
+ */
 + (JSSymbol *)symbolWithArityCheck:(JSSymbol *)symbol withObject:(id)object {
-    return [JSFunction isFunction:object] ? [[JSSymbol alloc] initWithArity:[(JSFunction *)object argsCount] symbol:symbol] : symbol;
+    if ([JSFunction isFunction:object]) {
+        JSFunction *fn = (JSFunction *)object;
+        [symbol setIsFunction:YES];
+        [symbol setInitialArity:[fn argsCount]];
+        [symbol resetArity];
+        [fn setName:[symbol string]];
+    }
+    return symbol;
 }
 
 - (instancetype)initWithName:(NSString *)name {
