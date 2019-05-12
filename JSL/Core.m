@@ -441,7 +441,8 @@ double dmod(double a, double n) {
             return [[JSList alloc] initWithArray:arr];
         }
         if ([JSNil isNil:first]) return (JSNil *)first;
-        @throw [[NSException alloc] initWithName:JSL_NOT_A_SEQUENCE_ERROR reason:JSL_NOT_A_SEQUENCE_ERROR_MSG userInfo:nil];
+        [[[JSError alloc] initWithDescription:SequenceError] throw];
+        return nil;
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:seq argCount:1 name:@"seq/1"] forKey:@"seq"];
 }

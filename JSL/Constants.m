@@ -20,7 +20,6 @@ NSString * const JSL_SYMBOL_NOT_FOUND = @"Symbol not found";
 NSString * const JSL_INVALID_ARGUMENT = @"Invalid argument";
 NSString * const JSL_INDEX_OUT_OF_BOUNDS = @"Index out of bounds";
 NSString * const JSL_FILE_READ_ERROR = @"File read error";
-NSString * const JSL_NOT_A_SEQUENCE_ERROR = @"seq called on non-sequence";
 
 #pragma mark Error message
 
@@ -32,4 +31,3 @@ NSString * const JSL_SYMBOL_NOT_FOUND_MSG = @"Symbol not found";
 NSString * const JSL_INVALID_ARGUMENT_MSG = @"Invalid argument";
 NSString * const JSL_INDEX_OUT_OF_BOUNDS_MSG = @"Index out of bounds";
 NSString * const JSL_FILE_READ_ERROR_MSG = @"File read error";
-NSString * const JSL_NOT_A_SEQUENCE_ERROR_MSG = @"seq called on non-sequence";
