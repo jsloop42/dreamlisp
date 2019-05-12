@@ -16,7 +16,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSL : NSObject
+@property (nonatomic, readwrite) Env *globalEnv;
 @property (nonatomic, readwrite) Env *env;
+@property (nonatomic, readwrite) NSMapTable<NSString *, ModuleTable *> *modules;
 - (instancetype)init;
 - (NSString * _Nullable)rep:(NSString *)string;
 - (NSString * _Nullable)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably;

@@ -9,20 +9,27 @@
 #import "JSL.h"
 
 @implementation JSL {
+    /** Holds the modules loaded. */
+    NSMapTable<NSString *, ModuleTable *> *_modules;
+    /** The symbol table used for auto gensym */
+    SymbolTable *_symTable;
     Reader *_reader;
     Printer *_printer;
+    Env *_globalEnv;
+    /** Current env */
     Env *_env;
     Core *_core;
-    SymbolTable *_symTable;
+    FileOps *_fileOps;
     NSArray *_keywords;
     BOOL _isQuasiquoteMode;
     NSUInteger _quasiquoteDepth;
     NSUInteger _unquoteDepth;
-    FileOps *_fileOps;
     dispatch_queue_t _queue;
 }
 
+@synthesize globalEnv = _globalEnv;
 @synthesize env = _env;
+@synthesize modules = _modules;
 
 - (instancetype)init {
     self = [super init];
@@ -31,11 +38,13 @@
 }
 
 - (void)bootstrap {
+    _modules = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
     _reader = [Reader new];
     _printer = [Printer new];
     _core = [Core new];
     _symTable = [SymbolTable new];
     _env = [Env new];
+    _globalEnv = _env;
     _fileOps = [FileOps new];
     _isQuasiquoteMode = NO;
     _quasiquoteDepth = 0;
@@ -102,6 +111,16 @@
                                                                                                   BOOL * _Nonnull stop) {
         [self rep:[obj content]];
     }];
+}
+
+#pragma mark Module
+
+- (void)setModule:(ModuleTable *)module {
+    [_modules setObject:module forKey:[module name]];
+}
+
+- (ModuleTable * _Nullable)module:(NSString *)name {
+    return [_modules objectForKey:name];
 }
 
 #pragma mark Read
@@ -283,6 +302,10 @@
                     continue;
                 } else if ([[sym name] isEqual:@"macroexpand"]) {
                     return [self macroExpand:[xs second] withEnv:env];
+                } else if ([[sym name] isEqual:@"defmodule"]) {
+                    [self defineModule:ast];
+                } else if ([[sym name] isEqual:@"in-module"]) {
+                    [self changeModule:ast];
                 }
             }
             // Function
@@ -313,6 +336,23 @@
             return [self evalAST:ast withEnv:env];
         }
     }
+}
+
+#pragma mark Module AST
+
+- (Env *)defineModule:(id<JSDataProtocol>)ast {
+    Env *modEnv = [[Env alloc] initWithCoreModule:[_core module]];
+    JSList *xs = (JSList *)ast;
+    JSList *modInfo = [xs first];
+    // TODO: setup module - add to modules table - add module functions to `ModuleTable.m`
+    _env = modEnv; // change module to current module
+    [self eval:[xs second] withEnv:modEnv];
+    return ast;
+}
+
+/** Change current module to the given one. */
+- (void)changeModule:(id<JSDataProtocol>)ast {
+
 }
 
 #pragma mark Auto gensym
@@ -449,6 +489,17 @@
                 }
                 table = fnTable;
                 continue;
+            } else if ([sym position] == 0 && [sym isEqualToName:@"defmodule"]) {
+                if (!_isQuasiquoteMode) {
+                    return ast;
+                }
+                continue;
+            } else if ([sym position] == 0 && [sym isEqualToName:@"export"]) {
+                continue;
+            } else if ([sym position] == 0 && [sym isEqualToName:@"export"]) {
+                //TODO
+                // (import (net.jsloop.tree tree) (create-tree 0) (right-node 1) (left-node 1))
+                // (import net.jsloop.tree (create-tree 0) (right-node 1) (left-node 1))
             } else if ([sym position] == 0 && [_keywords containsObject:[sym name]]) {
                 continue;
             } else {

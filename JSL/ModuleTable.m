@@ -11,15 +11,15 @@
 /** Module table contains symbols exported by a module. */
 @implementation ModuleTable {
     NSMapTable<JSSymbol *, id<JSDataProtocol>> *_table;
+    NSString *_name;
 }
 
 @synthesize table = _table;
+@synthesize name = _name;
 
 - (instancetype)init {
     self = [super init];
-    if (self) {
-        [self bootstrap];
-    }
+    if (self) [self bootstrap];
     return self;
 }
 
@@ -36,7 +36,7 @@
 }
 
 - (NSString *)description {
-    return [_table description];
+    return [[NSString alloc] initWithFormat:@"%@\n%@", _name, [_table description]];
 }
 
 @end

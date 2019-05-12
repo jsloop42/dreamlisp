@@ -25,6 +25,7 @@
     return [object isKindOfClass:[self class]];
 }
 
+/** Checks if the given data is a list. Else throws exception with the given function name. */
 + (JSList *)dataToList:(id<JSDataProtocol>)data fnName:(NSString *)fnName {
     return [self dataToList:data position:-1 fnName:fnName];
 }

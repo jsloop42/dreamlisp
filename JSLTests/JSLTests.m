@@ -1540,9 +1540,9 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)test {
-    JSL *jsl = [JSL new];    
+    JSL *jsl = [JSL new];
     //@try {
-        //[jsl rep:@""];
+        [jsl rep:@"(defmodule tree (export (create-tree 0) (right-node 1) (left-node 1)))"];
     //} @catch (NSException *excep) {
         //[jsl printException:excep log:YES readably:YES];
     //}
