@@ -8,21 +8,29 @@
 
 #import "Env.h"
 
+/** An env associated with a module. There is a global env and one specific for each module. */
 @implementation Env {
     Env *_outer;
+    /** The env table containing evaluated symbols with its binding. */
     NSMapTable<JSSymbol *, id<JSDataProtocol>> *_table;
-    SymbolTable *_symTable;
+    /** Exported symbols for the module. If no module is defined, then the symbols are global. */
+    ModuleTable *_module;
+    /** The core module */
+    ModuleTable *_coreModule;
+    BOOL _isModule;
 }
 
 @synthesize outer = _outer;
 @synthesize table = _table;
-@synthesize symbolTable = _symTable;
+@synthesize coreModule = _coreModule;
+@synthesize module = _module;
+@synthesize isModule = _isModule;
 
-- (instancetype)initWithTable:(SymbolTable *)table {
+- (instancetype)initWithCoreModule:(ModuleTable *)core {
     self = [super init];
     if (self) {
+        _coreModule = core;
         [self bootstrap];
-        _symTable = table;
     }
     return self;
 }
@@ -30,10 +38,17 @@
 - (instancetype)initWithEnv:(Env *)env {
     self = [super init];
     if (self) {
+        _coreModule = [env coreModule];
+        _module = [env module];
         [self bootstrap];
-        _symTable = [env symbolTable];
         _outer = env;
     }
+    return self;
+}
+
+- (instancetype)init {
+    self = [super init];
+    if (self) [self bootstrap];
     return self;
 }
 
@@ -59,6 +74,7 @@
     NSUInteger i = 0;
     if (self) {
         [self bootstrap];
+        _coreModule = [env coreModule];
         _outer = env;
         for (i = 0; i < len; i++) {
             JSSymbol *sym = (JSSymbol *)binds[i];
@@ -77,11 +93,12 @@
 }
 
 - (void)bootstrap {
-    _table =  [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    _table = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    if (!_module) _module = [ModuleTable new];
 }
 
-- (void)setObject:(id<JSDataProtocol>)value forSymbol:(JSSymbol *)key {
-    [_table setObject:value forKey:key];
+- (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key {
+    [_table setObject:obj forKey:key];
 }
 
 /** Recursively checks the environments for the given symbol until a match is found or the environment is the outermost, which is nil. */
@@ -95,26 +112,36 @@
 }
 
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key {
-    return [self objectForSymbol:key isFromSymbolTable:NO];
+    return [self objectForSymbol:key isFromCore:NO];
 }
 
-/** Retrieves the matching element for the given key from the environment if found. If not checks the symbol table if enabled. Else throws an exception. */
-- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isFromSymbolTable:(BOOL)isFromSymbolTable {
+/** Retrieves the matching element for the given key from the environment if found. If not checks the @c core module. Else throws an exception. */
+- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isFromCore:(BOOL)isFromCore {
     Env *env = [self findEnvForKey:key];
+    id<JSDataProtocol>val = nil;
     if (env != nil) {
-        id<JSDataProtocol>val = [[env table] objectForKey:key];
+        val = [[env table] objectForKey:key];
         if (val != nil) return val;
     }
     // Check for n arity symbol
     if (![key hasNArity]) return [self objectForSymbol:[key toNArity]];
-    if (!isFromSymbolTable) {
-        JSSymbol *sym = [_symTable symbol:key];
-        if (sym) {
-            [sym copyProperties:key];
-            return [self objectForSymbol:sym isFromSymbolTable:YES];
-        };
+    if (!isFromCore) {
+        val = [self objectForSymbolFromCore:[key resetArity]];
+        if (val) return val;
     }
     [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
+    return nil;
+}
+
+/** Retrieves object from @c core module if present. */
+- (_Nullable id<JSDataProtocol>)objectForSymbolFromCore:(JSSymbol *)key {
+    if (!_coreModule) [[[JSError alloc] initWithFormat:ModuleEmpty, @"'core'"] throw];
+    id<JSDataProtocol> obj = [_coreModule objectForSymbol:key];
+    if (obj) {
+        return obj;
+    } else if (![key hasNArity]) {
+        return [self objectForSymbolFromCore:[key toNArity]];
+    }
     return nil;
 }
 
