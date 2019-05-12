@@ -35,7 +35,7 @@
     _printer = [Printer new];
     _core = [Core new];
     _symTable = [SymbolTable new];
-    _env = [[Env alloc] initWithTable:_symTable];
+    _env = [Env new];
     _fileOps = [FileOps new];
     _isQuasiquoteMode = NO;
     _quasiquoteDepth = 0;
@@ -47,16 +47,11 @@
     [self loadCoreLib];
 }
 
-/** Adds functions defined in @c Core module to the environment. */
+#pragma mark Env setup
+
+/** Adds functions defined in @c core module to the environment. */
 - (void)setCoreFunctionsToREPL:(Env *)env {
-    NSMutableDictionary *module = [_core module];
-    NSLock *lock = [NSLock new];
-    [module enumerateKeysAndObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-        JSFunction *fn = [module objectForKey:key];
-        [lock lock];
-        [env setObject:fn forSymbol:[[JSSymbol alloc] initWithArity:[fn argsCount] string:key]];
-        [lock unlock];
-    }];
+    [_env setCoreModule:[_core module]];
 }
 
 /** Add @c eval function to the environment. */
@@ -109,10 +104,14 @@
     }];
 }
 
+#pragma mark Read
+
 /** Converts the given string expression to AST */
 - (NSMutableArray<id<JSDataProtocol>> *)read:(NSString *)string {
     return [_reader readString:string];
 }
+
+#pragma mark Eval
 
 /** Evaluate the AST with the given environment. */
 - (id<JSDataProtocol>)evalAST:(id<JSDataProtocol>)ast withEnv:(Env *)env {
@@ -483,7 +482,7 @@
     return xs;
 }
 
-// MARK: - Quasiquote
+#pragma mark Quasiquote
 
 /**
  Updates binding when an unquote is found within quasiquote.
@@ -522,9 +521,13 @@
     return xs;
 }
 
+#pragma mark Print
+
 - (NSString *)print:(id<JSDataProtocol>)data {
     return [_printer printStringFor:data readably:YES];
 }
+
+#pragma mark REPL
 
 /** Read-eval-print function. */
 - (NSString * _Nullable)rep:(NSString *)string {
@@ -536,8 +539,14 @@
         [self updateBindingsForAST:exps[i] table:_symTable];
         ret = [self print:[self eval:exps[i] withEnv:[self env]]];
     }
+    // Symbol table contains symbols encountered which are defined using def!, defmacro!. Since processing of macros does not happen at this stage, any symbols
+    // defined using macro functions other than defmacro! will not be added. Since these would be evaluated and added to the main env after each REP loop, we
+    // can clear them.
+    [_symTable clearAll];
     return ret;
 }
+
+#pragma mark Exception
 
 /** Returns an expression from the given exception. */
 - (nullable id<JSDataProtocol>)exceptionInfo:(NSException *)exception {

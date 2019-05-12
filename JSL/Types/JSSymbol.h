@@ -16,6 +16,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class JSFunction;
+
 @interface JSSymbol: NSObject <JSDataProtocol>
 @property (nonatomic, readwrite) NSInteger arity;
 @property (nonatomic, readwrite) NSInteger initialArity;
@@ -30,6 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 // Should not instantiate with empty name
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name;
+- (instancetype)initWithFunction:(JSFunction *)func name:(NSString *)name;
 - (instancetype)initWithArity:(NSInteger)arity symbol:(JSSymbol *)symbol;
 - (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position symbol:(JSSymbol *)symbol;
 - (instancetype)initWithArity:(NSInteger)arity string:(NSString *)string;

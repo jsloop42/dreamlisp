@@ -30,6 +30,7 @@
     return [self objectAtIndex:1];
 }
 
+/** Returns a new mutable array without the first element. The original array remains unchanged. */
 - (NSMutableArray *)rest {
     NSMutableArray *arr = [self mutableCopy];
     [arr removeObjectAtIndex:0];
@@ -58,6 +59,7 @@
     return [[[self reverseObjectEnumerator] allObjects] mutableCopy];
 }
 
+/** Drops first @c n elements from the array. */
 - (NSMutableArray * _Nullable)drop:(NSInteger)n {
     NSMutableArray *arr = [self mutableCopy];
     if (n > 0 && n <= [arr count]) {

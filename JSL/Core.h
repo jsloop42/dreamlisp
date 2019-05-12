@@ -12,12 +12,13 @@
 #import "Printer.h"
 #import "Logger.h"
 #import "Terminal.h"
+#import "ModuleTable.h"
 #import <objc/message.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Core : NSObject
-- (NSMutableDictionary *)module;
+- (ModuleTable *)module;
 @end
 
 NS_ASSUME_NONNULL_END

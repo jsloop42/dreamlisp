@@ -19,6 +19,7 @@
     NSInteger _position;
     /** Function name with arity if the symbol is bound to a function */
     NSString *_fnName;
+    NSString *_moduleName;
 }
 
 @synthesize arity = _arity;
@@ -64,6 +65,18 @@
         _arity = -2;
         _initialArity = -2;
         [self updateArity];
+    }
+    return self;
+}
+
+/** Initialise a symbol with function details if the given object is a function else returns the default symbol. */
+- (instancetype)initWithFunction:(JSFunction *)func name:(NSString *)name {
+    self = [super init];
+    if (self) {
+        _name = name;
+        _initialName = name;
+        _initialArity = [func argsCount];
+        [self resetArity];
     }
     return self;
 }

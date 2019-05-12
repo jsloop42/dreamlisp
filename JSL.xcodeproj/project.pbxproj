@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		9E2491EA226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2491E9226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m */; };
 		9E2491EB226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2491E9226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m */; };
+		9E250CEC22886ED500EDADEF /* ModuleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E250CEB22886ED500EDADEF /* ModuleTable.m */; };
+		9E250CED22886ED500EDADEF /* ModuleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E250CEB22886ED500EDADEF /* ModuleTable.m */; };
 		9E281CEA225890B10038A5AF /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CE9225890B10038A5AF /* Utils.m */; };
 		9E281CEB225890B10038A5AF /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CE9225890B10038A5AF /* Utils.m */; };
 		9E281CEE225908480038A5AF /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Constants.m */; };
@@ -99,6 +101,8 @@
 /* Begin PBXFileReference section */
 		9E2491E8226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSMutableDictionary+JSHashMap.h"; sourceTree = "<group>"; };
 		9E2491E9226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+JSHashMap.m"; sourceTree = "<group>"; };
+		9E250CEA22886ED500EDADEF /* ModuleTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModuleTable.h; sourceTree = "<group>"; };
+		9E250CEB22886ED500EDADEF /* ModuleTable.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ModuleTable.m; sourceTree = "<group>"; };
 		9E281CE8225890B10038A5AF /* Utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		9E281CE9225890B10038A5AF /* Utils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
 		9E281CEC225908480038A5AF /* Constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
@@ -284,6 +288,8 @@
 				9E6F444722578E5600777A24 /* JSL.m */,
 				9E3055392260FA8F001D4597 /* Logger.h */,
 				9E30553A2260FA8F001D4597 /* Logger.m */,
+				9E250CEA22886ED500EDADEF /* ModuleTable.h */,
+				9E250CEB22886ED500EDADEF /* ModuleTable.m */,
 				9E3A9D6F22568DB100348529 /* Printer.h */,
 				9E3A9D7022568DB100348529 /* Printer.m */,
 				9E3A9D7322568DBD00348529 /* Reader.h */,
@@ -445,6 +451,7 @@
 				9E3A9D7122568DB100348529 /* Printer.m in Sources */,
 				9E33AAC9227578E200A6EB98 /* JSNumber.m in Sources */,
 				9E33AAD9227579C000A6EB98 /* JSFunction.m in Sources */,
+				9E250CEC22886ED500EDADEF /* ModuleTable.m in Sources */,
 				9E33AAD52275799200A6EB98 /* JSBool.m in Sources */,
 				9E30553F22612AF1001D4597 /* NSMutableArray+JSList.m in Sources */,
 				9E3055542261A162001D4597 /* TypeUtils.m in Sources */,
@@ -485,6 +492,7 @@
 				9E281CEB225890B10038A5AF /* Utils.m in Sources */,
 				9E33AACA227578E200A6EB98 /* JSNumber.m in Sources */,
 				9E33AADA227579C000A6EB98 /* JSFunction.m in Sources */,
+				9E250CED22886ED500EDADEF /* ModuleTable.m in Sources */,
 				9E33AAD62275799200A6EB98 /* JSBool.m in Sources */,
 				9E30554022612AF1001D4597 /* NSMutableArray+JSList.m in Sources */,
 				9E3055552261A162001D4597 /* TypeUtils.m in Sources */,

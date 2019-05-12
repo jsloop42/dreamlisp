@@ -28,6 +28,7 @@ NSString *InvalidDataType = @"Invalid datatype";
 NSString *JSLException = @"JSLException";
 NSString *JSLUnderlyingException = @"JSLUnderlyingException";
 NSString *MacroSymbolNotFound = @"'%@' not found, used outside quasiquote";
+NSString *ModuleEmpty = @"%@ module is empty";
 NSString *SequenceError = @"Not a sequence";
 NSString *SymbolNotFound = @"'%@' not found";
 NSString *SymbolParseError = @"Symbol parse error for %@";

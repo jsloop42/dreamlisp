@@ -97,8 +97,7 @@
     Printer *prn = [Printer new];
     // Function
     JSFunction *fn = [[JSFunction alloc] initWithAst:[JSNil new] params:[NSMutableArray new]
-                      env:[[Env alloc] initWithTable:[SymbolTable new]]
-                      macro:false meta:[JSNil new] fn:^id(id arg) { return nil; } name:@"nil-fn/0"];
+                      env:[Env new] macro:false meta:[JSNil new] fn:^id(id arg) { return nil; } name:@"nil-fn/0"];
     XCTAssertEqualObjects([prn printStringFor:fn readably:true], @"nil-fn/0");
     // Symbol
     JSSymbol *sym = [[JSSymbol alloc] initWithName:@"greet"];
@@ -570,7 +569,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testEnv {
-    Env *env = [[Env alloc] initWithTable:[SymbolTable new]];
+    Env *env = [Env new];
     JSString *obj = [[JSString alloc] initWithString:@"123"];
     JSSymbol *key = [[JSSymbol alloc] initWithName:@"key"];
     [env setObject:obj forSymbol:key];

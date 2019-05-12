@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithTable:(SymbolTable *)table;
 - (JSSymbol * _Nullable)symbol:(JSSymbol *)symbol;
 - (void)setSymbol:(JSSymbol *)symbol;
+- (void)clearAll;
 - (NSUInteger)count;
 @end
 

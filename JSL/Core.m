@@ -10,7 +10,7 @@
 
 /** Core functions exposed to the environment. */
 @implementation Core {
-    NSMutableDictionary *_module;
+    ModuleTable *_module;
     Reader *_reader;
     Printer *_printer;
     Terminal *_terminal;
@@ -18,14 +18,12 @@
 
 - (instancetype)init {
     self = [super init];
-    if (self) {
-        [self bootstrap];
-    }
+    if (self) [self bootstrap];
     return self;
 }
 
 - (void)bootstrap {
-    _module = [NSMutableDictionary new];
+    _module = [ModuleTable new];
     _reader = [Reader new];
     _printer = [Printer new];
     _terminal = [Terminal new];
@@ -53,6 +51,8 @@ double dmod(double a, double n) {
 
 /** Arithmetic functions takes variadic arguments. If no arguments are given, default identities are returned if present, @c 0 for @c (+) and @c 1 @c (*). */
 - (void)addArithmeticFunctions {
+    JSFunction *fn = nil;
+
     id<JSDataProtocol>(^calc)(NSMutableArray *args, SEL sel) = ^id<JSDataProtocol>(NSMutableArray *args, SEL sel) {
         NSDecimalNumber *num = [NSDecimalNumber new];
         NSUInteger len = [args count];
@@ -90,7 +90,7 @@ double dmod(double a, double n) {
         return calc(args, @selector(decimalNumberByAdding:));
     } name:@"+/n"];
     [add setArgsCount:-1];
-    [_module setObject:add forKey:@"+"];
+    [_module setObject:add forSymbol:[[JSSymbol alloc] initWithFunction:add name:@"+"]];
 
     JSFunction *subtract = [[JSFunction alloc] initWithFn:^id<JSDataProtocol>(NSMutableArray *args) {
         if ([args count] == 1) {
@@ -106,21 +106,21 @@ double dmod(double a, double n) {
         return calc(args, @selector(decimalNumberBySubtracting:));
     } name:@"-/n"];
     [subtract setArgsCount:-1];
-    [_module setObject:subtract forKey:@"-"];
+    [_module setObject:subtract forSymbol:[[JSSymbol alloc] initWithFunction:subtract name:@"-"]];
 
     JSFunction *multiply = [[JSFunction alloc] initWithFn:^id<JSDataProtocol>(NSMutableArray *args) {
         if ([args isEmpty]) return [[JSNumber alloc] initWithInt:1];
         return calc(args, @selector(decimalNumberByMultiplyingBy:));
     } name:@"*/n"];
     [multiply setArgsCount:-1];
-    [_module setObject:multiply forKey:@"*"];
+    [_module setObject:multiply forSymbol:[[JSSymbol alloc] initWithFunction:multiply name:@"*"]];
 
     JSFunction *divide = [[JSFunction alloc] initWithFn:^id<JSDataProtocol>(NSMutableArray *args) {
         if ([args count] == 1) [args insertObject:[[JSNumber alloc] initWithInteger:1] atIndex:0];
         return calc(args, @selector(decimalNumberByDividingBy:));
     } name:@"//n"];
     [divide setArgsCount:-1];
-    [_module setObject:divide forKey:@"/"];
+    [_module setObject:divide forSymbol:[[JSSymbol alloc] initWithFunction:divide name:@"/"]];
 
     id<JSDataProtocol>(^mod)(NSMutableArray *args) = ^id<JSDataProtocol>(NSMutableArray *args) {
         [TypeUtils checkArity:args arity:2];
@@ -134,7 +134,8 @@ double dmod(double a, double n) {
         }
         return ret;
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:mod argCount:2 name:@"mod/2"] forKey:@"mod"];
+    fn = [[JSFunction alloc] initWithFn:mod argCount:2 name:@"mod/2"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"mod"]];
 }
 
 /** Checks if the given data are equal.  */
@@ -183,25 +184,25 @@ double dmod(double a, double n) {
         return compare(args, @selector(isLessThan:));
     } name:@"</n"];
     [lessThan setArgsCount:-1];
-    [_module setObject:lessThan forKey:@"<"];
+    [_module setObject:lessThan forSymbol:[[JSSymbol alloc] initWithFunction:lessThan name:@"<"]];
 
     JSFunction *greaterThan = [[JSFunction alloc] initWithFn:^id<JSDataProtocol>(NSMutableArray *args) {
         return compare(args, @selector(isGreaterThan:));
     } name:@">/n"];
     [greaterThan setArgsCount:-1];
-    [_module setObject:greaterThan forKey:@">"];
+    [_module setObject:greaterThan forSymbol:[[JSSymbol alloc] initWithFunction:greaterThan name:@">"]];
 
     JSFunction *lessThanOrEqualTo = [[JSFunction alloc] initWithFn:^id<JSDataProtocol>(NSMutableArray *args) {
         return compare(args, @selector(isLessThanOrEqualTo:));
     } name:@"<=/n"];
     [lessThanOrEqualTo setArgsCount:-1];
-    [_module setObject:lessThanOrEqualTo forKey:@"<="];
+    [_module setObject:lessThanOrEqualTo forSymbol:[[JSSymbol alloc] initWithFunction:lessThanOrEqualTo name:@"<="]];
 
     JSFunction *greaterThanOrEqualTo = [[JSFunction alloc] initWithFn:^id<JSDataProtocol>(NSMutableArray *args) {
         return compare(args, @selector(isGreaterThanOrEqualTo:));
     } name:@">=/n"];
     [greaterThanOrEqualTo setArgsCount:-1];
-    [_module setObject:greaterThanOrEqualTo forKey:@">="];
+    [_module setObject:greaterThanOrEqualTo forSymbol:[[JSSymbol alloc] initWithFunction:greaterThanOrEqualTo name:@">="]];
 
     JSFunction *equalTo = [[JSFunction alloc] initWithFn:^id<JSDataProtocol>(NSMutableArray *args) {
         BOOL ret = YES;
@@ -218,12 +219,13 @@ double dmod(double a, double n) {
         return [[JSBool alloc] initWithBool:ret];
     } name:@"=/n"];
     [equalTo setArgsCount:-1];
-    [_module setObject:equalTo forKey:@"="];
+    [_module setObject:equalTo forSymbol:[[JSSymbol alloc] initWithFunction:equalTo name:@"="]];
 }
 
 /** Add various string functions that returns a string or prints it to stdout. */
 - (void)addPrintFunctions {
     Core * __weak weakSelf = self;
+    JSFunction *fn = nil;
     id<JSDataProtocol>(^println)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         Core *this = weakSelf;
         NSUInteger len = [xs count];
@@ -235,7 +237,8 @@ double dmod(double a, double n) {
         info(@"%@", [ret componentsJoinedByString:@" "]);
         return [JSNil new];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:println argCount:-1 name:@"println/n"] forKey:@"println"];
+    fn = [[JSFunction alloc] initWithFn:println argCount:-1 name:@"println/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"println"]];
 
     id<JSDataProtocol>(^prn)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         Core *this = weakSelf;
@@ -248,7 +251,8 @@ double dmod(double a, double n) {
         info(@"%@", [ret componentsJoinedByString:@" "]);
         return [JSNil new];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:prn argCount:-1 name:@"prn/n"] forKey:@"prn"];
+    fn = [[JSFunction alloc] initWithFn:prn argCount:-1 name:@"prn/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"prn"]];
 
     id<JSDataProtocol>(^print)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         Core *this = weakSelf;
@@ -261,8 +265,9 @@ double dmod(double a, double n) {
         info(@"%@", [ret componentsJoinedByString:@" "]);
         return nil;
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:print argCount:-1 name:@"print/n"] forKey:@"print"];  // prints to stdout without returning nil
-
+    // prints to stdout without returning nil
+    fn = [[JSFunction alloc] initWithFn:print argCount:-1 name:@"print/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"print"]];
     id<JSDataProtocol>(^prstr)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         Core *this = weakSelf;
         NSUInteger len = [xs count];
@@ -273,7 +278,9 @@ double dmod(double a, double n) {
         }
         return [[JSString alloc] initWithString:[ret componentsJoinedByString:@" "]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:prstr argCount:-1 name:@"pr-str/n"] forKey:@"pr-str"];  // returns escaped strings (pr-str "a") -> "\"a\""
+    // returns escaped strings (pr-str "a") -> "\"a\""
+    fn = [[JSFunction alloc] initWithFn:prstr argCount:-1 name:@"pr-str/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"pr-str"]];
 
     id<JSDataProtocol>(^str)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         Core *this = weakSelf;
@@ -285,22 +292,27 @@ double dmod(double a, double n) {
         }
         return [[JSString alloc] initWithString:[ret componentsJoinedByString:@""]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:str argCount:-1 name:@"str/n"] forKey:@"str"];  // returns strings as such (str "a") -> "a"
+    // returns strings as such (str "a") -> "a"
+    fn = [[JSFunction alloc] initWithFn:str argCount:-1 name:@"str/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"str"]];
 }
 
 - (void)addListFunctions {
+    JSFunction *fn = nil;
     /** Create a list from the given elements. */
     id<JSDataProtocol>(^list)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         return [[JSList alloc] initWithArray:xs];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:list argCount:-1 name:@"list/n"] forKey:@"list"];
+    fn = [[JSFunction alloc] initWithFn:list argCount:-1 name:@"list/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"list"]];
 
     /** Checks if the given element is a list */
     id<JSDataProtocol>(^listp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         return [[JSBool alloc] initWithBool:[[(id<JSDataProtocol>)[xs first] dataType] isEqual:@"JSList"]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:listp argCount:1 name:@"list?/1"] forKey:@"list?"];
+    fn = [[JSFunction alloc] initWithFn:listp argCount:1 name:@"list?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"list?"]];
 
     /** Checks if the given list contains no elements. */
     id<JSDataProtocol>(^emptyp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -310,7 +322,8 @@ double dmod(double a, double n) {
         ret = [JSString isString:first] ? [(JSString *)first isEmpty] : [[JSList dataToList:first fnName:@"empty?/1"] isEmpty];
         return [[JSBool alloc] initWithBool:ret];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:emptyp argCount:1 name:@"empty?/1"] forKey:@"empty?"];
+    fn = [[JSFunction alloc] initWithFn:emptyp argCount:1 name:@"empty?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"empty?"]];
 
     /** Returns the number of elements in the given list. */
     id<JSDataProtocol>(^count)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -321,7 +334,8 @@ double dmod(double a, double n) {
                 ? [(JSString *)first count]
                 : [[JSList dataToList:first fnName:@"count/1"] count]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:count argCount:1 name:@"count/1"] forKey:@"count"];
+    fn = [[JSFunction alloc] initWithFn:count argCount:1 name:@"count/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"count"]];
 
     /**
      Takes any element and adds it to the first of the given list.
@@ -336,7 +350,8 @@ double dmod(double a, double n) {
         [arr insertObject:(id<JSDataProtocol>)[xs first] atIndex:0];
         return [[JSList alloc] initWithArray:arr];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:cons argCount:2 name:@"cons/2"] forKey:@"cons"];
+    fn = [[JSFunction alloc] initWithFn:cons argCount:2 name:@"cons/2"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"cons"]];
 
     /**
      Takes two lists or vectors, combines them and returns a list
@@ -362,7 +377,8 @@ double dmod(double a, double n) {
         }
         return [[JSList alloc] initWithArray:arr];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:concat argCount:-1 name:@"concat/n"] forKey:@"concat"];
+    fn = [[JSFunction alloc] initWithFn:concat argCount:-1 name:@"concat/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"concat"]];
 
     /**
      Returns the nth indexed element from the list.
@@ -380,7 +396,8 @@ double dmod(double a, double n) {
         [TypeUtils checkIndexBounds:list index:n];
         return [list nth:n];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:nth argCount:2 name:@"nth/2"] forKey:@"nth"];
+    fn = [[JSFunction alloc] initWithFn:nth argCount:2 name:@"nth/2"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"nth"]];
 
     /** Returns the first element of the list. If the list is empty, this returns nil. */
     id<JSDataProtocol>(^first)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -395,7 +412,8 @@ double dmod(double a, double n) {
         }
         return (first == nil) ? [JSNil new] : first;
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:first argCount:1 name:@"first/1"] forKey:@"first"];
+    fn = [[JSFunction alloc] initWithFn:first argCount:1 name:@"first/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"first"]];
 
     /** Returns a list without the first element. If the list is empty, then the list is returned. */
     id<JSDataProtocol>(^rest)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -405,7 +423,8 @@ double dmod(double a, double n) {
         JSList *list = [JSVector dataToList:data position:1 fnName:@"rest/1"];
         return [list isEmpty] ? [JSList new] : (JSList *)[list rest];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:rest argCount:1 name:@"rest/1"] forKey:@"rest"];
+    fn = [[JSFunction alloc] initWithFn:rest argCount:1 name:@"rest/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"rest"]];
 
     /**
      Takes a function and a list and applies the function to each element of the list and return the resulting list.
@@ -426,7 +445,8 @@ double dmod(double a, double n) {
         }
         return [[JSList alloc] initWithArray:ret];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:map argCount:2 name:@"map/2"] forKey:@"map"];
+    fn = [[JSFunction alloc] initWithFn:map argCount:2 name:@"map/2"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"map"]];
 
     /**
      Takes a vector and n elements, appends the elements to the vector and return resulting new vector. The original vector remains unchanged.
@@ -448,7 +468,8 @@ double dmod(double a, double n) {
         }
         return [[JSList alloc] initWithArray:[[rest reverse] arrayByAddingObjectsFromArray:list]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:conj argCount:-1 name:@"conj/n"] forKey:@"conj"];
+    fn = [[JSFunction alloc] initWithFn:conj argCount:-1 name:@"conj/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"conj"]];
 
     /** Checks if the given element is iteratable, which is a list or a vector. */
     id<JSDataProtocol>(^sequentialp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -456,7 +477,8 @@ double dmod(double a, double n) {
         id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
         return [[JSBool alloc] initWithBool:([JSList isList:first] || [JSVector isVector:first])];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:sequentialp argCount:1 name:@"sequential?/1"] forKey:@"sequential?"];
+    fn = [[JSFunction alloc] initWithFn:sequentialp argCount:1 name:@"sequential?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"sequential?"]];
 
     /**
      Takes a list, vector or a string and returns a list containing individual elements that can be iterated.
@@ -495,12 +517,14 @@ double dmod(double a, double n) {
         [[[JSError alloc] initWithDescription:SequenceError] throw];
         return nil;
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:seq argCount:1 name:@"seq/1"] forKey:@"seq"];
+    fn = [[JSFunction alloc] initWithFn:seq argCount:1 name:@"seq/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"seq"]];
 }
 
 /** Exposes the reader which is used for eval */
 - (void)addEvalFunctions {
     Core * __weak weakSelf = self;
+    JSFunction *fn = nil;
 
     /** Takes an expression in string form, tokenizes it returning the expression. */
     id<JSDataProtocol>(^readString)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -510,30 +534,36 @@ double dmod(double a, double n) {
         NSUInteger len = [exprs count];
         return (len == 0) ? [JSNil new] : exprs[len - 1];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:readString argCount:1 name:@"read-string/1"] forKey:@"read-string"];
+    fn = [[JSFunction alloc] initWithFn:readString argCount:1 name:@"read-string/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"read-string"]];
 
     /** Read content of a file as string. Should be used for smaller files only. */
     id<JSDataProtocol>(^slurp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         return [[JSString alloc] initWithContentsOfFile:[[JSString dataToString:[xs first] fnName:@"slurp/1"] value]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:slurp argCount:1 name:@"slurp/1"] forKey:@"slurp"];
+    fn = [[JSFunction alloc] initWithFn:slurp argCount:1 name:@"slurp/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"slurp"]];
 }
 
 - (void)addAtomFunctions {
+    JSFunction *fn = nil;
+
     /** Create an atom with the given element as its value. */
     id<JSDataProtocol>(^atom)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         return [[JSAtom alloc] initWithData:[xs first]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:atom argCount:1 name:@"atom/1"] forKey:@"atom"];
+    fn = [[JSFunction alloc] initWithFn:atom argCount:1 name:@"atom/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"atom"]];
 
     /** Checks if the given element is an atom. */
     id<JSDataProtocol>(^atomp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         return [[JSBool alloc] initWithBool:[JSAtom isAtom:[xs first]]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:atomp argCount:1 name:@"atom?/1"] forKey:@"atom?"];
+    fn = [[JSFunction alloc] initWithFn:atomp argCount:1 name:@"atom?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"atom?"]];
 
     /** Dereferences an atom returning the value it holds. */
     id<JSDataProtocol>(^deref)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -541,7 +571,8 @@ double dmod(double a, double n) {
         id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
         return ![JSAtom isAtom:first] ? [JSNil new] : [(JSAtom *)first value];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:deref argCount:1 name:@"deref/1"] forKey:@"deref"];
+    fn = [[JSFunction alloc] initWithFn:deref argCount:1 name:@"deref/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"deref"]];
 
     /** Mutates the value of an atom to the new given value. */
     id<JSDataProtocol>(^reset)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -552,7 +583,8 @@ double dmod(double a, double n) {
         [atom setValue:value];
         return value;
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:reset argCount:2 name:@"reset!/2"] forKey:@"reset!"];
+    fn = [[JSFunction alloc] initWithFn:reset argCount:2 name:@"reset!/2"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"reset!"]];
 
     /** Takes an atom, a function and arguments, applies the function to the arguments and sets the resulting value as the value of the atom. */
     id<JSDataProtocol>(^swap)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -565,16 +597,20 @@ double dmod(double a, double n) {
         [atom setValue:[fn fn](more)];
         return [atom value];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:swap argCount:-1 name:@"swap!/n"] forKey:@"swap!"];
+    fn = [[JSFunction alloc] initWithFn:swap argCount:-1 name:@"swap!/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"swap!"]];
 }
 
 - (void)addInvokeFunctions {
+    JSFunction* fn = nil;
+
     /** Throws an exception with the given data as its value. */
     id<JSDataProtocol>(^throw)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         @throw [[NSException alloc] initWithName:JSLException reason:JSLException userInfo:@{@"jsdata": (id<JSDataProtocol>)[xs first]}];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:throw argCount:1 name:@"throw/1"] forKey:@"throw"];
+    fn = [[JSFunction alloc] initWithFn:throw argCount:1 name:@"throw/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"throw"]];
 
     /** Takes a function and a list of arguments, invokes the function with the elements in the list as its arguments. */
     id<JSDataProtocol>(^apply)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -590,16 +626,20 @@ double dmod(double a, double n) {
         [params addObjectsFromArray:last];
         return [fn apply:params];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:apply argCount:-1 name:@"apply/n"] forKey:@"apply"];
+    fn = [[JSFunction alloc] initWithFn:apply argCount:-1 name:@"apply/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"apply"]];
 }
 
 - (void)addPredicateFunctions {
+    JSFunction *fn = nil;
+
     /** Checks if the given element is @c nil. */
     id<JSDataProtocol>(^nilp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         return [[JSBool alloc] initWithBool:[JSNil isNil:[xs first]]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:nilp argCount:1 name:@"nil?/1"] forKey:@"nil?"];
+    fn = [[JSFunction alloc] initWithFn:nilp argCount:1 name:@"nil?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"nil?"]];
 
     /** Checks if the given value is @c true. */
     id<JSDataProtocol>(^truep)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -607,7 +647,8 @@ double dmod(double a, double n) {
         id<JSDataProtocol> data = (id<JSDataProtocol>)[xs first];
         return [[JSBool alloc] initWithBool:([JSBool isBool:data] && [(JSBool *)data value] == YES)];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:truep argCount:1 name:@"true?/1"] forKey:@"true?"];
+    fn = [[JSFunction alloc] initWithFn:truep argCount:1 name:@"true?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"true?"]];
 
     /** Checks if the given element is @c false. */
     id<JSDataProtocol>(^falsep)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -615,21 +656,24 @@ double dmod(double a, double n) {
         id<JSDataProtocol> data = (id<JSDataProtocol>)[xs first];
         return [[JSBool alloc] initWithBool:([JSBool isBool:data] && [(JSBool *)data value] == NO)];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:falsep argCount:1 name:@"false?/1"] forKey:@"false?"];
+    fn = [[JSFunction alloc] initWithFn:falsep argCount:1 name:@"false?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"false?"]];
 
     /** Checks if the given element is a @c string. */
     id<JSDataProtocol>(^stringp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         return [[JSBool alloc] initWithBool:[JSString isString:[xs first]]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:stringp argCount:1 name:@"string?/1"] forKey:@"string?"];
+    fn = [[JSFunction alloc] initWithFn:stringp argCount:1 name:@"string?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"string?"]];
 
     /** Checks if the given element is a @c number. */
     id<JSDataProtocol>(^numberp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         return [[JSBool alloc] initWithBool:[JSNumber isNumber:[xs first]]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:numberp argCount:1 name:@"number?/1"] forKey:@"number?"];
+    fn = [[JSFunction alloc] initWithFn:numberp argCount:1 name:@"number?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"number?"]];
 
     /** Checks if the given element is a @c function. */
     id<JSDataProtocol>(^fnp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -641,7 +685,8 @@ double dmod(double a, double n) {
         }
         return [[JSBool alloc] initWithBool:NO];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:fnp argCount:1 name:@"fn?/1"] forKey:@"fn?"];
+    fn = [[JSFunction alloc] initWithFn:fnp argCount:1 name:@"fn?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"fn?"]];
 
     /** Checks if the given element is a @c macro. */
     id<JSDataProtocol>(^macrop)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -649,26 +694,33 @@ double dmod(double a, double n) {
         id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
         return [[JSBool alloc] initWithBool:([JSFunction isFunction:first] && [(JSFunction *)first isMacro])];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:macrop argCount:1 name:@"macro?/1"] forKey:@"macro?"];
+    fn = [[JSFunction alloc] initWithFn:macrop argCount:1 name:@"macro?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"macro?"]];
 }
 
 - (void)addSymbolFunctions {
+    JSFunction *fn = nil;
+
     /** Creates a symbol from the given string. */
     id<JSDataProtocol>(^symbol)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         return [[JSSymbol alloc] initWithName:[(JSString *)[xs first] value]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:symbol argCount:1 name:@"symbol/1"] forKey:@"symbol"];
+    fn = [[JSFunction alloc] initWithFn:symbol argCount:1 name:@"symbol/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"symbol"]];
 
     /** Checks if the given element is a symbol. */
     id<JSDataProtocol>(^symbolp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         return [[JSBool alloc] initWithBool:[JSSymbol isSymbol:[xs first]]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:symbolp argCount:1 name:@"symbol?/1"] forKey:@"symbol?"];
+    fn = [[JSFunction alloc] initWithFn:symbolp argCount:1 name:@"symbol?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"symbol?"]];
 }
 
 - (void)addKeywordFunctions {
+    JSFunction *fn = nil;
+
     /** Create a keyword from the given element. */
     id<JSDataProtocol>(^keyword)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
@@ -676,7 +728,8 @@ double dmod(double a, double n) {
         if ([JSKeyword isKeyword:first]) return first;
         return ([JSString isString:first]) ? [[JSKeyword alloc] initWithString:[(JSString *)first value]] :[JSNil new];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:keyword argCount:1 name:@"keyword/1"] forKey:@"keyword"];
+    fn = [[JSFunction alloc] initWithFn:keyword argCount:1 name:@"keyword/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"keyword"]];
 
     /** Checks if the given element is a keyword. */
     id<JSDataProtocol>(^keywordp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -684,37 +737,46 @@ double dmod(double a, double n) {
         id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
         return [[JSBool alloc] initWithBool:([JSKeyword isKeyword:first] || ([NSString isString:first] && [JSKeyword isEncodedKeyword:(NSString *)first]))];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:keywordp argCount:1 name:@"keyword?/1"] forKey:@"keyword?"];
+    fn = [[JSFunction alloc] initWithFn:keywordp argCount:1 name:@"keyword?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"keyword?"]];
 }
 
 - (void)addVectorFunctions {
+    JSFunction *fn = nil;
+
     /** Create a vector with the given elements. */
     id<JSDataProtocol>(^vector)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         return [[JSVector alloc] initWithArray:xs];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:vector argCount:-1 name:@"vector/n"] forKey:@"vector"];
+    fn = [[JSFunction alloc] initWithFn:vector argCount:-1 name:@"vector/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"vector"]];
 
     /** Checks if the given element is a vector. */
     id<JSDataProtocol>(^vectorp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         return [[JSBool alloc] initWithBool:[JSVector isVector:[xs first]]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:vectorp argCount:1 name:@"vector?/1"] forKey:@"vector?"];
+    fn = [[JSFunction alloc] initWithFn:vectorp argCount:1 name:@"vector?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"vector?"]];
 }
 
 - (void)addHashMapFunctions {
+    JSFunction *fn = nil;
+
     /** Create a hash map with given key value pair. The first element is taken as a key and the next element as its value and so on.*/
     id<JSDataProtocol>(^hashmap)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         return [[JSHashMap alloc] initWithArray:xs];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:hashmap argCount:-1 name:@"hash-map/n"] forKey:@"hash-map"];
+    fn = [[JSFunction alloc] initWithFn:hashmap argCount:-1 name:@"hash-map/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"hash-map"]];
 
     /** Checks if the given element is a hash map. */
     id<JSDataProtocol>(^mapp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         return [[JSBool alloc] initWithBool:[JSHashMap isHashMap:[xs first]]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:mapp argCount:1 name:@"map?/1"] forKey:@"map?"];
+    fn = [[JSFunction alloc] initWithFn:mapp argCount:1 name:@"map?/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"map?"]];
 
     /**
      Takes a hash map and key value pairs, add them to the hash map and return a resulting new hash map.
@@ -729,7 +791,8 @@ double dmod(double a, double n) {
         NSMapTable *rest = [[[JSHashMap alloc] initWithArray:[xs rest]] value];
         return [[JSHashMap alloc] initWithMapTable:[table assoc:rest]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:assoc argCount:-1 name:@"assoc/n"] forKey:@"assoc"];
+    fn = [[JSFunction alloc] initWithFn:assoc argCount:-1 name:@"assoc/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"assoc"]];
 
     /**
      Takes a hash map and keys, removes the value associated for the key if present and returns the resulting new hash map.
@@ -742,7 +805,8 @@ double dmod(double a, double n) {
         NSMapTable *table = [[first value] mutableCopy];
         return [[JSHashMap alloc] initWithMapTable:[table dissoc:keys]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:dissoc argCount:-1 name:@"dissoc/n"] forKey:@"dissoc"];
+    fn = [[JSFunction alloc] initWithFn:dissoc argCount:-1 name:@"dissoc/n"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"dissoc"]];
 
     /**
      Takes a hash map and a key and returns the value associated with the key if present. Returns nil otherwise.
@@ -760,7 +824,8 @@ double dmod(double a, double n) {
         }
         return [JSNil new];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:get argCount:2 name:@"get/2"] forKey:@"get"];
+    fn = [[JSFunction alloc] initWithFn:get argCount:2 name:@"get/2"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"get"]];
 
     /**
      Checks if the given hash map contains the key.
@@ -774,7 +839,8 @@ double dmod(double a, double n) {
         JSHashMap *first = [JSHashMap dataToHashMap:[xs first] fnName:@"contains?/2"];
         return [[JSBool alloc] initWithBool:[first containsKey:[xs second]]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:contains argCount:2 name:@"contains?/2"] forKey:@"contains?"];
+    fn = [[JSFunction alloc] initWithFn:contains argCount:2 name:@"contains?/2"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"contains?"]];
 
     /** Returns a list containing the hash map keys. */
     id<JSDataProtocol>(^keys)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -782,7 +848,8 @@ double dmod(double a, double n) {
         JSHashMap *first = [JSHashMap dataToHashMap:[xs first] fnName:@"keys/1"];
         return [[JSList alloc] initWithArray:[first allKeys]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:keys argCount:1 name:@"keys/1"] forKey:@"keys"];
+    fn = [[JSFunction alloc] initWithFn:keys argCount:1 name:@"keys/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"keys"]];
 
     /** Returns a list containing the hash map values. */
     id<JSDataProtocol>(^vals)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -790,11 +857,14 @@ double dmod(double a, double n) {
         JSHashMap *first = [JSHashMap dataToHashMap:[xs first] fnName:@"vals/1"];
         return [[JSList alloc] initWithArray:[first allObjects]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:vals argCount:1 name:@"vals/1"] forKey:@"vals"];
+    fn = [[JSFunction alloc] initWithFn:vals argCount:1 name:@"vals/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"vals"]];
 }
 
 - (void)addIOFunctions {
     Core * __weak weakSelf = self;
+    JSFunction *fn = nil;
+
     /** Reads a line from the stdin with the given prompt displayed. */
     id<JSDataProtocol>(^readline)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
@@ -802,10 +872,13 @@ double dmod(double a, double n) {
         return [[JSString alloc] initWithString:[this->_terminal
                                                  readlineWithPrompt:[[[JSString dataToString:[xs first] fnName:@"readline/1"] value] UTF8String]]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:readline argCount:1 name:@"readline/1"] forKey:@"readline"];
+    fn = [[JSFunction alloc] initWithFn:readline argCount:1 name:@"readline/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"readline"]];
 }
 
 - (void)addMetaFunctions {
+    JSFunction *fn = nil;
+
     /**
      Associates the given element with a metadata.
 
@@ -826,7 +899,8 @@ double dmod(double a, double n) {
         if ([JSAtom isAtom:first]) return [[JSAtom alloc] initWithMeta:meta atom:(JSAtom *)first];
         return first;
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:withMeta argCount:2 name:@"with-meta/2"] forKey:@"with-meta"];
+    fn = [[JSFunction alloc] initWithFn:withMeta argCount:2 name:@"with-meta/2"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"with-meta"]];
 
     /**
      Return a meta associated with the given element if present or nil.
@@ -842,25 +916,30 @@ double dmod(double a, double n) {
         }
         return [first meta] ? [first meta] : [JSNil new];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:meta argCount:1 name:@"meta/1"] forKey:@"meta"];
+    fn = [[JSFunction alloc] initWithFn:meta argCount:1 name:@"meta/1"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"meta"]];
 }
 
 - (void)addMiscFunctions {
+    JSFunction *fn = nil;
+
     /** Exits the current running process. To be used in REPL only. */
     id<JSDataProtocol>(^exitfn)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         exit(0);
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:exitfn argCount:0 name:@"exit/0"] forKey:@"exit*"];
+    fn = [[JSFunction alloc] initWithFn:exitfn argCount:0 name:@"exit/0"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"exit"]];
 
     /** Returns the current timestamp in milliseconds. */
     id<JSDataProtocol>(^timems)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:0];
         return [[JSNumber alloc] initWithInteger:[Utils timestamp]];
     };
-    [_module setObject:[[JSFunction alloc] initWithFn:timems argCount:0 name:@"time-ms/0"] forKey:@"time-ms"];
+    fn = [[JSFunction alloc] initWithFn:timems argCount:0 name:@"time-ms/0"];
+    [_module setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"time-ms"]];
 }
 
-- (NSMutableDictionary *)module {
+- (ModuleTable *)module {
     return _module;
 }
 

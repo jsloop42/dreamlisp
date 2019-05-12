@@ -8,7 +8,11 @@
 
 #import "SymbolTable.h"
 
-/** A table used for store and lookup of hygienic symbols */
+/**
+ A temporary table used for storing and lookup of hygienic symbols for an REP loop. The table will contain symbols encountered which are defined using def!,
+ defmacro!. Since processing of macros does not happen at auto gensym stage, any symbols defined using macro functions other than defmacro! will not be added.
+ The table can be cleared after each REP loop.
+ */
 @implementation SymbolTable {
     SymbolTable *_outer;
     NSMapTable<NSString *, JSSymbol *> *_table;
@@ -51,6 +55,11 @@
 - (void)setSymbol:(JSSymbol *)symbol {
     NSString *key = (NSString *)[symbol initialValue];
     [_table setObject:symbol forKey:key];
+}
+
+- (void)clearAll {
+    [_table removeAllObjects];
+    if (_outer) [_outer clearAll];
 }
 
 - (NSUInteger)count {
