@@ -14,8 +14,8 @@
     NSInteger _position;
 }
 
-@synthesize value = _string;
 @synthesize meta = _meta;
+@synthesize value = _string;
 
 + (BOOL)isString:(id)object {
     return [[object className] isEqual:[self className]];
@@ -105,14 +105,6 @@
 - (id<JSDataProtocol>)setPosition:(NSInteger)position {
     _position = position;
     return self;
-}
-
-- (NSString *)value {
-    return _string;
-}
-
-- (void)setValue:(NSString *)string {
-    _string = string;
 }
 
 - (BOOL)isEmpty {

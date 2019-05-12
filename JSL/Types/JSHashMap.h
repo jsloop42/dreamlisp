@@ -26,8 +26,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (id<JSDataProtocol>)objectForKey:(id)key;
 - (void)setObject:(id<JSDataProtocol>)object forKey:(id)key;
 - (NSUInteger)count;
-- (NSMapTable *)value;
-- (void)setValue:(NSMapTable *)table;
 - (NSArray *)allKeys;
 - (NSArray *)allObjects;
 - (BOOL)containsKey:(id)key;

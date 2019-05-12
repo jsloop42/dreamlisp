@@ -32,7 +32,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (int)intValue;
 - (NSUInteger)integerValue;
 - (BOOL)isDouble;
-- (NSDecimalNumber *)value;
 - (NSString *)string;
 - (BOOL)isEqual:(JSNumber *)num;
 - (NSUInteger)hash;

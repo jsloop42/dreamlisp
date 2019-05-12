@@ -26,7 +26,7 @@
 @synthesize env = _env;
 @synthesize macro = _isMacro;
 @synthesize meta = _meta;
-@synthesize value;
+@synthesize value;  // not used
 
 + (BOOL)isFunction:(id)object {
     return [[object className] isEqual:[self className]];

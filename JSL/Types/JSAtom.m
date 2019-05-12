@@ -15,6 +15,7 @@
 }
 
 @synthesize meta = _meta;
+@synthesize value = _data;
 
 + (BOOL)isAtom:(id)object {
     return [[object className] isEqual:[self className]];
@@ -67,14 +68,6 @@
 - (id<JSDataProtocol>)setPosition:(NSInteger)position {
     _position = position;
     return self;
-}
-
-- (id<JSDataProtocol>)value {
-    return _data;
-}
-
-- (void)setValue:(id<JSDataProtocol>)data {
-    _data = data;
 }
 
 - (BOOL)isEqual:(JSAtom *)atom {

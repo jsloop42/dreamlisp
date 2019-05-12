@@ -244,6 +244,19 @@ double dmod(double a, double n) {
     };
     [_ns setObject:[[JSFunction alloc] initWithFn:prn argCount:-1] forKey:@"prn"];
 
+    id<JSDataProtocol>(^print)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        Core *this = weakSelf;
+        NSUInteger len = [xs count];
+        NSUInteger i = 0;
+        NSMutableArray *ret = [NSMutableArray new];
+        for (i = 0; i < len; i++) {
+            [ret addObject:[this->_printer printStringFor:[xs nth:i] readably:false]];
+        }
+        info(@"%@", [ret componentsJoinedByString:@" "]);
+        return nil;
+    };
+    [_ns setObject:[[JSFunction alloc] initWithFn:print argCount:-1] forKey:@"print"];
+
     id<JSDataProtocol>(^prstr)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         Core *this = weakSelf;
         NSUInteger len = [xs count];

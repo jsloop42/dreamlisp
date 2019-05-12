@@ -155,10 +155,6 @@
     return _name;
 }
 
-- (NSString *)value {
-    return _name;
-}
-
 - (JSSymbol *)toNArity {
     _arity = -1;
     [self updateArity];

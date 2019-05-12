@@ -18,7 +18,7 @@
 }
 
 @synthesize meta = _meta;
-@synthesize value;
+@synthesize value = _n;
 
 + (BOOL)isNumber:(id)object {
     return [[object className] isEqual:[self className]];
@@ -161,10 +161,6 @@
 
 - (NSUInteger)integerValue {
     return [_n integerValue];
-}
-
-- (NSDecimalNumber *)value {
-    return _n;
 }
 
 - (BOOL)checkDouble:(NSString *)string {

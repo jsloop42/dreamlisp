@@ -87,10 +87,6 @@
     return self;
 }
 
-- (NSString *)value {
-    return _string;
-}
-
 - (NSString *)string {
     if ([_string characterAtIndex:0] == ':') {
         return [_string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:@""];
@@ -107,10 +103,6 @@
         return [_string substringFromIndex:1];
     }
     return _string;
-}
-
-- (void)setValue:(NSString *)value {
-    _string = value;
 }
 
 - (BOOL)isEqual:(JSKeyword *)keyword {

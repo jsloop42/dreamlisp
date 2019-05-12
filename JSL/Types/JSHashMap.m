@@ -15,6 +15,7 @@
 }
 
 @synthesize meta = _meta;
+@synthesize value = _table;
 
 + (BOOL)isHashMap:(id)object {
     return [[object className] isEqual:[self className]];
@@ -113,14 +114,6 @@
 
 - (NSUInteger)count {
     return [_table count];
-}
-
-- (NSMapTable *)value {
-    return _table;
-}
-
-- (void)setValue:(NSMapTable *)table {
-    _table = table;
 }
 
 - (NSArray *)allKeys {
