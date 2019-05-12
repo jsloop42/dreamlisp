@@ -33,7 +33,7 @@ NSString *_historyFile = @"/.jsl-history";
 - (void)loadHistoryFile:(NSString *)path {
     @try {
         [_fops openFile:path];
-        while([_fops hashNext]) {
+        while([_fops hasNext]) {
             NSString *line = [_fops readLine];
             if ([line length] > 0) add_history([line cStringUsingEncoding:NSUTF8StringEncoding]);
         }

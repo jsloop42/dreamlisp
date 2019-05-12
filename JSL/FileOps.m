@@ -72,6 +72,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     if (![_fm fileExistsAtPath:_path]) [_fm createFileAtPath:_path contents:nil attributes:nil];
 }
 
+/** Opens the given file setting handlers for reading the file. */
 - (void)openFile:(NSString *)path {
     _path = path;
     _filePath = [NSURL fileURLWithPath:_path];
@@ -130,10 +131,12 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     return [[NSBundle mainBundle] bundlePath];
 }
 
-- (BOOL)hashNext {
+/** Checks if the there are contents left for reading. */
+- (BOOL)hasNext {
     return _start < _buff;
 }
 
+/** Reads a line of string. */
 - (NSString *)readLine {
     NSData *line = nil;
     NSRange range = [_fileData rangeOfData:_delim options:0 range:NSMakeRange(_start, _buff - _start)];
@@ -151,6 +154,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     return [[NSString alloc] initWithData:line encoding:NSUTF8StringEncoding];
 }
 
+/** Appends the given string to currently opened file asynchronously and invokes the given callback function when done. */
 - (void)append:(NSString *)string completion:(void  (^ _Nullable)(void))callback {
     FileOps * __weak weakSelf = self;
     dispatch_async(self->_serialQueue, ^{
@@ -173,6 +177,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     });
 }
 
+/** Deletes the file at the given path. */
 - (BOOL)delete:(NSString *)path {
     NSError *err = nil;
     BOOL ret = [_fm removeItemAtPath:path error:&err];

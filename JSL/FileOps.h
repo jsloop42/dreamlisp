@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSMutableArray<FileResult *> *)loadFileFromPath:(NSMutableArray *)locations isConcurrent:(BOOL)isConcurrent isLookup:(BOOL)isLookup;
 - (NSString *)currentDirectoryPath;
 - (NSString *)bundlePath;
-- (BOOL)hashNext;
+- (BOOL)hasNext;
 - (NSString *)readLine;
 - (void)append:(NSString *)string completion:(void  (^ _Nullable)(void))callback;
 - (BOOL)delete:(NSString *)path;

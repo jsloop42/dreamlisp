@@ -148,9 +148,9 @@
     [fops createFileIfNotExist:file];
     XCTAssertNoThrow([fops append:content completion:^ {
         XCTAssertNoThrow([fops openFile:file]);
-        XCTAssertTrue([fops hashNext]);
+        XCTAssertTrue([fops hasNext]);
         NSString *text = @"";
-        while ([fops hashNext]) {
+        while ([fops hasNext]) {
             text = [text stringByAppendingString:[fops readLine]];
         }
         XCTAssertEqualObjects(text, @"foobar");
