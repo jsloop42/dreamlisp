@@ -8,17 +8,22 @@
 
 #import "Logger.h"
 
+/** Holds the info callback function mainly used for unit tests. */
 void (*callback)(id param, int tag, int counter, const char *s);
 static id self;
+/** A tag to distinguish each log which is passed to the callback */
 static int _tag = 0;
+/** A counter that increases with each callback. */
 static int _logCallCounter = 0;
 
+/** A callback function which when set will be invoked for an info log. */
 void infoCallback(id param, int tag, void(*fn)(id param, int tag, int counter, const char *s)) {
     callback = fn;
     self = param;
     _tag = tag;
 }
 
+/** Clears the info callback and associated variables. */
 void freeInfoCallback() {
     callback = NULL;
     self = NULL;
@@ -26,6 +31,7 @@ void freeInfoCallback() {
     _logCallCounter = 0;
 }
 
+/** Log with the given terminator string. */
 void info3(NSString *terminator, NSString *format, ...) {
     va_list args;
     va_start(args, format);
@@ -37,6 +43,7 @@ void info3(NSString *terminator, NSString *format, ...) {
     fprintf(stdout,"%s%s", [message UTF8String], [terminator UTF8String]);
 }
 
+/** Info level log. */
 void info(NSString *format, ...) {
     va_list args;
     va_start(args, format);
@@ -48,6 +55,7 @@ void info(NSString *format, ...) {
     fprintf(stdout,"%s\n", [message UTF8String]);
 }
 
+/** Debug log which is enabled only if the @c DEBUG flag is set. */
 void debug(NSString *format, ...) {
     #if DEBUG
         va_list args;
@@ -58,6 +66,7 @@ void debug(NSString *format, ...) {
     #endif
 }
 
+/** Error level log. */
 void error(NSString *format, ...) {
     va_list args;
     va_start(args, format);
