@@ -48,10 +48,10 @@
 }
 
 - (void)setCoreFunctionsToREPL:(Env *)env {
-    NSMutableDictionary *ns = [_core namespace];
+    NSMutableDictionary *module = [_core module];
     NSLock *lock = [NSLock new];
-    [ns enumerateKeysAndObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-        JSFunction *fn = [ns objectForKey:key];
+    [module enumerateKeysAndObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        JSFunction *fn = [module objectForKey:key];
         [lock lock];
         [env setObject:fn forSymbol:[[JSSymbol alloc] initWithArity:[fn argsCount] string:key]];
         [lock unlock];

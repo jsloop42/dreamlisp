@@ -11,6 +11,7 @@
 #import "Terminal.h"
 #import "Logger.h"
 
+/** The main entry point. */
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
         JSL *jsl = [JSL new];

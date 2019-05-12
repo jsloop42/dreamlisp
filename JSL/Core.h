@@ -17,7 +17,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Core : NSObject
-- (NSMutableDictionary *)namespace;
+- (NSMutableDictionary *)module;
 @end
 
 NS_ASSUME_NONNULL_END
