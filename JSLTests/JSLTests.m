@@ -1480,6 +1480,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)testErrorMessages {
     JSL *jsl = [JSL new];
+    // data type error
     XCTAssertEqualObjects([jsl rep:@"(try* (+ \"\") (catch* ex (str ex)))"], @"\"Expected 'number' but obtained 'string'\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (+ []) (catch* ex (str ex)))"], @"\"Expected 'number' but obtained 'vector'\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (+ [] \"\") (catch* ex (str ex)))"], @"\"Expected 'number' but obtained 'vector'\"");
@@ -1490,10 +1491,16 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(try* (first true) (catch* ex (str ex)))"], @"\"'first/1' requires 'list' or 'vector' for argument 1 but obtained 'bool'\"");
     // Function not found
     @try {
-        XCTAssertThrowsSpecificNamed([jsl rep:@"(last [1 2 3])"], NSException, JSLException, @"'last/1' not found");
+        XCTAssertThrowsSpecificNamed([jsl rep:@"(abc [1 2 3])"], NSException, JSLException, @"'abc/1' not found");
     } @catch (NSException *exception) {
-        XCTAssertTrue([Utils matchString:[exception.userInfo objectForKey:@"description"] withPattern:@"'last/1'? not found."]);
+        XCTAssertTrue([Utils matchString:[exception.userInfo objectForKey:@"description"] withPattern:@"'abc/1'? not found."]);
     }
+    // Arity error
+    XCTAssertEqualObjects([jsl rep:@"(try* (empty? [] []) (catch* ex (str ex)))"], @"\"'empty?/2' not found\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (list? [] []) (catch* ex (str ex)))"], @"\"'list?/2' not found\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (true? [] []) (catch* ex (str ex)))"], @"\"'true?/2' not found\"");
+    XCTAssertEqualObjects([jsl rep:@"(def! a (atom 4))"], @"(atom 4)");
+    XCTAssertEqualObjects([jsl rep:@"(try* (reset! x 4) (catch* ex (str ex)))"], @"\"'x' not found\"");
 }
 
 /** The expressions loaded and evaluated from file should be added to the env just like it is evaluated from REPL. */
