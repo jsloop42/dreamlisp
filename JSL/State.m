@@ -12,6 +12,7 @@ static NSUInteger _genSymCounter = 0;
 
 @implementation State
 
+/** Increments the auto gensymn counter. */
 + (NSUInteger)counter {
     return ++_genSymCounter;
 }

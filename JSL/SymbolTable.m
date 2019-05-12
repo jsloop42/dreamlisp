@@ -8,16 +8,14 @@
 
 #import "SymbolTable.h"
 
+/** A table used for store and lookup of hygienic symbols */
 @implementation SymbolTable {
     SymbolTable *_outer;
     NSMapTable<NSString *, JSSymbol *> *_table;
-    BOOL _startMacroScope;
-    NSMapTable<NSString *, JSSymbol *> *_expTable;
 }
 
 @synthesize outer = _outer;
 @synthesize table = _table;
-@synthesize expTable = _expTable;
 
 - (instancetype)init {
     self = [super init];
@@ -32,15 +30,12 @@
     if (self) {
         [self bootstrap];
         _outer = table;
-        _startMacroScope = [table isMacroScope];
     }
     return self;
 }
 
 - (void)bootstrap {
     _table = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
-    _expTable = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
-    _startMacroScope = NO;
 }
 
 - (JSSymbol * _Nullable)symbolForKey:(NSString *)name inTable:(SymbolTable *)symTable {
@@ -55,36 +50,15 @@
 
 - (void)setSymbol:(JSSymbol *)symbol {
     NSString *key = (NSString *)[symbol initialValue];
-    _startMacroScope ? [_expTable setObject:symbol forKey:key] : [_table setObject:symbol forKey:key];
-}
-
-/** Starts tracking symbols bounded within a lexical scope */
-- (void)startMacroScope {
-    _startMacroScope = YES;
-}
-
-- (void)stopMacroScope {
-    _startMacroScope = NO;
-}
-
-- (BOOL)isMacroScope {
-    return _startMacroScope;
-}
-
-- (void)resetMacroScope {
-    [_expTable removeAllObjects];
+    [_table setObject:symbol forKey:key];
 }
 
 - (NSUInteger)count {
     return [_table count];
 }
 
-- (NSUInteger)macroScopeCount {
-    return [_expTable count];
-}
-
 - (NSString *)description {
-    return [[_table description] stringByAppendingFormat:@"\n%@", [_expTable description]];
+    return [_table description];
 }
 
 @end
