@@ -172,7 +172,7 @@
 }
 
 /** Drops n elements. */
-- (JSList *)drop:(NSInteger)n {
+- (JSList * _Nullable)drop:(NSInteger)n {
     NSMutableArray *arr = [_array mutableCopy];
     if (n > 0 && n <= [arr count]) {
         [arr removeObjectsInRange:NSMakeRange(0, n)];

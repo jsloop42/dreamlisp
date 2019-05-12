@@ -18,8 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSL : NSObject
 @property (nonatomic, readwrite) Env *env;
 - (instancetype)init;
-- (NSString *)rep:(NSString *)string;
-- (NSString *)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably;
+- (NSString * _Nullable)rep:(NSString *)string;
+- (NSString * _Nullable)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably;
 @end
 
 NS_ASSUME_NONNULL_END

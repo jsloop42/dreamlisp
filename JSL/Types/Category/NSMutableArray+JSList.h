@@ -21,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (id)nth:(NSInteger)n;
 - (BOOL)isEmpty;
 - (NSMutableArray *)reverse;
-- (NSMutableArray *)drop:(NSInteger)n;
+- (NSMutableArray * _Nullable)drop:(NSInteger)n;
 @end
 
 NS_ASSUME_NONNULL_END

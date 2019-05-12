@@ -118,14 +118,13 @@
         JSList *list = (JSList *)ast;
         NSUInteger count = [list count];
         NSUInteger i = 0;
-        NSUInteger j = 0;
         NSMutableArray *arr = [NSMutableArray new];
         if ([JSSymbol isSymbol:[list first]]) {
             [arr addObject:[self eval:[[JSSymbol alloc] initWithArity:count - 1 symbol:[list first]] withEnv:env]];
-            j = 1;
+            i = 1;
         }
-        for(i = j; j < count; j = j + 1) {
-            [arr addObject:[self eval:[list nth:j] withEnv:env]];
+        for(; i < count; i = i + 1) {
+            [arr addObject:[self eval:[list nth:i] withEnv:env]];
         }
         return [[JSList alloc] initWithArray:arr];
     } if ([JSVector isVector:ast]) {
@@ -519,7 +518,7 @@
     return [_printer printStringFor:data readably:YES];
 }
 
-- (NSString *)rep:(NSString *)string {
+- (NSString * _Nullable)rep:(NSString *)string {
     NSMutableArray<id<JSDataProtocol>> *exps = [self read:string];
     NSUInteger len = [exps count];
     NSUInteger i = 0;
@@ -542,7 +541,7 @@
     return ([exception.description isNotEmpty]) ? [[JSString alloc] initWithString:exception.description] : nil;
 }
 
-- (NSString *)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably {
+- (NSString * _Nullable)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably {
     NSString *desc = nil;
     if (exception.userInfo != nil) {
         NSDictionary *info = exception.userInfo;

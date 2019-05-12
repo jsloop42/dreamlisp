@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface Terminal : NSObject
 - (instancetype)init;
 - (NSString *)readline;
-- (NSString *)readlineWithPrompt:(const char *)prompt;
+- (NSString * _Nullable)readlineWithPrompt:(const char *)prompt;
 - (void)loadHistoryFile:(NSString *)path;
 - (void)disableHistory:(BOOL)flag;
 @end

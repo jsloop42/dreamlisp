@@ -58,7 +58,7 @@
     return [[[self reverseObjectEnumerator] allObjects] mutableCopy];
 }
 
-- (NSMutableArray *)drop:(NSInteger)n {
+- (NSMutableArray * _Nullable)drop:(NSInteger)n {
     NSMutableArray *arr = [self mutableCopy];
     if (n > 0 && n <= [arr count]) {
         [arr removeObjectsInRange:NSMakeRange(0, n)];

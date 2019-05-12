@@ -50,9 +50,9 @@ NSString *_historyFile = @"/.jsl-history";
     return [self readlineWithPrompt:_prompt];
 }
 
-- (NSString *)readlineWithPrompt:(const char *)prompt {
+- (NSString * _Nullable)readlineWithPrompt:(const char *)prompt {
     char *input = readline(prompt);
-    NSString *exp;
+    NSString *exp = nil;
     if (input) {
         if (_isHistoryEnabled) add_history(input);
         exp = [[NSString alloc] initWithUTF8String:input];
