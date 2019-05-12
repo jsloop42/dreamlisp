@@ -73,22 +73,13 @@ NSString *SymbolParseError = @"Symbol parse error for %@";
     return self;
 }
 
+/** Initialise with underlying exception from the system. */
 - (instancetype)initWithUserInfo:(NSDictionary *)data {
     self = [super init];
     if (self) {
         [self bootstrap];
         _description = JSLUnderlyingException;
         _errDict = [data mutableCopy];
-    }
-    return self;
-}
-
-- (instancetype)initWithArray:(NSMutableArray *)array {
-    self = [super init];
-    if (self) {
-        [self bootstrap];
-        _description = JSLException;
-        [_errDict setObject:array forKey:@"array"];
     }
     return self;
 }

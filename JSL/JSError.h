@@ -41,7 +41,6 @@ extern NSString *SymbolParseError;
 - (instancetype)initWithFormat:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2);
 - (instancetype)initWithData:(id<JSDataProtocol>)data;
 - (instancetype)initWithUserInfo:(NSDictionary *)data;
-- (instancetype)initWithArray:(NSMutableArray *)array;
 - (NSMutableDictionary *)value;
 - (void)throw;
 @end
