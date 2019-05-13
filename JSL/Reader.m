@@ -157,7 +157,11 @@
 }
 
 - (JSSymbol *)symbolFromToken:(NSString *)token {
-    if ([token isEqual:@"/"]) return [[JSSymbol alloc] initWithName:token];
+    if ([token isEqual:@"/"]) return [[JSSymbol alloc] initWithName:token];  // divide function
+    NSArray *modArr = [token componentsSeparatedByString:@":"];
+    NSUInteger modCount = [modArr count];
+    if (modCount > 2) [self symbolParseError:token];
+    if (modCount == 2) token = modArr[1];  // the function part
     NSArray *symArr = [token componentsSeparatedByString:@"/"];
     NSUInteger count = [symArr count];
     JSSymbol *sym = nil;
@@ -172,6 +176,11 @@
         }
     } else if (count == 1) {
         sym = [[JSSymbol alloc] initWithName:token];
+    }
+    // Fully qualified symbol with module name included
+    if (modCount == 2) {
+        [sym setIsQualified:YES];
+        [sym setModuleName:modArr[0]];
     }
     return sym;
 }
