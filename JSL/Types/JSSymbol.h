@@ -25,6 +25,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) BOOL isFunction;
 @property (nonatomic, readonly) BOOL hasNArity;
 @property (nonatomic, readwrite) NSString *fnName;
+@property (nonatomic, readwrite) NSString *moduleName;
+@property (nonatomic, readwrite) BOOL isQualified;
 + (instancetype)new NS_UNAVAILABLE;
 + (BOOL)isSymbol:(id)object;
 + (BOOL)isSymbol:(id)object withName:(NSString *)name;
@@ -32,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 // Should not instantiate with empty name
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name;
-- (instancetype)initWithFunction:(JSFunction *)func name:(NSString *)name;
+- (instancetype)initWithFunction:(JSFunction *)func name:(NSString *)name moduleName:(NSString *)moduleName;
 - (instancetype)initWithArity:(NSInteger)arity symbol:(JSSymbol *)symbol;
 - (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position symbol:(JSSymbol *)symbol;
 - (instancetype)initWithArity:(NSInteger)arity string:(NSString *)string;

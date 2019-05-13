@@ -20,6 +20,7 @@
     /** Function name with arity if the symbol is bound to a function */
     NSString *_fnName;
     NSString *_moduleName;
+    BOOL _isQualified;
 }
 
 @synthesize arity = _arity;
@@ -30,6 +31,8 @@
 @synthesize value = _name;
 @synthesize initialValue = _initialName;
 @synthesize fnName = _fnName;
+@synthesize moduleName = _moduleName;
+@synthesize isQualified = _isQualified;
 
 + (BOOL)isSymbol:(id)object {
     return [[object className] isEqual:[self className]];
@@ -64,18 +67,23 @@
         _initialName = name;
         _arity = -2;
         _initialArity = -2;
+        _moduleName = defaultModuleName;
+        _isQualified = NO;
         [self updateArity];
     }
     return self;
 }
 
-/** Initialise a symbol with function details if the given object is a function else returns the default symbol. */
-- (instancetype)initWithFunction:(JSFunction *)func name:(NSString *)name {
+/** Initialise a symbol with function details and module name. */
+- (instancetype)initWithFunction:(JSFunction *)func name:(NSString *)name moduleName:(NSString *)moduleName {
     self = [super init];
     if (self) {
         _name = name;
         _initialName = name;
         _initialArity = [func argsCount];
+        _moduleName = moduleName;
+        _isQualified = YES;
+        _position = 0;
         [self resetArity];
     }
     return self;
@@ -96,6 +104,8 @@
         _initialArity = arity;
         _position = position;
         _hasNArity = [symbol hasNArity];
+        _moduleName = [symbol moduleName] ? [symbol moduleName] : defaultModuleName;
+        _isQualified = [symbol isQualified];
         [self updateArity];
     }
     return self;
@@ -114,6 +124,8 @@
         _arity = arity;
         _initialArity = arity;
         _position = position;
+        _moduleName = defaultModuleName;
+        _isQualified = NO;
         [self updateArity];
     }
     return self;
@@ -127,7 +139,10 @@
         _initialName = [symbol initialValue];
         _isFunction = [symbol isFunction];
         _hasNArity = [symbol hasNArity];
+        _position = [symbol position];
         _meta = meta;
+        _moduleName = [symbol moduleName] ? [symbol moduleName] : defaultModuleName;
+        _isQualified = [symbol isQualified];
     }
     return self;
 }
@@ -139,6 +154,8 @@
         _name = name;
         _initialName = name;
         _meta = meta;
+        _moduleName = defaultModuleName;
+        _isQualified = NO;
         [self updateArity];
     }
     return self;
@@ -146,6 +163,8 @@
 
 - (void)bootstrap {
     _position = -1;
+    _moduleName = defaultModuleName;
+    _isQualified = NO;
 }
 
 - (NSString *)dataType {
@@ -204,7 +223,7 @@
 
 - (NSString *)string {
     if (_initialArity <= -2) return _name;
-    return [[NSString alloc] initWithFormat:@"%@/%@", _name, (_initialArity == -1) ? @"n" : [[NSString alloc] initWithFormat:@"%ld", _initialArity]];
+    return [[NSString alloc] initWithFormat:@"%@:%@/%@", _moduleName, _name, (_initialArity == -1) ? @"n" : [[NSString alloc] initWithFormat:@"%ld", _initialArity]];
 }
 
 - (void)copyProperties:(JSSymbol *)symbol {
@@ -213,6 +232,7 @@
     _isFunction = [symbol isFunction];
     _meta = [symbol meta];
     _position = [symbol position];
+    _moduleName = [symbol moduleName];
     [self updateArity];
 }
 
@@ -222,11 +242,11 @@
 
 - (BOOL)isEqual:(id)symbol {
     if (![JSSymbol isSymbol:symbol]) return NO;
-    return [_name isEqual:[symbol name]] && _arity == [symbol arity];
+    return [_name isEqual:[symbol name]] && _arity == [symbol arity] && [_moduleName isEqual:[symbol moduleName]];
 }
 
 - (NSUInteger)hash {
-    return [_name hash] + _arity + 2;
+    return [_moduleName hash] + [_name hash] + _arity + 2;  // Adding 2 to offset negative arity.
 }
 
 - (BOOL)hasMeta {
@@ -242,7 +262,7 @@
 }
 
 - (NSString *)description {
-    return [[NSString alloc] initWithFormat:@"<%@ %p - %@ meta: %@>", NSStringFromClass([self class]), self, _name, _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - M:%@ %@ Arity:%ld meta: %@>", NSStringFromClass([self class]), self, _moduleName, _name, _arity, _meta];
 }
 
 @end
