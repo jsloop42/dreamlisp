@@ -11,7 +11,6 @@
 #import "JSSymbol.h"
 #import "JSList.h"
 #import "JSError.h"
-#import "SymbolTable.h"
 #import "ModuleTable.h"
 #import <objc/NSObjCRuntime.h>
 
@@ -19,23 +18,28 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class JSSymbol;
 @class JSList;
-@class SymbolTable;
 @class ModuleTable;
+
+extern NSString *defaultModuleName;
+extern NSString *coreModuleName;
 
 @interface Env : NSObject
 @property (nonatomic, readwrite) Env *outer;
 @property (nonatomic, readwrite) NSMapTable<JSSymbol *, id<JSDataProtocol>> *table;
-@property (nonatomic, readwrite) ModuleTable *coreModule;
 @property (nonatomic, readwrite) ModuleTable *module;
-@property (nonatomic, readwrite) BOOL isModule;
+@property (nonatomic, readwrite) BOOL isUserDefined;
++ (void)initialize;
++ (void)setEnv:(Env *)env forModuleName:(NSString *)moduleName;
++ (Env *)envForModuleName:(NSString *)moduleName;
++ (NSMapTable<NSString *, Env *> *)modules;
 - (instancetype)init;
-- (instancetype)initWithCoreModule:(ModuleTable *)core;
+- (instancetype)initWithModuleName:(NSString *)name isUserDefined:(BOOL)isUserDefined;
 - (instancetype)initWithEnv:(Env *)env;
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs;
 - (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key;
 - (Env *)findEnvForKey:(JSSymbol *)key;
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key;
-- (_Nullable id<JSDataProtocol>)objectForSymbolFromCore:(JSSymbol *)key;
+- (_Nullable id<JSDataProtocol>)objectForSymbolFromModuleTable:(JSSymbol *)key;
 - (void)setModuleName:(NSString *)name;
 - (NSString *)moduleName;
 @end
