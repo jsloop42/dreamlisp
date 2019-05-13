@@ -11,6 +11,7 @@
 #import "FileOps.h"
 #import "Utils.h"
 #import "Logger.h"
+#import "ModuleTable.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

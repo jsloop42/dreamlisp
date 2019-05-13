@@ -12,6 +12,7 @@
 #import "Printer.h"
 #import "Core.h"
 #import "Terminal.h"
+#import "SymbolTable.h"
 #import <objc/objc-api.h>
 
 NS_ASSUME_NONNULL_BEGIN

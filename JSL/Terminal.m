@@ -8,7 +8,7 @@
 
 #import "Terminal.h"
 
-const char *prompt = "repl> ";
+const char *prompt;
 static NSString *_appHome = @"/.jsl";
 static NSString *_historyFile = @"/jsl-history";
 
@@ -18,6 +18,12 @@ static NSString *_historyFile = @"/jsl-history";
     NSString *_historyPath;
     NSString *_homeDir;
     NSString *_appHomeDir;
+}
+
++ (void)initialize {
+    if (self == [self class]) {
+        prompt = [[defaultModuleName stringByAppendingString:@"> "] UTF8String];
+    }
 }
 
 - (instancetype)init {

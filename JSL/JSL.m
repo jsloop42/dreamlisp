@@ -46,7 +46,8 @@
     _printer = [Printer new];
     _core = [Core new];
     _symTable = [SymbolTable new];
-    _env = [Env new];
+    _env = [[Env alloc] initWithModuleName:defaultModuleName isUserDefined:NO];
+    [Env setEnv:[_core env] forModuleName:coreModuleName];
     _globalEnv = _env;
     _fileOps = [FileOps new];
     _isQuasiquoteMode = NO;
@@ -54,18 +55,12 @@
     _queue = dispatch_queue_create("jsl-dispatch-queu", nil);
     _isREPL = YES;
     _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*"];
-    [self setCoreFunctionsToREPL:_env];
     [self setLoadFileToREPL];
     [self setEvalToREPL];
-    [self loadCoreLib];
+    //[self loadCoreLib];
 }
 
 #pragma mark Env setup
-
-/** Adds functions defined in @c core module to the environment. */
-- (void)setCoreFunctionsToREPL:(Env *)env {
-    [_env setCoreModule:[_core module]];
-}
 
 /** Add @c eval function to the environment. */
 - (void)setEvalToREPL{
@@ -146,7 +141,9 @@
         NSUInteger i = 0;
         NSMutableArray *arr = [NSMutableArray new];
         if ([JSSymbol isSymbol:[list first]]) {
-            [arr addObject:[self eval:[[JSSymbol alloc] initWithArity:count - 1 symbol:[list first]] withEnv:env]];
+            // Get the function correspoding to the symbol
+            JSSymbol *sym = (JSSymbol *)[list first];
+            [arr addObject:[self eval:[[JSSymbol alloc] initWithArity:count - 1 position:[sym position] symbol:sym] withEnv:env]];
             i = 1;
         }
         for(; i < count; i = i + 1) {
@@ -346,12 +343,10 @@
 
 /** (defmodule tree (export (create-tree 0) (right-node 1) (left-node 1))) */
 - (JSSymbol *)defineModule:(id<JSDataProtocol>)ast {
-    Env *modEnv = [[Env alloc] initWithCoreModule:[_core module]];
     JSList *xs = (JSList *)ast;
     JSSymbol *modSym = [xs second];
     NSString *modName = [modSym name];
-    [modEnv setIsModule:YES];
-    [modEnv setModuleName:modName];
+    Env *modEnv = [[Env alloc] initWithModuleName:modName isUserDefined:YES];
      // The third element onwards are imports and exports
     // [xs nth:2];
     [self setModule:modEnv];
@@ -366,7 +361,7 @@
     JSList *xs = (JSList *)ast;
     JSSymbol *modSym = [xs second];
     NSString *modName = [modSym name];
-    if ([modName isEqual:@"repl"]) {
+    if ([modName isEqual:defaultModuleName]) {
         _env = _globalEnv;
     } else {
         // check modules table
