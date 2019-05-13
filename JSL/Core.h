@@ -13,12 +13,13 @@
 #import "Logger.h"
 #import "Terminal.h"
 #import "ModuleTable.h"
+#import "Env.h"
 #import <objc/message.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Core : NSObject
-- (ModuleTable *)module;
+- (Env *)env;
 @end
 
 NS_ASSUME_NONNULL_END
