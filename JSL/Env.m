@@ -17,6 +17,7 @@
     ModuleTable *_module;
     /** The core module */
     ModuleTable *_coreModule;
+    /** Is user defined module */
     BOOL _isModule;
 }
 
@@ -135,7 +136,7 @@
 
 /** Retrieves object from @c core module if present. */
 - (_Nullable id<JSDataProtocol>)objectForSymbolFromCore:(JSSymbol *)key {
-    if (!_coreModule) [[[JSError alloc] initWithFormat:ModuleEmpty, @"'core'"] throw];
+    if (!_coreModule) [[[JSError alloc] initWithFormat:ModuleEmpty, @"core"] throw];
     id<JSDataProtocol> obj = [_coreModule objectForSymbol:key];
     if (obj) {
         return obj;
@@ -143,6 +144,16 @@
         return [self objectForSymbolFromCore:[key toNArity]];
     }
     return nil;
+}
+
+#pragma mark Module
+
+- (void)setModuleName:(NSString *)name {
+    [_module setName:name];
+}
+
+- (NSString *)moduleName {
+    return [_module name];
 }
 
 @end

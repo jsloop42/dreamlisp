@@ -8,7 +8,7 @@
 
 #import "Terminal.h"
 
-static const char *_prompt = "user> ";
+const char *prompt = "repl> ";
 static NSString *_appHome = @"/.jsl";
 static NSString *_historyFile = @"/jsl-history";
 
@@ -60,7 +60,7 @@ static NSString *_historyFile = @"/jsl-history";
 }
 
 - (NSString *)readline {
-    return [self readlineWithPrompt:_prompt];
+    return [self readlineWithPrompt:prompt];
 }
 
 - (NSString * _Nullable)readlineWithPrompt:(const char *)prompt {

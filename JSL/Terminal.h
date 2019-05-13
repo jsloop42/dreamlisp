@@ -14,6 +14,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+extern const char *prompt;
+
 @interface Terminal : NSObject
 - (instancetype)init;
 - (NSString *)readline;

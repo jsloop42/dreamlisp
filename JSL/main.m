@@ -17,6 +17,7 @@ int main(int argc, const char * argv[]) {
         JSL *jsl = [JSL new];
         if (argc > 1) {
             @try {
+                [jsl setIsREPL:NO];
                 NSString *jslFile = [[NSString alloc] initWithCString:argv[1] encoding:NSUTF8StringEncoding];
                 NSMutableArray *arr = [NSMutableArray new];
                 NSUInteger i = 0;

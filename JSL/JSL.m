@@ -9,8 +9,8 @@
 #import "JSL.h"
 
 @implementation JSL {
-    /** Holds the modules loaded. */
-    NSMapTable<NSString *, ModuleTable *> *_modules;
+    /** Holds the module envs loaded. */
+    NSMapTable<NSString *, Env *> *_modules;
     /** The symbol table used for auto gensym */
     SymbolTable *_symTable;
     Reader *_reader;
@@ -25,11 +25,14 @@
     NSUInteger _quasiquoteDepth;
     NSUInteger _unquoteDepth;
     dispatch_queue_t _queue;
+    /** Is running a REPL */
+    BOOL _isREPL;
 }
 
 @synthesize globalEnv = _globalEnv;
 @synthesize env = _env;
 @synthesize modules = _modules;
+@synthesize isREPL = _isREPL;
 
 - (instancetype)init {
     self = [super init];
@@ -49,6 +52,7 @@
     _isQuasiquoteMode = NO;
     _quasiquoteDepth = 0;
     _queue = dispatch_queue_create("jsl-dispatch-queu", nil);
+    _isREPL = YES;
     _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*"];
     [self setCoreFunctionsToREPL:_env];
     [self setLoadFileToREPL];
@@ -115,11 +119,11 @@
 
 #pragma mark Module
 
-- (void)setModule:(ModuleTable *)module {
-    [_modules setObject:module forKey:[module name]];
+- (void)setModule:(Env *)moduleEnv {
+    [_modules setObject:moduleEnv forKey:[moduleEnv moduleName]];
 }
 
-- (ModuleTable * _Nullable)module:(NSString *)name {
+- (Env * _Nullable)module:(NSString *)name {
     return [_modules objectForKey:name];
 }
 
@@ -303,9 +307,9 @@
                 } else if ([[sym name] isEqual:@"macroexpand"]) {
                     return [self macroExpand:[xs second] withEnv:env];
                 } else if ([[sym name] isEqual:@"defmodule"]) {
-                    [self defineModule:ast];
+                    return [self defineModule:ast];
                 } else if ([[sym name] isEqual:@"in-module"]) {
-                    [self changeModule:ast];
+                    return [self changeModule:ast];
                 }
             }
             // Function
@@ -340,19 +344,41 @@
 
 #pragma mark Module AST
 
-- (Env *)defineModule:(id<JSDataProtocol>)ast {
+/** (defmodule tree (export (create-tree 0) (right-node 1) (left-node 1))) */
+- (JSSymbol *)defineModule:(id<JSDataProtocol>)ast {
     Env *modEnv = [[Env alloc] initWithCoreModule:[_core module]];
     JSList *xs = (JSList *)ast;
-    JSList *modInfo = [xs first];
-    // TODO: setup module - add to modules table - add module functions to `ModuleTable.m`
-    _env = modEnv; // change module to current module
-    [self eval:[xs second] withEnv:modEnv];
-    return ast;
+    JSSymbol *modSym = [xs second];
+    NSString *modName = [modSym name];
+    [modEnv setIsModule:YES];
+    [modEnv setModuleName:modName];
+     // The third element onwards are imports and exports
+    // [xs nth:2];
+    [self setModule:modEnv];
+    _env = modEnv; // change env to current module
+    if (_isREPL) prompt = [[modName stringByAppendingString:@"> "] UTF8String];
+    //[self eval:[xs second] withEnv:_env];
+    return modSym;
 }
 
 /** Change current module to the given one. */
-- (void)changeModule:(id<JSDataProtocol>)ast {
-
+- (JSSymbol *)changeModule:(id<JSDataProtocol>)ast {
+    JSList *xs = (JSList *)ast;
+    JSSymbol *modSym = [xs second];
+    NSString *modName = [modSym name];
+    if ([modName isEqual:@"repl"]) {
+        _env = _globalEnv;
+    } else {
+        // check modules table
+        Env *modEnv = [self module:modName];
+        if (modEnv) {
+            _env = modEnv;
+        } else {
+            [[[JSError alloc] initWithFormat:ModuleNotFound, modName] throw];
+        }
+    }
+    if (_isREPL) prompt = [[modName stringByAppendingString:@"> "] UTF8String];
+    return modSym;
 }
 
 #pragma mark Auto gensym

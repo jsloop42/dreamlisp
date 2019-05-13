@@ -1543,6 +1543,8 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     JSL *jsl = [JSL new];
     //@try {
         [jsl rep:@"(defmodule tree (export (create-tree 0) (right-node 1) (left-node 1)))"];
+        [jsl rep:@"(def! a 1)"];
+        XCTAssertEqualObjects([jsl rep:@"a"], @"1");
     //} @catch (NSException *excep) {
         //[jsl printException:excep log:YES readably:YES];
     //}
