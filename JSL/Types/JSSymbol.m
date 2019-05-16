@@ -55,6 +55,7 @@
         [symbol setIsFunction:YES];
         [symbol setInitialArity:[fn argsCount]];
         [symbol resetArity];
+        [symbol setModuleName:[fn moduleName]];
         [fn setName:[symbol string]];
     }
     return symbol;

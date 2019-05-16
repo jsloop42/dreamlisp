@@ -32,6 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, readwrite) NSInteger argsCount;
 @property (nonatomic, readwrite) NSString *name;
+@property (nonatomic, readwrite) NSString *moduleName;
 + (instancetype)new NS_UNAVAILABLE;
 + (BOOL)isFunction:(id)object;
 + (JSFunction *)dataToFunction:(id<JSDataProtocol>)data;

@@ -19,6 +19,7 @@
     NSInteger _position;
     /** The name with arity associated with the function. */
     NSString *_name;
+    NSString *_moduleName;
 }
 
 @synthesize fn = _fn;
@@ -30,6 +31,7 @@
 @synthesize meta = _meta;
 @synthesize value;  // not used
 @synthesize name = _name;
+@synthesize moduleName = _moduleName;
 
 + (BOOL)isFunction:(id)object {
     return [[object className] isEqual:[self className]];
@@ -72,7 +74,10 @@
 - (instancetype)initWithAst:(id<JSDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<JSDataProtocol> _Nullable)meta
                          fn:(id<JSDataProtocol> (^)(NSMutableArray *))fn {
     self = [super init];
-    if (self) self = [self initWithAst:ast params:params env:env macro:isMacro meta:meta fn:fn name:@""];
+    if (self) {
+        self = [self initWithAst:ast params:params env:env macro:isMacro meta:meta fn:fn name:@""];
+        _moduleName = [env moduleName];
+    }
     return self;
 }
 
@@ -97,7 +102,10 @@
 
 - (instancetype)initWithMacro:(JSFunction *)func {
     self = [super init];
-    if (self) self = [self initWithAst:func.ast params:func.params env:func.env macro:YES meta:func.meta fn:func.fn name:func.name];
+    if (self) {
+        self = [self initWithAst:func.ast params:func.params env:func.env macro:YES meta:func.meta fn:func.fn name:func.name];
+        _moduleName = [func.env moduleName];
+    }
     return self;
 }
 
@@ -106,15 +114,18 @@
     if (self) {
         self = [self initWithAst:func.ast params:func.params env:func.env macro:func.isMacro meta:meta fn:func.fn name:func.name];
         [self setArgsCount:[func argsCount]];
+        _moduleName = [func.env moduleName];
     }
     return self;
 }
 
 - (instancetype)initWithFunction:(JSFunction *)function {
     self = [super init];
-    if (self)
+    if (self) {
         self = [self initWithAst:function.ast params:function.params env:function.env macro:function.isMacro meta:function.meta fn:function.fn
                             name:function.name];
+        _moduleName = [function.env moduleName];
+    }
     return self;
 }
 

@@ -8,9 +8,7 @@
 
 #import "JSL.h"
 
-@implementation JSL {
-    /** Holds the module envs loaded. */
-    NSMapTable<NSString *, Env *> *_modules;
+@implementation JSL {    
     /** The symbol table used for auto gensym */
     SymbolTable *_symTable;
     Reader *_reader;
@@ -115,11 +113,11 @@
 #pragma mark Module
 
 - (void)setModule:(Env *)moduleEnv {
-    [_modules setObject:moduleEnv forKey:[moduleEnv moduleName]];
+    [Env setEnv:moduleEnv forModuleName:[moduleEnv moduleName]];
 }
 
 - (Env * _Nullable)module:(NSString *)name {
-    return [_modules objectForKey:name];
+    return [Env envForModuleName:name];
 }
 
 #pragma mark Read

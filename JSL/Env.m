@@ -8,6 +8,7 @@
 
 #import "Env.h"
 
+/** Holds the module envs loaded. */
 static NSMapTable<NSString *, Env *> *_modules;
 NSString *defaultModuleName = @"user";
 NSString *coreModuleName = @"core";
@@ -99,12 +100,13 @@ NSString *coreModuleName = @"core";
     NSUInteger i = 0;
     if (self) {
         [self bootstrap];
+        _module = [env module];
         _outer = env;
         for (i = 0; i < len; i++) {
             JSSymbol *sym = (JSSymbol *)binds[i];
-            JSSymbol *key = (JSSymbol *)binds[i + 1];
-            [key setModuleName:[_module name]];
             if ([[sym name] isEqual:@"&"]) {
+                JSSymbol *key = (JSSymbol *)binds[i + 1];
+                [key setModuleName:[_module name]];
                 if ([exprs count] > i) {
                     [_table setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:key];
                 } else {
@@ -128,8 +130,16 @@ NSString *coreModuleName = @"core";
     [_table setObject:obj forKey:key];
 }
 
+/** Checks if the symbol belongs to current module, if so update the module name. */
+- (void)updateModuleName:(JSSymbol *)symbol {
+    if (![symbol isQualified] && [[symbol moduleName] isEqual:defaultModuleName]) {
+        [symbol setModuleName:[_module name]];
+    }
+}
+
 /** Recursively checks the environments for the given symbol until a match is found or the environment is the outermost, which is nil. */
 - (Env *)findEnvForKey:(JSSymbol *)key {
+    [self updateModuleName:key];
     if ([_table objectForKey:key]) {
         return self;
     } else if (![key hasNArity]) {
