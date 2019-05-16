@@ -45,6 +45,10 @@ NSString *coreModuleName = @"core";
     return [_modules objectForKey:moduleName];
 }
 
++ (void)removeModule:(NSString *)moduleName {
+    [_modules removeObjectForKey:moduleName];
+}
+
 + (NSMapTable<NSString *, Env *> *)modules {
     return _modules;
 }
@@ -166,6 +170,7 @@ NSString *coreModuleName = @"core";
         val = [self objectForSymbolFromModuleTable:[key resetArity]];
         if (val) return val;
     }
+    if (![key isQualified]) [key setModuleName:[self moduleName]];
     [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
     return nil;
 }

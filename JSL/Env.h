@@ -31,6 +31,7 @@ extern NSString *coreModuleName;
 + (void)initialize;
 + (void)setEnv:(Env *)env forModuleName:(NSString *)moduleName;
 + (Env *)envForModuleName:(NSString *)moduleName;
++ (void)removeModule:(NSString *)moduleName;
 + (NSMapTable<NSString *, Env *> *)modules;
 - (instancetype)init;
 - (instancetype)initWithModuleName:(NSString *)name isUserDefined:(BOOL)isUserDefined;

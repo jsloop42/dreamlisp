@@ -223,7 +223,7 @@
 }
 
 - (NSString *)string {
-    if (_initialArity <= -2) return _name;
+    if (_initialArity <= -2) return [[NSString alloc] initWithFormat:@"%@:%@", _moduleName, _name];
     return [[NSString alloc] initWithFormat:@"%@:%@/%@", _moduleName, _name, (_initialArity == -1) ? @"n" : [[NSString alloc] initWithFormat:@"%ld", _initialArity]];
 }
 

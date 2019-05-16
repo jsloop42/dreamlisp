@@ -16,6 +16,8 @@
     Env *_globalEnv;
     /** Current env */
     Env *_env;
+    /** Used when loading code from file containing modules. Saves the current module to stack and pops back when the evaluating the file is complete. */
+    NSMutableArray<Env *> *_moduleStack;
     Core *_core;
     FileOps *_fileOps;
     NSArray *_keywords;
@@ -44,6 +46,7 @@
     _printer = [Printer new];
     _core = [Core new];
     _symTable = [SymbolTable new];
+    _moduleStack = [NSMutableArray new];
     _env = [[Env alloc] initWithModuleName:defaultModuleName isUserDefined:NO];
     [Env setEnv:[_core env] forModuleName:coreModuleName];
     _globalEnv = _env;
@@ -87,8 +90,9 @@
          enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [this rep:[obj content]];
         }];
+        // TODO: change this to info()
         [self rep:[[NSString alloc] initWithFormat:@"(println \"#(ok %@)\")", [path lastPathComponent]]];
-        return nil;
+        return [JSNil new];
     };
     [[self env] setObject:[[JSFunction alloc] initWithFn:loadFile argCount:1 name:@"load-file/1"] forSymbol:[[JSSymbol alloc] initWithArity:1
                                                                                                                                      string:@"load-file"]];
@@ -118,6 +122,12 @@
 
 - (Env * _Nullable)module:(NSString *)name {
     return [Env envForModuleName:name];
+}
+
+- (void)removeModule:(NSString *)name {
+    [Env removeModule:name];
+    _env = _globalEnv;
+    if (_isREPL) prompt = [[[_env moduleName] stringByAppendingString:@"> "] UTF8String];
 }
 
 #pragma mark Read
@@ -301,10 +311,13 @@
                     continue;
                 } else if ([[sym name] isEqual:@"macroexpand"]) {
                     return [self macroExpand:[xs second] withEnv:env];
-                } else if ([[sym name] isEqual:@"defmodule"]) {
+                } else if ([[sym name] isEqual:@"defmodule"]) {  // module
                     return [self defineModule:ast];
                 } else if ([[sym name] isEqual:@"in-module"]) {
                     return [self changeModule:ast];
+                } else if ([[sym name] isEqual:@"remove-module"]) {
+                    [self removeModule:[(JSSymbol *)[(JSList *)ast second] name]];
+                    return [JSNil new];
                 }
             }
             // Function
