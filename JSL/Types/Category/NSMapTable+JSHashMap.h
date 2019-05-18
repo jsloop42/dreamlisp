@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSMapTable *)assoc:(NSMapTable *)table;
 - (NSMapTable *)dissoc:(NSArray *)keys;
 - (BOOL)containsKey:(id)key;
+- (void)merge:(NSMapTable *)table;
 @end
 
 NS_ASSUME_NONNULL_END

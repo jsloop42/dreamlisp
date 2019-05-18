@@ -101,7 +101,7 @@
     XCTAssertEqualObjects([prn printStringFor:fn readably:true], @"nil-fn/0");
     // Symbol
     JSSymbol *sym = [[JSSymbol alloc] initWithName:@"greet"];
-    XCTAssertEqualObjects([prn printStringFor:sym readably:true], @"greet");
+    XCTAssertEqualObjects([prn printStringFor:sym readably:true], @"user:greet");
     // Integer
     JSNumber *num = [[JSNumber alloc] initWithString:@"42"];
     XCTAssertEqual([num integerValue], 42);
@@ -641,17 +641,17 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"((fn* (f x) (f x)) (fn* (a) (+ 1 a)) 7)"], @"8");
     // closure
     XCTAssertEqualObjects([jsl rep:@"(((fn* (a) (fn* (b) (+ a b))) 5) 7)"], @"12");
-    XCTAssertEqualObjects([jsl rep:@"(def! gen-plus5 (fn* () (fn* (b) (+ 5 b))))"], @"gen-plus5/0");
-    XCTAssertEqualObjects([jsl rep:@"(def! plus5 (gen-plus5))"], @"plus5/1");
+    XCTAssertEqualObjects([jsl rep:@"(def! gen-plus5 (fn* () (fn* (b) (+ 5 b))))"], @"user:gen-plus5/0");
+    XCTAssertEqualObjects([jsl rep:@"(def! plus5 (gen-plus5))"], @"user:plus5/1");
     XCTAssertEqualObjects([jsl rep:@"(plus5 7)"], @"12");
-    XCTAssertEqualObjects([jsl rep:@"(def! gen-plusX (fn* (x) (fn* (b) (+ x b))))"], @"gen-plusX/1");
-    XCTAssertEqualObjects([jsl rep:@"(def! plus7 (gen-plusX 7))"], @"plus7/1");
+    XCTAssertEqualObjects([jsl rep:@"(def! gen-plusX (fn* (x) (fn* (b) (+ x b))))"], @"user:gen-plusX/1");
+    XCTAssertEqualObjects([jsl rep:@"(def! plus7 (gen-plusX 7))"], @"user:plus7/1");
     XCTAssertEqualObjects([jsl rep:@"(plus7 8)"], @"15");
-    XCTAssertEqualObjects([jsl rep:@"(def! sumdown (fn* (N) (if (> N 0) (+ N (sumdown  (- N 1))) 0)))"], @"sumdown/1");
+    XCTAssertEqualObjects([jsl rep:@"(def! sumdown (fn* (N) (if (> N 0) (+ N (sumdown  (- N 1))) 0)))"], @"user:sumdown/1");
     XCTAssertEqualObjects([jsl rep:@"(sumdown 1)"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(sumdown 2)"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(sumdown 6)"], @"21");
-    XCTAssertEqualObjects([jsl rep:@"(def! fib (fn* (N) (if (= N 0) 1 (if (= N 1) 1 (+ (fib (- N 1)) (fib (- N 2)))))))"], @"fib/1");
+    XCTAssertEqualObjects([jsl rep:@"(def! fib (fn* (N) (if (= N 0) 1 (if (= N 1) 1 (+ (fib (- N 1)) (fib (- N 2)))))))"], @"user:fib/1");
     XCTAssertEqualObjects([jsl rep:@"(fib 1)"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(fib 2)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(fib 4)"], @"5");
@@ -681,7 +681,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(fn* (a) 1)"], @"#<fn/1>");
     // symbols with quote in name
     XCTAssertEqualObjects([jsl rep:@"(def! c' 10)"], @"10");
-    XCTAssertEqualObjects([jsl rep:@"(def! f' (fn* (x) (+ c' x)))"], @"f'/1");
+    XCTAssertEqualObjects([jsl rep:@"(def! f' (fn* (x) (+ c' x)))"], @"user:f'/1");
     XCTAssertEqualObjects([jsl rep:@"(f' 7)"], @"17");
 }
 
@@ -692,8 +692,8 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(a)"], @"0");
     XCTAssertEqualObjects([jsl rep:@"(a 3)"], @"1");
     // variadic function
-    XCTAssertEqualObjects([jsl rep:@"(def! x (fn* (& more) more))"], @"x/n");
-    XCTAssertEqualObjects([jsl rep:@"x/n"], @"x/n");
+    XCTAssertEqualObjects([jsl rep:@"(def! x (fn* (& more) more))"], @"user:x/n");
+    XCTAssertEqualObjects([jsl rep:@"x/n"], @"user:x/n");
     XCTAssertEqualObjects([jsl rep:@"(first (x 1 2 3 4))"], @"1");
 }
 
@@ -734,10 +734,10 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(pr-str [])"], @"\"[]\"");
     XCTAssertEqualObjects([jsl rep:@"(str [1 2 \"abc\" \"\\\"\"] \"def\")"], @"\"[1 2 abc \\\"]def\"");
     XCTAssertEqualObjects([jsl rep:@"(str \"A\" {:abc \"val\"} \"Z\")"], @"\"A{:abc val}Z\"");
-    XCTAssertEqualObjects([jsl rep:@"(str true \".\" false \".\" nil \".\" :keyw \".\" 'symb)"], @"\"true.false.nil.:keyw.symb\"");
+    XCTAssertEqualObjects([jsl rep:@"(str true \".\" false \".\" nil \".\" :keyw \".\" 'symb)"], @"\"true.false.nil.:keyw.user:symb\"");
     XCTAssertEqualObjects([jsl rep:@"(pr-str \"A\" {:abc \"val\"} \"Z\")"], @"\"\\\"A\\\" {:abc \\\"val\\\"} \\\"Z\\\"\"");
     XCTAssertEqualObjects([jsl rep:@"(pr-str true \".\" false \".\" nil \".\" :keyw \".\" 'symb)"],
-                          @"\"true \\\".\\\" false \\\".\\\" nil \\\".\\\" :keyw \\\".\\\" symb\"");
+                          @"\"true \\\".\\\" false \\\".\\\" nil \\\".\\\" :keyw \\\".\\\" user:symb\"");
     [jsl rep:@"(def! s (str {:abc \"val1\" :def \"val2\"}))"];
     XCTAssertEqualObjects([jsl rep:@"(or (= s \"{:abc val1 :def val2}\") (= s \"{:def val2 :abc val1}\"))"], @"true");
     NSString *ret = [jsl rep:@"(def! p (pr-str {:abc \"val1\" :def \"val2\"}))"];
@@ -795,7 +795,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     JSL *jsl = [JSL new];
     XCTAssertEqualObjects([jsl rep:@"(do (def! a 6) 7 (+ a 8))"], @"14");
     XCTAssertEqualObjects([jsl rep:@"a"], @"6");
-    XCTAssertEqualObjects([jsl rep:@"(def! DO (fn* (a) 7))"], @"DO/1");
+    XCTAssertEqualObjects([jsl rep:@"(def! DO (fn* (a) 7))"], @"user:DO/1");
     XCTAssertEqualObjects([jsl rep:@"(DO 3)"], @"7");
     // printing
     infoCallback(self, 0, &testdoPrintCallback);
@@ -857,7 +857,8 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(= (quote abc) (quote abcd))"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(= (quote abc) \"abc\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(= \"abc\" (quote abc))"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(= \"abc\" (str (quote abc)))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(= \"abc\" (str (quote abc)))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(= \"user:abc\" (str (quote abc)))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(= (quote abc) nil)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(= nil (quote abc))"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(not (= 1 1))"], @"false");
@@ -1549,10 +1550,9 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 - (void)test {
     JSL *jsl = [JSL new];
     //@try {
-    [jsl rep:@"(core:count [1 2 3])"];
-    //} @catch (NSException *excep) {
-        //[jsl printException:excep log:YES readably:YES];
-    //}
+    [jsl rep:@"(defmacro! d (fn* (n v) `(def! ~n ~v)))"];
+    [jsl rep:@"(defmodule foo ())"];
+    [jsl rep:@"(user:d b 2)"];  // macro must process symbols irrespective of modules
 }
 
 - (void)notestPerformanceJSListDropFirst {

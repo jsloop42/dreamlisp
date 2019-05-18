@@ -21,6 +21,7 @@
     NSString *_fnName;
     NSString *_moduleName;
     BOOL _isQualified;
+    BOOL _isModule;
 }
 
 @synthesize arity = _arity;
@@ -33,6 +34,7 @@
 @synthesize fnName = _fnName;
 @synthesize moduleName = _moduleName;
 @synthesize isQualified = _isQualified;
+@synthesize isModule = _isModule;
 
 + (BOOL)isSymbol:(id)object {
     return [[object className] isEqual:[self className]];
@@ -68,7 +70,7 @@
         _initialName = name;
         _arity = -2;
         _initialArity = -2;
-        _moduleName = defaultModuleName;
+        _moduleName = currentModuleName;
         _isQualified = NO;
         [self updateArity];
     }
@@ -101,11 +103,11 @@
         _name = [symbol name];
         _initialName = [symbol initialValue];
         _meta = [symbol meta];
-        _arity = arity;
         _initialArity = arity;
+        _arity = arity;
         _position = position;
         _hasNArity = [symbol hasNArity];
-        _moduleName = [symbol moduleName] ? [symbol moduleName] : defaultModuleName;
+        _moduleName = [symbol moduleName] ? [symbol moduleName] : currentModuleName;
         _isQualified = [symbol isQualified];
         [self updateArity];
     }
@@ -125,7 +127,7 @@
         _arity = arity;
         _initialArity = arity;
         _position = position;
-        _moduleName = defaultModuleName;
+        _moduleName = currentModuleName;
         _isQualified = NO;
         [self updateArity];
     }
@@ -142,7 +144,7 @@
         _hasNArity = [symbol hasNArity];
         _position = [symbol position];
         _meta = meta;
-        _moduleName = [symbol moduleName] ? [symbol moduleName] : defaultModuleName;
+        _moduleName = [symbol moduleName] ? [symbol moduleName] : currentModuleName;
         _isQualified = [symbol isQualified];
     }
     return self;
@@ -155,7 +157,7 @@
         _name = name;
         _initialName = name;
         _meta = meta;
-        _moduleName = defaultModuleName;
+        _moduleName = currentModuleName;
         _isQualified = NO;
         [self updateArity];
     }
@@ -164,7 +166,7 @@
 
 - (void)bootstrap {
     _position = -1;
-    _moduleName = defaultModuleName;
+    _moduleName = currentModuleName;
     _isQualified = NO;
 }
 
@@ -223,7 +225,9 @@
 }
 
 - (NSString *)string {
-    if (_initialArity <= -2) return [[NSString alloc] initWithFormat:@"%@:%@", _moduleName, _name];
+    if (_initialArity <= -2) {
+        return _isModule ? _name : [[NSString alloc] initWithFormat:@"%@:%@", _moduleName, _name];
+    }
     return [[NSString alloc] initWithFormat:@"%@:%@/%@", _moduleName, _name, (_initialArity == -1) ? @"n" : [[NSString alloc] initWithFormat:@"%ld", _initialArity]];
 }
 

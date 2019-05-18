@@ -23,6 +23,12 @@
     return self;
 }
 
+- (instancetype)initWithModuleTable:(ModuleTable *)table {
+    self = [super init];
+    if (self) self = table;
+    return self;
+}
+
 - (void)bootstrap {
     _table = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
 }
@@ -37,6 +43,14 @@
 
 - (NSString *)description {
     return [[NSString alloc] initWithFormat:@"%@\n%@", _name, [_table description]];
+}
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    return [[ModuleTable alloc] initWithModuleTable:self];
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [[ModuleTable alloc] initWithModuleTable:self];
 }
 
 @end

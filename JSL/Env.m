@@ -12,6 +12,7 @@
 static NSMapTable<NSString *, Env *> *_modules;
 NSString *defaultModuleName = @"user";
 NSString *coreModuleName = @"core";
+NSString *currentModuleName;
 
 /** An env associated with a module. There is a global env and one specific for each module. */
 @implementation Env {
@@ -20,6 +21,8 @@ NSString *coreModuleName = @"core";
     NSMapTable<JSSymbol *, id<JSDataProtocol>> *_table;
     /** Exported symbols for the module. If no module is defined, then the symbols are global. */
     ModuleTable *_module;
+    /** Used for auto gensym symbols */
+    SymbolTable *_symbolTable;
     /** Is user defined module */
     BOOL _isUserDefined;
 }
@@ -27,6 +30,7 @@ NSString *coreModuleName = @"core";
 @synthesize outer = _outer;
 @synthesize table = _table;
 @synthesize module = _module;
+@synthesize symbolTable = _symbolTable;
 @synthesize isUserDefined = _isUserDefined;
 
 #pragma mark Module lookup table
@@ -34,6 +38,7 @@ NSString *coreModuleName = @"core";
 + (void)initialize {
     if (self == [self class]) {
         _modules = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+        currentModuleName = defaultModuleName;
     }
 }
 
@@ -127,6 +132,7 @@ NSString *coreModuleName = @"core";
 - (void)bootstrap {
     _table = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
     if (!_module) _module = [ModuleTable new];
+    _symbolTable = [SymbolTable new];
 }
 
 - (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key {
@@ -153,11 +159,15 @@ NSString *coreModuleName = @"core";
 }
 
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key {
-    return [self objectForSymbol:key isFromModuleTable:NO];
+    return [self objectForSymbol:key isFromModuleTable:NO isFromSymbolTable:NO];
 }
 
 /** Retrieves the matching element for the given key from the environment if found. If not checks the @c modules' table. Else throws an exception. */
-- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isFromModuleTable:(BOOL)isFromModuleTable {
+- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isFromModuleTable:(BOOL)isFromModuleTable isFromSymbolTable:(BOOL)isFromSymbolTable {
+    if (!isFromSymbolTable) {
+        JSSymbol *sym = [_symbolTable symbol:key];
+        if (sym) return [self objectForSymbol:sym isFromModuleTable:isFromModuleTable isFromSymbolTable:YES];
+    }
     Env *env = [self findEnvForKey:key];
     id<JSDataProtocol>val = nil;
     if (env != nil) {

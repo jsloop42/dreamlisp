@@ -8,16 +8,12 @@
 
 #import "JSL.h"
 
-@implementation JSL {    
-    /** The symbol table used for auto gensym */
-    SymbolTable *_symTable;
+@implementation JSL {
     Reader *_reader;
     Printer *_printer;
     Env *_globalEnv;
     /** Current env */
     Env *_env;
-    /** Used when loading code from file containing modules. Saves the current module to stack and pops back when the evaluating the file is complete. */
-    NSMutableArray<Env *> *_moduleStack;
     Core *_core;
     FileOps *_fileOps;
     NSArray *_keywords;
@@ -25,8 +21,10 @@
     NSUInteger _quasiquoteDepth;
     NSUInteger _unquoteDepth;
     dispatch_queue_t _queue;
-    /** Is running a REPL */
-    BOOL _isREPL;
+    BOOL _isREPL;  // Is running a REPL
+    BOOL _isMacroInQuasiquote;  // Is `defmacro!` encountered within quasiquote
+    BOOL _isDefInQuasiQuote;  // Is `def!` encountered within quasiquote
+    SymbolTable *_macroTable;
 }
 
 @synthesize globalEnv = _globalEnv;
@@ -45,15 +43,17 @@
     _reader = [Reader new];
     _printer = [Printer new];
     _core = [Core new];
-    _symTable = [SymbolTable new];
-    _moduleStack = [NSMutableArray new];
     _env = [[Env alloc] initWithModuleName:defaultModuleName isUserDefined:NO];
-    [Env setEnv:[_core env] forModuleName:coreModuleName];
+    // Add modules to module table
+    [self setModule:_env];  // default module
+    [self setModule:[_core env]];  // core module
     _globalEnv = _env;
     _fileOps = [FileOps new];
     _isQuasiquoteMode = NO;
     _quasiquoteDepth = 0;
-    _queue = dispatch_queue_create("jsl-dispatch-queu", nil);
+    _isMacroInQuasiquote = NO;
+    _isDefInQuasiQuote = NO;
+    _queue = dispatch_queue_create("jsl-dispatch-queue", nil);
     _isREPL = YES;
     _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*"];
     [self setLoadFileToREPL];
@@ -69,7 +69,7 @@
     id<JSDataProtocol>(^fn)(NSMutableArray *arg) = ^id<JSDataProtocol>(NSMutableArray *arg) {
         JSL *this = weakSelf;
         id<JSDataProtocol> ast = (id<JSDataProtocol>)arg[0];
-        return [self eval:[self updateBindingsForAST:ast table:this->_symTable] withEnv:[self env]];
+        return [self eval:[self updateBindingsForAST:ast table:[this->_env symbolTable]] withEnv:[self env]];
     };
     NSString *hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
     NSString *langVersion = [[NSString alloc] initWithFormat:@"JSL v%@ [%@]", JSLVersion, hostLangVersion];
@@ -85,13 +85,15 @@
     JSL * __weak weakSelf = self;
     id<JSDataProtocol>(^loadFile)(NSMutableArray *arg) = ^id<JSDataProtocol>(NSMutableArray *arg) {
         JSL *this = weakSelf;
+        Env *current = this->_env;
         NSString *path = [[JSString dataToString:arg[0] fnName:@"load-file/1"] value];
         [[this->_fileOps loadFileFromPath:[@[path] mutableCopy] isConcurrent:NO isLookup:NO]
          enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [this rep:[obj content]];
         }];
-        // TODO: change this to info()
-        [self rep:[[NSString alloc] initWithFormat:@"(println \"#(ok %@)\")", [path lastPathComponent]]];
+        info(@"%@", [[NSString alloc] initWithFormat:@"#(ok %@)", [path lastPathComponent]]);
+        this->_env = current;
+        [this updatePrompt:[current moduleName]];
         return [JSNil new];
     };
     [[self env] setObject:[[JSFunction alloc] initWithFn:loadFile argCount:1 name:@"load-file/1"] forSymbol:[[JSSymbol alloc] initWithArity:1
@@ -108,10 +110,12 @@
     NSMutableArray *paths = [NSMutableArray new];
     [paths addObject:[self coreLibPath:[_fileOps currentDirectoryPath]]];
     [paths addObject:[self coreLibPath:[_fileOps bundlePath]]];
+    _env = [_core env];
     [[_fileOps loadFileFromPath:paths isConcurrent:YES isLookup:YES] enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx,
                                                                                                   BOOL * _Nonnull stop) {
         [self rep:[obj content]];
     }];
+    _env = _globalEnv;
 }
 
 #pragma mark Module
@@ -127,7 +131,7 @@
 - (void)removeModule:(NSString *)name {
     [Env removeModule:name];
     _env = _globalEnv;
-    if (_isREPL) prompt = [[[_env moduleName] stringByAppendingString:@"> "] UTF8String];
+    [self updatePrompt:[_env moduleName]];
 }
 
 #pragma mark Read
@@ -208,7 +212,8 @@
         NSMutableArray *xs = [(JSList *)ast value];
         id<JSDataProtocol> first = [xs first];
         if (first && [JSSymbol isSymbol:first]) {
-            JSSymbol *sym = [[JSSymbol alloc] initWithArity:[xs count] - 1 symbol:first];
+            //JSSymbol *sym = [[JSSymbol alloc] initWithArity:[xs count] - 1 symbol:first];
+            JSSymbol *sym = [[JSSymbol alloc] initWithArity:[xs count] - 1 position:0 symbol:first];
             if ([env findEnvForKey:sym]) {
                 id<JSDataProtocol> fnData = [env objectForSymbol:sym];
                 if ([JSFunction isFunction:fnData]) return [(JSFunction *)fnData isMacro];
@@ -356,12 +361,14 @@
 - (JSSymbol *)defineModule:(id<JSDataProtocol>)ast {
     JSList *xs = (JSList *)ast;
     JSSymbol *modSym = [xs second];
+    [modSym setIsModule:YES];
     NSString *modName = [modSym name];
     Env *modEnv = [[Env alloc] initWithModuleName:modName isUserDefined:YES];
      // The third element onwards are imports and exports
     // [xs nth:2];
     [self setModule:modEnv];
     _env = modEnv; // change env to current module
+    [self updatePrompt:modName];
     if (_isREPL) prompt = [[modName stringByAppendingString:@"> "] UTF8String];
     //[self eval:[xs second] withEnv:_env];
     return modSym;
@@ -371,6 +378,7 @@
 - (JSSymbol *)changeModule:(id<JSDataProtocol>)ast {
     JSList *xs = (JSList *)ast;
     JSSymbol *modSym = [xs second];
+    [modSym setIsModule:YES];
     NSString *modName = [modSym name];
     if ([modName isEqual:defaultModuleName]) {
         _env = _globalEnv;
@@ -383,8 +391,13 @@
             [[[JSError alloc] initWithFormat:ModuleNotFound, modName] throw];
         }
     }
-    if (_isREPL) prompt = [[modName stringByAppendingString:@"> "] UTF8String];
+    [self updatePrompt:modName];
     return modSym;
+}
+
+- (void)updatePrompt:(NSString *)moduleName {
+    if (_isREPL) prompt = [[moduleName stringByAppendingString:@"> "] UTF8String];
+    currentModuleName = moduleName;
 }
 
 #pragma mark Auto gensym
@@ -460,16 +473,26 @@
                 if (!_isQuasiquoteMode) {
                     i++;
                     [table setSymbol:[ast nth:i]];  // Setting the def! bind name to symbol table
+                } else {
+                    _isDefInQuasiQuote = YES;
                 }
                 continue;
             } else if ([sym position] == 0 && [sym isEqualToName:@"defmacro!"]) {
                 if (!_isQuasiquoteMode) {  // process defmacro! else, move to next symbol
+                    _macroTable = [[SymbolTable alloc] initWithTable:table];  // This is creating a new scope to make gensyms unique
                     i++;
                     [table setSymbol:[ast nth:i]];  // add binding name to main table
-                    SymbolTable *macroTable = [[SymbolTable alloc] initWithTable:table];
                     i++;
-                    [self updateBindingsForAST:[ast nth:i] table:macroTable];
+                    [self updateBindingsForAST:[ast nth:i] table:_macroTable];
+                    if (_isDefInQuasiQuote || _isMacroInQuasiquote) {
+                        [table merge:_macroTable];
+                        _isDefInQuasiQuote = NO;
+                        _isMacroInQuasiquote = NO;
+                    }
                     return ast;
+                } else {
+                    // we encountered defmacro! in quasiquote mode which means, it requires any symbols bound by the scope.
+                    _isMacroInQuasiquote = YES;
                 }
                 continue;
             } else if ([sym position] == 0 && [sym isEqualToName:@"quasiquote"]) {
@@ -479,6 +502,9 @@
                 _isQuasiquoteMode = YES;
                 // RULE: If no ~ or ~@ then no symbol lookup takes place - all are treated global. If ' encountered, no symbol lookup.
                 id<JSDataProtocol> symForm = [self updateBindingsForAST:[ast nth:i] table:table];
+                if (_isMacroInQuasiquote || _isDefInQuasiQuote) {
+                    _macroTable = table;
+                }
                 _quasiquoteDepth -= 1;
                 if (_quasiquoteDepth == 0) _isQuasiquoteMode = NO;
                 [ast update:symForm atIndex:i];
@@ -528,10 +554,14 @@
                 continue;
             } else if ([sym position] == 0 && [sym isEqualToName:@"export"]) {
                 continue;
-            } else if ([sym position] == 0 && [sym isEqualToName:@"export"]) {
+            } else if ([sym position] == 0 && [sym isEqualToName:@"import"]) {
                 //TODO
                 // (import (net.jsloop.tree tree) (create-tree 0) (right-node 1) (left-node 1))
                 // (import net.jsloop.tree (create-tree 0) (right-node 1) (left-node 1))
+            } else if ([sym position] == 0 && [sym isEqualToName:@"in-module"]) {
+                continue;
+            } else if ([sym position] == 0 && [sym isEqualToName:@"remove-module"]) {
+                continue;
             } else if ([sym position] == 0 && [_keywords containsObject:[sym name]]) {
                 continue;
             } else {
@@ -619,13 +649,9 @@
     NSUInteger i = 0;
     NSString *ret = nil;
     for (i = 0; i < len; i++) {
-        [self updateBindingsForAST:exps[i] table:_symTable];
+        [self updateBindingsForAST:exps[i] table:[_env symbolTable]];  // Symbol table contains symbols encountered which are defined using def!, defmacro!.
         ret = [self print:[self eval:exps[i] withEnv:[self env]]];
     }
-    // Symbol table contains symbols encountered which are defined using def!, defmacro!. Since processing of macros does not happen at this stage, any symbols
-    // defined using macro functions other than defmacro! will not be added. Since these would be evaluated and added to the main env after each REP loop, we
-    // can clear them.
-    [_symTable clearAll];
     return ret;
 }
 

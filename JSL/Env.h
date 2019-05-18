@@ -11,6 +11,7 @@
 #import "JSSymbol.h"
 #import "JSList.h"
 #import "JSError.h"
+#import "SymbolTable.h"
 #import "ModuleTable.h"
 #import <objc/NSObjCRuntime.h>
 
@@ -18,15 +19,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class JSSymbol;
 @class JSList;
+@class SymbolTable;
 @class ModuleTable;
 
 extern NSString *defaultModuleName;
 extern NSString *coreModuleName;
+extern NSString *currentModuleName;
 
 @interface Env : NSObject
 @property (nonatomic, readwrite) Env *outer;
 @property (nonatomic, readwrite) NSMapTable<JSSymbol *, id<JSDataProtocol>> *table;
 @property (nonatomic, readwrite) ModuleTable *module;
+@property (nonatomic, readwrite) SymbolTable *symbolTable;
 @property (nonatomic, readwrite) BOOL isUserDefined;
 + (void)initialize;
 + (void)setEnv:(Env *)env forModuleName:(NSString *)moduleName;

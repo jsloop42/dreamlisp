@@ -8,14 +8,68 @@
 
 #import "SymbolTable.h"
 
+@implementation SymTableKey {
+    NSString *_initialValue;
+    NSInteger _arity;
+    BOOL _isFunction;
+    BOOL _hasNArity;
+    NSInteger _position;
+    /** Function name with arity if the symbol is bound to a function */
+    NSString *_fnName;
+    NSString *_moduleName;
+    BOOL _isQualified;
+    BOOL _isModule;
+}
+
+@synthesize arity = _arity;
+@synthesize initialValue = _initialValue;
+@synthesize moduleName = _moduleName;
+
+- (instancetype)initWithSymbol:(JSSymbol *)symbol {
+    self = [super init];
+    if (self) {
+        _arity = [symbol arity];
+        _initialValue = [symbol initialValue];
+        _moduleName = [symbol moduleName];
+    }
+    return self;
+}
+
+- (instancetype)initWithKey:(SymTableKey *)key {
+    self = [super self];
+    if (self) self = key;
+    return self;
+}
+
+- (BOOL)isEqual:(id)symbol {
+    return [_initialValue isEqual:[symbol initialValue]] && _arity == [symbol arity] && [_moduleName isEqual:[symbol moduleName]];
+}
+
+- (NSUInteger)hash {
+    return [_moduleName hash] + [_initialValue hash] + _arity + 2;  // Adding 2 to offset negative arity.
+}
+
+- (NSString *)description {
+    return [[NSString alloc] initWithFormat:@"<%@ %p - M:%@ %@ Arity:%ld>", NSStringFromClass([self class]), self, _moduleName, _initialValue, _arity];
+}
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    return [[SymTableKey alloc] initWithKey:self];
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [[SymTableKey alloc] initWithKey:self];
+}
+
+@end
+
 /**
- A temporary table used for storing and lookup of hygienic symbols for an REP loop. The table will contain symbols encountered which are defined using def!,
- defmacro!. Since processing of macros does not happen at auto gensym stage, any symbols defined using macro functions other than defmacro! will not be added.
- The table can be cleared after each REP loop.
+ A table used for storing and lookup of hygienic symbols for an REP loop. The table will contain symbols encountered which are defined using def!, defmacro!.
+ Since processing of macros does not happen at auto gensym stage, any symbols defined using macro functions other than defmacro! will not be added.
  */
 @implementation SymbolTable {
     SymbolTable *_outer;
-    NSMapTable<NSString *, JSSymbol *> *_table;
+    NSMapTable<SymTableKey *, JSSymbol *> *_table;
 }
 
 @synthesize outer = _outer;
@@ -42,19 +96,27 @@
     _table = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
 }
 
-- (JSSymbol * _Nullable)symbolForKey:(NSString *)name inTable:(SymbolTable *)symTable {
+- (void)merge:(SymbolTable *)table {
+    [_table merge:[table table]];
+    if ([table outer]) [_outer merge:[table outer]];
+}
+
+- (SymTableKey *)toKey:(JSSymbol *)symbol {
+    return [[SymTableKey alloc] initWithSymbol:symbol];
+}
+
+- (JSSymbol * _Nullable)symbolForKey:(JSSymbol *)symbol inTable:(SymbolTable *)symTable {
     if (!symTable) return nil;
-    JSSymbol *sym = [[symTable table] objectForKey:name];
-    return sym ? sym : [self symbolForKey:name inTable:[symTable outer]];
+    JSSymbol *sym = [[symTable table] objectForKey:[self toKey:symbol]];
+    return sym ? sym : [self symbolForKey:symbol inTable:[symTable outer]];
 }
 
 - (JSSymbol * _Nullable)symbol:(JSSymbol *)symbol {
-    return [self symbolForKey:[symbol initialValue] inTable:self];
+    return [self symbolForKey:symbol inTable:self];
 }
 
 - (void)setSymbol:(JSSymbol *)symbol {
-    NSString *key = (NSString *)[symbol initialValue];
-    [_table setObject:symbol forKey:key];
+    [_table setObject:symbol forKey:[self toKey:symbol]];
 }
 
 - (void)clearAll {
@@ -68,6 +130,14 @@
 
 - (NSString *)description {
     return [_table description];
+}
+
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    return [[SymbolTable alloc] initWithTable:self];
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [[SymbolTable alloc] initWithTable:self];
 }
 
 @end

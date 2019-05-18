@@ -17,6 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ModuleTable : NSObject
 @property (nonatomic, readwrite) NSMapTable<JSSymbol *, id<JSDataProtocol>> *table;
 @property (nonatomic, readwrite) NSString *name;
+- (instancetype)init;
+- (instancetype)initWithModuleTable:(ModuleTable *)table;
 - (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key;
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key;
 @end

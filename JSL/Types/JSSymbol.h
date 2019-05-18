@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) NSString *fnName;
 @property (nonatomic, readwrite) NSString *moduleName;
 @property (nonatomic, readwrite) BOOL isQualified;
+@property (nonatomic, readwrite) BOOL isModule;
 + (instancetype)new NS_UNAVAILABLE;
 + (BOOL)isSymbol:(id)object;
 + (BOOL)isSymbol:(id)object withName:(NSString *)name;

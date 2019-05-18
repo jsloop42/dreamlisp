@@ -62,4 +62,13 @@
     return [self objectForKey:key] != nil;
 }
 
+/** Merge key value pairs from the given table */
+- (void)merge:(NSMapTable *)table {
+    NSEnumerator *iter = [table keyEnumerator];
+    id key = nil;
+    while ((key = [iter nextObject])) {
+        [self setObject:[table objectForKey:key] forKey:key];
+    }
+}
+
 @end
