@@ -66,12 +66,11 @@
 - (instancetype)initWithName:(NSString *)name {
     self = [super init];
     if (self) {
+        [self bootstrap];
         _name = name;
         _initialName = name;
         _arity = -2;
         _initialArity = -2;
-        _moduleName = currentModuleName;
-        _isQualified = NO;
         [self updateArity];
     }
     return self;
@@ -81,6 +80,7 @@
 - (instancetype)initWithFunction:(JSFunction *)func name:(NSString *)name moduleName:(NSString *)moduleName {
     self = [super init];
     if (self) {
+        [self bootstrap];
         _name = name;
         _initialName = name;
         _initialArity = [func argsCount];
@@ -122,13 +122,12 @@
     if (arity < -1) [[[JSError alloc] initWithDescription:FunctionArityError] throw];
     self = [super init];
     if (self) {
+        [self bootstrap];
         _name = string;
         _initialName = _name;
         _arity = arity;
         _initialArity = arity;
         _position = position;
-        _moduleName = currentModuleName;
-        _isQualified = NO;
         [self updateArity];
     }
     return self;
@@ -183,9 +182,7 @@
 }
 
 - (JSSymbol *)gensym {
-    if (_position == 0) {
-        _name = [[NSString alloc] initWithFormat:@"%@__%ld__auto__", [_name substringToIndex:[_name count]], [State counter]];
-    }
+    if (_position == 0) _name = [[NSString alloc] initWithFormat:@"%@__%ld__auto__", [_name substringToIndex:[_name count]], [State counter]];
     return self;
 }
 
@@ -225,10 +222,9 @@
 }
 
 - (NSString *)string {
-    if (_initialArity <= -2) {
-        return _isModule ? _name : [[NSString alloc] initWithFormat:@"%@:%@", _moduleName, _name];
-    }
-    return [[NSString alloc] initWithFormat:@"%@:%@/%@", _moduleName, _name, (_initialArity == -1) ? @"n" : [[NSString alloc] initWithFormat:@"%ld", _initialArity]];
+    if (_initialArity <= -2) return _isModule ? _name : [[NSString alloc] initWithFormat:@"%@:%@", _moduleName, _name];
+    return [[NSString alloc] initWithFormat:@"%@:%@/%@", _moduleName, _name, (_initialArity == -1) ? @"n" : [[NSString alloc]
+                                                                                                             initWithFormat:@"%ld", _initialArity]];
 }
 
 - (void)copyProperties:(JSSymbol *)symbol {

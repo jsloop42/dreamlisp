@@ -13,6 +13,7 @@
 #import "NSMutableArray+JSList.h"
 #import "JSError.h"
 #import "State.h"
+#import "SymbolTable.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -48,6 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)name;
 - (JSSymbol *)toNArity;
 - (JSSymbol *)resetArity;
+- (void)updateArity;
 - (NSString *)string;
 - (void)copyProperties:(JSSymbol *)symbol;
 - (BOOL)isEqualToName:(NSString *)name;

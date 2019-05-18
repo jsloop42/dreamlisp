@@ -1052,14 +1052,14 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (unquote 7))"], @"7");
     XCTAssertEqualObjects([jsl rep:@"(def! a 8)"], @"8");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (unquote a))"], @"8");
-    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 a 3))"], @"(1 a 3)");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 a 3))"], @"(1 user:a 3)");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 (unquote a) 3))"], @"(1 8 3)");
     XCTAssertEqualObjects([jsl rep:@"(def! b (quote (1 \"b\" \"d\")))"], @"(1 \"b\" \"d\")");
-    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 b 3))"], @"(1 b 3)");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 b 3))"], @"(1 user:b 3)");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 (unquote b) 3))"], @"(1 (1 \"b\" \"d\") 3)");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote ((unquote 1) (unquote 2)))"], @"(1 2)");
     XCTAssertEqualObjects([jsl rep:@"(def! c (quote (1 \"b\" \"d\")))"], @"(1 \"b\" \"d\")");
-    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 c 3))"], @"(1 c 3)");
+    XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 c 3))"], @"(1 user:c 3)");
     XCTAssertEqualObjects([jsl rep:@"(quasiquote (1 (splice-unquote c) 3))"], @"(1 1 \"b\" \"d\" 3)");
     // testing reader macros
     XCTAssertEqualObjects([jsl rep:@"'7"], @"7");
@@ -1073,13 +1073,13 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(def! a 8)"], @"8");
     XCTAssertEqualObjects([jsl rep:@"`(1 ~a 3)"], @"(1 8 3)");
     XCTAssertEqualObjects([jsl rep:@"(def! b '(1 \"b\" \"d\"))"], @"(1 \"b\" \"d\")");
-    XCTAssertEqualObjects([jsl rep:@"`(1 b 3)"], @"(1 b 3)");
+    XCTAssertEqualObjects([jsl rep:@"`(1 b 3)"], @"(1 user:b 3)");
     XCTAssertEqualObjects([jsl rep:@"`(1 ~b 3)"], @"(1 (1 \"b\" \"d\") 3)");
     XCTAssertEqualObjects([jsl rep:@"(def! c '(1 \"b\" \"d\"))"], @"(1 \"b\" \"d\")");
-    XCTAssertEqualObjects([jsl rep:@"`(1 c 3)"], @"(1 c 3)");
+    XCTAssertEqualObjects([jsl rep:@"`(1 c 3)"], @"(1 user:c 3)");
     XCTAssertEqualObjects([jsl rep:@"`(1 ~@c 3)"], @"(1 1 \"b\" \"d\" 3)");
     XCTAssertEqualObjects([jsl rep:@"(def! a 8)"], @"8");
-    XCTAssertEqualObjects([jsl rep:@"`[1 a 3]"], @"(1 a 3)");
+    XCTAssertEqualObjects([jsl rep:@"`[1 a 3]"], @"(1 user:a 3)");
     XCTAssertEqualObjects([jsl rep:@"[1 a 3]"], @"[1 8 3]");
     XCTAssertEqualObjects([jsl rep:@"(def! c '(1 \"b\" \"d\"))"], @"(1 \"b\" \"d\")");
     XCTAssertEqualObjects([jsl rep:@"`[1 ~@c 3]"], @"(1 1 \"b\" \"d\" 3)");
@@ -1099,7 +1099,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(unless2 false 7 8)"], @"7");
     XCTAssertEqualObjects([jsl rep:@"(unless2 true 7 8)"], @"8");
     // testing macro expand
-    XCTAssertEqualObjects([jsl rep:@"(macroexpand (unless2 2 3 4))"], @"(if (not 2) 3 4)");
+    XCTAssertEqualObjects([jsl rep:@"(macroexpand (unless2 2 3 4))"], @"(user:if (user:not 2) 3 4)");
     [jsl rep:@"(defmacro! identity (fn* (x) x))"];
     XCTAssertEqualObjects([jsl rep:@"(let* (a 123) (identity a))"], @"123");
     [jsl rep:@"(defmacro! foo (fn* (& more) (count more)))"];
@@ -1127,7 +1127,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     [jsl rep:@"(def! n (fn* (x) (p3 x)))"];
     XCTAssertEqualObjects([jsl rep:@"(n 4)"], @"400");
     XCTAssertEqualObjects([jsl rep:@"(n 5)"], @"500");
-    XCTAssertEqualObjects([jsl rep:@"`local-sym#"], @"local-sym#");  // not gensym reader macro
+    XCTAssertEqualObjects([jsl rep:@"`local-sym#"], @"user:local-sym#");  // not gensym reader macro
     // (let* (x#__9__auto__ (1 2 3)) (let* (y#__10__auto__ (first x#__9__auto__)) y#__10__auto__))
     [jsl rep:@"(defmacro! nested-let (fn* () `(let* [x# '(1 2 3)] (let* (y# (first x#)) y#))))"];
     XCTAssertEqualObjects([jsl rep:@"(nested-let)"], @"1");
@@ -1147,11 +1147,11 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(hm :b @(first(p 3)))"], @"{:b 3}");
     XCTAssertEqualObjects([jsl rep:@"(hm1 :a (p 5))"], @"{:a (atom 3)}");
     // test macro definition print
-    XCTAssertEqualObjects([jsl rep:@"(defmacro! a (fn* (x) `(+ 1 ~x)))"], @"a/1");
-    XCTAssertEqualObjects([jsl rep:@"(defmacro! a (fn* (& more) `(first (list ~@more))))"], @"a/n");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro! a (fn* (x) `(+ 1 ~x)))"], @"user:a/1");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro! a (fn* (& more) `(first (list ~@more))))"], @"user:a/n");
     // misc
-    XCTAssertEqualObjects([jsl rep:@"(defun inc (x) (+ x 1))"], @"inc/1");
-    XCTAssertEqualObjects([jsl rep:@"(defmacro apply1 (x) `(apply inc/1 ~x))"], @"apply1/1");
+    XCTAssertEqualObjects([jsl rep:@"(defun inc (x) (+ x 1))"], @"user:inc/1");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro apply1 (x) `(apply inc/1 ~x))"], @"user:apply1/1");
     XCTAssertEqualObjects([jsl rep:@"(apply1 [3])"], @"4");
 }
 
@@ -1190,7 +1190,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertNotNil(message);
     switch (tag) {
         case 0:
-            XCTAssertEqualObjects(message, @"\"exc is:\" \"'abc/2' not found\"");
+            XCTAssertEqualObjects(message, @"\"exc is:\" \"'user:abc/2' not found\"");
             break;
         case 1:
             XCTAssertEqualObjects(message, @"\"exc is:\" \"Index 1 is out of bounds of 0\"");
@@ -1290,7 +1290,9 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     JSL *jsl = [JSL new];
     FileOps *fops = [FileOps new];
     XCTAssertEqualObjects([jsl rep:@"(read-string \"(1 2 (3 4) nil)\")"], @"(1 2 (3 4) nil)");
-    XCTAssertEqualObjects([jsl rep:@"(read-string \"(+ 2 3)\")"], @"(+ 2 3)");
+    // Internally qualifies with current module name if not qualified. Eval will check core functions in core module if not in user module unless they are
+    // explicitly qualified.
+    XCTAssertEqualObjects([jsl rep:@"(read-string \"(+ 2 3)\")"], @"(user:+ 2 3)");
     XCTAssertEqualObjects([jsl rep:@"(read-string \"7 ;; comment\")"], @"7");
     XCTAssertEqualObjects([jsl rep:@"(read-string \";; comment\")"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(eval (read-string \"(+ 2 3)\"))"], @"5");
@@ -1428,7 +1430,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(keyword? 'abc)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(keyword? \"\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(keyword? (keyword \"abc\"))"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"(symbol \"abc\")"], @"abc");
+    XCTAssertEqualObjects([jsl rep:@"(symbol \"abc\")"], @"user:abc");
     XCTAssertEqualObjects([jsl rep:@"(keyword :abc)"], @":abc");
     XCTAssertEqualObjects([jsl rep:@"(keyword \"abc\")"], @":abc");
     XCTAssertEqualObjects([jsl rep:@"(sequential? (list 1 2 3))"], @"true");
@@ -1515,11 +1517,11 @@ void predicateFn(id param, int tag, int counter, const char *s) {
         XCTAssertTrue([Utils matchString:[exception.userInfo objectForKey:@"description"] withPattern:@"'abc/1'? not found."]);
     }
     // Arity error
-    XCTAssertEqualObjects([jsl rep:@"(try* (empty? [] []) (catch* ex (str ex)))"], @"\"'empty?/2' not found\"");
-    XCTAssertEqualObjects([jsl rep:@"(try* (list? [] []) (catch* ex (str ex)))"], @"\"'list?/2' not found\"");
-    XCTAssertEqualObjects([jsl rep:@"(try* (true? [] []) (catch* ex (str ex)))"], @"\"'true?/2' not found\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (empty? [] []) (catch* ex (str ex)))"], @"\"'user:empty?/2' not found\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (list? [] []) (catch* ex (str ex)))"], @"\"'user:list?/2' not found\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (true? [] []) (catch* ex (str ex)))"], @"\"'user:true?/2' not found\"");
     XCTAssertEqualObjects([jsl rep:@"(def! a (atom 4))"], @"(atom 4)");
-    XCTAssertEqualObjects([jsl rep:@"(try* (reset! x 4) (catch* ex (str ex)))"], @"\"'x' not found\"");
+    XCTAssertEqualObjects([jsl rep:@"(try* (reset! x 4) (catch* ex (str ex)))"], @"\"'user:x' not found\"");
 }
 
 /** The expressions loaded and evaluated from file should be added to the env just like it is evaluated from REPL. */
@@ -1545,14 +1547,20 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     [jsl rep:@"(defmodule tree (export (create-tree 0) (right-node 1) (left-node 1)))"];
     [jsl rep:@"(def! a 1)"];
     XCTAssertEqualObjects([jsl rep:@"a"], @"1");
+    [jsl rep:@"(in-module user)"];
+}
+
+- (void)testMacroWithModules {
+    JSL *jsl = [JSL new];
+    [jsl rep:@"(defmacro! d (fn* (n v) `(def! ~n ~v)))"];
+    XCTAssertEqualObjects([jsl rep:@"(d x 4)"], @"4");
+    XCTAssertEqualObjects([jsl rep:@"(defmodule foo ())"], @"foo");
+    XCTAssertEqualObjects([jsl rep:@"(user:d t 2)"], @"2");
+    [jsl rep:@"(in-module user)"];
 }
 
 - (void)test {
     JSL *jsl = [JSL new];
-    //@try {
-    [jsl rep:@"(defmacro! d (fn* (n v) `(def! ~n ~v)))"];
-    [jsl rep:@"(defmodule foo ())"];
-    [jsl rep:@"(user:d b 2)"];  // macro must process symbols irrespective of modules
 }
 
 - (void)notestPerformanceJSListDropFirst {

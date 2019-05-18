@@ -10,24 +10,16 @@
 #import "JSDataProtocol.h"
 #import "NSMapTable+JSHashMap.h"
 #import "JSSymbol.h"
+#import "SymbolTableKey.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class JSSymbol;
-
-@interface SymTableKey : NSObject
-@property (nonatomic, readwrite) NSInteger arity;
-@property (nonatomic, readwrite) NSString *initialValue;
-@property (nonatomic, readwrite) NSString *moduleName;
-- (instancetype)initWithSymbol:(JSSymbol *)symbol;
-- (instancetype)initWithKey:(SymTableKey *)key;
-- (BOOL)isEqual:(id)symbol;
-- (NSUInteger)hash;
-@end
+@class SymbolTableKey;
 
 @interface SymbolTable : NSObject
 @property (nonatomic, readwrite) SymbolTable *outer;
-@property (nonatomic, readonly) NSMapTable<SymTableKey *, JSSymbol *> *table;
+@property (nonatomic, readonly) NSMapTable<SymbolTableKey *, JSSymbol *> *table;
 - (instancetype)init;
 - (instancetype)initWithTable:(SymbolTable *)table;
 - (void)merge:(SymbolTable *)table;

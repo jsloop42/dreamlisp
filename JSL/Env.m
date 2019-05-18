@@ -142,18 +142,37 @@ NSString *currentModuleName;
 
 /** Checks if the symbol belongs to current module, if so update the module name. */
 - (void)updateModuleName:(JSSymbol *)symbol {
-    if (![symbol isQualified] && [[symbol moduleName] isEqual:defaultModuleName]) {
+    if (![symbol isQualified] && [[symbol moduleName] isNotEqualTo:currentModuleName]) {
         [symbol setModuleName:[_module name]];
     }
+}
+
+- (Env * _Nullable)findEnvForKey:(JSSymbol *)key inModule:(Env *)env {
+    JSSymbol *aKey = [[JSSymbol alloc] initWithName:[key name]];
+    [aKey copyProperties:key];
+    [aKey setArity:[key arity]];
+    [aKey updateArity];
+    [aKey setModuleName:[env moduleName]];
+    id<JSDataProtocol> obj = [[env table] objectForKey:aKey];
+    if (obj) {
+        return env;
+    } else {
+        if (![aKey hasNArity]) return [self findEnvForKey:[aKey toNArity] inModule:env];
+    }
+    return nil;
 }
 
 /** Recursively checks the environments for the given symbol until a match is found or the environment is the outermost, which is nil. */
 - (Env *)findEnvForKey:(JSSymbol *)key {
     [self updateModuleName:key];
+    if ([key isQualified]) return [Env envForModuleName:[key moduleName]];
     if ([_table objectForKey:key]) {
         return self;
     } else if (![key hasNArity]) {
         return [self findEnvForKey:[key toNArity]];
+    } else {
+        Env *env = [self findEnvForKey:key inModule:[Env envForModuleName:coreModuleName]];
+        if (env) return env;
     }
     return _outer ? [_outer findEnvForKey:[key resetArity]] : nil;
 }

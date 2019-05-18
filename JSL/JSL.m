@@ -22,9 +22,6 @@
     NSUInteger _unquoteDepth;
     dispatch_queue_t _queue;
     BOOL _isREPL;  // Is running a REPL
-    BOOL _isMacroInQuasiquote;  // Is `defmacro!` encountered within quasiquote
-    BOOL _isDefInQuasiQuote;  // Is `def!` encountered within quasiquote
-    SymbolTable *_macroTable;
 }
 
 @synthesize globalEnv = _globalEnv;
@@ -51,14 +48,12 @@
     _fileOps = [FileOps new];
     _isQuasiquoteMode = NO;
     _quasiquoteDepth = 0;
-    _isMacroInQuasiquote = NO;
-    _isDefInQuasiQuote = NO;
     _queue = dispatch_queue_create("jsl-dispatch-queue", nil);
     _isREPL = YES;
     _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*"];
     [self setLoadFileToREPL];
     [self setEvalToREPL];
-    //[self loadCoreLib];
+    [self loadCoreLib];
 }
 
 #pragma mark Env setup
@@ -93,7 +88,7 @@
         }];
         info(@"%@", [[NSString alloc] initWithFormat:@"#(ok %@)", [path lastPathComponent]]);
         this->_env = current;
-        [this updatePrompt:[current moduleName]];
+        [this updateModuleName:[current moduleName]];
         return [JSNil new];
     };
     [[self env] setObject:[[JSFunction alloc] initWithFn:loadFile argCount:1 name:@"load-file/1"] forSymbol:[[JSSymbol alloc] initWithArity:1
@@ -111,11 +106,13 @@
     [paths addObject:[self coreLibPath:[_fileOps currentDirectoryPath]]];
     [paths addObject:[self coreLibPath:[_fileOps bundlePath]]];
     _env = [_core env];
+    [self updateModuleName:[_env moduleName]];
     [[_fileOps loadFileFromPath:paths isConcurrent:YES isLookup:YES] enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx,
                                                                                                   BOOL * _Nonnull stop) {
         [self rep:[obj content]];
     }];
     _env = _globalEnv;
+    [self updateModuleName:[_env moduleName]];
 }
 
 #pragma mark Module
@@ -131,7 +128,7 @@
 - (void)removeModule:(NSString *)name {
     [Env removeModule:name];
     _env = _globalEnv;
-    [self updatePrompt:[_env moduleName]];
+    [self updateModuleName:[_env moduleName]];
 }
 
 #pragma mark Read
@@ -186,7 +183,7 @@
 }
 
 /** Process quasiquote. */
-- (id<JSDataProtocol>)quasiQuote:(id<JSDataProtocol>)ast {
+- (id<JSDataProtocol>)quasiquote:(id<JSDataProtocol>)ast {
     if (![self isPair:ast]) {
         id<JSDataProtocol>arg = ast;
         return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], arg] mutableCopy]];
@@ -199,11 +196,11 @@
         NSMutableArray *list = [(JSList *)first value];
         if (![list isEmpty] && [JSSymbol isSymbol:[list first]] && [[(JSSymbol *)[list first] name] isEqual:@"splice-unquote"]) {
             return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"concat"], [list second],
-                                                    [self quasiQuote:[[JSList alloc] initWithArray:[xs rest]]]] mutableCopy]];
+                                                    [self quasiquote:[[JSList alloc] initWithArray:[xs rest]]]] mutableCopy]];
         }
     }
-    return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"cons"], [self quasiQuote:first],
-                                            [self quasiQuote:[[JSList alloc] initWithArray:[xs rest]]]] mutableCopy]];
+    return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"cons"], [self quasiquote:first],
+                                            [self quasiquote:[[JSList alloc] initWithArray:[xs rest]]]] mutableCopy]];
 }
 
 /** Checks if the given ast is list with macro at function position. */
@@ -312,7 +309,7 @@
                     return [xs second];
                 } else if ([[sym name] isEqual:@"quasiquote"]) {
                     id<JSDataProtocol> exp = [xs second];
-                    ast = [self quasiQuote:exp];
+                    ast = [self quasiquote:exp];
                     continue;
                 } else if ([[sym name] isEqual:@"macroexpand"]) {
                     return [self macroExpand:[xs second] withEnv:env];
@@ -368,7 +365,7 @@
     // [xs nth:2];
     [self setModule:modEnv];
     _env = modEnv; // change env to current module
-    [self updatePrompt:modName];
+    [self updateModuleName:modName];
     if (_isREPL) prompt = [[modName stringByAppendingString:@"> "] UTF8String];
     //[self eval:[xs second] withEnv:_env];
     return modSym;
@@ -391,11 +388,12 @@
             [[[JSError alloc] initWithFormat:ModuleNotFound, modName] throw];
         }
     }
-    [self updatePrompt:modName];
+    [self updateModuleName:modName];
     return modSym;
 }
 
-- (void)updatePrompt:(NSString *)moduleName {
+/** Changes the prompt if in REPL and updates the @c currentModuleName */
+- (void)updateModuleName:(NSString *)moduleName {
     if (_isREPL) prompt = [[moduleName stringByAppendingString:@"> "] UTF8String];
     currentModuleName = moduleName;
 }
@@ -404,10 +402,21 @@
 
 /** If the given symbol is present in the symbol table, updates the given symbol to match. */
 - (JSSymbol * _Nullable)updateSymbol:(JSSymbol *)symbol table:(SymbolTable *)table {
-    JSSymbol *aSym = [table symbol:symbol];
-    if (aSym) {
-        [symbol setValue:[aSym value]];
-        return symbol;
+    JSSymbol *aSym = nil;
+    NSString *modName = [symbol moduleName];
+    if ([modName isEqual:currentModuleName]) {  // Symbol from the current module
+        aSym = [table symbol:symbol];
+        if (aSym) {
+            [symbol setValue:[aSym value]];
+            return symbol;
+        }
+    } else {  // Symbol is from another module
+        Env *env = [Env envForModuleName:modName];
+        aSym = [[env symbolTable] symbol:symbol];
+        if (aSym) {
+            [symbol setValue:[aSym value]];
+            return symbol;
+        }
     }
     return nil;
 }
@@ -473,26 +482,17 @@
                 if (!_isQuasiquoteMode) {
                     i++;
                     [table setSymbol:[ast nth:i]];  // Setting the def! bind name to symbol table
-                } else {
-                    _isDefInQuasiQuote = YES;
                 }
                 continue;
             } else if ([sym position] == 0 && [sym isEqualToName:@"defmacro!"]) {
                 if (!_isQuasiquoteMode) {  // process defmacro! else, move to next symbol
-                    _macroTable = [[SymbolTable alloc] initWithTable:table];  // This is creating a new scope to make gensyms unique
+                    SymbolTable *macroTable = [[SymbolTable alloc] initWithTable:table];  // This is creating a new scope to make gensyms unique
                     i++;
-                    [table setSymbol:[ast nth:i]];  // add binding name to main table
+                    JSSymbol *bind = [ast nth:i];
+                    [table setSymbol:bind];  // add binding name to main table
                     i++;
-                    [self updateBindingsForAST:[ast nth:i] table:_macroTable];
-                    if (_isDefInQuasiQuote || _isMacroInQuasiquote) {
-                        [table merge:_macroTable];
-                        _isDefInQuasiQuote = NO;
-                        _isMacroInQuasiquote = NO;
-                    }
+                    [self updateBindingsForAST:[ast nth:i] table:macroTable];
                     return ast;
-                } else {
-                    // we encountered defmacro! in quasiquote mode which means, it requires any symbols bound by the scope.
-                    _isMacroInQuasiquote = YES;
                 }
                 continue;
             } else if ([sym position] == 0 && [sym isEqualToName:@"quasiquote"]) {
@@ -502,9 +502,6 @@
                 _isQuasiquoteMode = YES;
                 // RULE: If no ~ or ~@ then no symbol lookup takes place - all are treated global. If ' encountered, no symbol lookup.
                 id<JSDataProtocol> symForm = [self updateBindingsForAST:[ast nth:i] table:table];
-                if (_isMacroInQuasiquote || _isDefInQuasiQuote) {
-                    _macroTable = table;
-                }
                 _quasiquoteDepth -= 1;
                 if (_quasiquoteDepth == 0) _isQuasiquoteMode = NO;
                 [ast update:symForm atIndex:i];
