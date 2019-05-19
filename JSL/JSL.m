@@ -211,8 +211,9 @@
         if (first && [JSSymbol isSymbol:first]) {
             //JSSymbol *sym = [[JSSymbol alloc] initWithArity:[xs count] - 1 symbol:first];
             JSSymbol *sym = [[JSSymbol alloc] initWithArity:[xs count] - 1 position:0 symbol:first];
-            if ([env findEnvForKey:sym]) {
-                id<JSDataProtocol> fnData = [env objectForSymbol:sym];
+            Env *aEnv = [env findEnvForKey:sym];
+            if (aEnv) {
+                id<JSDataProtocol> fnData = [aEnv objectForSymbol:sym];
                 if ([JSFunction isFunction:fnData]) return [(JSFunction *)fnData isMacro];
             }
         }
@@ -481,7 +482,9 @@
             } else if ([sym position] == 0 && [sym isEqualToName:@"def!"]) {
                 if (!_isQuasiquoteMode) {
                     i++;
-                    [table setSymbol:[ast nth:i]];  // Setting the def! bind name to symbol table
+                    JSSymbol *bind = [ast nth:i];
+                    [JSSymbol updateProperties:bind list:[ast nth:2]];
+                    [table setSymbol:bind];  // Setting the def! bind name to symbol table
                 }
                 continue;
             } else if ([sym position] == 0 && [sym isEqualToName:@"defmacro!"]) {
@@ -489,6 +492,7 @@
                     SymbolTable *macroTable = [[SymbolTable alloc] initWithTable:table];  // This is creating a new scope to make gensyms unique
                     i++;
                     JSSymbol *bind = [ast nth:i];
+                    [JSSymbol updateProperties:bind list:[ast nth:2]];
                     [table setSymbol:bind];  // add binding name to main table
                     i++;
                     [self updateBindingsForAST:[ast nth:i] table:macroTable];

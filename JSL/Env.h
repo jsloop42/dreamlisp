@@ -44,7 +44,6 @@ extern NSString *currentModuleName;
 - (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key;
 - (Env *)findEnvForKey:(JSSymbol *)key;
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key;
-- (_Nullable id<JSDataProtocol>)objectForSymbolFromModuleTable:(JSSymbol *)key;
 - (void)setModuleName:(NSString *)name;
 - (NSString *)moduleName;
 @end

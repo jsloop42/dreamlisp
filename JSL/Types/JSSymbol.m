@@ -63,6 +63,35 @@
     return symbol;
 }
 
+/** Update function bounded symbols properties from the given ast. */
++ (void)updateProperties:(JSSymbol *)symbol list:(id<JSDataProtocol>)ast {
+    if ([JSList isList:ast]) {
+        JSList *list = (JSList *)ast;
+        if ([JSSymbol isSymbol:[list first] withName:@"fn*"]) {
+            JSList *args = (JSList *)[list second];
+            if (![args isEmpty]) {
+                NSMutableArray<JSSymbol *> *arr = [args value];
+                NSPredicate *pred = [NSPredicate predicateWithFormat:@"SELF.name contains [c] %@", @"&"];
+                NSArray *filtered = [arr filteredArrayUsingPredicate:pred];
+                if ([filtered count] > 0) {
+                    [symbol setArity:-1];
+                    [symbol setInitialArity:-1];
+                    [symbol updateArity];
+                } else {
+                    NSUInteger count = [args count];
+                    [symbol setArity:count];
+                    [symbol setInitialArity:count];
+                    [symbol updateArity];
+                }
+            } else {
+                [symbol setArity:0];
+                [symbol setInitialArity:0];
+                [symbol updateArity];
+            }
+        }
+    }
+}
+
 - (instancetype)initWithName:(NSString *)name {
     self = [super init];
     if (self) {

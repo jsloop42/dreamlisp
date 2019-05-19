@@ -6,7 +6,6 @@
 //  Copyright © 2019 jsloop. All rights reserved.
 //
 
-#import <XCTest/XCTest.h>
 #import "JSLTests.h"
 
 @implementation JSLTests
@@ -1556,7 +1555,13 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(d x 4)"], @"4");
     XCTAssertEqualObjects([jsl rep:@"(defmodule foo ())"], @"foo");
     XCTAssertEqualObjects([jsl rep:@"(user:d t 2)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(defun inc (n) (+ n 1))"], @"foo:inc/1");
     [jsl rep:@"(in-module user)"];
+    @try {
+        XCTAssertThrowsSpecificNamed([jsl rep:@"(foo:inc 4)"], NSException, JSLException, @"Symbol not found");  // Symbol not exported
+    } @catch (NSException *exception) {
+        XCTAssertTrue([Utils matchString:[exception.userInfo objectForKey:@"description"] withPattern:@".*\\'?foo:/inc4\\'? not found.*"]);
+    }
 }
 
 - (void)test {

@@ -137,7 +137,11 @@ NSString *currentModuleName;
 
 - (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key {
     [key setModuleName:[_module name]];
-    [_table setObject:obj forKey:key];
+    if ([currentModuleName isEqual:defaultModuleName] || [currentModuleName isEqual:coreModuleName]) {
+        [_module setObject:obj forSymbol:key];
+    } else {
+        [_table setObject:obj forKey:key];
+    }
 }
 
 /** Checks if the symbol belongs to current module, if so update the module name. */
@@ -153,71 +157,120 @@ NSString *currentModuleName;
     [aKey setArity:[key arity]];
     [aKey updateArity];
     [aKey setModuleName:[env moduleName]];
-    id<JSDataProtocol> obj = [[env table] objectForKey:aKey];
+    id<JSDataProtocol> obj = nil;
+    obj = [[env module] objectForSymbol:aKey];
     if (obj) {
         return env;
-    } else {
-        if (![aKey hasNArity]) return [self findEnvForKey:[aKey toNArity] inModule:env];
+    } else if (![aKey hasNArity]) {
+        return [self findEnvForKey:[aKey toNArity] inModule:env];
     }
     return nil;
 }
 
-/** Recursively checks the environments for the given symbol until a match is found or the environment is the outermost, which is nil. */
+/** Lookup symbol table only if the symbol belongs to the current module. */
+//- (Env * _Nullable)findEnvForKey:(JSSymbol *)key inSymbolTable:(Env *)env {
+//    JSSymbol *sym = nil;
+//    if ([currentModuleName isEqual:[key moduleName]]) {
+//        sym = [[env symbolTable] symbol:key];
+//        if (sym) {
+//            return env;
+//        } else if (![key hasNArity]) {
+//            return [self findEnvForKey:[key toNArity] inSymbolTable:env];
+//        }
+//        [key resetArity];
+//    }
+//    return nil;
+//}
+
+/**
+ Lookup env table if the symbol belongs to current module, else lookup module table. Recursively checks the environments for the given symbol until a match
+ is found or the environment is the outermost, which is nil.
+ */
+- (Env * _Nullable)findEnvForKey:(JSSymbol *)key inEnv:(Env *)env {
+    if ([currentModuleName isEqual:[key moduleName]] && [currentModuleName isNotEqualTo:defaultModuleName] && [currentModuleName isNotEqualTo:coreModuleName]) {
+        if ([[env table] objectForKey:key]) {  // same module => all bindings are accessible
+            return self;
+        } else if (![key hasNArity]) {
+            return [self findEnvForKey:[key toNArity] inEnv:env];
+        }
+    } else {
+        if ([[env module] objectForSymbol:key]) {  // different module => look in module table only
+            return self;
+        } else if (![key hasNArity]) {
+            return [self findEnvForKey:[key toNArity] inEnv:env];
+        }
+    }
+    [key resetArity];
+    return _outer ? [_outer findEnvForKey:key inEnv:_outer] : nil;
+}
+
 - (Env *)findEnvForKey:(JSSymbol *)key {
     [self updateModuleName:key];
     if ([key isQualified]) return [Env envForModuleName:[key moduleName]];
-    if ([_table objectForKey:key]) {
-        return self;
-    } else if (![key hasNArity]) {
-        return [self findEnvForKey:[key toNArity]];
-    } else {
-        Env *env = [self findEnvForKey:key inModule:[Env envForModuleName:coreModuleName]];
-        if (env) return env;
-    }
-    return _outer ? [_outer findEnvForKey:[key resetArity]] : nil;
+    //Env *env = [self findEnvForKey:key inSymbolTable:self];
+    //if (env) return env;
+    Env *env = [self findEnvForKey:key inEnv:self];
+    if (env) return env;
+    env = [self findEnvForKey:key inModule:[Env envForModuleName:coreModuleName]];
+    if (env) return env;
+    return nil;
 }
 
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key {
-    return [self objectForSymbol:key isFromModuleTable:NO isFromSymbolTable:NO];
-}
-
-/** Retrieves the matching element for the given key from the environment if found. If not checks the @c modules' table. Else throws an exception. */
-- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isFromModuleTable:(BOOL)isFromModuleTable isFromSymbolTable:(BOOL)isFromSymbolTable {
-    if (!isFromSymbolTable) {
-        JSSymbol *sym = [_symbolTable symbol:key];
-        if (sym) return [self objectForSymbol:sym isFromModuleTable:isFromModuleTable isFromSymbolTable:YES];
-    }
     Env *env = [self findEnvForKey:key];
-    id<JSDataProtocol>val = nil;
-    if (env != nil) {
-        val = [[env table] objectForKey:key];
-        if (val != nil) return val;
-    }
-    // Check for n arity symbol
-    if (![key hasNArity]) return [self objectForSymbol:[key toNArity]];
-    if (!isFromModuleTable) {
-        val = [self objectForSymbolFromModuleTable:[key resetArity]];
+    id<JSDataProtocol> val = nil;
+    if (env) {
+        val = [env objectForSymbol:key fromEnv:env];
+        if (val) return val;
+    } else if ([[key moduleName] isEqual:[self moduleName]]) {
+        env = self;
+        val = [env objectForSymbol:key fromEnv:env];
         if (val) return val;
     }
-    if (![key isQualified]) [key setModuleName:[self moduleName]];
+    // Check core module
+    if (![key isQualified]) [key setModuleName:coreModuleName];
+    val = [env objectForSymbol:key fromEnv:env];
+    if (val) return val;
+    // Symbol not found
+    if (![key isQualified]) [key setModuleName:currentModuleName];
     [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
     return nil;
 }
 
-/**
- Retrieves object from @c modules' table if present. If not fully qualified the symbol is checked against core env because core modules need not be fully
- qualified */
-- (_Nullable id<JSDataProtocol>)objectForSymbolFromModuleTable:(JSSymbol *)key {
-    if (![key isQualified]) [key setModuleName:coreModuleName];  // set module to core
-    // Fetch from modules table
-    Env *modEnv = [Env envForModuleName:[key moduleName]];
-    id<JSDataProtocol>val = nil;
-    if (modEnv) {
-        val = [[modEnv table] objectForKey:key];
-        if (val != nil) return val;
-        // Check for n arity symbol
-        if (![key hasNArity]) return [self objectForSymbolFromModuleTable:[key toNArity]];
+- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromEnv:(Env *)env {
+    id<JSDataProtocol> val = nil;
+    if ([currentModuleName isEqual:[key moduleName]] && [[key moduleName] isNotEqualTo:defaultModuleName] && [[key moduleName] isNotEqualTo:coreModuleName]) {
+        val = [[env table] objectForKey:key];
+        if (val) {
+            return val;
+        } else if (![key hasNArity]) {
+            return [self objectForSymbol:[key toNArity] fromEnv:env];
+        }
+    } else {
+        val = [[env module] objectForSymbol:key];
+        if (val) {
+            return val;
+        } else if (![key hasNArity]) {
+            return [self objectForSymbol:[key toNArity] fromEnv:env];
+        } else if ([[key moduleName] isEqual:defaultModuleName] || [[key moduleName] isEqual:coreModuleName]) {
+            [key resetArity];
+            val = [self objectForSymbol:key fromTable:env];
+            if (val) return val;
+        }
     }
+    [key resetArity];
+    return [env outer] ? [self objectForSymbol:key fromEnv:[env outer]]: nil;
+}
+
+- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromTable:(Env *)env {
+    id<JSDataProtocol> val = nil;
+    val = [[env table] objectForKey:key];
+    if (val) {
+        return val;
+    } else if (![key hasNArity]) {
+        return [self objectForSymbol:[key toNArity] fromTable:env];
+    }
+    [key resetArity];
     return nil;
 }
 

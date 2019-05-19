@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "JSDataProtocol.h"
 #import "JSFunction.h"
+#import "JSList.h"
 #import "NSString+JSDataProtocol.h"
 #import "NSMutableArray+JSList.h"
 #import "JSError.h"
@@ -18,6 +19,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class JSFunction;
+@class JSList;
 
 @interface JSSymbol: NSObject <JSDataProtocol>
 @property (nonatomic, readwrite) NSInteger arity;
@@ -33,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isSymbol:(id)object;
 + (BOOL)isSymbol:(id)object withName:(NSString *)name;
 + (JSSymbol *)symbolWithArityCheck:(JSSymbol *)symbol withObject:(id)object;
++ (void)updateProperties:(JSSymbol *)symbol list:(JSList *)list;
 // Should not instantiate with empty name
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name;

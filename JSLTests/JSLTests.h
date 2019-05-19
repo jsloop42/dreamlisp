@@ -10,6 +10,7 @@
 #define JSLTests_h
 
 #import <Foundation/Foundation.h>
+#import <XCTest/XCTest.h>
 #import "Env.h"
 #import "Utils.h"
 #import "Types.h"
