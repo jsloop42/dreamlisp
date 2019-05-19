@@ -8,6 +8,10 @@
 
 #import "JSL.h"
 
+static NSString *coreLibFileName = @"core.jsl";
+static NSString *hostLangVersion;
+static NSString *langVersion;
+
 @implementation JSL {
     Reader *_reader;
     Printer *_printer;
@@ -29,9 +33,34 @@
 @synthesize modules = _modules;
 @synthesize isREPL = _isREPL;
 
++ (void)initialize {
+    hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
+    langVersion = [[NSString alloc] initWithFormat:@"JSL v%@ [%@]", JSLVersion, hostLangVersion];
+}
+
+- (instancetype)initWithREPL{
+    self = [super init];
+    if (self) {
+        _isREPL = YES;
+        [self bootstrap];
+        [self printVersion];
+        [self loadCoreLib];
+    }
+    return self;
+}
+
+- (instancetype)initWithoutREPL {
+    self = [super init];
+    if (self) {
+        _isREPL = NO;
+        [self bootstrap];
+        [self loadCoreLib];
+    }
+    return self;
+}
+
 - (instancetype)init {
     self = [super init];
-    if (self) [self bootstrap];
     return self;
 }
 
@@ -49,11 +78,9 @@
     _isQuasiquoteMode = NO;
     _quasiquoteDepth = 0;
     _queue = dispatch_queue_create("jsl-dispatch-queue", nil);
-    _isREPL = YES;
     _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*"];
     [self setLoadFileToREPL];
     [self setEvalToREPL];
-    [self loadCoreLib];
 }
 
 #pragma mark Env setup
@@ -66,8 +93,6 @@
         id<JSDataProtocol> ast = (id<JSDataProtocol>)arg[0];
         return [self eval:[self updateBindingsForAST:ast table:[this->_env symbolTable]] withEnv:[self env]];
     };
-    NSString *hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
-    NSString *langVersion = [[NSString alloc] initWithFormat:@"JSL v%@ [%@]", JSLVersion, hostLangVersion];
     [[self env] setObject:[[JSFunction alloc] initWithFn:fn argCount:1 name:@"eval/1"] forSymbol:[[JSSymbol alloc] initWithArity:1 string:@"eval"]];
     [[self env] setObject:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
     [[self env] setObject:[[JSString alloc] initWithFormat:@"%@", hostLangVersion] forSymbol:[[JSSymbol alloc] initWithName:@"*host-language*"]];
@@ -80,15 +105,26 @@
     JSL * __weak weakSelf = self;
     id<JSDataProtocol>(^loadFile)(NSMutableArray *arg) = ^id<JSDataProtocol>(NSMutableArray *arg) {
         JSL *this = weakSelf;
-        Env *current = this->_env;
         NSString *path = [[JSString dataToString:arg[0] fnName:@"load-file/1"] value];
-        [[this->_fileOps loadFileFromPath:[@[path] mutableCopy] isConcurrent:NO isLookup:NO]
-         enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [this rep:[obj content]];
-        }];
-        info(@"%@", [[NSString alloc] initWithFormat:@"#(ok %@)", [path lastPathComponent]]);
-        this->_env = current;
-        [this updateModuleName:[current moduleName]];
+        NSMutableArray<FileResult *> *files = [this->_fileOps loadFileFromPath:[@[path] mutableCopy] isConcurrent:NO isLookup:NO];
+        if ([files count] == 0) {
+            info(@"%@ %@", @"Error loading", path);
+            return nil;
+        } else {
+            Env *current = this->_env;
+            BOOL __block hasError = NO;
+            [files enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                 @try {
+                     [this rep:[obj content]];
+                 } @catch (NSException *exception) {
+                     hasError = YES;
+                     [this printException:exception log:YES readably:YES];
+                 }
+            }];
+            this->_env = current;
+            [this updateModuleName:[current moduleName]];
+            if (!hasError) info(@"%@", [[NSString alloc] initWithFormat:@"#(ok %@)", [path lastPathComponent]]);
+        }
         return [JSNil new];
     };
     [[self env] setObject:[[JSFunction alloc] initWithFn:loadFile argCount:1 name:@"load-file/1"] forSymbol:[[JSSymbol alloc] initWithArity:1
@@ -97,7 +133,7 @@
 
 /** Construct core lib file path. */
 - (NSString *)coreLibPath:(NSString *)path {
-    return [[NSString alloc] initWithFormat:@"%@/core.jsl", path];
+    return [[NSString alloc] initWithFormat:@"%@/%@", path, coreLibFileName];
 }
 
 /** Load core lib @c core.jsl from the search path. This paths includes the current working directory and the bundle directory in order. */
@@ -105,14 +141,26 @@
     NSMutableArray *paths = [NSMutableArray new];
     [paths addObject:[self coreLibPath:[_fileOps currentDirectoryPath]]];
     [paths addObject:[self coreLibPath:[_fileOps bundlePath]]];
-    _env = [_core env];
-    [self updateModuleName:[_env moduleName]];
-    [[_fileOps loadFileFromPath:paths isConcurrent:YES isLookup:YES] enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx,
-                                                                                                  BOOL * _Nonnull stop) {
-        [self rep:[obj content]];
-    }];
-    _env = _globalEnv;
-    [self updateModuleName:[_env moduleName]];
+    NSMutableArray<FileResult *> *files = [_fileOps loadFileFromPath:paths isConcurrent:YES isLookup:YES];
+    if ([files count] == 0) {
+        info(@"%@ %@", @"Error loading", coreLibFileName);
+    } else {
+        _env = [_core env];
+        [self updateModuleName:[_env moduleName]];
+        [files enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            @try {
+                [self rep:[obj content]];
+            } @catch (NSException *exception) {
+                [self printException:exception log:YES readably:YES];
+            }
+        }];
+        _env = _globalEnv;
+        [self updateModuleName:[_env moduleName]];
+    }
+}
+
+- (void)printVersion {
+    if (_isREPL) info(@"%@\n", langVersion);
 }
 
 #pragma mark Module
@@ -362,14 +410,21 @@
     [modSym setIsModule:YES];
     NSString *modName = [modSym name];
     Env *modEnv = [[Env alloc] initWithModuleName:modName isUserDefined:YES];
-     // The third element onwards are imports and exports
-    // [xs nth:2];
     [self setModule:modEnv];
     _env = modEnv; // change env to current module
     [self updateModuleName:modName];
+    // The third element onwards are imports and exports
+    // [xs nth:2];
+    [self processModuleExport:[xs drop:2]];
     if (_isREPL) prompt = [[modName stringByAppendingString:@"> "] UTF8String];
     //[self eval:[xs second] withEnv:_env];
     return modSym;
+}
+
+// The ast is of the form ((export (a 1) (b 0)) (export (c 2) (d 1)))
+- (void)processModuleExport:(JSList *)ast {
+    // TODO:
+    debug(@"%@", ast);
 }
 
 /** Change current module to the given one. */
@@ -653,6 +708,7 @@
         [self updateBindingsForAST:exps[i] table:[_env symbolTable]];  // Symbol table contains symbols encountered which are defined using def!, defmacro!.
         ret = [self print:[self eval:exps[i] withEnv:[self env]]];
     }
+    [[_env symbolTable] clearAll];
     return ret;
 }
 

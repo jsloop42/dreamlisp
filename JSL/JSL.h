@@ -23,6 +23,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) NSMapTable<NSString *, Env *> *modules;
 @property (nonatomic, readwrite) BOOL isREPL;
 - (instancetype)init;
+- (instancetype)initWithREPL;
+- (instancetype)initWithoutREPL;
+- (void)bootstrap;
+- (void)loadCoreLib;
+- (void)printVersion;
 - (NSString * _Nullable)rep:(NSString *)string;
 - (NSString * _Nullable)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably;
 @end

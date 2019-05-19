@@ -225,7 +225,7 @@
 }
 
 - (void)testArithmeticEval {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(+ 1 2)"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(+ 1 2 3)"], @"6");
     XCTAssertEqualObjects([jsl rep:@"(+ 1 2 3 4)"], @"10");
@@ -282,7 +282,7 @@
 }
 
 - (void)testComparisonFunctions {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(< 42 84)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(> 42 21)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(>= 42 42)"], @"true");
@@ -326,7 +326,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testPrintFunctions {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     infoCallback(self, 0, &testPrintCallback);
     XCTAssertEqualObjects([jsl rep:@"(println [33 2 3])"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(prn [(+ 21 12) 2 3])"], @"nil");
@@ -442,7 +442,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testDef {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     // def! with quote in symbol name
     XCTAssertEqualObjects([jsl rep:@"(def! x 10)"], @"10");
     XCTAssertEqualObjects([jsl rep:@"x"], @"10");
@@ -453,7 +453,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testList {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"()"], @"()");
     XCTAssertEqualObjects([jsl rep:@"(list)"], @"()");
     XCTAssertEqualObjects([jsl rep:@"(list 1 2 3)"], @"(1 2 3)");
@@ -464,7 +464,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testVector {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(if [] 7 8)"], @"7");
     XCTAssertEqualObjects([jsl rep:@"(count [1 2 3])"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(empty? [1 2 3])"], @"false");
@@ -487,7 +487,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testHashMap {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"{\"a\" 1}"], @"{\"a\" 1}");
     XCTAssertEqualObjects([jsl rep:@"{\"abc\" 1}"], @"{\"abc\" 1}");
     XCTAssertEqualObjects([jsl rep:@"{\"a\" (+ 1 2)}"], @"{\"a\" 3}");
@@ -578,13 +578,13 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     JSString *aObj = [[JSString alloc] initWithString:@"987"];
     [aEnv setObject:aObj forSymbol:aKey];
     XCTAssertEqualObjects([aEnv objectForSymbol:aKey], aObj);
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(list? *ARGV*)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"*ARGV*"], @"()");
 }
 
 - (void)testSpecialForms {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     // def!
     XCTAssertEqualObjects([jsl rep:@"(def! x 3)"], @"3");
     XCTAssertEqualObjects([jsl rep:@"x"], @"3");
@@ -630,7 +630,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testFunctions {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"((fn* (a b) (+ b a)) 3 4)"], @"7");
     XCTAssertEqualObjects([jsl rep:@"((fn* [f x] (f x)) (fn* [a] (+ 1 a)) 7)"], @"8");
     XCTAssertEqualObjects([jsl rep:@"(((fn* (a) (fn* (b) (+ a b))) 5) 7)"], @"12");
@@ -685,7 +685,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testMultiArityFunctions {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     [jsl rep:@"(def! a (fn* () 0))"];
     [jsl rep:@"(def! a (fn* (x) 1))"];
     XCTAssertEqualObjects([jsl rep:@"(a)"], @"0");
@@ -697,7 +697,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testNotFunction {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(not false)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(not nil)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(not true)"], @"false");
@@ -706,7 +706,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testString {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"\"\""], @"\"\"");
     XCTAssertEqualObjects([jsl rep:@"\"abc\""], @"\"abc\"");
     XCTAssertEqualObjects([jsl rep:@"\"abc  def\""], @"\"abc  def\"");
@@ -720,7 +720,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testPrint {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(pr-str)"], @"\"\"");
     XCTAssertEqualObjects([jsl rep:@"(pr-str \"\")"], @"\"\\\"\\\"\"");
     XCTAssertEqualObjects([jsl rep:@"(pr-str \"\\\"\")"], @"\"\\\"\\\\\\\"\\\"\"");
@@ -745,7 +745,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testStringFunctions {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(str)"], @"\"\"");
     XCTAssertEqualObjects([jsl rep:@"(str \"\")"], @"\"\"");
     XCTAssertEqualObjects([jsl rep:@"(str \"abc\")"], @"\"abc\"");
@@ -791,7 +791,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testdoForm {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(do (def! a 6) 7 (+ a 8))"], @"14");
     XCTAssertEqualObjects([jsl rep:@"a"], @"6");
     XCTAssertEqualObjects([jsl rep:@"(def! DO (fn* (a) 7))"], @"user:DO/1");
@@ -809,7 +809,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testEquality {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(= (list 1 2 3) (list 1 2 3))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(= (list 1 3 2) (list 1 2 3))"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(= (list 1 2 3) [1 2 3])"], @"true");
@@ -889,7 +889,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testConditional {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(if (> (count (list 1 2 3)) 3) \"yes\" \"no\")"], @"\"no\"");
     XCTAssertEqualObjects([jsl rep:@"(if (> 3 3) \"yes\" \"no\")"], @"\"no\"");
     XCTAssertEqualObjects([jsl rep:@"(if (>= (count (list 1 2 3)) 3) \"yes\" \"no\")"], @"\"yes\"");
@@ -911,7 +911,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testListCoreFunctions {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(list? (list))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(empty? (list))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(empty? (list 1))"], @"false");
@@ -991,7 +991,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testVectorCoreFunctions {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(map (fn* (a) (* 2 a)) [1 2 3])"], @"(2 4 6)");
     XCTAssertEqualObjects([jsl rep:@"(map (fn* [& args] (list? args)) [1 2])"], @"(true true)");
     XCTAssertEqualObjects([jsl rep:@"(vector? [10 11])"], @"true");
@@ -1019,7 +1019,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testKeyword {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(= :abc :abc)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(= :abc :def)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(= :abc \":abc\")"], @"false");
@@ -1040,7 +1040,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testQuote {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(quote 7)"], @"7");
     XCTAssertEqualObjects([jsl rep:@"(quote (1 2 3))"], @"(1 2 3)");
     XCTAssertEqualObjects([jsl rep:@"(quote (1 2 (3 4)))"], @"(1 2 (3 4))");
@@ -1085,7 +1085,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testMacro {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     [jsl rep:@"(defmacro! one (fn* () 1))"];
     XCTAssertEqualObjects([jsl rep:@"(one)"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(macro? one/0)"], @"true");
@@ -1159,7 +1159,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testErrorHandling {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertThrows([jsl rep:@"(throw \"err1\")"], @"Error: err1");
     XCTAssertThrows([jsl rep:@"(throw {:msg \"err2\"})"], @"Error: {:msg \"err2\"}");
     XCTAssertEqualObjects([jsl rep:@"(try* 123 (catch* e 456))"], @"123");
@@ -1204,7 +1204,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testMeta {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     JSSymbol *sym = [[JSSymbol alloc] initWithName:@""];
     XCTAssertFalse([sym hasMeta]);
     id<JSDataProtocol> meta = [[JSString alloc] initWithString:@"meta-string"];
@@ -1261,7 +1261,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testTCO {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     [jsl rep:@"(def! sum2 (fn* (n acc) (if (= n 0) acc (sum2 (- n 1) (+ n acc)))))"];
     XCTAssertEqualObjects([jsl rep:@"(sum2 10 0)"], @"55");
     XCTAssertEqualObjects([jsl rep:@"(def! res2 nil)"], @"nil");
@@ -1286,7 +1286,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testReadString {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     FileOps *fops = [FileOps new];
     XCTAssertEqualObjects([jsl rep:@"(read-string \"(1 2 (3 4) nil)\")"], @"(1 2 (3 4) nil)");
     // Internally qualifies with current module name if not qualified. Eval will check core functions in core module if not in user module unless they are
@@ -1311,7 +1311,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testLoadFile {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     NSString *incPath = [self pathForFile:@"inc.mal"];
     XCTAssertTrue([incPath isNotEmpty]);
     [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", incPath]];
@@ -1332,7 +1332,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testAtom {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     [jsl rep:@"(def! inc3 (fn* (a) (+ 3 a)))"];
     XCTAssertEqualObjects([jsl rep:@"(def! a (atom 2))"], @"(atom 2)");
     XCTAssertEqualObjects([jsl rep:@"(atom? a)"], @"true");
@@ -1373,7 +1373,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testEval {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     // testing eval does not use local environment
     XCTAssertEqualObjects([jsl rep:@"(def! a 1)"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(let* (a 2) (eval (read-string \"a\")))"], @"1");
@@ -1384,7 +1384,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testPredicate {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(symbol? 'abc)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(symbol? \"abc\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(nil? nil)"], @"true");
@@ -1483,13 +1483,13 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testHygenicSymbols {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     [jsl rep:@"(def! n 10) (+ n 1)"];
     [jsl rep:@"(def! x (+ n 5))"];  // n is not gensymed
 }
 
 - (void)testMisc {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"nil"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"*host-language*"], @"\"Objective-C 2.0\"");
     [jsl rep:@"(def! start-time (time-ms))"];
@@ -1499,7 +1499,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testErrorMessages {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     // data type error
     XCTAssertEqualObjects([jsl rep:@"(try* (+ \"\") (catch* ex (str ex)))"], @"\"Expected 'number' but obtained 'string'\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (+ []) (catch* ex (str ex)))"], @"\"Expected 'number' but obtained 'vector'\"");
@@ -1525,7 +1525,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 /** The expressions loaded and evaluated from file should be added to the env just like it is evaluated from REPL. */
 - (void)testScopeWithFile {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     NSString *scopePath = [self pathForFile:@"scope.jsl"];
     XCTAssertTrue([scopePath isNotEmpty]);
     [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", scopePath]];
@@ -1533,7 +1533,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testScope {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(def! a 4)"], @"4");
     XCTAssertEqualObjects([jsl rep:@"(def! c 1)"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(def! d (atom 3))"], @"(atom 3)");
@@ -1542,7 +1542,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testModule {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     [jsl rep:@"(defmodule tree (export (create-tree 0) (right-node 1) (left-node 1)))"];
     [jsl rep:@"(def! a 1)"];
     XCTAssertEqualObjects([jsl rep:@"a"], @"1");
@@ -1550,7 +1550,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)testMacroWithModules {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     [jsl rep:@"(defmacro! d (fn* (n v) `(def! ~n ~v)))"];
     XCTAssertEqualObjects([jsl rep:@"(d x 4)"], @"4");
     XCTAssertEqualObjects([jsl rep:@"(defmodule foo ())"], @"foo");
@@ -1565,7 +1565,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 - (void)test {
-    JSL *jsl = [JSL new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
 }
 
 - (void)notestPerformanceJSListDropFirst {

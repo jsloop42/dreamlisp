@@ -14,10 +14,12 @@
 /** The main entry point. */
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        JSL *jsl = [JSL new];
+        JSL *jsl = [[JSL alloc] init];
         if (argc > 1) {
             @try {
                 [jsl setIsREPL:NO];
+                [jsl bootstrap];
+                [jsl loadCoreLib];
                 NSString *jslFile = [[NSString alloc] initWithCString:argv[1] encoding:NSUTF8StringEncoding];
                 NSMutableArray *arr = [NSMutableArray new];
                 NSUInteger i = 0;
@@ -34,7 +36,11 @@ int main(int argc, const char * argv[]) {
                 exit(-1);
             }
         }
-        [jsl rep:@"(println *version*)"];
+        [jsl setIsREPL:YES];
+        [jsl printVersion];
+        [jsl bootstrap];
+        [jsl loadCoreLib];
+        //[jsl rep:@"(load-file \"/Users/jsloop/dev/inc.jsl\")"];
         Terminal *term = [Terminal new];
         NSString *inp;
         NSString *ret;

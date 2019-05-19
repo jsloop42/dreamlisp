@@ -167,21 +167,6 @@ NSString *currentModuleName;
     return nil;
 }
 
-/** Lookup symbol table only if the symbol belongs to the current module. */
-//- (Env * _Nullable)findEnvForKey:(JSSymbol *)key inSymbolTable:(Env *)env {
-//    JSSymbol *sym = nil;
-//    if ([currentModuleName isEqual:[key moduleName]]) {
-//        sym = [[env symbolTable] symbol:key];
-//        if (sym) {
-//            return env;
-//        } else if (![key hasNArity]) {
-//            return [self findEnvForKey:[key toNArity] inSymbolTable:env];
-//        }
-//        [key resetArity];
-//    }
-//    return nil;
-//}
-
 /**
  Lookup env table if the symbol belongs to current module, else lookup module table. Recursively checks the environments for the given symbol until a match
  is found or the environment is the outermost, which is nil.
@@ -207,8 +192,6 @@ NSString *currentModuleName;
 - (Env *)findEnvForKey:(JSSymbol *)key {
     [self updateModuleName:key];
     if ([key isQualified]) return [Env envForModuleName:[key moduleName]];
-    //Env *env = [self findEnvForKey:key inSymbolTable:self];
-    //if (env) return env;
     Env *env = [self findEnvForKey:key inEnv:self];
     if (env) return env;
     env = [self findEnvForKey:key inModule:[Env envForModuleName:coreModuleName]];
