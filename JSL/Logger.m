@@ -66,6 +66,17 @@ void debug(NSString *format, ...) {
     #endif
 }
 
+/** Verbose log which is enabled only if the @c VERBOSE flag is set. */
+void verbose(NSString *format, ...) {
+    #if VERBOSE
+        va_list args;
+        va_start(args, format);
+        NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
+        va_end(args);
+        fprintf(stderr, "%s\n", [message UTF8String]);
+    #endif
+}
+
 /** Error level log. */
 void error(NSString *format, ...) {
     va_list args;

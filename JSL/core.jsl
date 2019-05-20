@@ -34,4 +34,4 @@
 (def! gensym (fn* (sym) (symbol (str sym (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))
 
 ;; Exit the REPL
-(def! exit (fn* () (do (println "Bye.") (exit*))))
+(def! exit (fn* () (do (println "Bye") (exit*))))

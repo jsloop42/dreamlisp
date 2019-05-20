@@ -23,6 +23,7 @@
 #import "JSString.h"
 #import "JSSymbol.h"
 #import "JSVector.h"
+#import "JSFault.h"
 // Categories
 #import "NSArray+JSDataProtocol.h"
 #import "NSDecimalNumber+JSDataProtocol.h"

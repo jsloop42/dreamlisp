@@ -10,8 +10,10 @@
 #import "JSDataProtocol.h"
 #import "JSSymbol.h"
 #import "JSList.h"
+#import "JSFault.h"
 #import "JSError.h"
 #import "SymbolTable.h"
+#import "Logger.h"
 #import "ModuleTable.h"
 #import <objc/NSObjCRuntime.h>
 

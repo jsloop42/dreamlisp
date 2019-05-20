@@ -159,7 +159,7 @@
     return [_n intValue];
 }
 
-- (NSUInteger)integerValue {
+- (NSInteger)integerValue {
     return [_n integerValue];
 }
 

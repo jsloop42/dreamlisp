@@ -20,8 +20,10 @@
     /** Function name with arity if the symbol is bound to a function */
     NSString *_fnName;
     NSString *_moduleName;
+    NSString *_initialModuleName;
     BOOL _isQualified;
     BOOL _isModule;
+    BOOL _isFault;
 }
 
 @synthesize arity = _arity;
@@ -33,8 +35,10 @@
 @synthesize initialValue = _initialName;
 @synthesize fnName = _fnName;
 @synthesize moduleName = _moduleName;
+@synthesize initialModuleName = _initialModuleName;
 @synthesize isQualified = _isQualified;
 @synthesize isModule = _isModule;
+@synthesize isFault = _isFault;
 
 + (BOOL)isSymbol:(id)object {
     return [[object className] isEqual:[self className]];
@@ -114,6 +118,7 @@
         _initialName = name;
         _initialArity = [func argsCount];
         _moduleName = moduleName;
+        _initialModuleName = moduleName;
         _isQualified = YES;
         _position = 0;
         [self resetArity];
@@ -137,6 +142,7 @@
         _position = position;
         _hasNArity = [symbol hasNArity];
         _moduleName = [symbol moduleName] ? [symbol moduleName] : currentModuleName;
+        _initialModuleName = [symbol initialModuleName];
         _isQualified = [symbol isQualified];
         [self updateArity];
     }
@@ -173,6 +179,7 @@
         _position = [symbol position];
         _meta = meta;
         _moduleName = [symbol moduleName] ? [symbol moduleName] : currentModuleName;
+        _initialModuleName = [symbol initialModuleName];
         _isQualified = [symbol isQualified];
     }
     return self;
@@ -186,6 +193,7 @@
         _initialName = name;
         _meta = meta;
         _moduleName = currentModuleName;
+        _initialModuleName = _moduleName;
         _isQualified = NO;
         [self updateArity];
     }
@@ -195,6 +203,7 @@
 - (void)bootstrap {
     _position = -1;
     _moduleName = currentModuleName;
+    _initialModuleName = _moduleName;
     _isQualified = NO;
 }
 
@@ -263,6 +272,7 @@
     _meta = [symbol meta];
     _position = [symbol position];
     _moduleName = [symbol moduleName];
+    _initialModuleName = [symbol initialModuleName];
     [self updateArity];
 }
 
@@ -292,7 +302,11 @@
 }
 
 - (NSString *)description {
-    return [[NSString alloc] initWithFormat:@"<%@ %p - M:%@ %@ Arity:%ld meta: %@>", NSStringFromClass([self class]), self, _moduleName, _name, _arity, _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - ModuleName: %@, InitialModuleName: %@, " \
+            @"Name: %@, Arity:%ld, InitialArity: %ld, " \
+            @"isQualified: %hhd, isFault: %hhd, " \
+            @"meta: %@>",
+            NSStringFromClass([self class]), self, _moduleName, _initialModuleName, _name, _arity, _initialArity, _isQualified, _isFault, _meta];
 }
 
 @end

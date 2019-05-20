@@ -74,6 +74,8 @@
 		9E3F324B227B694400B56B6A /* core.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
 		9E4F029922904A1D0064081F /* SymbolTableKey.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F029822904A1D0064081F /* SymbolTableKey.m */; };
 		9E4F029A22904A1D0064081F /* SymbolTableKey.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F029822904A1D0064081F /* SymbolTableKey.m */; };
+		9E4F02D72291A1E80064081F /* JSFault.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F02D62291A1E80064081F /* JSFault.m */; };
+		9E4F02D82291A1E80064081F /* JSFault.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F02D62291A1E80064081F /* JSFault.m */; };
 		9E5D7B4B225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
 		9E5D7B4C225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
 		9E6F444822578E5600777A24 /* JSL.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F444722578E5600777A24 /* JSL.m */; };
@@ -175,6 +177,8 @@
 		9E3F324A227B694300B56B6A /* core.jsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = core.jsl; sourceTree = "<group>"; };
 		9E4F029722904A1D0064081F /* SymbolTableKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SymbolTableKey.h; sourceTree = "<group>"; };
 		9E4F029822904A1D0064081F /* SymbolTableKey.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SymbolTableKey.m; sourceTree = "<group>"; };
+		9E4F02D52291A1E80064081F /* JSFault.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSFault.h; sourceTree = "<group>"; };
+		9E4F02D62291A1E80064081F /* JSFault.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSFault.m; sourceTree = "<group>"; };
 		9E5D7B49225B947E00970453 /* Terminal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Terminal.h; sourceTree = "<group>"; };
 		9E5D7B4A225B947E00970453 /* Terminal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Terminal.m; sourceTree = "<group>"; };
 		9E6F444622578E5600777A24 /* JSL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSL.h; sourceTree = "<group>"; };
@@ -227,6 +231,8 @@
 				9E33AAD32275799200A6EB98 /* JSBool.h */,
 				9E33AAD42275799200A6EB98 /* JSBool.m */,
 				9E33AAAF2275767800A6EB98 /* JSDataProtocol.h */,
+				9E4F02D52291A1E80064081F /* JSFault.h */,
+				9E4F02D62291A1E80064081F /* JSFault.m */,
 				9E33AAD7227579C000A6EB98 /* JSFunction.h */,
 				9E33AAD8227579C000A6EB98 /* JSFunction.m */,
 				9E9458592274F04F00A3D449 /* JSHashMap.h */,
@@ -472,6 +478,7 @@
 				9E94585B2274F04F00A3D449 /* JSHashMap.m in Sources */,
 				9E3A9D4E22568AFC00348529 /* main.m in Sources */,
 				9E9458562274EB4400A3D449 /* NSMapTable+JSHashMap.m in Sources */,
+				9E4F02D72291A1E80064081F /* JSFault.m in Sources */,
 				9E33AABD2275783400A6EB98 /* JSSymbol.m in Sources */,
 				9E33AAB9227577C000A6EB98 /* JSKeyword.m in Sources */,
 				9E30554422612C34001D4597 /* NSString+JSDataProtocol.m in Sources */,
@@ -514,6 +521,7 @@
 				9E94585C2274F04F00A3D449 /* JSHashMap.m in Sources */,
 				9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */,
 				9E9458572274EB4400A3D449 /* NSMapTable+JSHashMap.m in Sources */,
+				9E4F02D82291A1E80064081F /* JSFault.m in Sources */,
 				9E33AABE2275783400A6EB98 /* JSSymbol.m in Sources */,
 				9E33AABA227577C000A6EB98 /* JSKeyword.m in Sources */,
 				9E30554522612C34001D4597 /* NSString+JSDataProtocol.m in Sources */,
@@ -569,6 +577,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
+					"VERBOSE=1",
 					"$(inherited)",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -644,6 +653,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 7S7UE44956;
 				ENABLE_STRICT_OBJC_MSGSEND = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

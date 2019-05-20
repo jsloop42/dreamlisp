@@ -569,13 +569,16 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
 
 - (void)testEnv {
     Env *env = [Env new];
+    [env setModuleName:defaultModuleName];
     JSString *obj = [[JSString alloc] initWithString:@"123"];
     JSSymbol *key = [[JSSymbol alloc] initWithName:@"key"];
+    [key setModuleName:defaultModuleName];
     [env setObject:obj forSymbol:key];
     XCTAssertEqualObjects([env objectForSymbol:key], obj);
     Env *aEnv = [[Env alloc] initWithEnv:env];
     JSSymbol *aKey = [[JSSymbol alloc] initWithName:@"aKey"];
     JSString *aObj = [[JSString alloc] initWithString:@"987"];
+    [aKey setModuleName:defaultModuleName];
     [aEnv setObject:aObj forSymbol:aKey];
     XCTAssertEqualObjects([aEnv objectForSymbol:aKey], aObj);
     JSL *jsl = [[JSL alloc] initWithoutREPL];
@@ -598,11 +601,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"mynum"], @"111");
     XCTAssertEqualObjects([jsl rep:@"MYNUM"], @"222");
     // env lookup error
-    @try {
-        XCTAssertThrowsSpecificNamed([jsl rep:@"(abc 1 2 3)"], NSException, JSLException, @"Symbol not found");
-    } @catch (NSException *exception) {
-        XCTAssertTrue([Utils matchString:[exception.userInfo objectForKey:@"description"] withPattern:@".*\\'?abc\\'? not found.*"]);
-    }
+    XCTAssertEqualObjects([jsl rep:@"(try* (abc 1 2 3) (catch* ex (str ex)))"], @"\"'user:abc/3' not found\"");
     // error aborts def! being re-set
     XCTAssertEqualObjects([jsl rep:@"(def! w 123)"], @"123");
     XCTAssertThrows([jsl rep:@"(def! w (abc))"], @"Symbol not found");
@@ -1510,11 +1509,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(try* (empty? (atom 1)) (catch* ex (str ex)))"], @"\"'empty?/1' requires 'list' but obtained 'atom'\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (first true) (catch* ex (str ex)))"], @"\"'first/1' requires 'list' or 'vector' for argument 1 but obtained 'bool'\"");
     // Function not found
-    @try {
-        XCTAssertThrowsSpecificNamed([jsl rep:@"(abc [1 2 3])"], NSException, JSLException, @"'abc/1' not found");
-    } @catch (NSException *exception) {
-        XCTAssertTrue([Utils matchString:[exception.userInfo objectForKey:@"description"] withPattern:@"'abc/1'? not found."]);
-    }
+    XCTAssertEqualObjects([jsl rep:@"(try* (abc [1 2 3]) (catch* ex (str ex)))"], @"\"'user:abc/1' not found\"");
     // Arity error
     XCTAssertEqualObjects([jsl rep:@"(try* (empty? [] []) (catch* ex (str ex)))"], @"\"'user:empty?/2' not found\"");
     XCTAssertEqualObjects([jsl rep:@"(try* (list? [] []) (catch* ex (str ex)))"], @"\"'user:list?/2' not found\"");
@@ -1557,11 +1552,20 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(user:d t 2)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(defun inc (n) (+ n 1))"], @"foo:inc/1");
     [jsl rep:@"(in-module user)"];
-    @try {
-        XCTAssertThrowsSpecificNamed([jsl rep:@"(foo:inc 4)"], NSException, JSLException, @"Symbol not found");  // Symbol not exported
-    } @catch (NSException *exception) {
-        XCTAssertTrue([Utils matchString:[exception.userInfo objectForKey:@"description"] withPattern:@".*\\'?foo:/inc4\\'? not found.*"]);
-    }
+    XCTAssertEqualObjects([jsl rep:@"(try* (foo:inc 4) (catch* ex (str ex)))"], @"\"'foo:inc/1' not found\"");  // function not exported
+}
+
+- (void)testMacroExports {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(defmodule foo (export (inc 1)) (export (dec 1)))"], @"foo");
+    XCTAssertEqualObjects([jsl rep:@"(defun inc (n) (+ n 1))"], @"foo:inc/1");
+    XCTAssertEqualObjects([jsl rep:@"(inc 4)"], @"5");
+    XCTAssertEqualObjects([jsl rep:@"(defun dec (n) (- n 1))"], @"foo:dec/1");
+    XCTAssertEqualObjects([jsl rep:@"(defun greet () 42)"], @"foo:greet/0");
+    XCTAssertEqualObjects([jsl rep:@"(greet)"], @"42");
+    XCTAssertEqualObjects([jsl rep:@"(in-module user)"], @"user");
+    XCTAssertEqualObjects([jsl rep:@"(foo:inc 4)"], @"5");
+    XCTAssertEqualObjects([jsl rep:@"(try* (foo:greet) (catch* ex (str ex)))"], @"\"'foo:greet/0' not found\"");  // function not exported
 }
 
 - (void)test {

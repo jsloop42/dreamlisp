@@ -30,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta number:(JSNumber *)number;
 - (double)doubleValue;
 - (int)intValue;
-- (NSUInteger)integerValue;
+- (NSInteger)integerValue;
 - (BOOL)isDouble;
 - (NSString *)string;
 - (BOOL)isEqual:(JSNumber *)num;

@@ -12,6 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface State : NSObject
 + (NSUInteger)counter;
++ (void)setIsVerbose:(BOOL)flag;
++ (BOOL)isVerbose;
 - (NSUInteger)counter;
 - (NSInteger)currentCounter;
 @end

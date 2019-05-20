@@ -72,7 +72,10 @@
     } else if ([JSFunction isFunction:data]) {
         JSFunction *fn = (JSFunction *)data;
         return [[fn name] isNotEmpty] ? [fn name] : @"#fn";
+    } else if ([JSFault isFault:data]) {
+        return [NSString stringWithFormat:@"#<fault %@>", (JSFault *)[data value]];
     }
-    return InvalidDataType;
+    [[[JSError alloc] initWithFormat:InvalidDataType, data] throw];
+    return nil;
 }
 @end

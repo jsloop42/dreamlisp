@@ -415,16 +415,42 @@ static NSString *langVersion;
     [self updateModuleName:modName];
     // The third element onwards are imports and exports
     // [xs nth:2];
-    [self processModuleExport:[xs drop:2]];
+    [self processModuleExport:[xs drop:2] module:_env];
     if (_isREPL) prompt = [[modName stringByAppendingString:@"> "] UTF8String];
     //[self eval:[xs second] withEnv:_env];
     return modSym;
 }
 
-// The ast is of the form ((export (a 1) (b 0)) (export (c 2) (d 1)))
-- (void)processModuleExport:(JSList *)ast {
+// The ast can be of the form (export (a 1) (b 0)) (export (c 2) (d 1)) ..
+- (void)processModuleExport:(JSList *)ast module:(Env *)env {
     // TODO:
-    debug(@"%@", ast);
+//    debug(@"%@", ast);
+    NSMutableArray *arr = [ast value];
+    NSLock *lock = [NSLock new];
+    [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger i, BOOL * _Nonnull stop) {
+        NSMutableArray *xs = (NSMutableArray *)obj;
+        if ([JSSymbol isSymbol:[xs first] withName:@"export"]) {
+            NSMutableArray *fnList = [(JSList *)[xs rest] value];
+            [fnList enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull expObj, NSUInteger j, BOOL * _Nonnull expStop) {
+//                debug(@"%@", expObj);
+                NSMutableArray *aExp = (NSMutableArray *)expObj;
+                JSSymbol *sym = (JSSymbol *)[aExp first];
+                JSNumber *arityNum = (JSNumber *)[aExp second];
+                NSInteger arity = [arityNum integerValue];
+                [sym setArity:arity];
+                [sym setInitialArity:arity];
+                [sym updateArity];
+                [sym setIsFault:YES];
+                [sym setModuleName:[env moduleName]];
+                [lock lock];
+                [[env module] setObject:[JSFault new] forSymbol:sym];
+                [lock unlock];
+//                debug(@"All keys in env: %@", [[[env module] table] allKeys]);
+//                debug(@"Current fault in env: %@", [[env module] objectForSymbol:sym]);
+            }];
+        }
+    }];
+//    debug(@"keys count in env: %ld", [[[env module] table] count]);
 }
 
 /** Change current module to the given one. */
@@ -708,7 +734,7 @@ static NSString *langVersion;
         [self updateBindingsForAST:exps[i] table:[_env symbolTable]];  // Symbol table contains symbols encountered which are defined using def!, defmacro!.
         ret = [self print:[self eval:exps[i] withEnv:[self env]]];
     }
-    [[_env symbolTable] clearAll];
+    //[[_env symbolTable] clearAll];
     return ret;
 }
 

@@ -929,8 +929,8 @@ double dmod(double a, double n) {
     id<JSDataProtocol>(^exitfn)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         exit(0);
     };
-    fn = [[JSFunction alloc] initWithFn:exitfn argCount:0 name:@"exit/0"];
-    [_env setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"exit" moduleName:coreModuleName]];
+    fn = [[JSFunction alloc] initWithFn:exitfn argCount:0 name:@"exit*/0"];
+    [_env setObject:fn forSymbol:[[JSSymbol alloc] initWithFunction:fn name:@"exit*" moduleName:coreModuleName]];
 
     /** Returns the current timestamp in milliseconds. */
     id<JSDataProtocol>(^timems)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {

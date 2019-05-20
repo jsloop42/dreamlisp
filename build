@@ -5,6 +5,7 @@ buildlog="build.log"
 proj="JSL.xcodeproj"
 scheme="JSL"
 config="Release"
+#config="Debug"
 corelib="core.jsl"
 
 function getFilename() {

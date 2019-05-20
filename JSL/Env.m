@@ -97,7 +97,8 @@ NSString *currentModuleName;
 }
 
 /**
- Initializes environment with an outer environment and binds symbols with expressions.
+ Initializes environment with an outer environment and binds symbols with expressions. The current env is used instead of the symbol's env. Symbols can be
+ qualified which refers to other env.
 
  @param env The outer environment.
  @param binds A array of `JSSymbol` symbols.
@@ -109,8 +110,14 @@ NSString *currentModuleName;
     NSUInteger i = 0;
     if (self) {
         [self bootstrap];
-        _module = [env module];
-        _outer = env;
+        if ([[env moduleName] isNotEqualTo:coreModuleName] && [currentModuleName isNotEqualTo:[env moduleName]]) {
+            Env *currEnv = [Env envForModuleName:currentModuleName];
+            _module = [currEnv module];
+            _outer = currEnv;
+        } else {
+            _module = [env module];
+            _outer = env;
+        }
         for (i = 0; i < len; i++) {
             JSSymbol *sym = (JSSymbol *)binds[i];
             if ([[sym name] isEqual:@"&"]) {
@@ -137,7 +144,7 @@ NSString *currentModuleName;
 
 - (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key {
     [key setModuleName:[_module name]];
-    if ([currentModuleName isEqual:defaultModuleName] || [currentModuleName isEqual:coreModuleName]) {
+    if ([[self moduleName] isEqual:defaultModuleName] || [[self moduleName] isEqual:coreModuleName]) {
         [_module setObject:obj forSymbol:key];
     } else {
         [_table setObject:obj forKey:key];
@@ -199,21 +206,36 @@ NSString *currentModuleName;
     return nil;
 }
 
+- (id<JSDataProtocol>)resolveFault:(id<JSDataProtocol>)object forKey:(JSSymbol *)key inEnv:(Env *)env {
+    if ([JSFault isFault:object]) {
+//        debug(@"Fault found for key: %@", key);
+        id<JSDataProtocol> val = [[env table] objectForKey:key];
+        if (val) {  // update object in export table
+            [key setInitialModuleName:[env moduleName]];
+            [[env module] setObject:val forSymbol:key];
+            return val;
+        } else {
+            [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
+        }
+    }
+    return object;
+}
+
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key {
     Env *env = [self findEnvForKey:key];
     id<JSDataProtocol> val = nil;
     if (env) {
         val = [env objectForSymbol:key fromEnv:env];
-        if (val) return val;
+        if (val) return [self resolveFault:val forKey:key inEnv:env];
     } else if ([[key moduleName] isEqual:[self moduleName]]) {
         env = self;
         val = [env objectForSymbol:key fromEnv:env];
-        if (val) return val;
+        if (val) return [self resolveFault:val forKey:key inEnv:env];
     }
     // Check core module
     if (![key isQualified]) [key setModuleName:coreModuleName];
     val = [env objectForSymbol:key fromEnv:env];
-    if (val) return val;
+    if (val) return [self resolveFault:val forKey:key inEnv:env];
     // Symbol not found
     if (![key isQualified]) [key setModuleName:currentModuleName];
     [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
