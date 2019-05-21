@@ -64,9 +64,9 @@
     [_table setObject:symbol forKey:[self toKey:symbol]];
 }
 
-- (void)clearAll {
+- (void)removeAllObjects {
     [_table removeAllObjects];
-    if (_outer) [_outer clearAll];
+    if (_outer) [_outer removeAllObjects];
 }
 
 - (NSUInteger)count {

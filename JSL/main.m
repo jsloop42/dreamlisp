@@ -28,6 +28,7 @@ int main(int argc, const char * argv[]) {
                         arr[i - 2] = [[JSString alloc] initWithCString:argv[i]];
                     }
                 }
+                // If there are additional arguments passed to the program, bind it to *ARGV* symbol as a list.
                 [[jsl env] setObject:[[JSList alloc] initWithArray:arr] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
                 [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", jslFile]];
                 exit(0);

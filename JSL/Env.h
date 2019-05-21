@@ -34,6 +34,7 @@ extern NSString *currentModuleName;
 @property (nonatomic, readwrite) ModuleTable *module;
 @property (nonatomic, readwrite) SymbolTable *symbolTable;
 @property (nonatomic, readwrite) BOOL isUserDefined;
+@property (nonatomic, readwrite) BOOL isExportAll;
 + (void)initialize;
 + (void)setEnv:(Env *)env forModuleName:(NSString *)moduleName;
 + (Env *)envForModuleName:(NSString *)moduleName;

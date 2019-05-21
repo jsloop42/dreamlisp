@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)merge:(SymbolTable *)table;
 - (JSSymbol * _Nullable)symbol:(JSSymbol *)symbol;
 - (void)setSymbol:(JSSymbol *)symbol;
-- (void)clearAll;
+- (void)removeAllObjects;
 - (NSUInteger)count;
 @end
 

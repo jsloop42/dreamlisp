@@ -21,6 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithModuleTable:(ModuleTable *)table;
 - (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key;
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key;
+- (void)removeAllObjects;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -41,6 +41,10 @@
     return [_table objectForKey:key];
 }
 
+- (void)removeAllObjects {
+    [_table removeAllObjects];
+}
+
 - (NSString *)description {
     return [[NSString alloc] initWithFormat:@"%@\n%@", _name, [_table description]];
 }

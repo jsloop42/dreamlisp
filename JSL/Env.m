@@ -25,6 +25,7 @@ NSString *currentModuleName;
     SymbolTable *_symbolTable;
     /** Is user defined module */
     BOOL _isUserDefined;
+    BOOL _isExportAll;
 }
 
 @synthesize outer = _outer;
@@ -32,6 +33,7 @@ NSString *currentModuleName;
 @synthesize module = _module;
 @synthesize symbolTable = _symbolTable;
 @synthesize isUserDefined = _isUserDefined;
+@synthesize isExportAll = _isExportAll;
 
 #pragma mark Module lookup table
 
@@ -75,6 +77,7 @@ NSString *currentModuleName;
     if (self) {
         _module = [env module];
         [self bootstrap];
+        _isExportAll = [env isExportAll];
         _outer = env;
     }
     return self;
@@ -114,9 +117,11 @@ NSString *currentModuleName;
             Env *currEnv = [Env envForModuleName:currentModuleName];
             _module = [currEnv module];
             _outer = currEnv;
+            _isExportAll = [currEnv isExportAll];
         } else {
             _module = [env module];
             _outer = env;
+            _isExportAll = [env isExportAll];
         }
         for (i = 0; i < len; i++) {
             JSSymbol *sym = (JSSymbol *)binds[i];
@@ -124,13 +129,25 @@ NSString *currentModuleName;
                 JSSymbol *key = (JSSymbol *)binds[i + 1];
                 [key setModuleName:[_module name]];
                 if ([exprs count] > i) {
-                    [_table setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:key];
+                    if (_isExportAll) {
+                        [_module setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forSymbol:key];
+                    } else {
+                        [_table setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:key];
+                    }
                 } else {
-                    [_table setObject:[[JSList alloc] initWithArray:@[]] forKey:key];
+                    if (_isExportAll) {
+                        [_module setObject:[[JSList alloc] initWithArray:@[]] forSymbol:key];
+                    } else {
+                        [_table setObject:[[JSList alloc] initWithArray:@[]] forKey:key];
+                    }
                 }
                 break;
             }
-            [_table setObject:exprs[i] forKey:[self setFunctionInfo:exprs[i] symbol:sym]];
+            if (_isExportAll) {
+                [_module setObject:exprs[i] forSymbol:[self setFunctionInfo:exprs[i] symbol:sym]];
+            } else {
+                [_table setObject:exprs[i] forKey:[self setFunctionInfo:exprs[i] symbol:sym]];
+            }
         }
     }
     return self;
@@ -140,11 +157,12 @@ NSString *currentModuleName;
     _table = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
     if (!_module) _module = [ModuleTable new];
     _symbolTable = [SymbolTable new];
+    _isExportAll = NO;
 }
 
 - (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key {
     [key setModuleName:[_module name]];
-    if ([[self moduleName] isEqual:defaultModuleName] || [[self moduleName] isEqual:coreModuleName]) {
+    if (_isExportAll || [[self moduleName] isEqual:defaultModuleName] || [[self moduleName] isEqual:coreModuleName]) {
         [_module setObject:obj forSymbol:key];
     } else {
         [_table setObject:obj forKey:key];
@@ -179,7 +197,8 @@ NSString *currentModuleName;
  is found or the environment is the outermost, which is nil.
  */
 - (Env * _Nullable)findEnvForKey:(JSSymbol *)key inEnv:(Env *)env {
-    if ([currentModuleName isEqual:[key moduleName]] && [currentModuleName isNotEqualTo:defaultModuleName] && [currentModuleName isNotEqualTo:coreModuleName]) {
+    if (!_isExportAll && [currentModuleName isEqual:[key moduleName]] && [currentModuleName isNotEqualTo:defaultModuleName] &&
+        [currentModuleName isNotEqualTo:coreModuleName]) {
         if ([[env table] objectForKey:key]) {  // same module => all bindings are accessible
             return self;
         } else if (![key hasNArity]) {
@@ -244,7 +263,7 @@ NSString *currentModuleName;
 
 - (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromEnv:(Env *)env {
     id<JSDataProtocol> val = nil;
-    if ([currentModuleName isEqual:[key moduleName]] && [[key moduleName] isNotEqualTo:defaultModuleName] && [[key moduleName] isNotEqualTo:coreModuleName]) {
+    if (!_isExportAll && [currentModuleName isEqual:[key moduleName]] && [[key moduleName] isNotEqualTo:defaultModuleName] && [[key moduleName] isNotEqualTo:coreModuleName]) {
         val = [[env table] objectForKey:key];
         if (val) {
             return val;

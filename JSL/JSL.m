@@ -428,26 +428,34 @@ static NSString *langVersion;
     NSMutableArray *arr = [ast value];
     NSLock *lock = [NSLock new];
     [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger i, BOOL * _Nonnull stop) {
-        NSMutableArray *xs = (NSMutableArray *)obj;
+        JSList *xs = (JSList *)obj;
         if ([JSSymbol isSymbol:[xs first] withName:@"export"]) {
-            NSMutableArray *fnList = [(JSList *)[xs rest] value];
-            [fnList enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull expObj, NSUInteger j, BOOL * _Nonnull expStop) {
-//                debug(@"%@", expObj);
-                NSMutableArray *aExp = (NSMutableArray *)expObj;
-                JSSymbol *sym = (JSSymbol *)[aExp first];
-                JSNumber *arityNum = (JSNumber *)[aExp second];
-                NSInteger arity = [arityNum integerValue];
-                [sym setArity:arity];
-                [sym setInitialArity:arity];
-                [sym updateArity];
-                [sym setIsFault:YES];
-                [sym setModuleName:[env moduleName]];
-                [lock lock];
-                [[env module] setObject:[JSFault new] forSymbol:sym];
-                [lock unlock];
-//                debug(@"All keys in env: %@", [[[env module] table] allKeys]);
-//                debug(@"Current fault in env: %@", [[env module] objectForSymbol:sym]);
-            }];
+            JSList *elem = [xs rest];
+            if ([elem count] == 1 && [JSSymbol isSymbol:[elem first] withName:@"all"]) {
+                [env setIsExportAll:YES];
+                [[env module] removeAllObjects];
+                *stop = YES;
+            } else {
+                [env setIsExportAll:NO];
+                NSMutableArray *fnList = [(JSList *)elem value];
+                [fnList enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull expObj, NSUInteger j, BOOL * _Nonnull expStop) {
+    //                debug(@"%@", expObj);
+                    NSMutableArray *aExp = (NSMutableArray *)expObj;
+                    JSSymbol *sym = (JSSymbol *)[aExp first];
+                    JSNumber *arityNum = (JSNumber *)[aExp second];
+                    NSInteger arity = [arityNum integerValue];
+                    [sym setArity:arity];
+                    [sym setInitialArity:arity];
+                    [sym updateArity];
+                    [sym setIsFault:YES];
+                    [sym setModuleName:[env moduleName]];
+                    [lock lock];
+                    [[env module] setObject:[JSFault new] forSymbol:sym];
+                    [lock unlock];
+    //                debug(@"All keys in env: %@", [[[env module] table] allKeys]);
+    //                debug(@"Current fault in env: %@", [[env module] objectForSymbol:sym]);
+                }];
+            }
         }
     }];
 //    debug(@"keys count in env: %ld", [[[env module] table] count]);
@@ -734,7 +742,7 @@ static NSString *langVersion;
         [self updateBindingsForAST:exps[i] table:[_env symbolTable]];  // Symbol table contains symbols encountered which are defined using def!, defmacro!.
         ret = [self print:[self eval:exps[i] withEnv:[self env]]];
     }
-    //[[_env symbolTable] clearAll];
+    //[[_env symbolTable] removeAllObjects];
     return ret;
 }
 
