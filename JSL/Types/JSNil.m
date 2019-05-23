@@ -11,10 +11,12 @@
 @implementation JSNil {
     id<JSDataProtocol> _meta;
     NSInteger _position;
+    BOOL _isImported;
 }
 
 @synthesize meta = _meta;
 @synthesize value;
+@synthesize isImported = _isImported;
 
 + (BOOL)isNil:(id)object {
     return [[object className] isEqual:[self className]];
@@ -55,11 +57,13 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    return [JSNil new];
+    id elem = [JSNil new];
+    [elem setIsImported:_isImported];
+    return elem;
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
-    return [JSNil new];
+    return [self copyWithZone:zone];
 }
 
 - (NSString *)description {

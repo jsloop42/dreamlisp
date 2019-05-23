@@ -24,6 +24,7 @@
     BOOL _isQualified;
     BOOL _isModule;
     BOOL _isFault;
+    BOOL _isImported;
 }
 
 @synthesize arity = _arity;
@@ -39,6 +40,7 @@
 @synthesize isQualified = _isQualified;
 @synthesize isModule = _isModule;
 @synthesize isFault = _isFault;
+@synthesize isImported = _isImported;
 
 + (BOOL)isSymbol:(id)object {
     return [[object className] isEqual:[self className]];
@@ -62,6 +64,7 @@
         [symbol setInitialArity:[fn argsCount]];
         [symbol resetArity];
         [symbol setModuleName:[fn moduleName]];
+        [symbol setIsImported:[object isImported]];
         [fn setName:[symbol string]];
     }
     return symbol;
@@ -144,6 +147,7 @@
         _moduleName = [symbol moduleName] ? [symbol moduleName] : currentModuleName;
         _initialModuleName = [symbol initialModuleName];
         _isQualified = [symbol isQualified];
+        _isImported = [symbol isImported];
         [self updateArity];
     }
     return self;
@@ -181,6 +185,7 @@
         _moduleName = [symbol moduleName] ? [symbol moduleName] : currentModuleName;
         _initialModuleName = [symbol initialModuleName];
         _isQualified = [symbol isQualified];
+        _isImported = [symbol isImported];
     }
     return self;
 }
@@ -294,11 +299,13 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    return [[JSSymbol alloc] initWithName:_name];
+    id elem = [[JSSymbol alloc] initWithName:_name];
+    [elem setIsImported:_isImported];
+    return elem;
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
-    return [[JSSymbol alloc] initWithName:_name];
+    return [self copyWithZone:zone];
 }
 
 - (NSString *)description {

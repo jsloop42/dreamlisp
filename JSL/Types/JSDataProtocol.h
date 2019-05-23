@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSString *dataTypeName;
 @property (nonatomic, readwrite) id value;
 @property (nonatomic, readwrite) id<JSDataProtocol> meta;
+@property (nonatomic, readwrite) BOOL isImported;
 - (BOOL)hasMeta;
 - (NSInteger)position;
 - (id<JSDataProtocol>)setPosition:(NSInteger)position;

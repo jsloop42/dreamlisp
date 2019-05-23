@@ -12,10 +12,12 @@
     NSMapTable *_table;
     id<JSDataProtocol> _meta;
     NSInteger _position;
+    BOOL _isImported;
 }
 
 @synthesize meta = _meta;
 @synthesize value = _table;
+@synthesize isImported = _isImported;
 
 + (BOOL)isHashMap:(id)object {
     return [[object className] isEqual:[self className]];
@@ -152,11 +154,13 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    return [[JSHashMap alloc] initWithMapTable:_table];
+    id elem = [[JSHashMap alloc] initWithMapTable:_table];
+    [elem setIsImported:_isImported];
+    return elem;
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
-    return [[JSHashMap alloc] initWithMapTable:_table];
+    return [self copyWithZone:zone];
 }
 
 - (NSString *)description {

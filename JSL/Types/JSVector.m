@@ -12,10 +12,12 @@
     NSMutableArray *_array;
     id<JSDataProtocol> _meta;
     NSInteger _position;
+    BOOL _isImported;
 }
 
 @synthesize meta = _meta;
 @synthesize value = _array;
+@synthesize isImported = _isImported;
 
 + (BOOL)isVector:(id)object {
     return [[object className] isEqual:[self className]];
@@ -121,11 +123,13 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    return [[JSVector alloc] initWithArray:_array];
+    id elem = [[JSVector alloc] initWithArray:_array];
+    [elem setIsImported:_isImported];
+    return elem;
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
-    return [[JSVector alloc] initWithArray:_array];
+    return [self copyWithZone:zone];
 }
 
 - (NSString *)description {

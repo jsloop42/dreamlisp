@@ -7,10 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "JSDataProtocol.h"
-#import "JSSymbol.h"
-#import "JSList.h"
-#import "JSFault.h"
+#import "Types.h"
 #import "JSError.h"
 #import "SymbolTable.h"
 #import "Logger.h"
@@ -21,6 +18,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class JSSymbol;
 @class JSList;
+@class JSVector;
+@class JSHashMap;
+@class JSAtom;
 @class SymbolTable;
 @class ModuleTable;
 
@@ -44,9 +44,11 @@ extern NSString *currentModuleName;
 - (instancetype)initWithModuleName:(NSString *)name isUserDefined:(BOOL)isUserDefined;
 - (instancetype)initWithEnv:(Env *)env;
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs;
+- (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs isImported:(BOOL)isImported;
 - (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key;
 - (Env *)findEnvForKey:(JSSymbol *)key;
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key;
+- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isThrow:(BOOL)isThrow;
 - (void)setModuleName:(NSString *)name;
 - (NSString *)moduleName;
 @end

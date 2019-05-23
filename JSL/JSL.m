@@ -259,11 +259,8 @@ static NSString *langVersion;
         if (first && [JSSymbol isSymbol:first]) {
             //JSSymbol *sym = [[JSSymbol alloc] initWithArity:[xs count] - 1 symbol:first];
             JSSymbol *sym = [[JSSymbol alloc] initWithArity:[xs count] - 1 position:0 symbol:first];
-            Env *aEnv = [env findEnvForKey:sym];
-            if (aEnv) {
-                id<JSDataProtocol> fnData = [aEnv objectForSymbol:sym];
-                if ([JSFunction isFunction:fnData]) return [(JSFunction *)fnData isMacro];
-            }
+            id<JSDataProtocol> fnData = [env objectForSymbol:sym isThrow:NO];
+            if (fnData && [JSFunction isFunction:fnData]) return [(JSFunction *)fnData isMacro];
         }
     }
     return NO;
@@ -338,7 +335,8 @@ static NSString *langVersion;
                     continue;
                 } else if ([[sym name] isEqual:@"fn*"]) {
                     id<JSDataProtocol>(^fn)(NSMutableArray *) = ^id<JSDataProtocol>(NSMutableArray * arg) {
-                        Env *fnEnv = [[Env alloc] initWithEnv:env binds:[(JSList *)[xs second] value] exprs:arg];
+                        // Uses current env `[self env]` than the passed in `env` param so that the closure gets the latest env variable.
+                        Env *fnEnv = [[Env alloc] initWithEnv:[self env] binds:[(JSList *)[xs second] value] exprs:arg];
                         return [self eval:[xs nth:2] withEnv:fnEnv];
                     };
                     return [[JSFunction alloc] initWithAst:[xs nth:2] params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
@@ -377,7 +375,7 @@ static NSString *langVersion;
             NSMutableArray *rest = [list rest];
             if ([fn ast]) {
                 ast = [fn ast];
-                env = [[Env alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest];
+                env = [[Env alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest isImported:[fn isImported]];
             } else {
                 return [fn apply:rest];
             }
@@ -429,7 +427,8 @@ static NSString *langVersion;
     NSLock *lock = [NSLock new];
     [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger i, BOOL * _Nonnull stop) {
         JSList *xs = (JSList *)obj;
-        if ([JSSymbol isSymbol:[xs first] withName:@"export"]) {
+        id<JSDataProtocol> modDir = [xs first];
+        if ([JSSymbol isSymbol:modDir withName:@"export"]) {
             JSList *elem = [xs rest];
             if ([elem count] == 1 && [JSSymbol isSymbol:[elem first] withName:@"all"]) {
                 [env setIsExportAll:YES];
@@ -440,7 +439,7 @@ static NSString *langVersion;
                 NSMutableArray *fnList = [(JSList *)elem value];
                 [fnList enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull expObj, NSUInteger j, BOOL * _Nonnull expStop) {
     //                debug(@"%@", expObj);
-                    NSMutableArray *aExp = (NSMutableArray *)expObj;
+                    NSMutableArray *aExp = (NSMutableArray *)[(JSList *)expObj value];
                     JSSymbol *sym = (JSSymbol *)[aExp first];
                     JSNumber *arityNum = (JSNumber *)[aExp second];
                     NSInteger arity = [arityNum integerValue];
@@ -449,16 +448,48 @@ static NSString *langVersion;
                     [sym updateArity];
                     [sym setIsFault:YES];
                     [sym setModuleName:[env moduleName]];
+                    [sym setInitialModuleName:[env moduleName]];
                     [lock lock];
-                    [[env module] setObject:[JSFault new] forSymbol:sym];
+                    [[env module] setObject:[[JSFault alloc] initWithModule:[env moduleName] isImportFault:NO] forSymbol:sym];
                     [lock unlock];
     //                debug(@"All keys in env: %@", [[[env module] table] allKeys]);
     //                debug(@"Current fault in env: %@", [[env module] objectForSymbol:sym]);
                 }];
             }
+        } else if ([JSSymbol isSymbol:modDir withName:@"import"]) {
+            debug(@"%@", xs);
+            JSList *imports = (JSList *)[xs rest];
+            NSMutableArray *impArr = (NSMutableArray *)[imports value];
+            [impArr enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                JSList *imp = (JSList *)obj;
+                if ([JSSymbol isSymbol:[imp first] withName:@"from"]) {
+                    NSString *modName = [(JSSymbol *)[imp second] value];
+                    Env *impEnv = [Env envForModuleName:modName];
+                    if (impEnv) {
+                        NSMutableArray *impFns = (NSMutableArray *)[(JSList *)[imp drop:2] value];
+                        [impFns enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                            JSList *aExp = (JSList *)obj;
+                            JSSymbol *sym = (JSSymbol *)[aExp first];
+                            JSNumber *arityNum = (JSNumber *)[aExp second];
+                            NSInteger arity = [arityNum integerValue];
+                            [sym setArity:arity];
+                            [sym setInitialArity:arity];
+                            [sym updateArity];
+                            [sym setIsFault:YES];
+                            [sym setModuleName:[env moduleName]];
+                            [sym setInitialModuleName:modName];
+                            [sym setIsImported:YES];
+                            [lock lock];
+                            [[env table] setObject:[[JSFault alloc] initWithModule:modName isImportFault:YES] forKey:sym];
+                            [lock unlock];
+                        }];
+                    }
+                }
+            }];
         }
     }];
-//    debug(@"keys count in env: %ld", [[[env module] table] count]);
+    //debug(@"keys count in env module: %ld", [[[env module] table] count]);
+    debug(@"env table: %@", [[env module] table]);
 }
 
 /** Change current module to the given one. */

@@ -15,10 +15,12 @@
     BOOL _isDouble;
     id<JSDataProtocol> _meta;
     NSInteger _position;
+    BOOL _isImported;
 }
 
 @synthesize meta = _meta;
 @synthesize value = _n;
+@synthesize isImported = _isImported;
 
 + (BOOL)isNumber:(id)object {
     return [[object className] isEqual:[self className]];
@@ -193,11 +195,13 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    return [[JSNumber alloc] initWithNumber:_n];
+    id elem = [[JSNumber alloc] initWithNumber:_n];
+    [elem setIsImported:_isImported];
+    return elem;
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
-    return [[JSNumber alloc] initWithNumber:_n];
+    return [self copyWithZone:zone];
 }
 
 - (NSString *)description {

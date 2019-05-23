@@ -1259,7 +1259,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(meta +)"], @"nil");
 }
 
-- (void)testTCO {
+- (void)notestTCO {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     [jsl rep:@"(def! sum2 (fn* (n acc) (if (= n 0) acc (sum2 (- n 1) (+ n acc)))))"];
     XCTAssertEqualObjects([jsl rep:@"(sum2 10 0)"], @"55");
@@ -1593,6 +1593,23 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(bar:sum 40 2)"], @"42");
     XCTAssertEqualObjects([jsl rep:@"(try* (bar:diff 45 3) (catch* ex (str ex)))"], @"\"'bar:diff/2' not found\"");  // function not exported
 }
+
+- (void)testModuleImport {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(defmodule bar (export (sum 2) (sum 1)))"], @"bar");
+    XCTAssertEqualObjects([jsl rep:@"(defun sum (x y) (+ x y))"], @"bar:sum/2");
+    XCTAssertEqualObjects([jsl rep:@"(defun sum (x) (+ x 10))"], @"bar:sum/1");
+    XCTAssertEqualObjects([jsl rep:@"(defmodule foo (export (inc 1) (greet 0)) (import (from bar (sum 2) (sum 1))))"], @"foo");
+    XCTAssertEqualObjects([jsl rep:@"(defun inc (n) (+ n 1))"], @"foo:inc/1");
+    XCTAssertEqualObjects([jsl rep:@"(defun dec (n) (- n 1))"], @"foo:dec/1");
+    XCTAssertEqualObjects([jsl rep:@"(defun greet () (sum 32))"], @"foo:greet/0");
+    XCTAssertEqualObjects([jsl rep:@"(greet)"], @"42");
+    XCTAssertEqualObjects([jsl rep:@"(in-module user)"], @"user");
+    XCTAssertEqualObjects([jsl rep:@"(try* (foo:greet) (catch* ex (str ex)))"], @"42");
+}
+
+// TODO: test case
+// nested macro with [(atom (fn* (n) (+ n 1))) (atom (fn* (n) (+ n 2)))]
 
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];

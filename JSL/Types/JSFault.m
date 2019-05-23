@@ -13,10 +13,14 @@
     id<JSDataProtocol> _meta;
     NSInteger _position;
     NSString *_value;
+    NSString *_moduleName;
+    BOOL _isImported;
 }
 
 @synthesize meta = _meta;
 @synthesize value = _value;
+@synthesize moduleName = _moduleName;
+@synthesize isImported = _isImported;
 
 + (BOOL)isFault:(id)object {
     return [[object className] isEqual:[self className]];
@@ -25,9 +29,23 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _value = [[[NSUUID UUID] UUIDString] lowercaseString];
+        [self bootstrap];
     }
     return self;
+}
+
+- (instancetype)initWithModule:(NSString *)moduleName isImportFault:(BOOL)isImportFault  {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+        _moduleName = moduleName;
+        _isImported = isImportFault;
+    }
+    return self;
+}
+
+- (void)bootstrap {
+    _value = [[[NSUUID UUID] UUIDString] lowercaseString];
 }
 
 - (NSString *)dataType {
@@ -63,13 +81,12 @@
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     JSFault *fault = [JSFault new];
     [fault setValue:_value];
+    [fault setIsImported:_isImported];
     return fault;
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
-    JSFault *fault = [JSFault new];
-    [fault setValue:_value];
-    return fault;
+    return [self copyWithZone:zone];
 }
 
 - (NSString *)description {

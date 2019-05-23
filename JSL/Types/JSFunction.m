@@ -20,6 +20,7 @@
     /** The name with arity associated with the function. */
     NSString *_name;
     NSString *_moduleName;
+    BOOL _isImported;
 }
 
 @synthesize fn = _fn;
@@ -32,6 +33,7 @@
 @synthesize value;  // not used
 @synthesize name = _name;
 @synthesize moduleName = _moduleName;
+@synthesize isImported = _isImported;
 
 + (BOOL)isFunction:(id)object {
     return [[object className] isEqual:[self className]];
@@ -69,7 +71,6 @@
     }
     return self;
 }
-
 
 - (instancetype)initWithAst:(id<JSDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<JSDataProtocol> _Nullable)meta
                          fn:(id<JSDataProtocol> (^)(NSMutableArray *))fn {
@@ -125,6 +126,7 @@
         self = [self initWithAst:function.ast params:function.params env:function.env macro:function.isMacro meta:function.meta fn:function.fn
                             name:function.name];
         _moduleName = [function.env moduleName];
+        _isImported = [function isImported];
     }
     return self;
 }
@@ -173,7 +175,7 @@
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
-    return [[JSFunction alloc] initWithFunction:self];
+    return [self copyWithZone:zone];
 }
 
 - (NSString *)description {

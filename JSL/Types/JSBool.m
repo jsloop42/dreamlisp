@@ -12,10 +12,12 @@
     BOOL _flag;
     id<JSDataProtocol> _meta;
     NSInteger _position;
+    BOOL _isImported;
 }
 
 @synthesize meta = _meta;
 @synthesize value;
+@synthesize isImported = _isImported;
 
 + (BOOL)isBool:(id)object {
     return [[object className] isEqual:[self className]];
@@ -67,7 +69,9 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    return [[JSBool allocWithZone:zone] initWithBool:_flag];
+    id elem = [[JSBool allocWithZone:zone] initWithBool:_flag];
+    [elem setIsImported:_isImported];
+    return elem;
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {

@@ -12,10 +12,12 @@
     NSString *_string;
     id<JSDataProtocol> _meta;
     NSInteger _position;
+    BOOL _isImported;
 }
 
 @synthesize value = _string;
 @synthesize meta = _meta;
+@synthesize isImported = _isImported;
 
 + (BOOL)isKeyword:(id)object {
     return [[object className] isEqual:[self className]];
@@ -118,11 +120,13 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    return [[JSKeyword alloc] initWithKeyword:[self string]];
+    id elem = [[JSKeyword alloc] initWithKeyword:[self string]];
+    [elem setIsImported:_isImported];
+    return elem;
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
-    return [[JSKeyword alloc] initWithKeyword:[self string]];
+    return [self copyWithZone:zone];
 }
 
 - (NSString *)description {
