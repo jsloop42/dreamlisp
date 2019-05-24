@@ -398,7 +398,11 @@ static NSString *langVersion;
 
 #pragma mark Module AST
 
-/** (defmodule tree (export (create-tree 0) (right-node 1) (left-node 1))) */
+/**
+ (defmodule tree (export (create-tree 0) (right-node 1) (left-node 1)))
+ (defmodule foo (export (greet 0)) (import (from bar (sum 1))))
+ (defmodule foo (export (greet 0)) (export all) (import (from bar (sum 1))))
+ */
 - (JSSymbol *)defineModule:(id<JSDataProtocol>)ast {
     JSList *xs = (JSList *)ast;
     JSSymbol *modSym = [xs second];
@@ -409,17 +413,13 @@ static NSString *langVersion;
     _env = modEnv; // change env to current module
     [self updateModuleName:modName];
     // The third element onwards are imports and exports
-    // [xs nth:2];
     [self processModuleExport:[xs drop:2] module:_env];
     if (_isREPL) prompt = [[modName stringByAppendingString:@"> "] UTF8String];
-    //[self eval:[xs second] withEnv:_env];
     return modSym;
 }
 
-// The ast can be of the form (export (a 1) (b 0)) (export (c 2) (d 1)) ..
+// The ast can be of the form (export (a 1) (b 0)) (export (c 2) (d 1)) (import (from list (all 2)) (from io (read 1))) ..
 - (void)processModuleExport:(JSList *)ast module:(Env *)env {
-    // TODO:
-//    debug(@"%@", ast);
     NSMutableArray *arr = [ast value];
     NSLock *lock = [NSLock new];
     [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger i, BOOL * _Nonnull stop) {
@@ -435,7 +435,6 @@ static NSString *langVersion;
                 [env setIsExportAll:NO];
                 NSMutableArray *fnList = [(JSList *)elem value];
                 [fnList enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull expObj, NSUInteger j, BOOL * _Nonnull expStop) {
-    //                debug(@"%@", expObj);
                     NSMutableArray *aExp = (NSMutableArray *)[(JSList *)expObj value];
                     JSSymbol *sym = (JSSymbol *)[aExp first];
                     JSNumber *arityNum = (JSNumber *)[aExp second];
@@ -449,12 +448,9 @@ static NSString *langVersion;
                     [lock lock];
                     [[env module] setObject:[[JSFault alloc] initWithModule:[env moduleName] isImportFault:NO] forSymbol:sym];
                     [lock unlock];
-    //                debug(@"All keys in env: %@", [[[env module] table] allKeys]);
-    //                debug(@"Current fault in env: %@", [[env module] objectForSymbol:sym]);
                 }];
             }
         } else if ([JSSymbol isSymbol:modDir withName:@"import"]) {
-            debug(@"%@", xs);
             JSList *imports = (JSList *)[xs rest];
             NSMutableArray *impArr = (NSMutableArray *)[imports value];
             [impArr enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -485,8 +481,6 @@ static NSString *langVersion;
             }];
         }
     }];
-    //debug(@"keys count in env module: %ld", [[[env module] table] count]);
-    debug(@"env table: %@", [[env module] table]);
 }
 
 /** Change current module to the given one. */
@@ -770,7 +764,7 @@ static NSString *langVersion;
         [self updateBindingsForAST:exps[i] table:[_env symbolTable]];  // Symbol table contains symbols encountered which are defined using def!, defmacro!.
         ret = [self print:[self eval:exps[i] withEnv:[self env]]];
     }
-    //[[_env symbolTable] removeAllObjects];
+    [[_env symbolTable] removeAllObjects];
     return ret;
 }
 
