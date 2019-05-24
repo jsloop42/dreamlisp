@@ -30,7 +30,6 @@ static NSString *langVersion;
 
 @synthesize globalEnv = _globalEnv;
 @synthesize env = _env;
-@synthesize modules = _modules;
 @synthesize isREPL = _isREPL;
 
 + (void)initialize {
@@ -65,7 +64,6 @@ static NSString *langVersion;
 }
 
 - (void)bootstrap {
-    _modules = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
     _reader = [Reader new];
     _printer = [Printer new];
     _core = [Core new];
@@ -257,7 +255,6 @@ static NSString *langVersion;
         NSMutableArray *xs = [(JSList *)ast value];
         id<JSDataProtocol> first = [xs first];
         if (first && [JSSymbol isSymbol:first]) {
-            //JSSymbol *sym = [[JSSymbol alloc] initWithArity:[xs count] - 1 symbol:first];
             JSSymbol *sym = [[JSSymbol alloc] initWithArity:[xs count] - 1 position:0 symbol:first];
             id<JSDataProtocol> fnData = [env objectForSymbol:sym isThrow:NO];
             if (fnData && [JSFunction isFunction:fnData]) return [(JSFunction *)fnData isMacro];
@@ -375,7 +372,7 @@ static NSString *langVersion;
             NSMutableArray *rest = [list rest];
             if ([fn ast]) {
                 ast = [fn ast];
-                env = [[Env alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest isImported:[fn isImported]];
+                env = [[Env alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest isImported:[fn isImported] currentEnv:env];
             } else {
                 return [fn apply:rest];
             }

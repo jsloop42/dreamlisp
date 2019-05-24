@@ -13,11 +13,13 @@
     id<JSDataProtocol> _meta;
     NSInteger _position;
     BOOL _isImported;
+    NSString *_moduleName;
 }
 
 @synthesize meta = _meta;
 @synthesize value = _string;
 @synthesize isImported = _isImported;
+@synthesize moduleName = _moduleName;
 
 + (BOOL)isString:(id)object {
     return [[object className] isEqual:[self className]];

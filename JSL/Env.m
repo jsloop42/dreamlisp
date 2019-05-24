@@ -26,6 +26,9 @@ NSString *currentModuleName;
     /** Is user defined module */
     BOOL _isUserDefined;
     BOOL _isExportAll;
+    // To distinguish it from JSFunction's env which may be different from current env if the function is referenced from another module. If the env is
+    // imported into the current env. Encountered within initWithEnv:binds:exprs:IsImported.. method.
+    BOOL _isImported;
 }
 
 @synthesize outer = _outer;
@@ -34,6 +37,7 @@ NSString *currentModuleName;
 @synthesize symbolTable = _symbolTable;
 @synthesize isUserDefined = _isUserDefined;
 @synthesize isExportAll = _isExportAll;
+@synthesize isImported = _isImported;
 
 #pragma mark Module lookup table
 
@@ -109,33 +113,33 @@ NSString *currentModuleName;
  @param exprs A array of `id<JSDataProtocol>` expressions.
  */
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs {
-    return [self initWithEnv:env binds:binds exprs:exprs isImported:NO];
+    return [self initWithEnv:env binds:binds exprs:exprs isImported:NO currentEnv:env];
 }
 
-- (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs isImported:(BOOL)isImported {
+- (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs isImported:(BOOL)isImported currentEnv:(Env *)currentEnv {
     self = [super init];
     NSUInteger len = [binds count];
     NSUInteger i = 0;
     if (self) {
         [self bootstrap];
-
-//        if ([[env moduleName] isNotEqualTo:coreModuleName] && [currentModuleName isNotEqualTo:[env moduleName]]) {
-//            Env *currEnv = [Env envForModuleName:currentModuleName];
-//            _module = [currEnv module];
-//            _outer = currEnv;
-//            _isExportAll = [currEnv isExportAll];
-//            _isUserDefined = [currEnv isUserDefined];
-//        } else {
-//            _module = [env module];
-//            _outer = env;
-//            _isExportAll = [env isExportAll];
-//            _isUserDefined = [env isUserDefined];
-//        }
-        [_module setName:[env moduleName]];
-        _outer = env;
-        _isExportAll = [env isExportAll];
-        _isUserDefined = [env isUserDefined];
-        // Set module name to all symbols in the exprs array which will set the params list for functions to belong to same module as the function.
+        _isImported = isImported;
+        Env *effEnv = nil;
+        if (isImported) {
+            effEnv = currentEnv;
+        } else if (env != currentEnv) {
+            effEnv = currentEnv;
+        } else {
+            effEnv = env;
+        }
+        [_module setName:[effEnv moduleName]];
+        _outer = effEnv;
+        _isExportAll = [effEnv isExportAll];
+        _isUserDefined = [effEnv isUserDefined];
+        // Sets module name to all binds element to current module name if they does not belong to core.
+        [binds enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [self updateModuleNameForExprs:obj moduleName:currentModuleName];
+        }];
+        // Sets module name to all symbols in the exprs array which will set the params list for functions to belong to same module as the function.
         [exprs enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [self updateModuleNameForExprs:obj moduleName:currentModuleName];
         }];
@@ -205,15 +209,34 @@ NSString *currentModuleName;
     } else if ([JSSymbol isSymbol:ast]) {
         JSSymbol *sym = (JSSymbol *)ast;
         NSString *modName = [sym moduleName];
-        if (![sym isQualified] && [modName isNotEqualTo:moduleName] && [modName isNotEqualTo:coreModuleName]) {
+        if (_isImported && [modName isNotEqualTo:coreModuleName]) {
+            [sym setInitialModuleName:[sym moduleName]];
+            [sym setModuleName:moduleName];
+            [sym setIsImported:YES];
+        } else if (![sym isQualified] && [modName isNotEqualTo:moduleName] && [modName isNotEqualTo:coreModuleName]) {
+            // These are imported symbols invoked directly.
+            [sym setModuleName:moduleName];
+            id<JSDataProtocol> elem = [self objectForSymbol:sym isThrow:NO];
+            if (elem && [elem isImported]) {
+                [sym setIsImported:YES];  // symbols module name should point to current module and initial module name to the imported module name.
+            }
+            if ([sym isImported]) {
+                [sym setInitialModuleName:[elem moduleName]];
+            } else {
+                [sym setInitialModuleName:[sym moduleName]];
+            }
+        } else if (![sym isQualified] && [modName isEqual:moduleName] && [modName isNotEqualTo:coreModuleName]) {
+            // Inner bindings of a function. In `(defun greet () (sum 11))`, the inner bindings starts from `(sum 11)`. These are present as ast in a JSFunction
+            // object.
             [sym setModuleName:moduleName];
             id<JSDataProtocol> elem = [self objectForSymbol:sym isThrow:NO];
             if (elem && [elem isImported]) {
                 [sym setIsImported:YES];
-                // TODO: set module name?
             }
             if ([sym isImported]) {
-                [sym setInitialModuleName:moduleName];
+                [sym setInitialModuleName:[elem moduleName]];
+            } else {
+                [sym setInitialModuleName:[sym moduleName]];
             }
         }
     } else if ([JSHashMap isHashMap:ast]) {
@@ -271,7 +294,6 @@ NSString *currentModuleName;
 }
 
 - (Env *)findEnvForKey:(JSSymbol *)key {
-    //Env *env = [self findEnvForKey:key inEnv:[env moduleName]];
     [self updateModuleName:key];
     if ([key isQualified]) return [Env envForModuleName: [key isImported] ? [key initialModuleName] : [key moduleName]];
     Env *env = [self findEnvForKey:key inEnv:self];
@@ -297,6 +319,8 @@ NSString *currentModuleName;
                     [key setIsImported:YES];
                     [key setInitialModuleName:[modEnv moduleName]];
                     [key setModuleName:[env moduleName]];
+                    // TODO: Testing
+                    [key setIsQualified:YES];
                     [[env table] setObject:val forKey:key];
                     return val;
                 } else {
@@ -335,7 +359,6 @@ NSString *currentModuleName;
         val = [env objectForSymbol:key fromEnv:env];
         if (val) return [self resolveFault:val forKey:key inEnv:env];
     }
-    // TODO: isQualified and isImported
     // Check core module
     if (![key isQualified]) [key setModuleName:coreModuleName];
     val = [env objectForSymbol:key fromEnv:env];
@@ -377,7 +400,6 @@ NSString *currentModuleName;
 
 /** Fetch imported symbol from env table */
 - (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromImportedEnv:(Env *)env {
-    id<JSDataProtocol> val = nil;
     JSSymbol *sym = key;
     [sym setModuleName:[sym initialModuleName]];
     return [self objectForSymbol:sym fromTable:env];

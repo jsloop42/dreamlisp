@@ -20,7 +20,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JSL : NSObject
 @property (nonatomic, readwrite) Env *globalEnv;
 @property (nonatomic, readwrite) Env *env;
-@property (nonatomic, readwrite) NSMapTable<NSString *, Env *> *modules;
 @property (nonatomic, readwrite) BOOL isREPL;
 - (instancetype)init;
 - (instancetype)initWithREPL;

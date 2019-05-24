@@ -12,7 +12,6 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSFault : NSObject <JSDataProtocol>
-@property (nonatomic, readwrite) NSString *moduleName;
 + (BOOL)isFault:(id)object;
 - (instancetype)init;
 - (instancetype)initWithModule:(NSString *)moduleName isImportFault:(BOOL)isImportFault;
