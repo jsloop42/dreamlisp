@@ -1606,7 +1606,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(defmacro a () 1)"], @"foo:a/0");
     XCTAssertEqualObjects([jsl rep:@"(greet)"], @"42");
     XCTAssertEqualObjects([jsl rep:@"(in-module user)"], @"user");
-    XCTAssertEqualObjects([jsl rep:@"(try* (foo:greet) (catch* ex (str ex)))"], @"42");
+    XCTAssertEqualObjects([jsl rep:@"(foo:greet)"], @"42");
 }
 
 // TODO: test case

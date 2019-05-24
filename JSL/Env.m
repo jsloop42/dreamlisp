@@ -126,6 +126,9 @@ NSString *currentModuleName;
         Env *effEnv = nil;
         if (isImported) {
             effEnv = currentEnv;
+        } else if ([[env moduleName] isEqual:[currentEnv moduleName]]) {
+            // Eg: nested functions have same module but env depth will be more than the currentEnv due to [fn env] value.
+            effEnv = env;
         } else if (env != currentEnv) {
             effEnv = currentEnv;
         } else {
@@ -283,7 +286,7 @@ NSString *currentModuleName;
             return [self findEnvForKey:[key toNArity] inEnv:env];
         }
     } else {
-        if ([[env module] objectForSymbol:key]) {  // different module => look in module table only
+        if ([[env module] objectForSymbol:key]) {  // different module, core or user module => look in module table only
             return self;
         } else if (![key hasNArity]) {
             return [self findEnvForKey:[key toNArity] inEnv:env];
