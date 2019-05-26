@@ -267,7 +267,7 @@ static NSUInteger repTimeout = 10;
         if (first && [JSSymbol isSymbol:first]) {
             JSSymbol *sym = [[JSSymbol alloc] initWithArity:[xs count] - 1 position:0 symbol:first];
             id<JSDataProtocol> fnData = [env objectForSymbol:sym isThrow:NO];
-            [xs update:sym atIndex:0];  // The symbol will be updated with props, so use the updated symbol.
+            //[xs update:sym atIndex:0];  // The symbol will be updated with props, so use the updated symbol. FIXME: seems to be not required
             if (fnData && [JSFunction isFunction:fnData]) return [(JSFunction *)fnData isMacro];
         }
     }
@@ -554,8 +554,10 @@ static NSUInteger repTimeout = 10;
 - (JSSymbol * _Nullable)findSymbol:(JSSymbol *)symbol arity:(NSInteger)arity table:(SymbolTable *)table {
     JSSymbol *sym = nil;
     NSString *modName = [symbol moduleName];
-//    sym = [table symbol:symbol];  FIXME: all but qualified access 
-//    if (sym) return sym;
+    if ([symbol isQualified]) {
+        sym = [self symbol:symbol arity:arity fromTable:[[Env envForModuleName:modName] symbolTable]];
+        return sym;
+    }
     if ([modName isEqual:currentModuleName] && [modName isNotEqualTo:coreModuleName]) {  // Symbol from the current module
         sym = [self symbol:symbol arity:arity fromTable:table];
         if (sym) return sym;
