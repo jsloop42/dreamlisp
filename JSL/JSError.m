@@ -33,6 +33,7 @@ NSString *ModuleNotFound = @"'%@' module not found";
 NSString *SequenceError = @"Not a sequence";
 NSString *SymbolNotFound = @"'%@' not found";
 NSString *SymbolParseError = @"Symbol parse error for %@";
+NSString *SymbolTableTimeout = @"Symbol table processing timed out";
 
 @implementation JSError {
     NSString *_description;

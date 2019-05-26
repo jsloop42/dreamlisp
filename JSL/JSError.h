@@ -36,6 +36,7 @@ extern NSString *ModuleNotFound;
 extern NSString *SequenceError;
 extern NSString *SymbolNotFound;
 extern NSString *SymbolParseError;
+extern NSString *SymbolTableTimeout;
 
 @interface JSError : NSObject
 @property (nonatomic, readwrite) NSString *description;

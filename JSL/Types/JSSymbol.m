@@ -70,7 +70,7 @@
     return symbol;
 }
 
-/** Update function bounded symbols properties from the given ast. */
+/** Update function bounded symbols properties from the given ast used in autogensym. */
 + (void)updateProperties:(JSSymbol *)symbol list:(id<JSDataProtocol>)ast {
     if ([JSList isList:ast]) {
         JSList *list = (JSList *)ast;
@@ -81,20 +81,19 @@
                 NSPredicate *pred = [NSPredicate predicateWithFormat:@"SELF.name contains [c] %@", @"&"];
                 NSArray *filtered = [arr filteredArrayUsingPredicate:pred];
                 if ([filtered count] > 0) {
-                    [symbol setArity:-1];
                     [symbol setInitialArity:-1];
-                    [symbol updateArity];
+                    [symbol resetArity];
                 } else {
                     NSUInteger count = [args count];
-                    [symbol setArity:count];
                     [symbol setInitialArity:count];
-                    [symbol updateArity];
+                    [symbol resetArity];
                 }
             } else {
-                [symbol setArity:0];
                 [symbol setInitialArity:0];
-                [symbol updateArity];
+                [symbol resetArity];
             }
+            [symbol setInitialModuleName:currentModuleName];
+            [symbol setModuleName:currentModuleName];
         }
     }
 }

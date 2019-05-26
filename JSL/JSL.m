@@ -545,10 +545,13 @@ static NSUInteger repTimeout = 10;
         sym = [self symbol:symbol arity:arity fromTable:table];
         if (sym) return sym;
     }
-    if ([modName isNotEqualTo:currentModuleName]) {
+    if ([modName isNotEqualTo:currentModuleName]) {  // current module is "foo", symbol's module name is "user" which is default, and symbol belongs to "core", for eg: +
         sym = [self symbol:symbol arity:arity fromTable:[[Env envForModuleName:modName] symbolTable]];
         if (sym) return sym;
     }
+    // check current module
+    sym = [self symbol:symbol arity:arity fromTable:[[Env envForModuleName:coreModuleName] symbolTable]];
+    if (sym) return sym;
     // Check core module
     [symbol setModuleName:coreModuleName];
     sym = [self symbol:symbol arity:arity fromTable:[[Env envForModuleName:coreModuleName] symbolTable]];
@@ -559,13 +562,22 @@ static NSUInteger repTimeout = 10;
 
 /** If the given symbol is present in the symbol table, updates the given symbol to match. */
 - (void)updateSymbol:(JSSymbol *)symbol arity:(NSInteger)arity table:(SymbolTable *)table {
-    JSSymbol *sym = [self findSymbol:symbol arity:arity table:table];
-    if (sym) {
-        [symbol setValue:[sym value]];  // TODO: copy all props?
-//        [symbol setValue:[sym value]];
-//        return symbol;
-    }
+    JSSymbol *sym = nil;
+    NSString *modName = [symbol moduleName];
+    if (![symbol isQualified] && [modName isNotEqualTo:currentModuleName]) [symbol setModuleName:currentModuleName];
+    sym = [self findSymbol:symbol arity:arity table:table];
+    if (sym) [self updateGensymProps:sym forSymbol:symbol];
+    // Symbol does not belong to current module, set back to the initial module name and do another lookup
+    if (![symbol isQualified] && [modName isNotEqualTo:currentModuleName]) [sym setModuleName:modName];
+    sym = [self findSymbol:symbol arity:arity table:table];
+    if (sym) [self updateGensymProps:sym forSymbol:symbol];
 }
+
+- (void)updateGensymProps:(JSSymbol *)gensym forSymbol:(JSSymbol *)symbol {
+    [symbol setValue:[gensym value]];  // FIXME: copy all props?
+    [symbol copyProperties:gensym];
+}
+
 //- (JSSymbol * _Nullable)updateSymbol:(JSSymbol *)symbol arity:(NSInteger)arity table:(SymbolTable *)table {
 //    JSSymbol *aSym = nil;
 //    NSString *modName = [symbol moduleName];
@@ -639,6 +651,14 @@ static NSUInteger repTimeout = 10;
         }
     }];
     return ast;
+}
+
+- (void)setPropsNameForBinding:(JSSymbol *)symbol {
+    if ([[symbol initialModuleName] isEqual:defaultModuleName]) {  // TODO: remove this check?
+        // The module names default to "user". So we need to update it to current module where the function or let binding is encountered.
+        [symbol setInitialModuleName:currentModuleName];
+        [symbol setModuleName:currentModuleName];
+    }
 }
 
 - (JSList *)updateBindingsForList:(JSList *)ast table:(SymbolTable *)table {
@@ -729,24 +749,26 @@ static NSUInteger repTimeout = 10;
                 i++;
                 JSList* elem = [ast nth:i];  // fn arguments
                 NSMutableArray *arr = [elem value];
-                NSMutableArray *symArgs = [arr mutableCopy];;
+                //NSMutableArray *symArgs = [arr mutableCopy];;
                 NSUInteger len = [arr count];
                 NSUInteger i = 0;
                 for (i = 0; i < len; i++) {
-                    id<JSDataProtocol> arg = arr[i];
-                    if ([JSSymbol isSymbol:arg]) {
+                    id<JSDataProtocol> arg = arr[i];  // mutable
+                    if ([JSSymbol isSymbol:arg]) {  // Process function arguments
                         JSSymbol *aSym = (JSSymbol *)arg;
                         // Handle nested fn* within quasiquote
                         if ([[aSym value] isEqualToString:@"unquote"] || [[aSym value] isEqualToString:@"unquote-splice"]) {
                             i++;
                             arg = arr[i];
+                            [self setPropsNameForBinding:arg];
                             [self updateUnquoteBindingsForAST:arg table:table];
                         } else if ([[aSym value] isNotEqualTo:@"&"]) {
+                            [self setPropsNameForBinding:aSym];
                             arg = [aSym autoGensym];
                             [fnTable setSymbol:arg];
                         }
                     }
-                    [symArgs setObject:arg atIndexedSubscript:i];
+                    //[symArgs setObject:arg atIndexedSubscript:i];
                 }
                 table = fnTable;
                 continue;

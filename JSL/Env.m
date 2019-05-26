@@ -129,7 +129,7 @@ NSString *currentModuleName;
         } else if ([[env moduleName] isEqual:[currentEnv moduleName]]) {
             // Eg: nested functions have same module but env depth will be more than the currentEnv due to [fn env] value.
             effEnv = env;
-        } else if (env != currentEnv) {
+        } else if (env != currentEnv && [[env moduleName] isNotEqualTo:coreModuleName]) {  // core.jsl symbols accessed => effEnv = core
             effEnv = currentEnv;
         } else {
             effEnv = env;
@@ -216,7 +216,7 @@ NSString *currentModuleName;
             [sym setInitialModuleName:[sym moduleName]];
             [sym setModuleName:moduleName];
             [sym setIsImported:YES];
-        } else if (![sym isQualified] && [modName isNotEqualTo:moduleName] && [modName isNotEqualTo:coreModuleName]) {
+        } else if (![sym isQualified] && [modName isNotEqualTo:moduleName] && [modName isNotEqualTo:coreModuleName] && [[sym moduleName] isNotEqualTo:[sym initialModuleName]]) {  // wrong condition - initial mod == curr mod => ?
             // These are imported symbols invoked directly.
             [sym setModuleName:moduleName];
             id<JSDataProtocol> elem = [self objectForSymbol:sym isThrow:NO];
@@ -242,6 +242,36 @@ NSString *currentModuleName;
                 [sym setInitialModuleName:[sym moduleName]];
             }
         }
+//        if (_isImported && [modName isNotEqualTo:coreModuleName]) {
+//            [sym setInitialModuleName:[sym moduleName]];
+//            [sym setModuleName:moduleName];
+//            [sym setIsImported:YES];
+//        } else if (![sym isQualified] && [modName isNotEqualTo:moduleName] && [modName isNotEqualTo:coreModuleName]) {
+//            // These are imported symbols invoked directly.
+//            [sym setModuleName:moduleName];
+//            id<JSDataProtocol> elem = [self objectForSymbol:sym isThrow:NO];
+//            if (elem && [elem isImported]) {
+//                [sym setIsImported:YES];  // symbols module name should point to current module and initial module name to the imported module name.
+//            }
+//            if ([sym isImported]) {
+//                [sym setInitialModuleName:[elem moduleName]];
+//            } else {
+//                [sym setInitialModuleName:[sym moduleName]];
+//            }
+//        } else if (![sym isQualified] && [modName isEqual:moduleName] && [modName isNotEqualTo:coreModuleName]) {
+//            // Inner bindings of a function. In `(defun greet () (sum 11))`, the inner bindings starts from `(sum 11)`. These are present as ast in a JSFunction
+//            // object.
+//            [sym setModuleName:moduleName];
+//            id<JSDataProtocol> elem = [self objectForSymbol:sym isThrow:NO];
+//            if (elem && [elem isImported]) {
+//                [sym setIsImported:YES];
+//            }
+//            if ([sym isImported]) {
+//                [sym setInitialModuleName:[elem moduleName]];
+//            } else {
+//                [sym setInitialModuleName:[sym moduleName]];
+//            }
+//        }
     } else if ([JSHashMap isHashMap:ast]) {
         NSMutableDictionary *hm = [(JSHashMap *)ast value];
         NSMutableArray *allKeys = [[hm allKeys] mutableCopy];
@@ -362,16 +392,16 @@ NSString *currentModuleName;
     Env *env = [self findEnvForKey:key];
     id<JSDataProtocol> val = nil;
     if (env) {
-        val = [env objectForSymbol:key fromEnv:env];
+        val = [self objectForSymbol:key fromEnv:env];
         if (val) return [self resolveFault:val forKey:key inEnv:env];
     } else if ([[key moduleName] isEqual:[self moduleName]]) {
         env = self;
-        val = [env objectForSymbol:key fromEnv:env];
+        val = [self objectForSymbol:key fromEnv:env];
         if (val) return [self resolveFault:val forKey:key inEnv:env];
     }
     // Check core module
     if (![key isQualified]) [key setModuleName:coreModuleName];
-    val = [env objectForSymbol:key fromEnv:env];
+    val = [self objectForSymbol:key fromEnv:env];
     if (val) return [self resolveFault:val forKey:key inEnv:env];
     // Symbol not found
     if (![key isQualified]) [key setModuleName:currentModuleName];

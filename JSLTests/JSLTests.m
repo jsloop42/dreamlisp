@@ -1115,9 +1115,8 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     [jsl rep:@"(def! inc2* (fn* (x) (pow2* x)))"];
     XCTAssertEqualObjects([jsl rep:@"(inc2* 5)"], @"10");
     // Testing nested macros
-    // x# is not a gensym reader macro, but it is auto gensymed
-    [jsl rep:@"(defmacro! p1 (fn* (a) `(let* (x# 10) (* ~a x#))))"];
-    [jsl rep:@"(defmacro! p2 (fn* (a) `(let* (x# 2) (p1 (* ~a x#)))))"];
+    [jsl rep:@"(defmacro! p1 (fn* (a) `(let* (x 10) (* ~a x))))"];
+    [jsl rep:@"(defmacro! p2 (fn* (a) `(let* (x 2) (p1 (* ~a x)))))"];
     [jsl rep:@"(def! n (fn* (x) (p2 x)))"];
     XCTAssertEqualObjects([jsl rep:@"(n 4)"], @"80");
     XCTAssertEqualObjects([jsl rep:@"(n 10)"], @"200");
@@ -1151,6 +1150,13 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(defun inc (x) (+ x 1))"], @"user:inc/1");
     XCTAssertEqualObjects([jsl rep:@"(defmacro apply1 (x) `(apply inc/1 ~x))"], @"user:apply1/1");
     XCTAssertEqualObjects([jsl rep:@"(apply1 [3])"], @"4");
+    // vector binding in let
+    XCTAssertEqualObjects([jsl rep:@"(defmacro! m (fn* (x) `(let* (a [1 2 3]) (let* [b [4 5]] (+ ~x (first b))))))"], @"user:m/1");
+    XCTAssertEqualObjects([jsl rep:@"(m 3)"], @"7");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro foo1 () `(let (xs [(atom (fn* (n) (+ n 1))) (atom (fn* (n) (+ n 2)))]) (@(first xs) 10)))"], @"user:foo1/0");
+    XCTAssertEqualObjects([jsl rep:@"(foo1)"], @"11");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro foo2 () `(let (xs [(atom (fn* (n) (+ n 1))) (atom (fn* (n) (+ n 2)))]) (@(nth xs 1) 10)))"], @"user:foo2/0");
+    XCTAssertEqualObjects([jsl rep:@"(foo2)"], @"12");
 }
 
 void errorHandleFn(id param, int tag, int counter, const char *s) {
@@ -1609,8 +1615,10 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(foo:greet)"], @"42");
 }
 
-// TODO: test case
-// nested macro with [(atom (fn* (n) (+ n 1))) (atom (fn* (n) (+ n 2)))]
+- (void)testCoreLib {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(let (a 11 b (fn* (n) (+ n 1)) c (atom 0)) (reset! c (+ a 10)) (b @c))"], @"22");
+}
 
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
