@@ -541,6 +541,8 @@ static NSUInteger repTimeout = 10;
 - (JSSymbol * _Nullable)findSymbol:(JSSymbol *)symbol arity:(NSInteger)arity table:(SymbolTable *)table {
     JSSymbol *sym = nil;
     NSString *modName = [symbol moduleName];
+    sym = [table symbol:symbol];
+    if (sym) return sym;
     if ([modName isEqual:currentModuleName] && [modName isNotEqualTo:coreModuleName]) {  // Symbol from the current module
         sym = [self symbol:symbol arity:arity fromTable:table];
         if (sym) return sym;
