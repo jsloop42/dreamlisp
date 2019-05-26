@@ -11,6 +11,7 @@
 static NSString *coreLibFileName = @"core.jsl";
 static NSString *hostLangVersion;
 static NSString *langVersion;
+static NSUInteger repTimeout = 10;
 
 @implementation JSL {
     Reader *_reader;
@@ -25,6 +26,8 @@ static NSString *langVersion;
     NSUInteger _quasiquoteDepth;
     NSUInteger _unquoteDepth;
     dispatch_queue_t _queue;
+    dispatch_queue_t _repQueue;  // Used for REPL queue for processing symbols from symbol table
+    dispatch_group_t _dispatchGroup;
     BOOL _isREPL;  // Is running a REPL
 }
 
@@ -76,6 +79,7 @@ static NSString *langVersion;
     _isQuasiquoteMode = NO;
     _quasiquoteDepth = 0;
     _queue = dispatch_queue_create("jsl-dispatch-queue", nil);
+    _repQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*"];
     [self setLoadFileToREPL];
     [self setEvalToREPL];
@@ -231,14 +235,20 @@ static NSString *langVersion;
 /** Process quasiquote. */
 - (id<JSDataProtocol>)quasiquote:(id<JSDataProtocol>)ast {
     if (![self isPair:ast]) {
-        id<JSDataProtocol>arg = ast;
-        return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], arg] mutableCopy]];
+        return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], ast] mutableCopy]];
     }
     JSList *lst = (JSList *)ast;
     NSMutableArray *xs = [lst value];
     id<JSDataProtocol> first = [xs first];
     if ([JSSymbol isSymbol:first] && [[(JSSymbol *)first name] isEqual:@"unquote"]) return [xs second];
     if ([self isPair:first]) {
+        if ([JSVector isVector:first] && [xs count] == 1) {
+            NSMutableArray *arr = [NSMutableArray new];
+            [arr addObject:[[JSSymbol alloc] initWithName:@"vector"]];
+            [arr addObjectsFromArray:[(JSVector *)first value]];
+            // (quote (vector 1 2 3)) -> JSList:(quote JSList:(vector 1 2 3))
+            return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"list"], [[JSList alloc] initWithArray:arr]] mutableCopy]];
+        }
         NSMutableArray *list = [(JSList *)first value];
         if (![list isEmpty] && [JSSymbol isSymbol:[list first]] && [[(JSSymbol *)[list first] name] isEqual:@"splice-unquote"]) {
             return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"concat"], [list second],
@@ -413,13 +423,13 @@ static NSString *langVersion;
     _env = modEnv; // change env to current module
     [self updateModuleName:modName];
     // The third element onwards are imports and exports
-    [self processModuleExport:[xs drop:2] module:_env];
+    [self processModuleDirectives:[xs drop:2] module:_env];
     if (_isREPL) prompt = [[modName stringByAppendingString:@"> "] UTF8String];
     return modSym;
 }
 
-// The ast can be of the form (export (a 1) (b 0)) (export (c 2) (d 1)) (import (from list (all 2)) (from io (read 1))) ..
-- (void)processModuleExport:(JSList *)ast module:(Env *)env {
+/** Process module import exports. The ast can be of the form (export (a 1) (b 0)) (export (c 2) (d 1)) (import (from list (all 2)) (from io (read 1))) .. */
+- (void)processModuleDirectives:(JSList *)ast module:(Env *)env {
     NSMutableArray *arr = [ast value];
     NSLock *lock = [NSLock new];
     [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger i, BOOL * _Nonnull stop) {
@@ -512,26 +522,94 @@ static NSString *langVersion;
 
 #pragma mark Auto gensym
 
-/** If the given symbol is present in the symbol table, updates the given symbol to match. */
-- (JSSymbol * _Nullable)updateSymbol:(JSSymbol *)symbol table:(SymbolTable *)table {
-    JSSymbol *aSym = nil;
-    NSString *modName = [symbol moduleName];
-    if ([modName isEqual:currentModuleName]) {  // Symbol from the current module
-        aSym = [table symbol:symbol];
-        if (aSym) {
-            [symbol setValue:[aSym value]];
-            return symbol;
-        }
-    } else {  // Symbol is from another module
-        Env *env = [Env envForModuleName:modName];
-        aSym = [[env symbolTable] symbol:symbol];
-        if (aSym) {
-            [symbol setValue:[aSym value]];
-            return symbol;
-        }
+- (JSSymbol * _Nullable)symbol:(JSSymbol *)symbol arity:(NSInteger)arity fromTable:(SymbolTable *)table {
+    JSSymbol *sym = [table symbol:symbol];
+    if (sym) return sym;
+    if ([symbol position] == 0 && [symbol arity] != arity && ![symbol hasNArity]) {  // TODO: is position check required?
+        [symbol setArity:arity];
+        [symbol updateArity];
+        return [self symbol:symbol arity:arity fromTable:table];
     }
-    return nil;
+    if (![symbol hasNArity]) {
+        [symbol toNArity];
+        return [self symbol:symbol arity:arity fromTable:table];
+    }
+    [symbol resetArity];
+    return [table outer] ? [self symbol:symbol arity:arity fromTable:[table outer]] : nil;
 }
+
+- (JSSymbol * _Nullable)findSymbol:(JSSymbol *)symbol arity:(NSInteger)arity table:(SymbolTable *)table {
+    JSSymbol *sym = nil;
+    NSString *modName = [symbol moduleName];
+    if ([modName isEqual:currentModuleName] && [modName isNotEqualTo:coreModuleName]) {  // Symbol from the current module
+        sym = [self symbol:symbol arity:arity fromTable:table];
+        if (sym) return sym;
+    }
+    if ([modName isNotEqualTo:currentModuleName]) {
+        sym = [self symbol:symbol arity:arity fromTable:[[Env envForModuleName:modName] symbolTable]];
+        if (sym) return sym;
+    }
+    // Check core module
+    [symbol setModuleName:coreModuleName];
+    sym = [self symbol:symbol arity:arity fromTable:[[Env envForModuleName:coreModuleName] symbolTable]];
+    if (sym) return sym;
+    [symbol setModuleName:modName];
+    return [table outer] ? [self findSymbol:symbol arity:arity table:[table outer]] : nil;
+}
+
+/** If the given symbol is present in the symbol table, updates the given symbol to match. */
+- (void)updateSymbol:(JSSymbol *)symbol arity:(NSInteger)arity table:(SymbolTable *)table {
+    JSSymbol *sym = [self findSymbol:symbol arity:arity table:table];
+    if (sym) {
+        [symbol setValue:[sym value]];  // TODO: copy all props?
+//        [symbol setValue:[sym value]];
+//        return symbol;
+    }
+}
+//- (JSSymbol * _Nullable)updateSymbol:(JSSymbol *)symbol arity:(NSInteger)arity table:(SymbolTable *)table {
+//    JSSymbol *aSym = nil;
+//    NSString *modName = [symbol moduleName];
+//    if ([modName isEqual:currentModuleName]) {  // Symbol from the current module
+//        aSym = [table symbol:symbol];
+//        if (aSym) {
+//            [symbol setValue:[aSym value]];
+//            return symbol;
+//        } else if ([symbol arity] != -2) {
+//            [symbol setArity:-2];
+//            aSym = [table symbol:symbol];
+//            if (aSym) {
+//                [symbol setValue:[aSym value]];
+//                [symbol setArity:[symbol initialArity]];
+//                return symbol;
+//            }
+//        } else {
+//            // check core module  // TODO: refactor out
+//            [symbol setModuleName:coreModuleName];
+//            aSym = [[[Env envForModuleName:coreModuleName] symbolTable] symbol:symbol];
+//            if (aSym) {
+//                [symbol setValue:[aSym value]];
+//                return symbol;
+//            } else {
+//                [symbol toNArity];
+//                aSym = [[[Env envForModuleName:coreModuleName] symbolTable] symbol:symbol];
+//                if (aSym) {
+//                    [symbol setValue:[aSym value]];
+//                    return symbol;
+//                }
+//                [symbol resetArity];
+//            }
+//            [symbol setModuleName:modName];
+//        }
+//    } else {  // Symbol is from another module
+//        Env *env = [Env envForModuleName:modName];
+//        aSym = [[env symbolTable] symbol:symbol];
+//        if (aSym) {
+//            [symbol setValue:[aSym value]];
+//            return symbol;
+//        }
+//    }
+//    return nil;
+//}
 
 /** Updates bindings for key and value of the given hash map. */
 - (JSHashMap * _Nullable)updateBindingsForHashMap:(JSHashMap *)ast table:(SymbolTable *)table {
@@ -554,7 +632,8 @@ static NSString *langVersion;
 - (JSVector *)updateBindingsForVector:(JSVector *)ast table:(SymbolTable *)table {
     [[ast value] enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id<JSDataProtocol>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if ([JSSymbol isSymbol:obj]) {
-            [self updateSymbol:obj table:table];
+//            [self updateSymbol:obj table:table];
+            [self updateSymbol:obj arity:-2 table:table];
         } else {
             [self updateBindingsForAST:obj table:table];
         }
@@ -570,25 +649,36 @@ static NSString *langVersion;
         if ([JSSymbol isSymbol:elem]) {
             JSSymbol *sym = (JSSymbol *)elem;
             if ([sym position] == 0 && [sym isEqualToName:@"let*"]) {  // (let* exp)
-                SymbolTable *letTable = [[SymbolTable alloc] initWithTable:table];
-                NSMutableArray *bindings = [(JSList *)[ast nth:i + 1] value]; // bindings -> list or vector (let* (x 1 y 2) ..)
-                NSUInteger j = 0;
-                NSUInteger blen = [bindings count];
-                // Check if any of the symbols are redefined
-                id<JSDataProtocol> aSym = nil;
-                for (j = 0; j < blen; j += 2) {
-                    // NOTE: pattern matching can be done here for let destructuring
-                    aSym = bindings[j];
-                    if ([JSSymbol isSymbol:aSym]) {
+                //if (!_isQuasiquoteMode) {
+                    SymbolTable *letTable = [[SymbolTable alloc] initWithTable:table];
+                    NSMutableArray *bindings = [(JSList *)[ast nth:i + 1] value]; // bindings -> list or vector (let* (x 1 y 2) ..)
+                    NSUInteger j = 0;
+                    NSUInteger blen = [bindings count];
+                    // Check if any of the symbols are redefined
+                    id<JSDataProtocol> aSym = nil;
+                    for (j = 0; j < blen; j += 2) {
+                        // NOTE: pattern matching can be done here for let destructuring
+                        aSym = bindings[j];
                         JSSymbol *elem = (JSSymbol *)aSym;
-                        [elem autoGensym];  // let* binding symbols are gensymed always
-                        [letTable setSymbol:elem];
+                        if ([[aSym value] isEqualToString:@"unquote"] || [[aSym value] isEqualToString:@"unquote-splice"]) {
+                            j++;
+                            aSym = bindings[j];
+                            [self updateUnquoteBindingsForAST:aSym table:table];
+                        } else {
+                            [elem autoGensym];  // let* binding symbols are gensymed if not found within unquote or unquote-splice
+                            [letTable setSymbol:elem];
+                            // value part of the let*
+                            [self updateBindingsForAST:bindings[j + 1] table:letTable];
+                        }
+//                        if ([JSSymbol isSymbol:aSym]) {
+//                            JSSymbol *elem = (JSSymbol *)aSym;
+//                            [elem autoGensym];  // let* binding symbols are gensymed always
+//                            [letTable setSymbol:elem];
+//                        }
                     }
-                    // value part of the let*
-                    [self updateBindingsForAST:bindings[j + 1] table:letTable];
-                }
-                table = letTable; // for the let scope
-                i++;
+                    table = letTable; // for the let scope
+                    i++;
+                //}
                 continue;
             } else if ([sym position] == 0 && [sym isEqualToName:@"def!"]) {
                 if (!_isQuasiquoteMode) {
@@ -646,6 +736,7 @@ static NSString *langVersion;
                     id<JSDataProtocol> arg = arr[i];
                     if ([JSSymbol isSymbol:arg]) {
                         JSSymbol *aSym = (JSSymbol *)arg;
+                        // Handle nested fn* within quasiquote
                         if ([[aSym value] isEqualToString:@"unquote"] || [[aSym value] isEqualToString:@"unquote-splice"]) {
                             i++;
                             arg = arr[i];
@@ -678,7 +769,13 @@ static NSString *langVersion;
                 continue;
             } else {
                 // Update symbol in the list if there is a binding found
-                [self updateSymbol:[ast nth:i] table:table];
+//                if ([sym position] == 0) {  // ((fn* [f x] (f x)) (fn* [a] (+ 1 a)) 7)
+//                    [sym setInitialArity:[ast count] - 1];
+//                    [sym resetArity];
+//                }
+                //[self updateSymbol:[ast nth:i] table:table];  // TODO: nth ?
+                //[self updateSymbol:sym table:table];
+                [self updateSymbol:sym arity:[ast count] - 1 table:table];
             }
         } else {
             // element is not a symbol
@@ -690,7 +787,8 @@ static NSString *langVersion;
 
 /** Update symbol bindings if found, when list functions at 0th place which doesn't match the special forms, or for other symbols in other positions. */
 - (JSSymbol *)updateBindingsForSymbol:(JSSymbol *)symbol table:(SymbolTable *)table {
-    [self updateSymbol:symbol table:table];
+    //[self updateSymbol:symbol table:table];
+    [self updateSymbol:symbol arity:[symbol arity] table:table];
     return symbol;
 }
 
@@ -724,7 +822,8 @@ static NSString *langVersion;
             id<JSDataProtocol> obj = arr[i];
             if ([JSSymbol isSymbol:obj]) {
                 JSSymbol *sym = (JSSymbol *)obj;
-                [self updateSymbol:sym table:table];  // Do symbol lookup only
+                //[self updateSymbol:sym table:table];  // Do symbol lookup only
+                [self updateSymbol:sym arity:[sym arity] table:table];
             } else {
                 [self updateUnquoteBindingsForAST:obj table:table];
             }
@@ -746,6 +845,18 @@ static NSString *langVersion;
     return xs;
 }
 
+- (void)updateEnvFromSymbolTable:(SymbolTable *)table env:(Env *)env callback:(void (^)(void))callback {
+    NSString *modName = [env moduleName];
+    [[[table table] allKeys] enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([modName isEqual:defaultModuleName] || [modName isEqual:coreModuleName] ||  [env isExportAll]) {
+            [[env module] setObject:[table symbol:obj] forSymbol:obj];
+        } else {
+            [[env table] setObject:[table symbol:obj] forKey:obj];
+        }
+    }];
+    //[table removeAllObjects];  // TODO: ?
+}
+
 #pragma mark Print
 
 - (NSString *)print:(id<JSDataProtocol>)data {
@@ -760,11 +871,14 @@ static NSString *langVersion;
     NSUInteger len = [exps count];
     NSUInteger i = 0;
     NSString *ret = nil;
+    //_dispatchGroup = dispatch_group_create();
     for (i = 0; i < len; i++) {
         [self updateBindingsForAST:exps[i] table:[_env symbolTable]];  // Symbol table contains symbols encountered which are defined using def!, defmacro!.
+      //  info(@"%@", [_env symbolTable]);
+        [self updateEnvFromSymbolTable:[_env symbolTable] env:_env callback:nil];
         ret = [self print:[self eval:exps[i] withEnv:[self env]]];
     }
-    [[_env symbolTable] removeAllObjects];
+    //[[_env symbolTable] removeAllObjects];
     return ret;
 }
 

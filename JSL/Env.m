@@ -266,11 +266,13 @@ NSString *currentModuleName;
     id<JSDataProtocol> obj = nil;
     obj = [[env module] objectForSymbol:aKey];
     if (obj) {
+        [aKey setInitialModuleName:[key initialModuleName]];
+        key = aKey;
         return env;
     } else if (![aKey hasNArity]) {
         return [self findEnvForKey:[aKey toNArity] inModule:env];
     }
-    return nil;
+    return [env outer] ? [self findEnvForKey:key inModule:[env outer]] : nil;
 }
 
 /**
