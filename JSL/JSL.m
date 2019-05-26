@@ -267,6 +267,7 @@ static NSUInteger repTimeout = 10;
         if (first && [JSSymbol isSymbol:first]) {
             JSSymbol *sym = [[JSSymbol alloc] initWithArity:[xs count] - 1 position:0 symbol:first];
             id<JSDataProtocol> fnData = [env objectForSymbol:sym isThrow:NO];
+            [xs update:sym atIndex:0];  // The symbol will be updated with props, so use the updated symbol.
             if (fnData && [JSFunction isFunction:fnData]) return [(JSFunction *)fnData isMacro];
         }
     }
@@ -379,7 +380,19 @@ static NSUInteger repTimeout = 10;
             // Function
             NSMutableArray *list = [(JSList *)[self evalAST:ast withEnv:env] value];
             JSFunction *fn = [JSFunction dataToFunction:[list first]];
-            NSMutableArray *rest = [list rest];
+            // The symbol in the ast at first position is resolved to corrsponding function in the list, which is in `fn` variable.
+            // NB: Any value properties can be update from the corresponding symbol at this position.
+            JSSymbol *bind = (JSSymbol *)[(JSList *)ast first];
+            if ([fn isImported]) {  // case where the inner function ast is imported but not marked in the symbol
+                if (![bind isImported]) {
+                    [bind setIsImported:YES];
+                    [bind setIsQualified:YES];
+                    [bind setInitialModuleName:[fn moduleName]];
+                }
+            } else if ([bind isImported]) {
+                [fn setIsImported:YES];  // case where the symbol is resolved from fault and the corresponding value's props are yet to be set
+            }
+            NSMutableArray *rest = [list rest];  // The arguments to the function
             if ([fn ast]) {
                 ast = [fn ast];
                 env = [[Env alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest isImported:[fn isImported] currentEnv:env];
@@ -541,8 +554,8 @@ static NSUInteger repTimeout = 10;
 - (JSSymbol * _Nullable)findSymbol:(JSSymbol *)symbol arity:(NSInteger)arity table:(SymbolTable *)table {
     JSSymbol *sym = nil;
     NSString *modName = [symbol moduleName];
-    sym = [table symbol:symbol];
-    if (sym) return sym;
+//    sym = [table symbol:symbol];  FIXME: all but qualified access 
+//    if (sym) return sym;
     if ([modName isEqual:currentModuleName] && [modName isNotEqualTo:coreModuleName]) {  // Symbol from the current module
         sym = [self symbol:symbol arity:arity fromTable:table];
         if (sym) return sym;
@@ -559,6 +572,8 @@ static NSUInteger repTimeout = 10;
     sym = [self symbol:symbol arity:arity fromTable:[[Env envForModuleName:coreModuleName] symbolTable]];
     if (sym) return sym;
     [symbol setModuleName:modName];
+    sym = [table symbol:symbol];
+    if (sym) return sym;
     return [table outer] ? [self findSymbol:symbol arity:arity table:[table outer]] : nil;
 }
 
@@ -576,8 +591,15 @@ static NSUInteger repTimeout = 10;
 }
 
 - (void)updateGensymProps:(JSSymbol *)gensym forSymbol:(JSSymbol *)symbol {
-    [symbol setValue:[gensym value]];  // FIXME: copy all props?
-    [symbol copyProperties:gensym];
+    if ([[gensym name] isNotEqualTo:[symbol name]]) {
+        [symbol setValue:[gensym value]]; // update only the name as we are matching gensym values only.
+        // (defmodule foo (export (greet 0)) (import (from bar (sum 1))))
+        // (def! greet (fn* () (sum 32)))
+        if ([symbol isQualified]) [symbol setInitialModuleName:[symbol moduleName]];
+        [symbol setInitialArity:[gensym arity]];
+        [symbol resetArity];
+        //[symbol copyProperties:gensym];  //
+    }
 }
 
 //- (JSSymbol * _Nullable)updateSymbol:(JSSymbol *)symbol arity:(NSInteger)arity table:(SymbolTable *)table {

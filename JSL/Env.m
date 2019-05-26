@@ -139,11 +139,11 @@ NSString *currentModuleName;
         _isExportAll = [effEnv isExportAll];
         _isUserDefined = [effEnv isUserDefined];
         // Sets module name to all binds element to current module name if they does not belong to core.
-        [binds enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [binds enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [self updateModuleNameForExprs:obj moduleName:currentModuleName];
         }];
         // Sets module name to all symbols in the exprs array which will set the params list for functions to belong to same module as the function.
-        [exprs enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [exprs enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [self updateModuleNameForExprs:obj moduleName:currentModuleName];
         }];
         for (i = 0; i < len; i++) {
@@ -202,11 +202,11 @@ NSString *currentModuleName;
             [sym setInitialArity:[sym arity]];
             [sym updateArity];
         }
-        [(NSMutableArray *)[xs value] enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [(NSMutableArray *)[xs value] enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [self updateModuleNameForExprs:obj moduleName:moduleName];
         }];
     } if ([JSVector isVector:ast]) {
-        [(NSMutableArray *)[(JSVector *)ast value] enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [(NSMutableArray *)[(JSVector *)ast value] enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [self updateModuleNameForExprs:obj moduleName:moduleName];
         }];
     } else if ([JSSymbol isSymbol:ast]) {
@@ -216,7 +216,7 @@ NSString *currentModuleName;
             [sym setInitialModuleName:[sym moduleName]];
             [sym setModuleName:moduleName];
             [sym setIsImported:YES];
-        } else if (![sym isQualified] && [modName isNotEqualTo:moduleName] && [modName isNotEqualTo:coreModuleName] && [[sym moduleName] isNotEqualTo:[sym initialModuleName]]) {  // wrong condition - initial mod == curr mod => ?
+        } else if (![sym isQualified] && [modName isNotEqualTo:moduleName] && [modName isNotEqualTo:coreModuleName] && [[sym moduleName] isNotEqualTo:[sym initialModuleName]]) {  // FIXME: wrong condition - initial mod == curr mod => ?
             // These are imported symbols invoked directly.
             [sym setModuleName:moduleName];
             id<JSDataProtocol> elem = [self objectForSymbol:sym isThrow:NO];
@@ -276,10 +276,10 @@ NSString *currentModuleName;
         NSMutableDictionary *hm = [(JSHashMap *)ast value];
         NSMutableArray *allKeys = [[hm allKeys] mutableCopy];
         NSMutableArray *allVals = [[hm allValues] mutableCopy];
-        [allKeys enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [allKeys enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [self updateModuleNameForExprs:obj moduleName:moduleName];
         }];
-        [allVals enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [allVals enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [self updateModuleNameForExprs:obj moduleName:moduleName];
         }];
     } else if ([JSAtom isAtom:ast]) {

@@ -52,6 +52,16 @@ extern NSString *currentModuleName;
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isThrow:(BOOL)isThrow;
 - (void)setModuleName:(NSString *)name;
 - (NSString *)moduleName;
+
+// Private functions
+- (void)updateModuleName:(JSSymbol *)symbol;
+- (void)updateModuleNameForExprs:(id<JSDataProtocol>)ast moduleName:(NSString *)moduleName;
+- (Env * _Nullable)findEnvForKey:(JSSymbol *)key inModule:(Env *)env;
+- (Env * _Nullable)findEnvForKey:(JSSymbol *)key inEnv:(Env *)env;
+- (id<JSDataProtocol>)resolveFault:(id<JSDataProtocol>)object forKey:(JSSymbol *)key inEnv:(Env *)env;
+- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromEnv:(Env *)env;
+- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromImportedEnv:(Env *)env;
+- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromTable:(Env *)env;
 @end
 
 NS_ASSUME_NONNULL_END
