@@ -8,7 +8,6 @@
 
 #import "Terminal.h"
 
-const char *prompt;
 static NSString *_appHome = @"/.jsl";
 static NSString *_historyFile = @"/jsl-history";
 
@@ -18,13 +17,10 @@ static NSString *_historyFile = @"/jsl-history";
     NSString *_historyPath;
     NSString *_homeDir;
     NSString *_appHomeDir;
+    NSString *_prompt;
 }
 
-+ (void)initialize {
-    if (self == [self class]) {
-        prompt = [[defaultModuleName stringByAppendingString:@"> "] UTF8String];
-    }
-}
+@synthesize prompt = _prompt;
 
 - (instancetype)init {
     self = [super init];
@@ -38,6 +34,7 @@ static NSString *_historyFile = @"/jsl-history";
     _homeDir = NSHomeDirectory();
     _appHomeDir = [_homeDir stringByAppendingString:_appHome];
     _historyPath = [_appHomeDir stringByAppendingString:_historyFile];
+    _prompt = [defaultModuleName stringByAppendingString:@"> "];
     [self checkPath];
     [self loadHistoryFile:_historyPath];
 }
@@ -66,7 +63,7 @@ static NSString *_historyFile = @"/jsl-history";
 }
 
 - (NSString *)readline {
-    return [self readlineWithPrompt:prompt];
+    return [self readlineWithPrompt:[_prompt UTF8String]];
 }
 
 - (NSString * _Nullable)readlineWithPrompt:(const char *)prompt {

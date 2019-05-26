@@ -47,7 +47,7 @@ int main(int argc, const char * argv[]) {
         NSString *ret;
         while (true) {
             @try {
-                inp = [term readline];
+                inp = [term readlineWithPrompt:[[jsl prompt] UTF8String]];
                 if (inp && [inp isNotEmpty]) {
                     ret = [jsl rep:inp];
                     if (ret) {

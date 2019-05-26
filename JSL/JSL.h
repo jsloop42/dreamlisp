@@ -21,6 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) Env *globalEnv;
 @property (nonatomic, readwrite) Env *env;
 @property (nonatomic, readwrite) BOOL isREPL;
+@property (nonatomic, readwrite) NSString *prompt;
 - (instancetype)init;
 - (instancetype)initWithREPL;
 - (instancetype)initWithoutREPL;

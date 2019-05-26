@@ -11,7 +11,6 @@
 static NSString *coreLibFileName = @"core.jsl";
 static NSString *hostLangVersion;
 static NSString *langVersion;
-static NSUInteger repTimeout = 10;
 
 @implementation JSL {
     Reader *_reader;
@@ -27,13 +26,14 @@ static NSUInteger repTimeout = 10;
     NSUInteger _unquoteDepth;
     dispatch_queue_t _queue;
     dispatch_queue_t _repQueue;  // Used for REPL queue for processing symbols from symbol table
-    dispatch_group_t _dispatchGroup;
     BOOL _isREPL;  // Is running a REPL
+    NSString *_prompt;
 }
 
 @synthesize globalEnv = _globalEnv;
 @synthesize env = _env;
 @synthesize isREPL = _isREPL;
+@synthesize prompt = _prompt;
 
 + (void)initialize {
     hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
@@ -437,7 +437,7 @@ static NSUInteger repTimeout = 10;
     [self updateModuleName:modName];
     // The third element onwards are imports and exports
     [self processModuleDirectives:[xs drop:2] module:_env];
-    if (_isREPL) prompt = [[modName stringByAppendingString:@"> "] UTF8String];
+    if (_isREPL) _prompt = [modName stringByAppendingString:@"> "];
     return modSym;
 }
 
@@ -529,7 +529,7 @@ static NSUInteger repTimeout = 10;
 
 /** Changes the prompt if in REPL and updates the @c currentModuleName */
 - (void)updateModuleName:(NSString *)moduleName {
-    if (_isREPL) prompt = [[moduleName stringByAppendingString:@"> "] UTF8String];
+    if (_isREPL) _prompt = [moduleName stringByAppendingString:@"> "];
     currentModuleName = moduleName;
 }
 
@@ -895,14 +895,23 @@ static NSUInteger repTimeout = 10;
 
 - (void)updateEnvFromSymbolTable:(SymbolTable *)table env:(Env *)env callback:(void (^)(void))callback {
     NSString *modName = [env moduleName];
-    [[[table table] allKeys] enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if ([modName isEqual:defaultModuleName] || [modName isEqual:coreModuleName] ||  [env isExportAll]) {
-            [[env module] setObject:[table symbol:obj] forSymbol:obj];
-        } else {
-            [[env table] setObject:[table symbol:obj] forKey:obj];
+    NSArray *keys = [[table table] allKeys];
+    NSUInteger len = [keys count];
+    NSUInteger __block count = 0;
+    if (len == 0) {
+        callback();
+        return;
+    }
+    [keys enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (obj != nil) {
+            if ([modName isEqual:defaultModuleName] || [modName isEqual:coreModuleName] ||  [env isExportAll]) {
+                [[env module] setObject:[table symbol:obj] forSymbol:obj];
+            } else {
+                [[env table] setObject:[table symbol:obj] forKey:obj];
+            }
         }
+        if (++count == len) callback(); // FIXME: Enable in concurrent mode
     }];
-    //[table removeAllObjects];  // TODO: ?
 }
 
 #pragma mark Print
@@ -914,19 +923,49 @@ static NSUInteger repTimeout = 10;
 #pragma mark REPL
 
 /** Read-eval-print function. */
-- (NSString * _Nullable)rep:(NSString *)string {
+- (NSString * _Nullable)rep1:(NSString *)string {
     NSMutableArray<id<JSDataProtocol>> *exps = [self read:string];
     NSUInteger len = [exps count];
     NSUInteger i = 0;
     NSString *ret = nil;
-    //_dispatchGroup = dispatch_group_create();
     for (i = 0; i < len; i++) {
         [self updateBindingsForAST:exps[i] table:[_env symbolTable]];  // Symbol table contains symbols encountered which are defined using def!, defmacro!.
-      //  info(@"%@", [_env symbolTable]);
         [self updateEnvFromSymbolTable:[_env symbolTable] env:_env callback:nil];
         ret = [self print:[self eval:exps[i] withEnv:[self env]]];
     }
-    //[[_env symbolTable] removeAllObjects];
+    return ret;
+}
+
+- (NSString * _Nullable)rep:(NSString *)string {
+    NSMutableArray<id<JSDataProtocol>> *exps = [self read:string];
+    NSUInteger len = [exps count];
+    NSUInteger i = 0;
+    NSString __block *ret = nil;
+    JSL * __weak weakSelf = self;
+    BOOL __block isTimeout = true;
+    NSException __block *excep = nil;
+    dispatch_group_t dispatchGroup = dispatch_group_create();
+    for (i = 0; i < len; i++) {
+        [self updateBindingsForAST:exps[i] table:[_env symbolTable]];  // Symbol table contains symbols encountered which are defined using def!, defmacro!.
+        dispatch_group_enter(dispatchGroup);
+        dispatch_async(_repQueue, ^{
+            JSL *this = weakSelf;
+            [this updateEnvFromSymbolTable:[this->_env symbolTable] env:this->_env callback:^{
+                @try {
+                    ret = [this print:[this eval:exps[i] withEnv:[this env]]];
+                } @catch (NSException *exception) {
+                    excep = exception;
+                }
+                isTimeout = false;
+                dispatch_group_leave(dispatchGroup);
+            }];
+        });
+        dispatch_group_wait(dispatchGroup, DISPATCH_TIME_FOREVER);
+        if (excep) @throw excep;
+        if (isTimeout) {
+            error(@"%@", SymbolTableTimeout);
+        }
+    }
     return ret;
 }
 

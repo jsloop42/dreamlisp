@@ -10,12 +10,17 @@
 
 static NSUInteger _genSymCounter = 0;
 static BOOL _isVerbose = NO;
+static BOOL _isConcurrentMode = YES;
 
 @implementation State
 
+#pragma mark Class methods
+
 /** Increments the auto gensymn counter. */
 + (NSUInteger)counter {
-    return ++_genSymCounter;
+    @synchronized (self) {
+        return ++_genSymCounter;
+    }
 }
 
 + (void)setIsVerbose:(BOOL)flag {
@@ -26,9 +31,21 @@ static BOOL _isVerbose = NO;
     return _isVerbose;
 }
 
++ (BOOL)isConcurrentMode {
+    return _isConcurrentMode;
+}
+
++ (void)setIsConcurrentMode {
+
+}
+
+#pragma mark Instance methods
+
 /** Increments the auto gensymn counter. */
 - (NSUInteger)counter {
-    return ++_genSymCounter;
+    @synchronized (self) {
+        return ++_genSymCounter;
+    }
 }
 
 /** Return the current auto gensymn counter. */

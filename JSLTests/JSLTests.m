@@ -100,6 +100,7 @@
     XCTAssertEqualObjects([prn printStringFor:fn readably:true], @"nil-fn/0");
     // Symbol
     JSSymbol *sym = [[JSSymbol alloc] initWithName:@"greet"];
+    [sym setModuleName:defaultModuleName];
     XCTAssertEqualObjects([prn printStringFor:sym readably:true], @"user:greet");
     // Integer
     JSNumber *num = [[JSNumber alloc] initWithString:@"42"];
@@ -1254,9 +1255,9 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(meta +)"], @"nil");
 }
 
-- (void)notestTCO {
+- (void)testTCO {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-    [jsl rep:@"(def! sum2 (fn* (n acc) (if (= n 0) acc (sum2 (- n 1) (+ n acc)))))"];
+    [jsl rep:@"(def! sum2 (fn* (n acc) (if (= n 0) acc (sum2 (- n 1) (+ n acc)))))"];  // tail recursive
     XCTAssertEqualObjects([jsl rep:@"(sum2 10 0)"], @"55");
     XCTAssertEqualObjects([jsl rep:@"(def! res2 nil)"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(def! res2 (sum2 10000 0))"], @"50005000");
@@ -1488,7 +1489,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"*host-language*"], @"\"Objective-C 2.0\"");
     [jsl rep:@"(def! start-time (time-ms))"];
     XCTAssertEqualObjects([jsl rep:@"(= start-time 0)"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(let* [sumdown (fn* (N) (if (> N 0) (+ N (sumdown (- N 1))) 0))] (sumdown 1000)) ; Waste some time"], @"500500");
+    XCTAssertEqualObjects([jsl rep:@"(let* [sumdown (fn* (N) (if (> N 0) (+ N (sumdown (- N 1))) 0))] (sumdown 100)) ; Waste some time"], @"5050");  // not tail recursive
     XCTAssertEqualObjects([jsl rep:@"(> (time-ms) start-time)"], @"true");
 }
 
@@ -1615,7 +1616,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     Env *env = [Env new];
     // Current module name is "user"
     NSString *currModName = @"user";
-    JSSymbol *sym = [[JSSymbol alloc] initWithName:@"add"];
+    JSSymbol *sym = [[JSSymbol alloc] initWithName:@"random-sym-1"];
     // A new symbol before any processing or from current module
     [sym setInitialModuleName:defaultModuleName];
     [sym resetModuleName];

@@ -405,6 +405,7 @@ NSString *currentModuleName;
     if (val) return [self resolveFault:val forKey:key inEnv:env];
     // Symbol not found
     if (![key isQualified]) [key setModuleName:currentModuleName];
+    //info(@"Symbol not found: %@", [key string]);
     if (isThrow) [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
     return nil;
 }

@@ -15,9 +15,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern const char *prompt;
 
 @interface Terminal : NSObject
+@property (nonatomic, readwrite) NSString *prompt;
 - (instancetype)init;
 - (NSString *)readline;
 - (NSString * _Nullable)readlineWithPrompt:(const char *)prompt;
