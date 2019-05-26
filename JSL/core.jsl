@@ -2,15 +2,17 @@
 (defmacro! defmacro (fn* (symname args & form)
  `(defmacro! ~symname (fn* ~args (do ~@form)))))
 
-;; Evaluates expressions one at a time. If an expression returns false, the function returns with the result else continues evaluation till the last expression
-;; is evaluated.
-(defmacro or () nil)
-(defmacro or (x) x)
-(defmacro or (x & more) `(let* (res ~x) (if res res (or ~@more))))
-
 ;; A macro to define functions
-(defmacro defun (symname args & form)
-  `(def! ~symname (fn* ~args (do ~@form))))
+(defmacro! defun (fn* (symname args & form)
+ `(def! ~symname (fn* ~args (do ~@form)))))
+
+;; A macro that evaluates all forms passed in a let binding
+(defmacro! let (fn* (b & form)
+  `(let* ~b (do ~@form))))
+
+;; A macro that evaluates all forms passed to a function
+(defmacro! fn (fn* (args & form)
+  `(fn* ~args (do ~@form))))
 
 (def! greet (fn* () (println "hello")))
 
@@ -25,6 +27,12 @@
        (nth xs 1)
        (throw "Odd number of forms to cond"))
     (cond ~@(rest (rest xs)))))))
+
+;; Evaluates expressions one at a time. If an expression returns false, the function returns with the result else continues evaluation till the last expression
+;; is evaluated.
+(defmacro or () nil)
+(defmacro or (x) x)
+(defmacro or (x & more) `(let* (res ~x) (if res res (or ~@more))))
 
 ;; A counter to generate unique symbol name
 (def! *gensym-counter* (atom 0))

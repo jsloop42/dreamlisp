@@ -54,6 +54,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (JSSymbol *)toNArity;
 - (JSSymbol *)resetArity;
 - (void)updateArity;
+- (void)resetModuleName;
 - (NSString *)string;
 - (void)copyProperties:(JSSymbol *)symbol;
 - (BOOL)isEqualToName:(NSString *)name;

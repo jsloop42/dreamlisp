@@ -967,17 +967,6 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(cond false 7 false 8 false 9)"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(first nil)"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(rest nil)"], @"()");
-    NSString *corePath = [self pathForFile:@"core.mal"];
-    XCTAssertTrue([corePath isNotEmpty]);
-    [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", corePath]];
-    XCTAssertEqualObjects([jsl rep:@"(-> 7)"], @"7");
-    XCTAssertEqualObjects([jsl rep:@"(-> (list 7 8 9) first)"], @"7");
-    XCTAssertEqualObjects([jsl rep:@"(-> (list 7 8 9) (first))"], @"7");
-    XCTAssertEqualObjects([jsl rep:@"(-> (list 7 8 9) first (+ 7))"], @"14");
-    XCTAssertEqualObjects([jsl rep:@"(-> (list 7 8 9) rest (rest) first (+ 7))"], @"16");
-    XCTAssertEqualObjects([jsl rep:@"(->> \"L\")"], @"\"L\"");
-    XCTAssertEqualObjects([jsl rep:@"(->> \"L\" (str \"A\") (str \"M\"))"], @"\"MAL\"");
-    XCTAssertEqualObjects([jsl rep:@"(->> [4] (concat [3]) (concat [2]) rest (concat [1]))"], @"(1 3 4)");
     XCTAssertEqualObjects([jsl rep:@"(conj (list) 1)"], @"(1)");
     XCTAssertEqualObjects([jsl rep:@"(conj (list 1) 2)"], @"(2 1)");
     XCTAssertEqualObjects([jsl rep:@"(conj (list 2 3) 4)"], @"(4 2 3)");
@@ -1097,7 +1086,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(unless2 false 7 8)"], @"7");
     XCTAssertEqualObjects([jsl rep:@"(unless2 true 7 8)"], @"8");
     // testing macro expand
-    XCTAssertEqualObjects([jsl rep:@"(macroexpand (unless2 2 3 4))"], @"(user:if (user:not 2) 3 4)");
+    XCTAssertEqualObjects([jsl rep:@"(macroexpand (unless2 2 3 4))"], @"(user:if (core:not 2) 3 4)");
     [jsl rep:@"(defmacro! identity (fn* (x) x))"];
     XCTAssertEqualObjects([jsl rep:@"(let* (a 123) (identity a))"], @"123");
     [jsl rep:@"(defmacro! foo (fn* (& more) (count more)))"];
@@ -1618,6 +1607,48 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 - (void)testCoreLib {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(let (a 11 b (fn* (n) (+ n 1)) c (atom 0)) (reset! c (+ a 10)) (b @c))"], @"22");
+}
+
+#pragma mark Env
+
+- (void)testEnvUpdateModuleNameForExprs {
+    Env *env = [Env new];
+    // Current module name is "user"
+    NSString *currModName = @"user";
+    JSSymbol *sym = [[JSSymbol alloc] initWithName:@"add"];
+    // A new symbol before any processing or from current module
+    [sym setInitialModuleName:defaultModuleName];
+    [sym resetModuleName];
+    [sym resetArity];
+    [env updateModuleNameForExprs:sym moduleName:currModName];
+    XCTAssertEqualObjects([sym moduleName], currModName);
+    XCTAssertEqualObjects([sym initialModuleName], currModName);
+    // A symbol from core module
+    [sym setInitialModuleName:coreModuleName];
+    [sym resetModuleName];
+    // If a symbol from "core" module is encountered, the module names are reset to core.
+    [env updateModuleNameForExprs:sym moduleName:currModName];
+    XCTAssertEqualObjects([sym moduleName], coreModuleName);
+    XCTAssertEqualObjects([sym initialModuleName], coreModuleName);
+    // A symbol from a new module is found
+    NSString *newModName = @"io";
+    [sym setInitialModuleName:newModName];
+    [sym resetModuleName];
+    XCTAssertEqualObjects([sym moduleName], newModName);
+    XCTAssertEqualObjects([sym initialModuleName], newModName);
+    // An symbol with different module names encountered
+    [sym setInitialModuleName:defaultModuleName];
+    XCTAssertEqualObjects([sym moduleName], newModName);
+    XCTAssertEqualObjects([sym initialModuleName], defaultModuleName);
+    // An qualified symbol is found
+    [sym setIsQualified:YES];
+    XCTAssertEqualObjects([sym moduleName], newModName);
+    XCTAssertEqualObjects([sym initialModuleName], defaultModuleName);  // No change is made to module names
+    // An imported symbol is found
+    [sym setIsQualified:NO];
+    [sym setIsImported:YES];
+    XCTAssertEqualObjects([sym moduleName], newModName);
+    XCTAssertEqualObjects([sym initialModuleName], defaultModuleName);  // No change is made to module names
 }
 
 - (void)test {
