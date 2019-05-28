@@ -47,6 +47,7 @@ extern NSString *currentModuleName;
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs;
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs isImported:(BOOL)isImported currentEnv:(Env *)currentEnv;
 - (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key;
+- (void)updateObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key;
 - (Env *)findEnvForKey:(JSSymbol *)key;
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key;
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isThrow:(BOOL)isThrow;

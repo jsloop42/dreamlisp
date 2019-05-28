@@ -71,4 +71,10 @@
     }
 }
 
+/** Updates key and value. If existing key is present, it is removed and the current key is added so that any properties updated in current key is reflected. */
+- (void)updateObject:(id)object forKey:(id)key {
+    [self removeObjectForKey:key];
+    [self setObject:object forKey:key];
+}
+
 @end

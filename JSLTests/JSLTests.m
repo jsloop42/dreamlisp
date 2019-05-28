@@ -1548,7 +1548,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(user:d t 2)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(defun inc (n) (+ n 1))"], @"foo:inc/1");
     [jsl rep:@"(in-module user)"];
-    XCTAssertEqualObjects([jsl rep:@"(try* (foo:inc 4) (catch* ex (str ex)))"], @"\"'foo:inc/1' not found\"");  // function not exported
+    XCTAssertEqualObjects([jsl rep:@"(try* (foo:random-1 4) (catch* ex (str ex)))"], @"\"'foo:random-1/1' not found\"");  // function not exported
 }
 
 - (void)testModuleExports {
@@ -1561,7 +1561,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(greet)"], @"42");
     XCTAssertEqualObjects([jsl rep:@"(in-module user)"], @"user");
     XCTAssertEqualObjects([jsl rep:@"(foo:inc 4)"], @"5");
-    XCTAssertEqualObjects([jsl rep:@"(try* (foo:greet) (catch* ex (str ex)))"], @"\"'foo:greet/0' not found\"");  // function not exported
+    XCTAssertEqualObjects([jsl rep:@"(try* (foo:random-2) (catch* ex (str ex)))"], @"\"'foo:random-2/0' not found\"");  // function not exported
 }
 
 - (void)testModuleExportAll {
@@ -1603,6 +1603,8 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(greet)"], @"42");
     XCTAssertEqualObjects([jsl rep:@"(in-module user)"], @"user");
     XCTAssertEqualObjects([jsl rep:@"(foo:greet)"], @"42");
+    // Invoke MFA from string format
+    XCTAssertEqualObjects([jsl rep:@"(eval (read-string \"(foo:greet)\"))"], @"42");
 }
 
 - (void)testCoreLib {
@@ -1650,6 +1652,25 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     [sym setIsImported:YES];
     XCTAssertEqualObjects([sym moduleName], newModName);
     XCTAssertEqualObjects([sym initialModuleName], defaultModuleName);  // No change is made to module names
+}
+
+- (void)notestCodeLoadedFromFile {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    NSString *moduleTest = [self pathForFile:@"module-test.jsl"];
+    XCTAssertTrue([moduleTest isNotEmpty]);
+    [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", moduleTest]];
+    XCTAssertEqualObjects([jsl rep:@"(test-in-user)"], @"123");
+    XCTAssertEqualObjects([jsl rep:@"(foo:greet-name \"o\")"], @"\"Hello Olivia\"");
+    XCTAssertEqualObjects([jsl rep:@"(foo:greet)"], @"\"Hello there\"");
+    XCTAssertEqualObjects([jsl rep:@"(foo:fringe-me)"], @"42");
+    XCTAssertEqualObjects([jsl rep:@"(foo:magic 42)"], @"\"Now you see me\"");
+    XCTAssertEqualObjects([jsl rep:@"(foo:magic 24)"], @"\"Now you don't\"");
+    XCTAssertEqualObjects([jsl rep:@"foo:fdefun"], @"foo:fdefun/n");
+    XCTAssertEqualObjects([jsl rep:@"(foo:fdefun a () 21)"], @"user:a/0");
+    XCTAssertEqualObjects([jsl rep:@"(a)"], @"21");
+    XCTAssertEqualObjects([jsl rep:@"(bar:do-magic)"], @"0");
+    XCTAssertEqualObjects([jsl rep:@"(bar:magic-magic 42)"], @"1764");
+    XCTAssertEqualObjects([jsl rep:@"(bar:bar \"Olive\")"], @"\"I am Olive\"");
 }
 
 - (void)test {

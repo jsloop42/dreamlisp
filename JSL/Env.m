@@ -181,7 +181,7 @@ NSString *currentModuleName;
 //            NSAssert([[key moduleName] isEqual:coreModuleName], @"Core symbols should have core as its module name");
 //        }
         [_module setObject:obj forSymbol:key];
-        NSAssert([_module objectForSymbol:key] != nil, @"cannot be nil");
+        NSAssert([_module objectForSymbol:key] != nil, @"cannot be nil");  // FIXME:
         if ([[key name] isEqual:@"defmacro"]) {
             NSAssert([[key moduleName] isEqual:coreModuleName], @"wrong module name");
         }
@@ -192,6 +192,10 @@ NSString *currentModuleName;
         }
         [_table setObject:obj forKey:key];
     }
+}
+
+- (void)updateObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key {
+    [_table updateObject:obj forKey:key];
 }
 
 /** Checks if the symbol belongs to current module, if so update the module name. */
@@ -287,6 +291,17 @@ NSString *currentModuleName;
     return [env outer] ? [self findEnvForKey:key inModule:[env outer]] : nil;
 }
 
+/** Checks env's internal table for a match */
+- (Env * _Nullable)findEnvForKey:(JSSymbol *)key inEnvTable:(Env *)env {
+    id<JSDataProtocol> val = [[env table] objectForKey:key];
+    if (val) {
+        return env;
+    } else if (![key hasNArity]) {
+        return [self findEnvForKey:[key toNArity] inEnvTable:env];
+    }
+    return [env outer] ? [self findEnvForKey:[key resetArity] inEnvTable:[env outer]] : nil;
+}
+
 /**
  Lookup env table if the symbol belongs to current module, else lookup module table. Recursively checks the environments for the given symbol until a match
  is found or the environment is the outermost, which is nil.
@@ -294,7 +309,7 @@ NSString *currentModuleName;
 - (Env * _Nullable)findEnvForKey:(JSSymbol *)key inEnv:(Env *)env {
     if (!_isExportAll && [currentModuleName isEqual:[key moduleName]] && [currentModuleName isNotEqualTo:defaultModuleName] &&
         [currentModuleName isNotEqualTo:coreModuleName]) {
-        if ([[env table] objectForKey:key]) {  // same module => all bindings are accessible
+        if ([[env table] objectForKey:key]) {  // same module => all bindings are accessible. Not export all, so lookup in table
             return self;
         } else if (![key hasNArity]) {
             return [self findEnvForKey:[key toNArity] inEnv:env];
@@ -305,6 +320,9 @@ NSString *currentModuleName;
         } else if (![key hasNArity]) {
             return [self findEnvForKey:[key toNArity] inEnv:env];
         }
+        // Check for imported symbol which will not match the above conditions in the current table
+        Env *aEnv = [self findEnvForKey:[key resetArity] inEnvTable:env];
+        if (aEnv) return aEnv;
     }
     [key resetArity];
     return _outer ? [_outer findEnvForKey:key inEnv:_outer] : nil;
@@ -331,7 +349,7 @@ NSString *currentModuleName;
         if ([fault isImported]) {
             Env *modEnv = [Env envForModuleName:[fault moduleName]];
             if (modEnv) {
-                [key setModuleName:[fault moduleName]];
+                [key setModuleName:[fault moduleName]];  // update module name so that the key can be retrieved from the original module
                 val = [[modEnv module] objectForSymbol:key];
                 // An imported symbol with fault found. The symbol value's from the original module can also be a fault if the export was not resolved already.
                 // Check if the export needs to be resolved.
@@ -339,10 +357,11 @@ NSString *currentModuleName;
                 if (val) {
                     [val setIsImported:YES];
                     [key setIsImported:YES];
+                    [key setIsFault:NO];
                     [key setInitialModuleName:[modEnv moduleName]];
                     [key setModuleName:[env moduleName]];
                     [key setIsQualified:YES];  // Can be set to NO, in which case lookup would take additional steps to resolve.
-                    [[env table] setObject:val forKey:key];
+                    [[env table] updateObject:val forKey:key];
                     return val;
                 } else {
                     [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
@@ -356,7 +375,7 @@ NSString *currentModuleName;
                 // The original function changes are reflected for imports as well because the function if fetch from the referring module table if it is either
                 // qualified or imported.
                 [key setIsQualified:YES];  // Can be set to NO
-                [[env module] setObject:val forSymbol:key];
+                [[env module] updateObject:val forSymbol:key];
                 return val;
             } else {
                 [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
@@ -377,10 +396,17 @@ NSString *currentModuleName;
         if ([[env moduleName] isEqual:coreModuleName]) {
             [key setModuleName:coreModuleName];
             val = [env objectForSymbol:key fromEnv:env];
+            if (val) return [self resolveFault:val forKey:key inEnv:env];
         } else {
+            // env is obtained => the symbol is in either the module table or internal table.
             val = [self objectForSymbol:key fromEnv:env];
+            if (val) return [self resolveFault:val forKey:key inEnv:env];
+            // check for imported symbol
+            if (![key isQualified]) {
+                val = [self objectForSymbol:key fromTable:env];
+                if (val) return [self resolveFault:val forKey:key inEnv:env];
+            }
         }
-        if (val) return [self resolveFault:val forKey:key inEnv:env];
     } else if ([[key moduleName] isEqual:[self moduleName]]) {
         env = self;
         val = [self objectForSymbol:key fromEnv:env];
@@ -394,7 +420,7 @@ NSString *currentModuleName;
     if (![key isQualified]) [key setModuleName:currentModuleName];
     //info(@"Symbol not found: %@", [key string]);
     if (isThrow) {
-        if ([[key name] isEqual:@"defmacro"]) {
+        if ([[key name] isEqual:@"fringe"]) {
             [self test];
         }
         [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
@@ -403,13 +429,13 @@ NSString *currentModuleName;
 }
 
 - (void)test {
-    Env *coreEnv = [Env envForModuleName:coreModuleName];
-    NSMutableArray *keys = [[[[coreEnv module] table] allKeys] mutableCopy];
+    Env *bar = [Env envForModuleName:@"bar"];
+    NSMutableArray *keys = [[[bar table] allKeys] mutableCopy];
     [keys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if ([JSSymbol isSymbol:obj withName:@"defmacro"]) {
+        if ([JSSymbol isSymbol:obj withName:@"fringe"]) {
             JSSymbol *sym = (JSSymbol *)obj;
             info(@"%@", sym);
-            id<JSDataProtocol> val = [[[coreEnv module] table] objectForKey:sym];
+            id<JSDataProtocol> val = [[bar table] objectForKey:sym];
             info(@"%@", val);
             [sym setModuleName:coreModuleName];
         }
@@ -422,8 +448,9 @@ NSString *currentModuleName;
     if (([key isQualified] && [key isImported]) || [key isImported]) {
         return [self objectForSymbol:key fromImportedEnv:[Env envForModuleName:[key initialModuleName]]];
     }
-    if (!_isExportAll && [currentModuleName isEqual:[key moduleName]] && [[key moduleName] isNotEqualTo:defaultModuleName] &&
-        [[key moduleName] isNotEqualTo:coreModuleName]) {
+    if (!_isExportAll && [currentModuleName isEqual:[key moduleName]] && [[key moduleName] isNotEqualTo:defaultModuleName] && [[key moduleName] isNotEqualTo:coreModuleName]) {
+        // => lookup internal table. This case will not lookup the internal table if the module has all exports and imported symbol, in which case we will miss
+        // picking up imported symbol. So another direct lookup is required if the symbol is nil.
         val = [[env table] objectForKey:key];
         if (val) {
             return val;
@@ -436,9 +463,19 @@ NSString *currentModuleName;
             return val;
         } else if (![key hasNArity]) {
             return [self objectForSymbol:[key toNArity] fromEnv:env];
-        } else if ([[key moduleName] isEqual:defaultModuleName] || [[key moduleName] isEqual:coreModuleName]) {
+        } else if ([[key moduleName] isEqual:defaultModuleName]) {
             [key resetArity];
             val = [self objectForSymbol:key fromTable:env];
+            if (val) return val;
+        } else if ([[key moduleName] isEqual:coreModuleName]) {
+            [key resetArity];
+            Env *coreEnv = nil;
+            if ([[env moduleName] isNotEqualTo:coreModuleName]) {
+                coreEnv = [Env envForModuleName:coreModuleName];
+            } else {
+                coreEnv = env;
+            }
+            val = [self objectForSymbol:key fromModuleTable:coreEnv];
             if (val) return val;
         }
     }
@@ -450,6 +487,9 @@ NSString *currentModuleName;
 - (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromImportedEnv:(Env *)env {
     JSSymbol *sym = key;
     [sym setModuleName:[sym initialModuleName]];
+    if ([env isExportAll]) {
+        return [self objectForSymbol:sym fromModuleTable:env];
+    }
     return [self objectForSymbol:sym fromTable:env];
 }
 
@@ -463,6 +503,18 @@ NSString *currentModuleName;
     }
     [key resetArity];
     return [env outer] ? [self objectForSymbol:key fromTable:[env outer]]: nil;
+}
+
+- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromModuleTable:(Env *)env {
+    id<JSDataProtocol> val = nil;
+    val = [[env module] objectForSymbol:key];
+    if (val) {
+        return val;
+    } else if (![key hasNArity]) {
+        return [self objectForSymbol:[key toNArity] fromModuleTable:env];
+    }
+    [key resetArity];
+    return [env outer] ? [self objectForSymbol:key fromModuleTable:[env outer]]: nil;
 }
 
 #pragma mark Module

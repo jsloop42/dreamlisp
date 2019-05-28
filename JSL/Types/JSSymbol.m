@@ -290,6 +290,9 @@
 
 - (BOOL)isEqual:(id)symbol {
     if (![JSSymbol isSymbol:symbol]) return NO;
+//    if ([SymbolTableKey isSymbolTableKey:symbol]) {  // FIXME: remove?
+//        symbol = [(SymbolTableKey *)symbol toSymbol];
+//    }
     return [_name isEqual:[symbol name]] && _arity == [symbol arity] && [_moduleName isEqual:[symbol moduleName]];
 }
 

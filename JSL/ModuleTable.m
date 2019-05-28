@@ -37,6 +37,10 @@
     [_table setObject:obj forKey:key];
 }
 
+- (void)updateObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key {
+    [_table updateObject:obj forKey:key];
+}
+
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key {
     return [_table objectForKey:key];
 }

@@ -17,8 +17,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) NSInteger arity;
 @property (nonatomic, readwrite) NSString *initialValue;
 @property (nonatomic, readwrite) NSString *moduleName;
++ (BOOL)isSymbolTableKey:(id)key;
 - (instancetype)initWithSymbol:(JSSymbol *)symbol;
 - (instancetype)initWithKey:(SymbolTableKey *)key;
+- (JSSymbol *)toSymbol;
 - (BOOL)isEqual:(id)symbol;
 - (NSUInteger)hash;
 @end

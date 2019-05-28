@@ -129,8 +129,13 @@ static NSString *langVersion;
         }
         return [JSNil new];
     };
-    [[self env] setObject:[[JSFunction alloc] initWithFn:loadFile argCount:1 name:@"load-file/1"] forSymbol:[[JSSymbol alloc] initWithArity:1
-                                                                                                                                     string:@"load-file"]];
+    Env *coreEnv = [Env envForModuleName:coreModuleName];
+    JSSymbol *sym = [[JSSymbol alloc] initWithArity:1 string:@"load-file"];
+    [sym setInitialModuleName:coreModuleName];
+    [sym resetModuleName];
+    JSFunction *fn = [[JSFunction alloc] initWithFn:loadFile argCount:1 name:@"load-file/1"];
+    [fn setModuleName:coreModuleName];
+    [[coreEnv module] setObject:fn forSymbol:sym];
 }
 
 /** Construct core lib file path. */
@@ -441,24 +446,49 @@ static NSString *langVersion;
     return modSym;
 }
 
-/** Process module import exports. The ast can be of the form (export (a 1) (b 0)) (export (c 2) (d 1)) (import (from list (all 2)) (from io (read 1))) .. */
-- (void)processModuleDirectives:(JSList *)ast module:(Env *)env {
-    NSMutableArray *arr = [ast value];
-    NSLock *lock = [NSLock new];
-    [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger i, BOOL * _Nonnull stop) {
-        JSList *xs = (JSList *)obj;
-        id<JSDataProtocol> modDir = [xs first];
-        if ([JSSymbol isSymbol:modDir withName:@"export"]) {
-            JSList *elem = [xs rest];
-            if ([elem count] == 1 && [JSSymbol isSymbol:[elem first] withName:@"all"]) {
-                [env setIsExportAll:YES];
-                [[env module] removeAllObjects];
-                *stop = YES;
-            } else {
-                [env setIsExportAll:NO];
-                NSMutableArray *fnList = [(JSList *)elem value];
-                [fnList enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull expObj, NSUInteger j, BOOL * _Nonnull expStop) {
-                    NSMutableArray *aExp = (NSMutableArray *)[(JSList *)expObj value];
+- (void)processExportDirective:(JSList *)ast module:(Env *)env {
+    JSList *elem = [ast rest];
+    if ([elem count] == 1 && [JSSymbol isSymbol:[elem first] withName:@"all"]) {
+        [env setIsExportAll:YES];
+        return;
+    } else {
+        [env setIsExportAll:NO];
+        NSMutableArray *fnList = [(JSList *)elem value];
+        NSUInteger len = [fnList count];
+        NSUInteger i = 0;
+        for (i = 0; i < len; i++) {
+            NSMutableArray *aExp = (NSMutableArray *)[(JSList *)fnList[i] value];
+            JSSymbol *sym = (JSSymbol *)[aExp first];
+            JSNumber *arityNum = (JSNumber *)[aExp second];
+            NSInteger arity = [arityNum integerValue];
+            [sym setArity:arity];
+            [sym setInitialArity:arity];
+            [sym updateArity];
+            [sym setIsFault:YES];
+            [sym setModuleName:[env moduleName]];
+            [sym setInitialModuleName:[env moduleName]];
+            [[env module] setObject:[[JSFault alloc] initWithModule:[env moduleName] isImportFault:NO] forSymbol:sym];
+        }
+    }
+    //info(@"Exports\n%@", [[[env module] table] allKeys]);
+}
+
+- (void)processImportDirective:(JSList *)ast module:(Env *)env {
+    JSList *imports = [ast rest];
+    NSMutableArray *impArr = (NSMutableArray *)[imports value];
+    NSUInteger len = [impArr count];
+    NSUInteger i = 0;
+    for (i = 0; i < len; i++) {
+        JSList *imp = (JSList *)impArr[i];
+        if ([JSSymbol isSymbol:[imp first] withName:@"from"]) {
+            NSString *modName = [(JSSymbol *)[imp second] value];
+            Env *impEnv = [Env envForModuleName:modName];
+            if (impEnv) {
+                NSMutableArray *impFns = (NSMutableArray *)[(JSList *)[imp drop:2] value];
+                NSUInteger fnLen = [impFns count];
+                NSUInteger j = 0;
+                for (j = 0; j < fnLen; j++) {
+                    JSList *aExp = (JSList *)impFns[j];
                     JSSymbol *sym = (JSSymbol *)[aExp first];
                     JSNumber *arityNum = (JSNumber *)[aExp second];
                     NSInteger arity = [arityNum integerValue];
@@ -467,43 +497,30 @@ static NSString *langVersion;
                     [sym updateArity];
                     [sym setIsFault:YES];
                     [sym setModuleName:[env moduleName]];
-                    [sym setInitialModuleName:[env moduleName]];
-                    [lock lock];
-                    [[env module] setObject:[[JSFault alloc] initWithModule:[env moduleName] isImportFault:NO] forSymbol:sym];
-                    [lock unlock];
-                }];
-            }
-        } else if ([JSSymbol isSymbol:modDir withName:@"import"]) {
-            JSList *imports = (JSList *)[xs rest];
-            NSMutableArray *impArr = (NSMutableArray *)[imports value];
-            [impArr enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                JSList *imp = (JSList *)obj;
-                if ([JSSymbol isSymbol:[imp first] withName:@"from"]) {
-                    NSString *modName = [(JSSymbol *)[imp second] value];
-                    Env *impEnv = [Env envForModuleName:modName];
-                    if (impEnv) {
-                        NSMutableArray *impFns = (NSMutableArray *)[(JSList *)[imp drop:2] value];
-                        [impFns enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                            JSList *aExp = (JSList *)obj;
-                            JSSymbol *sym = (JSSymbol *)[aExp first];
-                            JSNumber *arityNum = (JSNumber *)[aExp second];
-                            NSInteger arity = [arityNum integerValue];
-                            [sym setArity:arity];
-                            [sym setInitialArity:arity];
-                            [sym updateArity];
-                            [sym setIsFault:YES];
-                            [sym setModuleName:[env moduleName]];
-                            [sym setInitialModuleName:modName];
-                            [sym setIsImported:YES];
-                            [lock lock];
-                            [[env table] setObject:[[JSFault alloc] initWithModule:modName isImportFault:YES] forKey:sym];
-                            [lock unlock];
-                        }];
-                    }
+                    [sym setInitialModuleName:modName];
+                    [sym setIsImported:YES];
+                    [[env table] setObject:[[JSFault alloc] initWithModule:modName isImportFault:YES] forKey:sym];
                 }
-            }];
+            }
         }
-    }];
+    }
+    //info(@"Imports\n%@", [[env table] allKeys]);
+}
+
+/** Process module import exports. The ast can be of the form (export (a 1) (b 0)) (export (c 2) (d 1)) (import (from list (all 2)) (from io (read 1))) .. */
+- (void)processModuleDirectives:(JSList *)ast module:(Env *)env {
+    NSMutableArray *arr = [ast value];
+    NSUInteger len = [arr count];
+    NSUInteger i = 0;
+    for (i = 0; i < len; i++) {
+        JSList *xs = (JSList *)arr[i];
+        id<JSDataProtocol> modDir = [xs first];
+        if ([JSSymbol isSymbol:modDir withName:@"export"]) {
+            [self processExportDirective:xs module:env];
+        } else if ([JSSymbol isSymbol:modDir withName:@"import"]) {
+            [self processImportDirective:xs module:env];
+        }
+    }
 }
 
 /** Change current module to the given one. */
@@ -626,7 +643,7 @@ static NSString *langVersion;
 
 /** Update only the symbols in the vector for which there is a match in the symbol table. */
 - (JSVector *)updateBindingsForVector:(JSVector *)ast table:(SymbolTable *)table {
-    [[ast value] enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id<JSDataProtocol>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [[ast value] enumerateObjectsWithOptions:0 usingBlock:^(id<JSDataProtocol>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if ([JSSymbol isSymbol:obj]) {
             [self updateSymbol:obj arity:-2 table:table];
         } else {
@@ -712,7 +729,7 @@ static NSString *langVersion;
                 // lookup takes place.
                 if (_isQuasiquoteMode) {
                     NSMutableArray *arr = [ast value];
-                    [arr enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    [arr enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                         if (idx != 0) {
                             [self updateUnquoteBindingsForAST:obj table:table];
                         }
@@ -866,7 +883,7 @@ static NSString *langVersion;
     NSUInteger i = 0;
     NSString *ret = nil;
     for (i = 0; i < len; i++) {
-        [self updateBindingsForAST:exps[i] table:[_env symbolTable]];  // Symbol table contains symbols encountered which are defined using def!, defmacro!.
+        [self updateBindingsForAST:exps[i] table:[_env symbolTable]];  // Symbol table contains symbols encountered which are defined using def!, defmacro!. // FIXME: [self env]
         //[self updateEnvFromSymbolTable:[_env symbolTable] env:_env callback:nil];
         ret = [self print:[self eval:exps[i] withEnv:[self env]]];
     }

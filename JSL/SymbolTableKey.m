@@ -25,6 +25,10 @@
 @synthesize initialValue = _initialValue;
 @synthesize moduleName = _moduleName;
 
++ (BOOL)isSymbolTableKey:(id)key {
+    return [[key className] isEqual:[self className]];
+}
+
 - (instancetype)initWithSymbol:(JSSymbol *)symbol {
     self = [super init];
     if (self) {
@@ -39,6 +43,19 @@
     self = [super self];
     if (self) self = key;
     return self;
+}
+
+- (JSSymbol *)toSymbol {
+    JSSymbol *sym = [[JSSymbol alloc] initWithName:_initialValue];
+    NSAssert(false, @"Assumed to be not used");
+//    [sym setInitialArity:_arity];
+//    [sym setPosition:_position];
+//    [sym resetArity];
+//    [sym setInitialModuleName:_moduleName];
+//    [sym resetModuleName];
+//    [sym setIsQualified:_isQualified];
+//    [sym setIsModule:_isModule];
+    return sym;
 }
 
 - (BOOL)isEqual:(id)symbol {

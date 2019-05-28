@@ -15,11 +15,13 @@
 #import "JSError.h"
 #import "State.h"
 #import "SymbolTable.h"
+#import "SymbolTableKey.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class JSFunction;
 @class JSList;
+@class SymbolTableKey;
 
 @interface JSSymbol: NSObject <JSDataProtocol>
 @property (nonatomic, readwrite) NSInteger arity;
