@@ -175,11 +175,20 @@ NSString *currentModuleName;
 - (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key {
     [key setModuleName:[_module name]];
     if (_isExportAll || [[self moduleName] isEqual:defaultModuleName] || [[self moduleName] isEqual:coreModuleName]) {
+//        if ([[self moduleName] isEqual:coreModuleName]) {
+//            [key setInitialModuleName:coreModuleName];
+//            [key resetModuleName];
+//            NSAssert([[key moduleName] isEqual:coreModuleName], @"Core symbols should have core as its module name");
+//        }
         [_module setObject:obj forSymbol:key];
+        NSAssert([_module objectForSymbol:key] != nil, @"cannot be nil");
+        if ([[key name] isEqual:@"defmacro"]) {
+            NSAssert([[key moduleName] isEqual:coreModuleName], @"wrong module name");
+        }
     } else {
         id <JSDataProtocol> elem = [_table objectForKey:key];
         if (elem) {
-             // if imported symbol is getting overwritten, display a warning.
+            // FIXME: if imported symbol is getting overwritten, display a warning.
         }
         [_table setObject:obj forKey:key];
     }
@@ -216,8 +225,9 @@ NSString *currentModuleName;
             [sym setInitialModuleName:[sym moduleName]];
             [sym setModuleName:moduleName];
             [sym setIsImported:YES];
-        } else if (![sym isQualified] && [modName isNotEqualTo:moduleName] && [modName isNotEqualTo:coreModuleName] && [[sym moduleName] isNotEqualTo:[sym initialModuleName]]) {  // FIXME: wrong condition - initial mod == curr mod => ?
-            // These are imported symbols invoked directly.
+        } else if (![sym isQualified] && [modName isNotEqualTo:moduleName] && [modName isNotEqualTo:coreModuleName] &&
+                   [[sym moduleName] isNotEqualTo:[sym initialModuleName]]) {
+            // These can be imported symbols or symbols defined in a new module
             [sym setModuleName:moduleName];
             id<JSDataProtocol> elem = [self objectForSymbol:sym isThrow:NO];
             if (elem && [elem isImported]) {
@@ -228,36 +238,7 @@ NSString *currentModuleName;
             } else {
                 [sym setInitialModuleName:[sym moduleName]];
             }
-        } else if (![sym isQualified] && [modName isEqual:moduleName] && [modName isNotEqualTo:coreModuleName]) {
-            // Inner bindings of a function. In `(defun greet () (sum 11))`, the inner bindings starts from `(sum 11)`. These are present as ast in a JSFunction
-            // object.
-            [sym setModuleName:moduleName];
-            id<JSDataProtocol> elem = [self objectForSymbol:sym isThrow:NO];
-            if (elem && [elem isImported]) {
-                [sym setIsImported:YES];
-            }
-            if ([sym isImported]) {
-                [sym setInitialModuleName:[elem moduleName]];
-            } else {
-                [sym setInitialModuleName:[sym moduleName]];
-            }
         }
-//        if (_isImported && [modName isNotEqualTo:coreModuleName]) {
-//            [sym setInitialModuleName:[sym moduleName]];
-//            [sym setModuleName:moduleName];
-//            [sym setIsImported:YES];
-//        } else if (![sym isQualified] && [modName isNotEqualTo:moduleName] && [modName isNotEqualTo:coreModuleName]) {
-//            // These are imported symbols invoked directly.
-//            [sym setModuleName:moduleName];
-//            id<JSDataProtocol> elem = [self objectForSymbol:sym isThrow:NO];
-//            if (elem && [elem isImported]) {
-//                [sym setIsImported:YES];  // symbols module name should point to current module and initial module name to the imported module name.
-//            }
-//            if ([sym isImported]) {
-//                [sym setInitialModuleName:[elem moduleName]];
-//            } else {
-//                [sym setInitialModuleName:[sym moduleName]];
-//            }
 //        } else if (![sym isQualified] && [modName isEqual:moduleName] && [modName isNotEqualTo:coreModuleName]) {
 //            // Inner bindings of a function. In `(defun greet () (sum 11))`, the inner bindings starts from `(sum 11)`. These are present as ast in a JSFunction
 //            // object.
@@ -297,6 +278,7 @@ NSString *currentModuleName;
     obj = [[env module] objectForSymbol:aKey];
     if (obj) {
         [aKey setInitialModuleName:[key initialModuleName]];
+        [aKey setInitialArity:[aKey arity]];
         key = aKey;
         return env;
     } else if (![aKey hasNArity]) {
@@ -392,7 +374,12 @@ NSString *currentModuleName;
     Env *env = [self findEnvForKey:key];
     id<JSDataProtocol> val = nil;
     if (env) {
-        val = [self objectForSymbol:key fromEnv:env];
+        if ([[env moduleName] isEqual:coreModuleName]) {
+            [key setModuleName:coreModuleName];
+            val = [env objectForSymbol:key fromEnv:env];
+        } else {
+            val = [self objectForSymbol:key fromEnv:env];
+        }
         if (val) return [self resolveFault:val forKey:key inEnv:env];
     } else if ([[key moduleName] isEqual:[self moduleName]]) {
         env = self;
@@ -406,8 +393,27 @@ NSString *currentModuleName;
     // Symbol not found
     if (![key isQualified]) [key setModuleName:currentModuleName];
     //info(@"Symbol not found: %@", [key string]);
-    if (isThrow) [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
+    if (isThrow) {
+        if ([[key name] isEqual:@"defmacro"]) {
+            [self test];
+        }
+        [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
+    }
     return nil;
+}
+
+- (void)test {
+    Env *coreEnv = [Env envForModuleName:coreModuleName];
+    NSMutableArray *keys = [[[[coreEnv module] table] allKeys] mutableCopy];
+    [keys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([JSSymbol isSymbol:obj withName:@"defmacro"]) {
+            JSSymbol *sym = (JSSymbol *)obj;
+            info(@"%@", sym);
+            id<JSDataProtocol> val = [[[coreEnv module] table] objectForKey:sym];
+            info(@"%@", val);
+            [sym setModuleName:coreModuleName];
+        }
+    }];
 }
 
 - (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromEnv:(Env *)env {
