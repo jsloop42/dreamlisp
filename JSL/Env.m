@@ -10,80 +10,85 @@
 
 /** Holds the module envs loaded. */
 static NSMapTable<NSString *, Env *> *_modules;
-NSString *defaultModuleName = @"user";
-NSString *coreModuleName = @"core";
-NSString *currentModuleName;
 
 /** An env associated with a module. There is a global env and one specific for each module. */
 @implementation Env {
     Env *_outer;
-    /** The env table containing evaluated symbols with its binding. */
-    NSMapTable<JSSymbol *, id<JSDataProtocol>> *_table;
     /** Exported symbols for the module. If no module is defined, then the symbols are global. */
-    ModuleTable *_module;
+    ModuleTable *_exportTable;
+    /** Imported symbols for the module. */
+    ModuleTable *_importTable;
+    /** The internal env table containing evaluated symbols with its binding. */
+    ModuleTable *_internalTable;
     /** Used for auto gensym symbols */
     SymbolTable *_symbolTable;
+    NSString *_moduleName;
     /** Is user defined module */
     BOOL _isUserDefined;
     BOOL _isExportAll;
-    // To distinguish it from JSFunction's env which may be different from current env if the function is referenced from another module. If the env is
-    // imported into the current env. Encountered within initWithEnv:binds:exprs:IsImported.. method.
-    BOOL _isImported;
 }
 
 @synthesize outer = _outer;
-@synthesize table = _table;
-@synthesize module = _module;
+@synthesize exportTable = _exportTable;
+@synthesize importTable = _importTable;
+@synthesize internalTable = _internalTable;
 @synthesize symbolTable = _symbolTable;
+@synthesize moduleName = _moduleName;
 @synthesize isUserDefined = _isUserDefined;
 @synthesize isExportAll = _isExportAll;
-@synthesize isImported = _isImported;
 
-#pragma mark Module lookup table
+#pragma mark Global modules lookup table
 
 + (void)initialize {
     if (self == [self class]) {
         _modules = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
-        currentModuleName = defaultModuleName;
     }
 }
 
+/** Associates the env with the given module name. */
 + (void)setEnv:(Env *)env forModuleName:(NSString *)moduleName {
     [_modules setObject:env forKey:moduleName];
 }
 
-+ (Env *)envForModuleName:(NSString *)moduleName {
+/** Returns env for the given module name. */
++ (Env *)forModuleName:(NSString *)moduleName {
     return [_modules objectForKey:moduleName];
 }
 
+/** Removes env for the given module name. */
 + (void)removeModule:(NSString *)moduleName {
     [_modules removeObjectForKey:moduleName];
 }
 
+/** Returns the internal modules table. */
 + (NSMapTable<NSString *, Env *> *)modules {
     return _modules;
 }
 
-#pragma mark Env table
+#pragma mark Env
+
+- (instancetype)initWithEnv:(Env *)env {
+    self = [super init];
+    if (self) {
+        _exportTable = [env exportTable];
+        _importTable = [env importTable];
+        _internalTable = [env internalTable];
+        _symbolTable = [env symbolTable];
+        [self bootstrap];
+        _moduleName = [env moduleName];
+        _isExportAll = [env isExportAll];
+        _isUserDefined = [env isUserDefined];
+        _outer = env;
+    }
+    return self;
+}
 
 - (instancetype)initWithModuleName:(NSString *)name isUserDefined:(BOOL)isUserDefined {
     self = [super init];
     if (self) {
         [self bootstrap];
-        [_module setName:name];
+        _moduleName = name;
         _isUserDefined = isUserDefined;
-    }
-    return self;
-}
-
-- (instancetype)initWithEnv:(Env *)env {
-    self = [super init];
-    if (self) {
-        _module = [env module];
-        [self bootstrap];
-        _isExportAll = [env isExportAll];
-        _isUserDefined = [env isUserDefined];
-        _outer = env;
     }
     return self;
 }
@@ -100,7 +105,7 @@ NSString *currentModuleName;
         [symbol setIsFunction:YES];
         [symbol setArity:[(JSFunction *)object argsCount]];
     }
-    [symbol setModuleName:[_module name]];
+    //[symbol setModuleName:[_module name]];
     return symbol;
 }
 
@@ -113,418 +118,109 @@ NSString *currentModuleName;
  @param exprs A array of `id<JSDataProtocol>` expressions.
  */
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs {
-    return [self initWithEnv:env binds:binds exprs:exprs isImported:NO currentEnv:env];
-}
-
-- (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs isImported:(BOOL)isImported currentEnv:(Env *)currentEnv {
     self = [super init];
     NSUInteger len = [binds count];
     NSUInteger i = 0;
     if (self) {
+        _internalTable = [env internalTable];
+        _importTable = [env importTable];
+        _exportTable = [env exportTable];
+        _symbolTable = [env symbolTable];
         [self bootstrap];
-        _isImported = isImported;
-        Env *effEnv = nil;
-        if (isImported) {
-            effEnv = currentEnv;
-        } else if ([[env moduleName] isEqual:[currentEnv moduleName]]) {
-            // Eg: nested functions have same module but env depth will be more than the currentEnv due to [fn env] value.
-            effEnv = env;
-        } else if (env != currentEnv && [[env moduleName] isNotEqualTo:coreModuleName]) {  // core.jsl symbols accessed => effEnv = core
-            effEnv = currentEnv;
-        } else {
-            effEnv = env;
-        }
-        [_module setName:[effEnv moduleName]];
-        _outer = effEnv;
-        _isExportAll = [effEnv isExportAll];
-        _isUserDefined = [effEnv isUserDefined];
-        // Sets module name to all binds element to current module name if they does not belong to core.
-        [binds enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [self updateModuleNameForExprs:obj moduleName:currentModuleName];
-        }];
-        // Sets module name to all symbols in the exprs array which will set the params list for functions to belong to same module as the function.
-        [exprs enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [self updateModuleNameForExprs:obj moduleName:currentModuleName];
-        }];
+        _moduleName = [env moduleName];
         for (i = 0; i < len; i++) {
             JSSymbol *sym = (JSSymbol *)binds[i];
             if ([[sym name] isEqual:@"&"]) {
                 JSSymbol *key = (JSSymbol *)binds[i + 1];
-                [key setModuleName:[_module name]];
                 if ([exprs count] > i) {
-                    [self setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forSymbol:key];
+                    [self setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:key];
                 } else {
                     JSList *list = [[JSList alloc] initWithArray:@[]];
-                    [self setObject:list forSymbol:[self setFunctionInfo:list symbol:key]];
+                    [self setObject:list forKey:[self setFunctionInfo:list symbol:key]];
                 }
                 break;
             }
-            [self setObject:exprs[i] forSymbol:[self setFunctionInfo:exprs[i] symbol:sym]];
+            [self setObject:exprs[i] forKey:[self setFunctionInfo:exprs[i] symbol:sym]];
         }
     }
     return self;
 }
 
 - (void)bootstrap {
-    _table = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
-    if (!_module) _module = [ModuleTable new];
-    _symbolTable = [SymbolTable new];
+    if (!_exportTable) _exportTable = [ModuleTable new];
+    if (!_importTable) _importTable = [ModuleTable new];
+    if (!_internalTable) _internalTable = [ModuleTable new];
+    if (!_symbolTable) _symbolTable = [SymbolTable new];
+    _moduleName = [Const defaultModuleName];
     _isExportAll = NO;
+    _isUserDefined = YES;
 }
 
-- (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key {
-    [key setModuleName:[_module name]];
-    if (_isExportAll || [[self moduleName] isEqual:defaultModuleName] || [[self moduleName] isEqual:coreModuleName]) {
-//        if ([[self moduleName] isEqual:coreModuleName]) {
-//            [key setInitialModuleName:coreModuleName];
-//            [key resetModuleName];
-//            NSAssert([[key moduleName] isEqual:coreModuleName], @"Core symbols should have core as its module name");
-//        }
-        [_module setObject:obj forSymbol:key];
-        NSAssert([_module objectForSymbol:key] != nil, @"cannot be nil");  // FIXME:
-        if ([[key name] isEqual:@"defmacro"]) {
-            NSAssert([[key moduleName] isEqual:coreModuleName], @"wrong module name");
-        }
-    } else {
-        id <JSDataProtocol> elem = [_table objectForKey:key];
-        if (elem) {
-            // FIXME: if imported symbol is getting overwritten, display a warning.
-        }
-        [_table setObject:obj forKey:key];
-    }
+- (id<JSDataProtocol>)objectForKey:(JSSymbol *)key {
+    return [self objectForKey:key isThrow:YES];
 }
 
-- (void)updateObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key {
-    [_table updateObject:obj forKey:key];
-}
-
-/** Checks if the symbol belongs to current module, if so update the module name. */
-- (void)updateModuleName:(JSSymbol *)symbol {
-    if (![symbol isQualified] && ![symbol isImported] && [[symbol moduleName] isNotEqualTo:currentModuleName]) {
-        [symbol setModuleName:[_module name]];
-    }
-}
-
-/** Update module name for expressions that corresponds to bindings. Invoked when any of the fn*, let*, catch* and function ast application is encountered.  */
-- (void)updateModuleNameForExprs:(id<JSDataProtocol>)ast moduleName:(NSString *)moduleName {
-    if ([JSList isList:ast]) {
-        JSList *xs = (JSList *)ast;
-        JSSymbol *sym = (JSSymbol *)[xs first];
-        if ([xs position] >= 3) {
-            [sym setArity:[xs count] - 1];
-            [sym setInitialArity:[sym arity]];
-            [sym updateArity];
-        }
-        [(NSMutableArray *)[xs value] enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [self updateModuleNameForExprs:obj moduleName:moduleName];
-        }];
-    } if ([JSVector isVector:ast]) {
-        [(NSMutableArray *)[(JSVector *)ast value] enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [self updateModuleNameForExprs:obj moduleName:moduleName];
-        }];
-    } else if ([JSSymbol isSymbol:ast]) {
-        JSSymbol *sym = (JSSymbol *)ast;
-        NSString *modName = [sym moduleName];
-        if (_isImported && [modName isNotEqualTo:coreModuleName]) {
-            [sym setInitialModuleName:[sym moduleName]];
-            [sym setModuleName:moduleName];
-            [sym setIsImported:YES];
-        } else if (![sym isQualified] && [modName isNotEqualTo:moduleName] && [modName isNotEqualTo:coreModuleName] &&
-                   [[sym moduleName] isNotEqualTo:[sym initialModuleName]]) {
-            // These can be imported symbols or symbols defined in a new module
-            [sym setModuleName:moduleName];
-            id<JSDataProtocol> elem = [self objectForSymbol:sym isThrow:NO];
-            if (elem && [elem isImported]) {
-                [sym setIsImported:YES];  // symbols module name should point to current module and initial module name to the imported module name.
-            }
-            if ([sym isImported]) {
-                [sym setInitialModuleName:[elem moduleName]];
-            } else {
-                [sym setInitialModuleName:[sym moduleName]];
-            }
-        }
-//        } else if (![sym isQualified] && [modName isEqual:moduleName] && [modName isNotEqualTo:coreModuleName]) {
-//            // Inner bindings of a function. In `(defun greet () (sum 11))`, the inner bindings starts from `(sum 11)`. These are present as ast in a JSFunction
-//            // object.
-//            [sym setModuleName:moduleName];
-//            id<JSDataProtocol> elem = [self objectForSymbol:sym isThrow:NO];
-//            if (elem && [elem isImported]) {
-//                [sym setIsImported:YES];
-//            }
-//            if ([sym isImported]) {
-//                [sym setInitialModuleName:[elem moduleName]];
-//            } else {
-//                [sym setInitialModuleName:[sym moduleName]];
-//            }
-//        }
-    } else if ([JSHashMap isHashMap:ast]) {
-        NSMutableDictionary *hm = [(JSHashMap *)ast value];
-        NSMutableArray *allKeys = [[hm allKeys] mutableCopy];
-        NSMutableArray *allVals = [[hm allValues] mutableCopy];
-        [allKeys enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [self updateModuleNameForExprs:obj moduleName:moduleName];
-        }];
-        [allVals enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [self updateModuleNameForExprs:obj moduleName:moduleName];
-        }];
-    } else if ([JSAtom isAtom:ast]) {
-        [self updateModuleNameForExprs:[(JSAtom *)ast value] moduleName:moduleName];
-    }
-}
-
-- (Env * _Nullable)findEnvForKey:(JSSymbol *)key inModule:(Env *)env {
-    JSSymbol *aKey = [[JSSymbol alloc] initWithName:[key name]];
-    [aKey copyProperties:key];
-    [aKey setArity:[key arity]];
-    [aKey updateArity];
-    [aKey setModuleName:[env moduleName]];
-    id<JSDataProtocol> obj = nil;
-    obj = [[env module] objectForSymbol:aKey];
-    if (obj) {
-        [aKey setInitialModuleName:[key initialModuleName]];
-        [aKey setInitialArity:[aKey arity]];
-        key = aKey;
-        return env;
-    } else if (![aKey hasNArity]) {
-        return [self findEnvForKey:[aKey toNArity] inModule:env];
-    }
-    return [env outer] ? [self findEnvForKey:key inModule:[env outer]] : nil;
-}
-
-/** Checks env's internal table for a match */
-- (Env * _Nullable)findEnvForKey:(JSSymbol *)key inEnvTable:(Env *)env {
-    id<JSDataProtocol> val = [[env table] objectForKey:key];
-    if (val) {
-        return env;
-    } else if (![key hasNArity]) {
-        return [self findEnvForKey:[key toNArity] inEnvTable:env];
-    }
-    return [env outer] ? [self findEnvForKey:[key resetArity] inEnvTable:[env outer]] : nil;
-}
-
-/**
- Lookup env table if the symbol belongs to current module, else lookup module table. Recursively checks the environments for the given symbol until a match
- is found or the environment is the outermost, which is nil.
- */
-- (Env * _Nullable)findEnvForKey:(JSSymbol *)key inEnv:(Env *)env {
-    if (!_isExportAll && [currentModuleName isEqual:[key moduleName]] && [currentModuleName isNotEqualTo:defaultModuleName] &&
-        [currentModuleName isNotEqualTo:coreModuleName]) {
-        if ([[env table] objectForKey:key]) {  // same module => all bindings are accessible. Not export all, so lookup in table
-            return self;
-        } else if (![key hasNArity]) {
-            return [self findEnvForKey:[key toNArity] inEnv:env];
-        }
-    } else {
-        if ([[env module] objectForSymbol:key]) {  // different module, core or user module => look in module table only
-            return self;
-        } else if (![key hasNArity]) {
-            return [self findEnvForKey:[key toNArity] inEnv:env];
-        }
-        // Check for imported symbol which will not match the above conditions in the current table
-        Env *aEnv = [self findEnvForKey:[key resetArity] inEnvTable:env];
-        if (aEnv) return aEnv;
-    }
-    [key resetArity];
-    return _outer ? [_outer findEnvForKey:key inEnv:_outer] : nil;
-}
-
-- (Env *)findEnvForKey:(JSSymbol *)key {
-    [self updateModuleName:key];
-    if ([key isQualified]) {
-        return [Env envForModuleName: [key isImported] ? [key initialModuleName] : [key moduleName]];
-    } else if ([key isImported]) {
-        return [Env envForModuleName: [key initialModuleName]];
-    }
-    Env *env = [self findEnvForKey:key inEnv:self];
-    if (env) return env;
-    env = [self findEnvForKey:key inModule:[Env envForModuleName:coreModuleName]];
-    if (env) return env;
-    return nil;
-}
-
-- (id<JSDataProtocol>)resolveFault:(id<JSDataProtocol>)object forKey:(JSSymbol *)key inEnv:(Env *)env {
-    if ([JSFault isFault:object]) {
-        JSFault *fault = (JSFault *)object;
-        id<JSDataProtocol> val = nil;
-        if ([fault isImported]) {
-            Env *modEnv = [Env envForModuleName:[fault moduleName]];
-            if (modEnv) {
-                [key setModuleName:[fault moduleName]];  // update module name so that the key can be retrieved from the original module
-                val = [[modEnv module] objectForSymbol:key];
-                // An imported symbol with fault found. The symbol value's from the original module can also be a fault if the export was not resolved already.
-                // Check if the export needs to be resolved.
-                val = [[self resolveFault:val forKey:key inEnv:modEnv] mutableCopyWithZone:nil];
-                if (val) {
-                    [val setIsImported:YES];
-                    [key setIsImported:YES];
-                    [key setIsFault:NO];
-                    [key setInitialModuleName:[modEnv moduleName]];
-                    [key setModuleName:[env moduleName]];
-                    [key setIsQualified:YES];  // Can be set to NO, in which case lookup would take additional steps to resolve.
-                    [[env table] updateObject:val forKey:key];
-                    return val;
-                } else {
-                    [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
-                }
-            }
-        } else {  // Exported symbol => fetch from module table.
-            val = [self objectForSymbol:key fromTable:env];
-            if (val) {  // update object in export table
-                [key setInitialModuleName:[env moduleName]];
-                [key setIsFault:NO];
-                // The original function changes are reflected for imports as well because the function if fetch from the referring module table if it is either
-                // qualified or imported.
-                [key setIsQualified:YES];  // Can be set to NO
-                [[env module] updateObject:val forSymbol:key];
-                return val;
-            } else {
-                [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
-            }
-        }
-    }
-    return object;
-}
-
-- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key {
-    return [self objectForSymbol:key isThrow:YES];
-}
-
-- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isThrow:(BOOL)isThrow {
-    Env *env = [self findEnvForKey:key];
-    id<JSDataProtocol> val = nil;
-    if (env) {
-        if ([[env moduleName] isEqual:coreModuleName]) {
-            [key setModuleName:coreModuleName];
-            val = [env objectForSymbol:key fromEnv:env];
-            if (val) return [self resolveFault:val forKey:key inEnv:env];
+- (id<JSDataProtocol>)objectForKey:(JSSymbol *)key isThrow:(BOOL)isThrow {
+    if ([key isQualified]) return [self objectForKey:key inModule:[key initialModuleName]];
+    NSString *moduleName = [key moduleName];
+    id<JSDataProtocol> elem = nil;
+    if ([moduleName isEqual:_moduleName]) {
+        if (_isExportAll || [moduleName isEqual:[Const defaultModuleName]] || [moduleName isEqual:[Const coreModuleName]]) {
+            elem = [_exportTable objectForSymbol:key];
+            if (elem) return elem;
         } else {
-            // env is obtained => the symbol is in either the module table or internal table.
-            val = [self objectForSymbol:key fromEnv:env];
-            if (val) return [self resolveFault:val forKey:key inEnv:env];
-            // check for imported symbol
-            if (![key isQualified]) {
-                val = [self objectForSymbol:key fromTable:env];
-                if (val) return [self resolveFault:val forKey:key inEnv:env];
-            }
+            elem = [_internalTable objectForSymbol:key];
+            if (elem) return elem;
         }
-    } else if ([[key moduleName] isEqual:[self moduleName]]) {
-        env = self;
-        val = [self objectForSymbol:key fromEnv:env];
-        if (val) return [self resolveFault:val forKey:key inEnv:env];
+        elem = [_importTable objectForSymbol:key];
+        if (elem) return elem;
+    } else {
+        // Symbol belongs to another module
+        elem = [self objectForKey:key inModule:[key moduleName]];
+        if (elem) return elem;
     }
-    // Check core module
-    if (![key isQualified]) [key setModuleName:coreModuleName];
-    val = [self objectForSymbol:key fromEnv:env];
-    if (val) return [self resolveFault:val forKey:key inEnv:env];
-    // Symbol not found
-    if (![key isQualified]) [key setModuleName:currentModuleName];
-    //info(@"Symbol not found: %@", [key string]);
-    if (isThrow) {
-        if ([[key name] isEqual:@"fringe"]) {
-            [self test];
+    // Symbol may belong to core
+    [key setModuleName:[Const coreModuleName]];
+    elem = [self objectForKey:key inModule:[Const coreModuleName]];
+    if (elem) return elem;
+    [key resetModuleName];
+    if (isThrow) [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
+    return nil;
+}
+
+- (id<JSDataProtocol> _Nullable)objectForKey:(JSSymbol *)key inModule:(NSString *)name {
+    Env *env = [Env forModuleName:name];
+    JSSymbol *sym = key;
+    if (env) {
+        id<JSDataProtocol> elem;
+        if ([key isQualified]) {
+            [sym setModuleName:[key initialModuleName]];
         }
-        [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
+        if ([env isExportAll] || [name isEqual:[Const defaultModuleName]] || [name isEqual:[Const coreModuleName]]) {
+            elem = [[env exportTable] objectForSymbol:sym];
+            if (elem) return elem;
+        } else {
+            elem = [[env internalTable] objectForSymbol:sym];
+            if (elem) return elem;
+        }
     }
     return nil;
 }
 
-- (void)test {
-    Env *bar = [Env envForModuleName:@"bar"];
-    NSMutableArray *keys = [[[bar table] allKeys] mutableCopy];
-    [keys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if ([JSSymbol isSymbol:obj withName:@"fringe"]) {
-            JSSymbol *sym = (JSSymbol *)obj;
-            info(@"%@", sym);
-            id<JSDataProtocol> val = [[bar table] objectForKey:sym];
-            info(@"%@", val);
-            [sym setModuleName:coreModuleName];
-        }
-    }];
-}
-
-- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromEnv:(Env *)env {
-    id<JSDataProtocol> val = nil;
-    // Resolve import and export to latest symbol value, which makes hot code reload reflect changes throughout the system seamlessly
-    if (([key isQualified] && [key isImported]) || [key isImported]) {
-        return [self objectForSymbol:key fromImportedEnv:[Env envForModuleName:[key initialModuleName]]];
-    }
-    if (!_isExportAll && [currentModuleName isEqual:[key moduleName]] && [[key moduleName] isNotEqualTo:defaultModuleName] && [[key moduleName] isNotEqualTo:coreModuleName]) {
-        // => lookup internal table. This case will not lookup the internal table if the module has all exports and imported symbol, in which case we will miss
-        // picking up imported symbol. So another direct lookup is required if the symbol is nil.
-        val = [[env table] objectForKey:key];
-        if (val) {
-            return val;
-        } else if (![key hasNArity]) {
-            return [self objectForSymbol:[key toNArity] fromEnv:env];
-        }
+- (void)setObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key {
+    if (_isExportAll || [_moduleName isEqual:[Const defaultModuleName]] || [_moduleName isEqual:[Const coreModuleName]]) {
+        [_exportTable setObject:obj forKey:key];
     } else {
-        val = [[env module] objectForSymbol:key];
-        if (val) {
-            return val;
-        } else if (![key hasNArity]) {
-            return [self objectForSymbol:[key toNArity] fromEnv:env];
-        } else if ([[key moduleName] isEqual:defaultModuleName]) {
-            [key resetArity];
-            val = [self objectForSymbol:key fromTable:env];
-            if (val) return val;
-        } else if ([[key moduleName] isEqual:coreModuleName]) {
-            [key resetArity];
-            Env *coreEnv = nil;
-            if ([[env moduleName] isNotEqualTo:coreModuleName]) {
-                coreEnv = [Env envForModuleName:coreModuleName];
-            } else {
-                coreEnv = env;
-            }
-            val = [self objectForSymbol:key fromModuleTable:coreEnv];
-            if (val) return val;
-        }
+        [_internalTable setObject:obj forKey:key];
     }
-    [key resetArity];
-    return [env outer] ? [self objectForSymbol:key fromEnv:[env outer]]: nil;
 }
 
-/** Fetch imported symbol from env table */
-- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromImportedEnv:(Env *)env {
-    JSSymbol *sym = key;
-    [sym setModuleName:[sym initialModuleName]];
-    if ([env isExportAll]) {
-        return [self objectForSymbol:sym fromModuleTable:env];
+- (void)updateObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key {
+    if (_isExportAll || [_moduleName isEqual:[Const defaultModuleName]] || [_moduleName isEqual:[Const coreModuleName]]) {
+        [_exportTable updateObject:obj forKey:key];
+    } else {
+        [_internalTable updateObject:obj forKey:key];
     }
-    return [self objectForSymbol:sym fromTable:env];
-}
-
-- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromTable:(Env *)env {
-    id<JSDataProtocol> val = nil;
-    val = [[env table] objectForKey:key];
-    if (val) {
-        return val;
-    } else if (![key hasNArity]) {
-        return [self objectForSymbol:[key toNArity] fromTable:env];
-    }
-    [key resetArity];
-    return [env outer] ? [self objectForSymbol:key fromTable:[env outer]]: nil;
-}
-
-- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromModuleTable:(Env *)env {
-    id<JSDataProtocol> val = nil;
-    val = [[env module] objectForSymbol:key];
-    if (val) {
-        return val;
-    } else if (![key hasNArity]) {
-        return [self objectForSymbol:[key toNArity] fromModuleTable:env];
-    }
-    [key resetArity];
-    return [env outer] ? [self objectForSymbol:key fromModuleTable:[env outer]]: nil;
-}
-
-#pragma mark Module
-
-- (void)setModuleName:(NSString *)name {
-    [_module setName:name];
-}
-
-- (NSString *)moduleName {
-    return [_module name];
 }
 
 - (NSString *)description {

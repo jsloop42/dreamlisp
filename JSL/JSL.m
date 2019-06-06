@@ -20,7 +20,6 @@ static NSString *langVersion;
     Env *_env;
     Core *_core;
     FileOps *_fileOps;
-    NSArray *_keywords;
     BOOL _isQuasiquoteMode;
     NSUInteger _quasiquoteDepth;
     NSUInteger _unquoteDepth;
@@ -30,6 +29,7 @@ static NSString *langVersion;
     NSString *_prompt;
 }
 
+@synthesize reader = _reader;
 @synthesize globalEnv = _globalEnv;
 @synthesize env = _env;
 @synthesize isREPL = _isREPL;
@@ -70,7 +70,7 @@ static NSString *langVersion;
     _reader = [Reader new];
     _printer = [Printer new];
     _core = [Core new];
-    _env = [[Env alloc] initWithModuleName:defaultModuleName isUserDefined:NO];
+    _env = [[Env alloc] initWithModuleName:[Const defaultModuleName] isUserDefined:NO];
     // Add modules to module table
     [self setModule:_env];  // default module
     [self setModule:[_core env]];  // core module
@@ -80,7 +80,6 @@ static NSString *langVersion;
     _quasiquoteDepth = 0;
     _queue = dispatch_queue_create("jsl-dispatch-queue", nil);
     _repQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
-    _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*"];
     [self setLoadFileToREPL];
     [self setEvalToREPL];
 }
@@ -95,11 +94,11 @@ static NSString *langVersion;
         id<JSDataProtocol> ast = (id<JSDataProtocol>)arg[0];
         return [self eval:[self updateBindingsForAST:ast table:[this->_env symbolTable]] withEnv:[self env]];
     };
-    [[self env] setObject:[[JSFunction alloc] initWithFn:fn argCount:1 name:@"eval/1"] forSymbol:[[JSSymbol alloc] initWithArity:1 string:@"eval"]];
-    [[self env] setObject:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
-    [[self env] setObject:[[JSString alloc] initWithFormat:@"%@", hostLangVersion] forSymbol:[[JSSymbol alloc] initWithName:@"*host-language*"]];
-    [[self env] setObject:[[JSString alloc] initWithFormat:@"%@", langVersion] forSymbol:[[JSSymbol alloc] initWithName:@"*version*"]];
-    [[self env] setObject:[JSList new] forSymbol:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
+    [[self env] setObject:[[JSFunction alloc] initWithFn:fn argCount:1 name:@"eval/1"] forKey:[[JSSymbol alloc] initWithArity:1 string:@"eval"]];
+    [[self env] setObject:[JSList new] forKey:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
+    [[self env] setObject:[[JSString alloc] initWithFormat:@"%@", hostLangVersion] forKey:[[JSSymbol alloc] initWithName:@"*host-language*"]];
+    [[self env] setObject:[[JSString alloc] initWithFormat:@"%@", langVersion] forKey:[[JSSymbol alloc] initWithName:@"*version*"]];
+    [[self env] setObject:[JSList new] forKey:[[JSSymbol alloc] initWithName:@"*ARGV*"]];
 }
 
 /** Add @c load-file to the environment, which loads and evaluates the expressions contained in the file. */
@@ -129,13 +128,13 @@ static NSString *langVersion;
         }
         return [JSNil new];
     };
-    Env *coreEnv = [Env envForModuleName:coreModuleName];
+    Env *coreEnv = [Env forModuleName:[Const coreModuleName]];
     JSSymbol *sym = [[JSSymbol alloc] initWithArity:1 string:@"load-file"];
-    [sym setInitialModuleName:coreModuleName];
+    [sym setInitialModuleName:[Const coreModuleName]];
     [sym resetModuleName];
     JSFunction *fn = [[JSFunction alloc] initWithFn:loadFile argCount:1 name:@"load-file/1"];
-    [fn setModuleName:coreModuleName];
-    [[coreEnv module] setObject:fn forSymbol:sym];
+    [fn setModuleName:[Const coreModuleName]];
+    [[coreEnv exportTable] setObject:fn forKey:sym];
 }
 
 /** Construct core lib file path. */
@@ -149,11 +148,13 @@ static NSString *langVersion;
     [paths addObject:[self coreLibPath:[_fileOps currentDirectoryPath]]];
     [paths addObject:[self coreLibPath:[_fileOps bundlePath]]];
     NSMutableArray<FileResult *> *files = [_fileOps loadFileFromPath:paths isConcurrent:YES isLookup:YES];
+    NSString *moduleName = [Const coreModuleName];
     if ([files count] == 0) {
         info(@"%@ %@", @"Error loading", coreLibFileName);
     } else {
         _env = [_core env];
-        [self updateModuleName:[_env moduleName]];
+        [_reader setModuleName:moduleName];
+        [self updateModuleName:moduleName];
         [files enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             @try {
                 [self rep:[obj content]];
@@ -162,7 +163,9 @@ static NSString *langVersion;
             }
         }];
         _env = _globalEnv;
-        [self updateModuleName:[_env moduleName]];
+        moduleName = [_env moduleName];
+        [self updateModuleName:moduleName];
+        [_reader setModuleName:moduleName];
     }
 }
 
@@ -172,12 +175,13 @@ static NSString *langVersion;
 
 #pragma mark Module
 
-- (void)setModule:(Env *)moduleEnv {
-    [Env setEnv:moduleEnv forModuleName:[moduleEnv moduleName]];
+- (void)setModule:(Env *)env {
+    [Env setEnv:env forModuleName:[env moduleName]];
+    [State setCurrentModuleName:[env moduleName]];
 }
 
 - (Env * _Nullable)module:(NSString *)name {
-    return [Env envForModuleName:name];
+    return [Env forModuleName:name];
 }
 
 - (void)removeModule:(NSString *)name {
@@ -198,7 +202,7 @@ static NSString *langVersion;
 /** Evaluate the AST with the given environment. */
 - (id<JSDataProtocol>)evalAST:(id<JSDataProtocol>)ast withEnv:(Env *)env {
     if ([JSSymbol isSymbol:ast]) {
-        return [env objectForSymbol:(JSSymbol *)ast];
+        return [env objectForKey:(JSSymbol *)ast];
     } else if ([JSList isList:ast]) {
         JSList *list = (JSList *)ast;
         NSUInteger count = [list count];
@@ -271,7 +275,7 @@ static NSString *langVersion;
         id<JSDataProtocol> first = [xs first];
         if (first && [JSSymbol isSymbol:first]) {
             JSSymbol *sym = [[JSSymbol alloc] initWithArity:[xs count] - 1 position:0 symbol:first];
-            id<JSDataProtocol> fnData = [env objectForSymbol:sym isThrow:NO];
+            id<JSDataProtocol> fnData = [env objectForKey:sym isThrow:NO];
             if (fnData && [JSFunction isFunction:fnData]) return [(JSFunction *)fnData isMacro];
         }
     }
@@ -282,7 +286,7 @@ static NSString *langVersion;
 - (id<JSDataProtocol>)macroExpand:(id<JSDataProtocol>)ast withEnv:(Env *)env {
     while ([self isMacroCall:ast env:env]) {
         NSMutableArray *xs = [(JSList *)ast value];
-        JSFunction *fn = (JSFunction *)[env objectForSymbol:[[JSSymbol alloc] initWithArity:[xs count] - 1 symbol:[xs first]]];
+        JSFunction *fn = (JSFunction *)[env objectForKey:[[JSSymbol alloc] initWithArity:[xs count] - 1 symbol:[xs first]]];
         ast = [fn apply:[xs rest]];
     }
     return ast;
@@ -306,13 +310,13 @@ static NSString *langVersion;
                 JSSymbol *sym = (JSSymbol *)[xs first];
                 if ([[sym name] isEqual:@"def!"]) {
                     id<JSDataProtocol> val = [self eval:[xs nth:2] withEnv:env];
-                    [env setObject:val forSymbol:[JSSymbol symbolWithArityCheck:[xs second] withObject:val]];
+                    [env setObject:val forKey:[JSSymbol symbolWithArityCheck:[xs second] withObject:val]];
                     return val;
                 } else if ([[sym name] isEqual:@"defmacro!"]) {
                     JSFunction *fn = (JSFunction *)[self eval:[xs nth:2] withEnv:env];
                     [fn setName:[(JSSymbol *)[xs second] name]];
                     JSFunction *macro = [[JSFunction alloc] initWithMacro:fn];
-                    [env setObject:macro forSymbol:[JSSymbol symbolWithArityCheck:[xs second] withObject:macro]];
+                    [env setObject:macro forKey:[JSSymbol symbolWithArityCheck:[xs second] withObject:macro]];
                     return macro;
                 } else if ([[sym name] isEqual:@"try*"]) {
                     @try {
@@ -349,9 +353,11 @@ static NSString *langVersion;
                 } else if ([[sym name] isEqual:@"fn*"]) {
                     id<JSDataProtocol>(^fn)(NSMutableArray *) = ^id<JSDataProtocol>(NSMutableArray * arg) {
                         // Uses current env `[self env]` than the passed in `env` param so that the closure gets the latest env variable.
-                        Env *fnEnv = [[Env alloc] initWithEnv:[self env] binds:[(JSList *)[xs second] value] exprs:arg];
+                        //Env *fnEnv = [[Env alloc] initWithEnv:[self env] binds:[(JSList *)[xs second] value] exprs:arg];
+                        Env *fnEnv = [[Env alloc] initWithEnv:env binds:[(JSList *)[xs second] value] exprs:arg];
                         return [self eval:[xs nth:2] withEnv:fnEnv];
                     };
+                    //return [[JSFunction alloc] initWithAst:[xs nth:2] params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
                     return [[JSFunction alloc] initWithAst:[xs nth:2] params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
                 } else if ([[sym name] isEqual:@"let*"]) {
                     Env *letEnv = [[Env alloc] initWithEnv:env];
@@ -360,7 +366,7 @@ static NSString *langVersion;
                     NSUInteger i = 0;
                     for (i = 0; i < len; i += 2) {
                         id<JSDataProtocol> val = [self eval:[bindings nth: i + 1] withEnv:letEnv];
-                        [letEnv setObject:val forSymbol:[JSSymbol symbolWithArityCheck:[bindings nth:i] withObject:val]];
+                        [letEnv setObject:val forKey:[JSSymbol symbolWithArityCheck:[bindings nth:i] withObject:val]];
                     }
                     ast = [xs nth:2];
                     env = letEnv;
@@ -400,7 +406,8 @@ static NSString *langVersion;
             NSMutableArray *rest = [list rest];  // The arguments to the function
             if ([fn ast]) {
                 ast = [fn ast];
-                env = [[Env alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest isImported:[fn isImported] currentEnv:env];
+                //env = [[Env alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest isImported:[fn isImported] currentEnv:env];
+                env = [[Env alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest];
             } else {
                 return [fn apply:rest];
             }
@@ -467,7 +474,7 @@ static NSString *langVersion;
             [sym setIsFault:YES];
             [sym setModuleName:[env moduleName]];
             [sym setInitialModuleName:[env moduleName]];
-            [[env module] setObject:[[JSFault alloc] initWithModule:[env moduleName] isImportFault:NO] forSymbol:sym];
+            [[env exportTable] setObject:[[JSFault alloc] initWithModule:[env moduleName] isImportFault:NO] forKey:sym];
         }
     }
     //info(@"Exports\n%@", [[[env module] table] allKeys]);
@@ -482,7 +489,7 @@ static NSString *langVersion;
         JSList *imp = (JSList *)impArr[i];
         if ([JSSymbol isSymbol:[imp first] withName:@"from"]) {
             NSString *modName = [(JSSymbol *)[imp second] value];
-            Env *impEnv = [Env envForModuleName:modName];
+            Env *impEnv = [Env forModuleName:modName];
             if (impEnv) {
                 NSMutableArray *impFns = (NSMutableArray *)[(JSList *)[imp drop:2] value];
                 NSUInteger fnLen = [impFns count];
@@ -499,7 +506,7 @@ static NSString *langVersion;
                     [sym setModuleName:[env moduleName]];
                     [sym setInitialModuleName:modName];
                     [sym setIsImported:YES];
-                    [[env table] setObject:[[JSFault alloc] initWithModule:modName isImportFault:YES] forKey:sym];
+                    [[env importTable] setObject:[[JSFault alloc] initWithModule:modName isImportFault:YES] forKey:sym];
                 }
             }
         }
@@ -529,7 +536,7 @@ static NSString *langVersion;
     JSSymbol *modSym = [xs second];
     [modSym setIsModule:YES];
     NSString *modName = [modSym name];
-    if ([modName isEqual:defaultModuleName]) {
+    if ([modName isEqual:[Const defaultModuleName]]) {
         _env = _globalEnv;
     } else {
         // check modules table
@@ -547,7 +554,7 @@ static NSString *langVersion;
 /** Changes the prompt if in REPL and updates the @c currentModuleName */
 - (void)updateModuleName:(NSString *)moduleName {
     if (_isREPL) _prompt = [moduleName stringByAppendingString:@"> "];
-    currentModuleName = moduleName;
+    [State setCurrentModuleName:moduleName];
 }
 
 #pragma mark Auto gensym
@@ -572,24 +579,24 @@ static NSString *langVersion;
     JSSymbol *sym = nil;
     NSString *modName = [symbol moduleName];
     if ([symbol isQualified]) {
-        sym = [self symbol:symbol arity:arity fromTable:[[Env envForModuleName:modName] symbolTable]];
+        sym = [self symbol:symbol arity:arity fromTable:[[Env forModuleName:modName] symbolTable]];
         return sym;
     }
-    if ([modName isEqual:currentModuleName] && [modName isNotEqualTo:coreModuleName]) {  // Symbol from the current module
+    if ([modName isEqual:[State currentModuleName]] && [modName isNotEqualTo:[Const coreModuleName]]) {  // Symbol from the current module
         sym = [self symbol:symbol arity:arity fromTable:table];
         if (sym) return sym;
     }
-    if ([modName isNotEqualTo:currentModuleName]) {
+    if ([modName isNotEqualTo:[State currentModuleName]]) {
         // current module is "foo", symbol's module name is "user" which is default, and symbol belongs to "core", for eg: +
-        sym = [self symbol:symbol arity:arity fromTable:[[Env envForModuleName:modName] symbolTable]];
+        sym = [self symbol:symbol arity:arity fromTable:[[Env forModuleName:modName] symbolTable]];
         if (sym) return sym;
     }
     // check current module
-    sym = [self symbol:symbol arity:arity fromTable:[[Env envForModuleName:coreModuleName] symbolTable]];
+    sym = [self symbol:symbol arity:arity fromTable:[[Env forModuleName:[Const coreModuleName]] symbolTable]];
     if (sym) return sym;
     // Check core module
-    [symbol setModuleName:coreModuleName];
-    sym = [self symbol:symbol arity:arity fromTable:[[Env envForModuleName:coreModuleName] symbolTable]];
+    [symbol setModuleName:[Const coreModuleName]];
+    sym = [self symbol:symbol arity:arity fromTable:[[Env forModuleName:[Const coreModuleName]] symbolTable]];
     if (sym) return sym;
     [symbol setModuleName:modName];
     sym = [table symbol:symbol];
@@ -601,14 +608,14 @@ static NSString *langVersion;
 - (void)updateSymbol:(JSSymbol *)symbol arity:(NSInteger)arity table:(SymbolTable *)table {
     JSSymbol *sym = nil;
     NSString *modName = [symbol moduleName];
-    if (![symbol isQualified] && [modName isNotEqualTo:currentModuleName]) [symbol setModuleName:currentModuleName];
+    if (![symbol isQualified] && [modName isNotEqualTo:[State currentModuleName]]) [symbol setModuleName:[State currentModuleName]];
     sym = [self findSymbol:symbol arity:arity table:table];
     if (sym) {
         [self updateGensymProps:sym forSymbol:symbol];
         return;
     }
     // Symbol does not belong to current module, set back to the initial module name and do another lookup
-    if (![symbol isQualified] && [modName isNotEqualTo:currentModuleName]) [sym setModuleName:modName];
+    if (![symbol isQualified] && [modName isNotEqualTo:[State currentModuleName]]) [sym setModuleName:modName];
     sym = [self findSymbol:symbol arity:arity table:table];
     if (sym) [self updateGensymProps:sym forSymbol:symbol];
 }
@@ -654,10 +661,10 @@ static NSString *langVersion;
 }
 
 - (void)setPropsNameForBinding:(JSSymbol *)symbol {
-    if ([[symbol initialModuleName] isEqual:defaultModuleName]) {
+    if ([[symbol initialModuleName] isEqual:[Const defaultModuleName]]) {
         // The module names default to "user". So we need to update it to current module where the function or let binding is encountered.
-        [symbol setInitialModuleName:currentModuleName];
-        [symbol setModuleName:currentModuleName];
+        [symbol setInitialModuleName:[State currentModuleName]];
+        [symbol setModuleName:[State currentModuleName]];
     }
 }
 
@@ -775,7 +782,7 @@ static NSString *langVersion;
                 continue;
             } else if ([sym position] == 0 && [sym isEqualToName:@"remove-module"]) {
                 continue;
-            } else if ([sym position] == 0 && [_keywords containsObject:[sym name]]) {
+            } else if ([sym position] == 0 && [[Const keyword] containsObject:[sym name]]) {
                 continue;
             } else {
                 // Update symbol in the list if there is an existing gensymed symbol
@@ -858,10 +865,10 @@ static NSString *langVersion;
     }
     [keys enumerateObjectsWithOptions:0 usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if (obj != nil) {
-            if ([modName isEqual:defaultModuleName] || [modName isEqual:coreModuleName] ||  [env isExportAll]) {
-                [[env module] setObject:[table symbol:obj] forSymbol:obj];  // FIXME: use key as [table symbol:key] instead of obj which is symbol table key
+            if ([modName isEqual:[Const defaultModuleName]] || [modName isEqual:[Const coreModuleName]] || [env isExportAll]) {
+                [[env exportTable] setObject:[table symbol:obj] forKey:obj];  // FIXME: use key as [table symbol:key] instead of obj which is symbol table key
             } else {
-                [[env table] setObject:[table symbol:obj] forKey:obj];
+                [[env internalTable] setObject:[table symbol:obj] forKey:obj];
             }
         }
         //if (++count == len) callback(); // FIXME: Enable in concurrent mode

@@ -19,10 +19,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) NSString *name;
 - (instancetype)init;
 - (instancetype)initWithModuleTable:(ModuleTable *)table;
-- (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key;
-- (void)updateObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key;
-- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key;
+- (void)setObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key;
+- (void)updateObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key;
+- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key;
 - (void)removeAllObjects;
+- (NSUInteger)count;
+- (NSArray<JSSymbol *> *)allKeys;
+- (NSArray<id<JSDataProtocol>> *)allObjects;
 @end
 
 NS_ASSUME_NONNULL_END

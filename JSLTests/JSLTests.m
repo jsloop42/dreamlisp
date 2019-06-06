@@ -92,6 +92,35 @@
     XCTAssertEqualObjects(uc[0], @"ABC");
 }
 
+- (void)testReader {
+    Reader *reader = [Reader new];
+    NSMutableArray<id<JSDataProtocol>> *ast = [reader readString:@"(def! a 1)"];
+    JSList *xs = (JSList *)ast[0];
+    XCTAssertEqualObjects([(JSSymbol *)[xs first] moduleName], [Const defaultModuleName]);
+    XCTAssertEqualObjects([(JSSymbol *)[xs second] moduleName], [Const defaultModuleName]);
+    XCTAssertEqualObjects([reader moduleName], [Const defaultModuleName]);
+    ast = [reader readString:@"(defmodule foo (export all))"];
+    XCTAssertEqualObjects([reader moduleName], @"foo");
+    ast = [reader readString:@"(def! a (fn* (n) (+ n 1)))"];
+    xs = (JSList *)ast[0];
+    XCTAssertEqualObjects([(JSSymbol *)[xs second] moduleName], @"foo");
+    xs = [xs nth:2];
+    XCTAssertEqualObjects([(JSSymbol *)[(JSList *)[xs nth:1] first] moduleName], @"foo");
+    xs = [xs nth:2];
+    XCTAssertEqualObjects([(JSSymbol *)[xs nth:1] moduleName], @"foo");
+    ast = [reader readString:@"(in-module user)"];
+    XCTAssertEqualObjects([reader moduleName], [Const defaultModuleName]);
+    ast = [reader readString:@"(def! b 2)"];
+    xs = (JSList *)ast[0];
+    XCTAssertEqualObjects([(JSSymbol *)[xs second] moduleName], [Const defaultModuleName]);
+    ast = [reader readString:@"(core:empty? [1])"];
+    xs = (JSList *)ast[0];
+    JSSymbol *sym = (JSSymbol *)[xs first];
+    XCTAssertEqualObjects([sym moduleName], [Const defaultModuleName]);
+    XCTAssertEqualObjects([sym initialModuleName], [Const coreModuleName]);
+    XCTAssertTrue([sym isQualified]);
+}
+
 - (void)testPrintString {
     Printer *prn = [Printer new];
     // Function
@@ -100,7 +129,7 @@
     XCTAssertEqualObjects([prn printStringFor:fn readably:true], @"nil-fn/0");
     // Symbol
     JSSymbol *sym = [[JSSymbol alloc] initWithName:@"greet"];
-    [sym setModuleName:defaultModuleName];
+    [sym setModuleName:[Const defaultModuleName]];
     XCTAssertEqualObjects([prn printStringFor:sym readably:true], @"user:greet");
     // Integer
     JSNumber *num = [[JSNumber alloc] initWithString:@"42"];
@@ -568,23 +597,45 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(contains? {a 2} a)"], @"true");
 }
 
+- (void)notestEnv {
+//    Env *env = [Env new];
+//    [env setModuleName:[Const defaultModuleName]];
+//    JSString *obj = [[JSString alloc] initWithString:@"123"];
+//    JSSymbol *key = [[JSSymbol alloc] initWithName:@"key"];
+//    [key setModuleName:[Const defaultModuleName]];
+//    [env setObject:obj forKey:key];
+//    XCTAssertEqualObjects([env objectForSymbol:key], obj);
+//    Env *aEnv = [[Env alloc] initWithEnv:env];
+//    JSSymbol *aKey = [[JSSymbol alloc] initWithName:@"aKey"];
+//    JSString *aObj = [[JSString alloc] initWithString:@"987"];
+//    [aKey setModuleName:[Const defaultModuleName]];
+//    [aEnv setObject:aObj forKey:aKey];
+//    XCTAssertEqualObjects([aEnv objectForSymbol:aKey], aObj);
+//    JSL *jsl = [[JSL alloc] initWithoutREPL];
+//    XCTAssertEqualObjects([jsl rep:@"(list? *ARGV*)"], @"true");
+//    XCTAssertEqualObjects([jsl rep:@"*ARGV*"], @"()");
+}
+
 - (void)testEnv {
-    Env *env = [Env new];
-    [env setModuleName:defaultModuleName];
-    JSString *obj = [[JSString alloc] initWithString:@"123"];
-    JSSymbol *key = [[JSSymbol alloc] initWithName:@"key"];
-    [key setModuleName:defaultModuleName];
-    [env setObject:obj forSymbol:key];
-    XCTAssertEqualObjects([env objectForSymbol:key], obj);
-    Env *aEnv = [[Env alloc] initWithEnv:env];
-    JSSymbol *aKey = [[JSSymbol alloc] initWithName:@"aKey"];
-    JSString *aObj = [[JSString alloc] initWithString:@"987"];
-    [aKey setModuleName:defaultModuleName];
-    [aEnv setObject:aObj forSymbol:aKey];
-    XCTAssertEqualObjects([aEnv objectForSymbol:aKey], aObj);
-    JSL *jsl = [[JSL alloc] initWithoutREPL];
-    XCTAssertEqualObjects([jsl rep:@"(list? *ARGV*)"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"*ARGV*"], @"()");
+    Reader *reader = [Reader new];  // In default module, user
+    Env *denv = [[Env alloc] initWithModuleName:[Const defaultModuleName] isUserDefined:NO];
+    NSMutableArray *xs = [reader readString:@"(def! a 1)"];
+    JSList *list = (JSList *)[xs first];
+    JSSymbol *key = [list nth:1];
+    id<JSDataProtocol> elem = [list nth:2];
+    [denv setObject:elem forKey:key];
+    XCTAssertEqual([[denv exportTable] count], 1);
+    XCTAssertEqual([[denv exportTable] objectForSymbol:key], elem);
+    [reader readString:@"(defmodule foo (export all))"];
+    xs = [reader readString:@"(def! b 2)"];
+    list = (JSList *)[xs first];
+    key = [list nth:1];
+    elem = [list nth:2];
+    Env *fooEnv = [[Env alloc] initWithModuleName:@"foo" isUserDefined:YES];
+    [fooEnv setObject:elem forKey:key];
+    XCTAssertEqual([[fooEnv exportTable] count], 0);
+    XCTAssertEqual([[fooEnv internalTable] count], 1);
+    XCTAssertEqual([[fooEnv internalTable] objectForSymbol:key], elem);
 }
 
 - (void)testSpecialForms {
@@ -1614,44 +1665,44 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 #pragma mark Env
 
-- (void)testEnvUpdateModuleNameForExprs {
-    Env *env = [Env new];
-    // Current module name is "user"
-    NSString *currModName = @"user";
-    JSSymbol *sym = [[JSSymbol alloc] initWithName:@"random-sym-1"];
-    // A new symbol before any processing or from current module
-    [sym setInitialModuleName:defaultModuleName];
-    [sym resetModuleName];
-    [sym resetArity];
-    [env updateModuleNameForExprs:sym moduleName:currModName];
-    XCTAssertEqualObjects([sym moduleName], currModName);
-    XCTAssertEqualObjects([sym initialModuleName], currModName);
-    // A symbol from core module
-    [sym setInitialModuleName:coreModuleName];
-    [sym resetModuleName];
-    // If a symbol from "core" module is encountered, the module names are reset to core.
-    [env updateModuleNameForExprs:sym moduleName:currModName];
-    XCTAssertEqualObjects([sym moduleName], coreModuleName);
-    XCTAssertEqualObjects([sym initialModuleName], coreModuleName);
-    // A symbol from a new module is found
-    NSString *newModName = @"io";
-    [sym setInitialModuleName:newModName];
-    [sym resetModuleName];
-    XCTAssertEqualObjects([sym moduleName], newModName);
-    XCTAssertEqualObjects([sym initialModuleName], newModName);
-    // An symbol with different module names encountered
-    [sym setInitialModuleName:defaultModuleName];
-    XCTAssertEqualObjects([sym moduleName], newModName);
-    XCTAssertEqualObjects([sym initialModuleName], defaultModuleName);
-    // An qualified symbol is found
-    [sym setIsQualified:YES];
-    XCTAssertEqualObjects([sym moduleName], newModName);
-    XCTAssertEqualObjects([sym initialModuleName], defaultModuleName);  // No change is made to module names
-    // An imported symbol is found
-    [sym setIsQualified:NO];
-    [sym setIsImported:YES];
-    XCTAssertEqualObjects([sym moduleName], newModName);
-    XCTAssertEqualObjects([sym initialModuleName], defaultModuleName);  // No change is made to module names
+- (void)notestEnvUpdateModuleNameForExprs {
+//    Env *env = [Env new];
+//    // Current module name is "user"
+//    NSString *currModName = @"user";
+//    JSSymbol *sym = [[JSSymbol alloc] initWithName:@"random-sym-1"];
+//    // A new symbol before any processing or from current module
+//    [sym setInitialModuleName:[Const defaultModuleName]];
+//    [sym resetModuleName];
+//    [sym resetArity];
+//    [env updateModuleNameForExprs:sym moduleName:currModName];
+//    XCTAssertEqualObjects([sym moduleName], currModName);
+//    XCTAssertEqualObjects([sym initialModuleName], currModName);
+//    // A symbol from core module
+//    [sym setInitialModuleName:[Const coreModuleName]];
+//    [sym resetModuleName];
+//    // If a symbol from "core" module is encountered, the module names are reset to core.
+//    [env updateModuleNameForExprs:sym moduleName:currModName];
+//    XCTAssertEqualObjects([sym moduleName], [Const coreModuleName]);
+//    XCTAssertEqualObjects([sym initialModuleName], [Const coreModuleName]);
+//    // A symbol from a new module is found
+//    NSString *newModName = @"io";
+//    [sym setInitialModuleName:newModName];
+//    [sym resetModuleName];
+//    XCTAssertEqualObjects([sym moduleName], newModName);
+//    XCTAssertEqualObjects([sym initialModuleName], newModName);
+//    // An symbol with different module names encountered
+//    [sym setInitialModuleName:[Const defaultModuleName]];
+//    XCTAssertEqualObjects([sym moduleName], newModName);
+//    XCTAssertEqualObjects([sym initialModuleName], [Const defaultModuleName]);
+//    // An qualified symbol is found
+//    [sym setIsQualified:YES];
+//    XCTAssertEqualObjects([sym moduleName], newModName);
+//    XCTAssertEqualObjects([sym initialModuleName], [Const defaultModuleName]);  // No change is made to module names
+//    // An imported symbol is found
+//    [sym setIsQualified:NO];
+//    [sym setIsImported:YES];
+//    XCTAssertEqualObjects([sym moduleName], newModName);
+//    XCTAssertEqualObjects([sym initialModuleName], [Const defaultModuleName]);  // No change is made to module names
 }
 
 - (void)notestCodeLoadedFromFile {
@@ -1672,7 +1723,6 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(bar:magic-magic 42)"], @"1764");
     XCTAssertEqualObjects([jsl rep:@"(bar:bar \"Olive\")"], @"\"I am Olive\"");
 }
-
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
 }

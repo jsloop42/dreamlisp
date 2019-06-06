@@ -1,14 +1,43 @@
 //
-//  Constants.m
+//  Const.m
 //  JSL
 //
 //  Created by jsloop on 06/04/19.
 //  Copyright © 2019 jsloop. All rights reserved.
 //
 
-#import "Constants.h"
+#import "Const.h"
 
 NSString * const JSLVersion = @"3.0";
+static NSArray *_keywords;
+static NSString * _defaultModuleName;
+static NSString * _coreModuleName;
+
+@implementation Const
+
++ (void)initialize {
+    if (self == [self class]) {
+        _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*", @"defmodule",
+                      @"in-module", @"import", @"export", @"remove-module"];
+        _defaultModuleName = @"user";
+        _coreModuleName = @"core";
+    }
+}
+
++ (NSArray *)keyword {
+    return _keywords;
+}
+
++ (NSString *)defaultModuleName {
+    return _defaultModuleName;
+}
+
++ (NSString *)coreModuleName {
+    return _coreModuleName;
+}
+
+@end
+
 
 #pragma mark Error constant
 

@@ -1,5 +1,5 @@
 //
-//  Constants.h
+//  Const.h
 //  JSL
 //
 //  Created by jsloop on 06/04/19.
@@ -11,6 +11,13 @@
 NS_ASSUME_NONNULL_BEGIN
 
 extern NSString * const JSLVersion;
+extern NSArray * keywords;
+
+@interface Const : NSObject
++ (NSArray *)keyword;
++ (NSString *)defaultModuleName;
++ (NSString *)coreModuleName;
+@end
 
 // Error constants
 

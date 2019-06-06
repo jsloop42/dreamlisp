@@ -10,7 +10,7 @@
 #import "JSDataProtocol.h"
 #import "JSError.h"
 #import "Logger.h"
-#import "Constants.h"
+#import "Const.h"
 #import "NSMapTable+JSHashMap.h"
 
 NS_ASSUME_NONNULL_BEGIN

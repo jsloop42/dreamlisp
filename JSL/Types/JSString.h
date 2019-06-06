@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "Constants.h"
+#import "Const.h"
 #import "JSDataProtocol.h"
 #import "NSString+JSDataProtocol.h"
 #import "JSError.h"

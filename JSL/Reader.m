@@ -21,10 +21,13 @@
     NSRegularExpression *_numExp;
     NSRegularExpression *_keywordExp;
     NSRegularExpression *_tokenExp;
+    NSString *_moduleName;
+    NSArray *_keywords;
 }
 
 /** The current token position */
 @synthesize position = _position;
+@synthesize moduleName = _moduleName;
 
 - (instancetype)init {
     self = [super init];
@@ -36,10 +39,11 @@
     return self;
 }
 
-- (instancetype)initWithTokens:(NSMutableArray *)array {
+- (instancetype)initWithTokens:(NSMutableArray *)array moduleName:(NSString *)name {
     self = [super init];
     if (self) {
         [self bootstrap];
+        _moduleName = name;
         _tokens = array;
         _position = 0;
     }
@@ -67,6 +71,8 @@
      */
     _tokenPattern = @"[\\s,]*(~@|[\\[\\]{}()'`~^@]|\"(?:[\\\\].|[^\\\\\"])*\"?|;.*|[^\\s\\[\\]{}()\"`,;]+)";
     _tokenExp = [NSRegularExpression regularExpressionWithPattern:_tokenPattern options:0 error:nil];
+    _moduleName = [Const defaultModuleName];
+    _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*", @"defmodule", @"in-module"];
 }
 
 /** Return the next token incrementing the position. */
@@ -91,12 +97,13 @@
 - (nullable NSMutableArray<id<JSDataProtocol>> *)readString:(NSString *)string {
     NSMutableArray *tokens = [self tokenize:string];
     if ([tokens count] <= 0) return nil;
-    Reader *reader = [[Reader alloc] initWithTokens:tokens];
+    Reader *reader = [[Reader alloc] initWithTokens:tokens moduleName:_moduleName];
     NSMutableArray *exprs = [NSMutableArray new];
     // Evaluate more than one expressions if encountered
     while ([reader position] < [tokens count]) {
         [exprs addObject:[reader readForm]];
     }
+    _moduleName = [reader moduleName];
     return exprs;
 }
 
@@ -157,15 +164,24 @@
 }
 
 - (JSSymbol *)symbolFromToken:(NSString *)token {
-    if ([token isEqual:@"/"]) return [[JSSymbol alloc] initWithName:token];  // divide function
+    if ([token isEqual:@"/"]) {
+        JSSymbol *sym = [[JSSymbol alloc] initWithArity:-1 string:@"/"];
+        [sym setInitialModuleName:[Const coreModuleName]];
+        [sym setModuleName:_moduleName];
+        [sym resetArity];
+        return sym;
+    }
+    if ([token isEqual:@"defmodule"] || [token isEqual:@"in-module"]) {
+        _moduleName = [self peek];
+    }
     NSArray *modArr = [token componentsSeparatedByString:@":"];
     NSUInteger modCount = [modArr count];
     if (modCount > 2) [self symbolParseError:token];
     if (modCount == 2) token = modArr[1];  // the function part
     NSArray *symArr = [token componentsSeparatedByString:@"/"];
     NSUInteger count = [symArr count];
-    JSSymbol *sym = nil;
     NSString *arity = nil;
+    JSSymbol *sym = nil;
     if (count > 2) [self symbolParseError:token];
     if (count == 2) {
         arity = symArr[1];
@@ -177,10 +193,12 @@
     } else if (count == 1) {
         sym = [[JSSymbol alloc] initWithName:token];
     }
+    [sym setInitialModuleName:_moduleName];
+    [sym resetModuleName];
     // Fully qualified symbol with module name included
     if (modCount == 2) {
         [sym setIsQualified:YES];
-        [sym setModuleName:modArr[0]];
+        [sym setInitialModuleName:modArr[0]];
     }
     return sym;
 }

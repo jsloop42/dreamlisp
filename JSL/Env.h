@@ -24,21 +24,18 @@ NS_ASSUME_NONNULL_BEGIN
 @class SymbolTable;
 @class ModuleTable;
 
-extern NSString *defaultModuleName;
-extern NSString *coreModuleName;
-extern NSString *currentModuleName;
-
 @interface Env : NSObject
 @property (nonatomic, readwrite) Env *outer;
-@property (nonatomic, readwrite) NSMapTable<JSSymbol *, id<JSDataProtocol>> *table;
-@property (nonatomic, readwrite) ModuleTable *module;
+@property (nonatomic, readwrite) ModuleTable *exportTable;
+@property (nonatomic, readwrite) ModuleTable *importTable;
+@property (nonatomic, readwrite) ModuleTable *internalTable;
 @property (nonatomic, readwrite) SymbolTable *symbolTable;
+@property (nonatomic, readwrite) NSString *moduleName;
 @property (nonatomic, readwrite) BOOL isUserDefined;
 @property (nonatomic, readwrite) BOOL isExportAll;
-@property (nonatomic, readwrite) BOOL isImported;
 + (void)initialize;
 + (void)setEnv:(Env *)env forModuleName:(NSString *)moduleName;
-+ (Env *)envForModuleName:(NSString *)moduleName;
++ (Env *)forModuleName:(NSString *)moduleName;
 + (void)removeModule:(NSString *)moduleName;
 + (NSMapTable<NSString *, Env *> *)modules;
 - (instancetype)init;
@@ -46,23 +43,13 @@ extern NSString *currentModuleName;
 - (instancetype)initWithEnv:(Env *)env;
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs;
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs isImported:(BOOL)isImported currentEnv:(Env *)currentEnv;
-- (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key;
-- (void)updateObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key;
-- (Env *)findEnvForKey:(JSSymbol *)key;
-- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key;
-- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isThrow:(BOOL)isThrow;
+- (void)setObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key;
+- (void)updateObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key;
+- (id<JSDataProtocol>)objectForKey:(JSSymbol *)key;
+- (id<JSDataProtocol>)objectForKey:(JSSymbol *)key isThrow:(BOOL)isThrow;
 - (void)setModuleName:(NSString *)name;
 - (NSString *)moduleName;
 
-// Private functions
-- (void)updateModuleName:(JSSymbol *)symbol;
-- (void)updateModuleNameForExprs:(id<JSDataProtocol>)ast moduleName:(NSString *)moduleName;
-- (Env * _Nullable)findEnvForKey:(JSSymbol *)key inModule:(Env *)env;
-- (Env * _Nullable)findEnvForKey:(JSSymbol *)key inEnv:(Env *)env;
-- (id<JSDataProtocol>)resolveFault:(id<JSDataProtocol>)object forKey:(JSSymbol *)key inEnv:(Env *)env;
-- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromEnv:(Env *)env;
-- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromImportedEnv:(Env *)env;
-- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key fromTable:(Env *)env;
 @end
 
 NS_ASSUME_NONNULL_END

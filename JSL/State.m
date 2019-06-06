@@ -10,7 +10,7 @@
 
 static NSUInteger _genSymCounter = 0;
 static BOOL _isVerbose = NO;
-static BOOL _isConcurrentMode = YES;
+static NSString *_currentModuleName;
 
 @implementation State
 
@@ -31,12 +31,14 @@ static BOOL _isConcurrentMode = YES;
     return _isVerbose;
 }
 
-+ (BOOL)isConcurrentMode {
-    return _isConcurrentMode;
++ (NSString *)currentModuleName {
+    return _currentModuleName;
 }
 
-+ (void)setIsConcurrentMode {
-
++ (void)setCurrentModuleName:(NSString *)name {
+    @synchronized (self) {
+        _currentModuleName = name;
+    }
 }
 
 #pragma mark Instance methods

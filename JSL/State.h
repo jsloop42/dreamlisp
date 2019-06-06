@@ -14,6 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSUInteger)counter;
 + (void)setIsVerbose:(BOOL)flag;
 + (BOOL)isVerbose;
++ (NSString *)currentModuleName;
++ (void)setCurrentModuleName:(NSString *)name;
 - (NSUInteger)counter;
 - (NSInteger)currentCounter;
 @end

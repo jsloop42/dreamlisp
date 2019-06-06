@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Const.h"
 #import "Types.h"
 #import "Reader.h"
 #import "Printer.h"
@@ -18,6 +19,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSL : NSObject
+@property (nonatomic, readwrite) Reader *reader;
 @property (nonatomic, readwrite) Env *globalEnv;
 @property (nonatomic, readwrite) Env *env;
 @property (nonatomic, readwrite) BOOL isREPL;

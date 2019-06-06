@@ -8,14 +8,15 @@
 
 #import <Foundation/Foundation.h>
 #import "Types.h"
-#import "Constants.h"
+#import "Const.h"
 #import "JSError.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Reader : NSObject
 @property (nonatomic, readonly) NSUInteger position;
-- (instancetype)initWithTokens:(NSMutableArray *)array;
+@property (nonatomic, readwrite) NSString *moduleName;
+- (instancetype)initWithTokens:(NSMutableArray *)array moduleName:(NSString *)name;
 - (nullable NSString *)next;
 - (nullable NSString *)peek;
 - (void)pass;

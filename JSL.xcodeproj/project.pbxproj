@@ -13,8 +13,8 @@
 		9E250CED22886ED500EDADEF /* ModuleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E250CEB22886ED500EDADEF /* ModuleTable.m */; };
 		9E281CEA225890B10038A5AF /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CE9225890B10038A5AF /* Utils.m */; };
 		9E281CEB225890B10038A5AF /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CE9225890B10038A5AF /* Utils.m */; };
-		9E281CEE225908480038A5AF /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Constants.m */; };
-		9E281CEF225908480038A5AF /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Constants.m */; };
+		9E281CEE225908480038A5AF /* Const.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Const.m */; };
+		9E281CEF225908480038A5AF /* Const.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Const.m */; };
 		9E281CF8225A4C790038A5AF /* libreadline.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E281CF7225A4C790038A5AF /* libreadline.tbd */; };
 		9E281CFD225A60770038A5AF /* tests in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CF9225A60760038A5AF /* tests */; };
 		9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CFA225A60760038A5AF /* run_argv_test.sh */; };
@@ -109,8 +109,8 @@
 		9E250CEB22886ED500EDADEF /* ModuleTable.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ModuleTable.m; sourceTree = "<group>"; };
 		9E281CE8225890B10038A5AF /* Utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		9E281CE9225890B10038A5AF /* Utils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
-		9E281CEC225908480038A5AF /* Constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
-		9E281CED225908480038A5AF /* Constants.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Constants.m; sourceTree = "<group>"; };
+		9E281CEC225908480038A5AF /* Const.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Const.h; sourceTree = "<group>"; };
+		9E281CED225908480038A5AF /* Const.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Const.m; sourceTree = "<group>"; };
 		9E281CF7225A4C790038A5AF /* libreadline.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libreadline.tbd; path = usr/lib/libreadline.tbd; sourceTree = SDKROOT; };
 		9E281CF9225A60760038A5AF /* tests */ = {isa = PBXFileReference; lastKnownFileType = folder; path = tests; sourceTree = "<group>"; };
 		9E281CFA225A60760038A5AF /* run_argv_test.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run_argv_test.sh; sourceTree = "<group>"; };
@@ -283,8 +283,8 @@
 			isa = PBXGroup;
 			children = (
 				9E30554122612BA4001D4597 /* Types */,
-				9E281CEC225908480038A5AF /* Constants.h */,
-				9E281CED225908480038A5AF /* Constants.m */,
+				9E281CEC225908480038A5AF /* Const.h */,
+				9E281CED225908480038A5AF /* Const.m */,
 				9E3A9D6322568D4B00348529 /* Core.h */,
 				9E3A9D6422568D4B00348529 /* Core.m */,
 				9E3A9D6B22568D8D00348529 /* Env.h */,
@@ -484,7 +484,7 @@
 				9E30554422612C34001D4597 /* NSString+JSDataProtocol.m in Sources */,
 				9E3055602262633E001D4597 /* JSError.m in Sources */,
 				9E9B6228225B9FC20060DA9A /* FileOps.m in Sources */,
-				9E281CEE225908480038A5AF /* Constants.m in Sources */,
+				9E281CEE225908480038A5AF /* Const.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -527,7 +527,7 @@
 				9E30554522612C34001D4597 /* NSString+JSDataProtocol.m in Sources */,
 				9E3055612262633E001D4597 /* JSError.m in Sources */,
 				9E9B6229225B9FC20060DA9A /* FileOps.m in Sources */,
-				9E281CEF225908480038A5AF /* Constants.m in Sources */,
+				9E281CEF225908480038A5AF /* Const.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

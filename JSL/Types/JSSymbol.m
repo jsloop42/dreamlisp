@@ -25,6 +25,7 @@
     BOOL _isModule;
     BOOL _isFault;
     BOOL _isImported;
+    BOOL _isCore;  // If it is a core symbol of the form def!, defmacro!, let*, if etc.
 }
 
 @synthesize arity = _arity;
@@ -41,6 +42,7 @@
 @synthesize isModule = _isModule;
 @synthesize isFault = _isFault;
 @synthesize isImported = _isImported;
+@synthesize isCore = _isCore;
 
 + (BOOL)isSymbol:(id)object {
     return [[object className] isEqual:[self className]];
@@ -92,8 +94,8 @@
                 [symbol setInitialArity:0];
                 [symbol resetArity];
             }
-            [symbol setInitialModuleName:currentModuleName];
-            [symbol setModuleName:currentModuleName];
+            [symbol setInitialModuleName:[State currentModuleName]];
+            [symbol setModuleName:[State currentModuleName]];
         }
     }
 }
@@ -143,7 +145,7 @@
         _arity = arity;
         _position = position;
         _hasNArity = [symbol hasNArity];
-        _moduleName = [symbol moduleName] ? [symbol moduleName] : currentModuleName;
+        _moduleName = [symbol moduleName] ? [symbol moduleName] : [State currentModuleName];
         _initialModuleName = [symbol initialModuleName];
         _isQualified = [symbol isQualified];
         _isImported = [symbol isImported];
@@ -181,7 +183,7 @@
         _hasNArity = [symbol hasNArity];
         _position = [symbol position];
         _meta = meta;
-        _moduleName = [symbol moduleName] ? [symbol moduleName] : currentModuleName;
+        _moduleName = [symbol moduleName] ? [symbol moduleName] : [State currentModuleName];
         _initialModuleName = [symbol initialModuleName];
         _isQualified = [symbol isQualified];
         _isImported = [symbol isImported];
@@ -196,7 +198,7 @@
         _name = name;
         _initialName = name;
         _meta = meta;
-        _moduleName = currentModuleName;
+        _moduleName = [State currentModuleName];
         _initialModuleName = _moduleName;
         _isQualified = NO;
         [self updateArity];
@@ -206,7 +208,7 @@
 
 - (void)bootstrap {
     _position = -1;
-    _moduleName = currentModuleName;
+    _moduleName = [State currentModuleName];
     _initialModuleName = _moduleName;
     _isQualified = NO;
 }

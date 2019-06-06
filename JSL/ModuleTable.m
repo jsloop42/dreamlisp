@@ -33,20 +33,39 @@
     _table = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
 }
 
-- (void)setObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key {
+- (void)setObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key {
     [_table setObject:obj forKey:key];
 }
 
-- (void)updateObject:(id<JSDataProtocol>)obj forSymbol:(JSSymbol *)key {
+- (void)updateObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key {
     [_table updateObject:obj forKey:key];
 }
 
-- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key {
-    return [_table objectForKey:key];
+- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key {
+    id<JSDataProtocol> elem = [_table objectForKey:key];
+    if (elem) return elem;
+    if (![key hasNArity]) {
+        elem = [self objectForSymbol:[key toNArity]];
+        if (elem) return elem;
+    }
+    [key resetArity];
+    return nil;
 }
 
 - (void)removeAllObjects {
     [_table removeAllObjects];
+}
+
+- (NSUInteger)count {
+    return [_table count];
+}
+
+- (NSArray<JSSymbol *> *)allKeys {
+    return [_table allKeys];
+}
+
+- (NSArray<id<JSDataProtocol>> *)allObjects {
+    return [_table allObjects];
 }
 
 - (NSString *)description {
