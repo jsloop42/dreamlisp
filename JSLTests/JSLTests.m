@@ -690,6 +690,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     // Test let*
     XCTAssertEqualObjects([jsl rep:@"(let* (x 1 y 2) (reset! a x) (reset! a (+ x y)))"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(try* (reset! a 10) (reset! a (+ @a 2)))"], @"12");
+    XCTAssertEqualObjects([jsl rep:@"(try* (throw \"foo\") (catch* e (reset! a 1) (reset! a (+ @a 10))))"], @"11");
 }
 
 - (void)testFunctions {

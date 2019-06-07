@@ -296,6 +296,11 @@ static NSString *langVersion;
     return ast;
 }
 
+- (JSList *)toDoForm:(NSMutableArray *)arr {
+    [arr insertObject:[[JSSymbol alloc] initWithName:@"do"] atIndex:0];
+    return [[JSList alloc] initWithArray:arr];
+}
+
 /** Evaluate the expression with the given environment. */
 - (id<JSDataProtocol>)eval:(id<JSDataProtocol>)ast withEnv:(Env *)env {
     while (true) {
@@ -324,10 +329,7 @@ static NSString *langVersion;
                     return macro;
                 } else if ([[sym name] isEqual:@"try*"]) {
                     @try {
-                        NSMutableArray *formArr = [xs rest];
-                        [formArr insertObject:[[JSSymbol alloc] initWithName:@"do"] atIndex:0];
-                        JSList *form = [[JSList alloc] initWithArray:formArr];
-                        return [self eval:form withEnv:env];
+                        return [self eval:[self toDoForm:[xs rest]] withEnv:env];
                     } @catch (NSException *exception) {
                         if ([xs count] > 2) {
                             JSList *catchxs = (JSList *)[xs nth:2];
@@ -336,7 +338,7 @@ static NSString *langVersion;
                             }
                             Env *catchEnv = [[Env alloc] initWithEnv:env binds:[@[(JSSymbol *)[catchxs second]] mutableCopy]
                                                                exprs:[@[[self exceptionInfo:exception]] mutableCopy]];
-                            return [self eval:[catchxs nth:2] withEnv:catchEnv];
+                            return [self eval:[self toDoForm:[[catchxs drop:2] value]] withEnv:catchEnv];
                          }
                         @throw exception;
                     }
@@ -358,9 +360,7 @@ static NSString *langVersion;
                     }
                     continue;
                 } else if ([[sym name] isEqual:@"fn*"]) {
-                    NSMutableArray *formArr = [xs drop:2];
-                    [formArr insertObject:[[JSSymbol alloc] initWithName:@"do"] atIndex:0];
-                    JSList *form = [[JSList alloc] initWithArray:formArr];
+                    JSList *form = (JSList *)[self toDoForm:[xs drop:2]];
                     id<JSDataProtocol>(^fn)(NSMutableArray *) = ^id<JSDataProtocol>(NSMutableArray * arg) {
                         Env *fnEnv = [[Env alloc] initWithEnv:env binds:[(JSList *)[xs second] value] exprs:arg];
                         return  [self eval:form withEnv:fnEnv];
@@ -375,10 +375,7 @@ static NSString *langVersion;
                         id<JSDataProtocol> val = [self eval:[bindings nth: i + 1] withEnv:letEnv];
                         [letEnv setObject:val forKey:[JSSymbol symbolWithArityCheck:[bindings nth:i] withObject:val]];
                     }
-                    NSMutableArray *formArr = [xs drop:2];
-                    [formArr insertObject:[[JSSymbol alloc] initWithName:@"do"] atIndex:0];
-                    JSList *form = [[JSList alloc] initWithArray:formArr];
-                    ast = form;
+                    ast = [self toDoForm:[xs drop:2]];
                     env = letEnv;
                     continue;
                 } else if ([[sym name] isEqual:@"quote"]) {
