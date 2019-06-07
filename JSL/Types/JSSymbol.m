@@ -94,13 +94,20 @@
                 [symbol setInitialArity:0];
                 [symbol resetArity];
             }
-            [symbol setInitialModuleName:[State currentModuleName]];
-            [symbol setModuleName:[State currentModuleName]];
+            //[symbol setInitialModuleName:[State currentModuleName]];
+            //[symbol setModuleName:[State currentModuleName]];
         }
     }
 }
 
 - (instancetype)initWithName:(NSString *)name {
+    self = [self initWithName:name moduleName:_moduleName];
+    _moduleName = [State currentModuleName];
+    _initialModuleName = _moduleName;
+    return self;
+}
+
+- (instancetype)initWithName:(NSString *)name moduleName:(NSString *)moduleName {
     self = [super init];
     if (self) {
         [self bootstrap];
@@ -108,10 +115,13 @@
         _initialName = name;
         _arity = -2;
         _initialArity = -2;
+        _moduleName = moduleName;
+        _initialModuleName = moduleName;
         [self updateArity];
     }
     return self;
 }
+
 
 /** Initialise a symbol with function details and module name. */
 - (instancetype)initWithFunction:(JSFunction *)func name:(NSString *)name moduleName:(NSString *)moduleName {
@@ -156,6 +166,14 @@
 
 - (instancetype)initWithArity:(NSInteger)arity string:(NSString *)string {
     return [self initWithArity:arity position:-1 string:string];
+}
+
+
+- (instancetype)initWithArity:(NSInteger)arity string:(NSString *)string moduleName:(NSString *)moduleName {
+    self = [self initWithArity:arity position:-1 string:string];
+    _moduleName = moduleName;
+    _initialModuleName = moduleName;
+    return self;
 }
 
 - (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position string:(NSString *)string {

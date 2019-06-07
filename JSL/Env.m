@@ -174,6 +174,10 @@ static NSMapTable<NSString *, Env *> *_modules;
         }
         elem = [_importTable objectForSymbol:key];
         if (elem) return elem;
+        if ([self outer]) {
+            elem = [_outer objectForKey:key];
+            if (elem) return elem;
+        }
     } else {
         // Symbol belongs to another module
         elem = [self objectForKey:key inModule:[key moduleName]];
@@ -184,7 +188,9 @@ static NSMapTable<NSString *, Env *> *_modules;
     elem = [self objectForKey:key inModule:[Const coreModuleName]];
     if (elem) return elem;
     [key resetModuleName];
-    if (isThrow) [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
+    if (isThrow) {
+        [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
+    }
     return nil;
 }
 
@@ -203,6 +209,7 @@ static NSMapTable<NSString *, Env *> *_modules;
             elem = [[env internalTable] objectForSymbol:sym];
             if (elem) return elem;
         }
+        return [env outer] ? [[env outer] objectForKey:key] : nil;
     }
     return nil;
 }

@@ -43,10 +43,12 @@ NS_ASSUME_NONNULL_BEGIN
 // Should not instantiate with empty name
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithName:(NSString *)name;
+- (instancetype)initWithName:(NSString *)name moduleName:(NSString *)moduleName;
 - (instancetype)initWithFunction:(JSFunction *)func name:(NSString *)name moduleName:(NSString *)moduleName;
 - (instancetype)initWithArity:(NSInteger)arity symbol:(JSSymbol *)symbol;
 - (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position symbol:(JSSymbol *)symbol;
 - (instancetype)initWithArity:(NSInteger)arity string:(NSString *)string;
+- (instancetype)initWithArity:(NSInteger)arity string:(NSString *)string moduleName:(NSString *)moduleName;
 - (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position string:(NSString *)string;
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta symbol:(JSSymbol *)symbol;
 - (instancetype)initWithMeta:(_Nullable id<JSDataProtocol>)meta name:(NSString *)name;
