@@ -127,7 +127,7 @@
     } else if ([token isEqual:@"^"]) {
         [self pass];
         id<JSDataProtocol> meta = [self readForm];
-        return [[JSList alloc] initWithArray: @[[[JSSymbol alloc] initWithArity:2 position:0 string:@"with-meta"],
+        return [[JSList alloc] initWithArray: @[[[JSSymbol alloc] initWithArity:2 position:0 string:@"with-meta" moduleName:[Const coreModuleName]],
                                                 [[self readForm] setPosition:1], [meta setPosition:2]]];
     }
     return [self readAtom];
@@ -165,11 +165,7 @@
 
 - (JSSymbol *)symbolFromToken:(NSString *)token {
     if ([token isEqual:@"/"]) {
-        JSSymbol *sym = [[JSSymbol alloc] initWithArity:-1 string:@"/"];
-        [sym setInitialModuleName:[Const coreModuleName]];
-        [sym setModuleName:_moduleName];
-        [sym resetArity];
-        return sym;
+        return [[JSSymbol alloc] initWithArity:-1 string:@"/" moduleName:[Const coreModuleName]];
     }
     if ([token isEqual:@"defmodule"] || [token isEqual:@"in-module"]) {
         _moduleName = [self peek];
