@@ -71,9 +71,10 @@ static NSString *langVersion;
     _printer = [Printer new];
     _core = [Core new];
     _env = [[Env alloc] initWithModuleName:[Const defaultModuleName] isUserDefined:NO];
+    [State setCurrentModuleName:[_env moduleName]];
     // Add modules to module table
-    [self setModule:_env];  // default module
-    [self setModule:[_core env]];  // core module
+    [self addModule:_env];  // default module
+    [self addModule:[_core env]];  // core module
     _globalEnv = _env;
     _fileOps = [FileOps new];
     _isQuasiquoteMode = NO;
@@ -82,6 +83,7 @@ static NSString *langVersion;
     _repQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     [self setLoadFileToREPL];
     [self setEvalToREPL];
+    if (_isREPL) _prompt = [[State currentModuleName] stringByAppendingString:@"> "];
 }
 
 #pragma mark Env setup
@@ -178,9 +180,8 @@ static NSString *langVersion;
 
 #pragma mark Module
 
-- (void)setModule:(Env *)env {
+- (void)addModule:(Env *)env {
     [Env setEnv:env forModuleName:[env moduleName]];
-    [State setCurrentModuleName:[env moduleName]];
 }
 
 - (Env * _Nullable)module:(NSString *)name {
@@ -354,14 +355,14 @@ static NSString *langVersion;
                     }
                     continue;
                 } else if ([[sym name] isEqual:@"fn*"]) {
+                    NSMutableArray *formArr = [xs drop:2];
+                    [formArr insertObject:[[JSSymbol alloc] initWithName:@"do"] atIndex:0];
+                    JSList *form = [[JSList alloc] initWithArray:formArr];
                     id<JSDataProtocol>(^fn)(NSMutableArray *) = ^id<JSDataProtocol>(NSMutableArray * arg) {
-                        // Uses current env `[self env]` than the passed in `env` param so that the closure gets the latest env variable.
-                        //Env *fnEnv = [[Env alloc] initWithEnv:[self env] binds:[(JSList *)[xs second] value] exprs:arg];
                         Env *fnEnv = [[Env alloc] initWithEnv:env binds:[(JSList *)[xs second] value] exprs:arg];
-                        return [self eval:[xs nth:2] withEnv:fnEnv];
+                        return  [self eval:form withEnv:fnEnv];
                     };
-                    //return [[JSFunction alloc] initWithAst:[xs nth:2] params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
-                    return [[JSFunction alloc] initWithAst:[xs nth:2] params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
+                    return [[JSFunction alloc] initWithAst:form params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
                 } else if ([[sym name] isEqual:@"let*"]) {
                     Env *letEnv = [[Env alloc] initWithEnv:env];
                     NSMutableArray *bindings = [JSVector isVector:[xs second]] ? [(JSVector *)[xs second] value] : [(JSList *)[xs second] value];
@@ -447,7 +448,8 @@ static NSString *langVersion;
     [modSym setIsModule:YES];
     NSString *modName = [modSym name];
     Env *modEnv = [[Env alloc] initWithModuleName:modName isUserDefined:YES];
-    [self setModule:modEnv];
+    [self addModule:modEnv];
+    [State setCurrentModuleName:[modEnv moduleName]];
     _env = modEnv; // change env to current module
     [self updateModuleName:modName];
     // The third element onwards are imports and exports
