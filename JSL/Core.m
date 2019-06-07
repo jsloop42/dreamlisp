@@ -884,7 +884,7 @@ double dmod(double a, double n) {
     /**
      Associates the given element with a metadata.
 
-     (def! f (with-meta :foo 1)) ; :foo  The keyword :foo has meta as 1
+     (def f (with-meta :foo 1)) ; :foo  The keyword :foo has meta as 1
      */
     id<JSDataProtocol>(^withMeta)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:2];

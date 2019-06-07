@@ -50,6 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithArity:(NSInteger)arity string:(NSString *)string;
 - (instancetype)initWithArity:(NSInteger)arity string:(NSString *)string moduleName:(NSString *)moduleName;
 - (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position string:(NSString *)string;
+- (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position string:(NSString *)string moduleName:(NSString *)moduleName;
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta symbol:(JSSymbol *)symbol;
 - (instancetype)initWithMeta:(_Nullable id<JSDataProtocol>)meta name:(NSString *)name;
 - (JSSymbol *)gensym;

@@ -1,16 +1,16 @@
-(def! test-in-user (fn* () 123))
+(def test-in-user (fn () 123))
 
 (defmodule foo (export all))
 
-(def! greet-name (fn* (n) "Hello Olivia"))
+(def greet-name (fn (n) "Hello Olivia"))
 
-(def! greet (fn* () "Hello there"))
+(def greet (fn () "Hello there"))
 
 (defun fringe-me () 42)
 
 (defun magic (n) (if (= n 42) "Now you see me" "Now you don't"))
 
-(defmacro! fdefun (fn* (symname args & form) `(def! ~symname (fn* ~args (do ~@form)))))
+(defmacro fdefun (fn (symname args & form) `(def ~symname (fn ~args ~@form))))
 
 (defmodule bar (export all) (import (from foo (magic 1))))
 

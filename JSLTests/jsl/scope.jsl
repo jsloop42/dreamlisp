@@ -1,12 +1,10 @@
-(def! a 4)
-(def! c 1)
-(def! d (atom 3))
+(def a 4)
+(def c 1)
+(def d (atom 3))
 
-(def! f1 (fn* (a b)
-  (do
-    (+ a b c (deref d))
-    (let* (x 6 z (+ a c) f (fn* (x) (* x x)))
-      (* x z)))))
+(def f1 (fn (a b)
+  (+ a b c (deref d))
+  (let (x 6 z (+ a c) f (fn (x) (* x x)))
+    (* x z)))))
 
 ; (f1 4 6) ;30
-

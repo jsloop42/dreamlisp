@@ -9,7 +9,7 @@
 #import "SymbolTable.h"
 
 /**
- A table used for storing and lookup of hygienic symbols for an REP loop. The table will contain symbols encountered which are defined using def!, defmacro!.
+ A table used for storing and lookup of hygienic symbols for an REP loop. The table will contain symbols encountered which are defined using def, defmacro.
  Since processing of macros does not happen at auto gensym stage, any symbols defined using macro functions other than defmacro! will not be added.
  */
 @implementation SymbolTable {

@@ -25,7 +25,7 @@
     BOOL _isModule;
     BOOL _isFault;
     BOOL _isImported;
-    BOOL _isCore;  // If it is a core symbol of the form def!, defmacro!, let*, if etc.
+    BOOL _isCore;  // If it is a core symbol of the form def, defmacro, let, if etc.
 }
 
 @synthesize arity = _arity;
@@ -177,6 +177,10 @@
 }
 
 - (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position string:(NSString *)string {
+    return [self initWithArity:arity position:position string:string moduleName:[State currentModuleName]];
+}
+
+- (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position string:(NSString *)string moduleName:(NSString *)moduleName {
     if (arity < -1) [[[JSError alloc] initWithDescription:FunctionArityError] throw];
     self = [super init];
     if (self) {
@@ -186,6 +190,8 @@
         _arity = arity;
         _initialArity = arity;
         _position = position;
+        _moduleName = moduleName;
+        _initialModuleName = _moduleName;
         [self updateArity];
     }
     return self;

@@ -317,23 +317,30 @@ static NSString *langVersion;
             if ([JSSymbol isSymbol:[xs first]]) {
                 // special forms
                 JSSymbol *sym = (JSSymbol *)[xs first];
-                if ([[sym name] isEqual:@"def!"]) {
+                if ([[sym name] isEqual:@"def"]) {
                     id<JSDataProtocol> val = [self eval:[xs nth:2] withEnv:env];
                     [env setObject:val forKey:[JSSymbol symbolWithArityCheck:[xs second] withObject:val]];
                     return val;
-                } else if ([[sym name] isEqual:@"defmacro!"]) {
+                } else if ([[sym name] isEqual:@"defmacro"]) {
                     JSFunction *fn = (JSFunction *)[self eval:[xs nth:2] withEnv:env];
                     [fn setName:[(JSSymbol *)[xs second] name]];
                     JSFunction *macro = [[JSFunction alloc] initWithMacro:fn];
                     [env setObject:macro forKey:[JSSymbol symbolWithArityCheck:[xs second] withObject:macro]];
                     return macro;
-                } else if ([[sym name] isEqual:@"try*"]) {
+                } else if ([[sym name] isEqual:@"try"]) {
+                    NSMutableArray *form = [xs rest];
                     @try {
-                        return [self eval:[self toDoForm:[xs rest]] withEnv:env];
+                        if ([JSList isList:[xs last]]) {
+                            JSList *last = [xs last];
+                            if ([JSSymbol isSymbol:[last first] withName:@"catch"]) {
+                                form = [form dropLast];
+                            }
+                        }
+                        return [self eval:[self toDoForm:form] withEnv:env];
                     } @catch (NSException *exception) {
                         if ([xs count] > 2) {
                             JSList *catchxs = (JSList *)[xs nth:2];
-                            if ([JSSymbol isSymbol:[catchxs first]] && [[(JSSymbol *)[catchxs first] name] isNotEqualTo:@"catch*"]) {
+                            if ([JSSymbol isSymbol:[catchxs first]] && [[(JSSymbol *)[catchxs first] name] isNotEqualTo:@"catch"]) {
                                 [[[JSError alloc] initWithData:[catchxs first]] throw];
                             }
                             Env *catchEnv = [[Env alloc] initWithEnv:env binds:[@[(JSSymbol *)[catchxs second]] mutableCopy]
@@ -359,14 +366,14 @@ static NSString *langVersion;
                         ast = [xs nth:2];
                     }
                     continue;
-                } else if ([[sym name] isEqual:@"fn*"]) {
+                } else if ([[sym name] isEqual:@"fn"]) {
                     JSList *form = (JSList *)[self toDoForm:[xs drop:2]];
                     id<JSDataProtocol>(^fn)(NSMutableArray *) = ^id<JSDataProtocol>(NSMutableArray * arg) {
                         Env *fnEnv = [[Env alloc] initWithEnv:env binds:[(JSList *)[xs second] value] exprs:arg];
                         return  [self eval:form withEnv:fnEnv];
                     };
                     return [[JSFunction alloc] initWithAst:form params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
-                } else if ([[sym name] isEqual:@"let*"]) {
+                } else if ([[sym name] isEqual:@"let"]) {
                     Env *letEnv = [[Env alloc] initWithEnv:env];
                     NSMutableArray *bindings = [JSVector isVector:[xs second]] ? [(JSVector *)[xs second] value] : [(JSList *)[xs second] value];
                     NSUInteger len = [bindings count];
@@ -615,9 +622,9 @@ static NSString *langVersion;
         id<JSDataProtocol> elem = [ast nth:i];
         if ([JSSymbol isSymbol:elem]) {
             JSSymbol *sym = (JSSymbol *)elem;
-            if ([sym position] == 0 && [sym isEqualToName:@"let*"]) {  // (let* exp)
+            if ([sym position] == 0 && [sym isEqualToName:@"let"]) {  // (let exp)
                 SymbolTable *letTable = [[SymbolTable alloc] initWithTable:table];
-                NSMutableArray *bindings = [(JSList *)[ast nth:i + 1] value]; // bindings -> list or vector (let* (x 1 y 2) ..)
+                NSMutableArray *bindings = [(JSList *)[ast nth:i + 1] value]; // bindings -> list or vector (let (x 1 y 2) ..)
                 NSUInteger j = 0;
                 NSUInteger blen = [bindings count];
                 // Check if any of the symbols are redefined
@@ -631,25 +638,25 @@ static NSString *langVersion;
                         aSym = bindings[j];
                         [self updateUnquoteBindingsForAST:aSym table:table];
                     } else {
-                        [elem autoGensym];  // let* binding symbols are gensymed if not found within unquote or unquote-splice
+                        [elem autoGensym];  // let binding symbols are gensymed if not found within unquote or unquote-splice
                         [letTable setSymbol:elem];
-                        // value part of the let*
+                        // value part of the let
                         [self updateBindingsForAST:bindings[j + 1] table:letTable];
                     }
                 }
                 table = letTable; // for the let scope
                 i++;
                 continue;
-            } else if ([sym position] == 0 && [sym isEqualToName:@"def!"]) {
+            } else if ([sym position] == 0 && [sym isEqualToName:@"def"]) {
                 if (!_isQuasiquoteMode) {
                     i++;
                     JSSymbol *bind = [ast nth:i];
                     [JSSymbol updateProperties:bind list:[ast nth:2]];
-                    [table setSymbol:bind];  // Setting the def! bind name to symbol table
+                    [table setSymbol:bind];  // Setting the def bind name to symbol table
                 }
                 continue;
-            } else if ([sym position] == 0 && [sym isEqualToName:@"defmacro!"]) {
-                if (!_isQuasiquoteMode) {  // process defmacro! else, move to next symbol
+            } else if ([sym position] == 0 && [sym isEqualToName:@"defmacro"]) {
+                if (!_isQuasiquoteMode) {  // process defmacro else, move to next symbol
                     SymbolTable *macroTable = [[SymbolTable alloc] initWithTable:table];  // This is creating a new scope to make gensyms unique
                     i++;
                     JSSymbol *bind = [ast nth:i];
@@ -684,7 +691,7 @@ static NSString *langVersion;
                 } else {
                     [[[JSError alloc] initWithFormat:MacroSymbolNotFound, [sym name]] throw];
                 }
-            } else if ([sym position] == 0 && [sym isEqualToName:@"fn*"]) {
+            } else if ([sym position] == 0 && [sym isEqualToName:@"fn"]) {
                 SymbolTable *fnTable = [[SymbolTable alloc] initWithTable:table];
                 i++;
                 JSList* elem = [ast nth:i];  // fn arguments
@@ -695,7 +702,7 @@ static NSString *langVersion;
                     id<JSDataProtocol> arg = arr[i];  // mutable
                     if ([JSSymbol isSymbol:arg]) {  // Process function arguments
                         JSSymbol *aSym = (JSSymbol *)arg;
-                        // Handle nested fn* within quasiquote
+                        // Handle nested fn within quasiquote
                         if ([[aSym value] isEqualToString:@"unquote"] || [[aSym value] isEqualToString:@"unquote-splice"]) {
                             i++;
                             arg = arr[i];
@@ -751,8 +758,8 @@ static NSString *langVersion;
 /**
  Updates binding when an unquote is found within quasiquote.
 
- `(let* [x 3] `(let* [x 1] (+ x (first [1 2 3]))))
- `(let* [x 3] `(let* [x 1] (+ x (first [1 2 3])))) ; -> `(let* [x 1] (+ x (first [1 2 3]))) ; -> 2
+ `(let [x 3] `(let [x 1] (+ x (first [1 2 3]))))
+ `(let [x 3] `(let [x 1] (+ x (first [1 2 3])))) ; -> `(let [x 1] (+ x (first [1 2 3]))) ; -> 2
  */
 - (JSList *)updateUnqoteBindingsForList:(JSList *)xs table:(SymbolTable *)table {
     if (_isQuasiquoteMode) {
@@ -821,8 +828,8 @@ static NSString *langVersion;
     NSUInteger i = 0;
     NSString *ret = nil;
     for (i = 0; i < len; i++) {
-        // Symbol table contains symbols encountered which are defined using def!, defmacro!
-        [self updateBindingsForAST:exps[i] table:[[self env] symbolTable]];
+        // Symbol table contains symbols encountered which are defined using def, defmacro
+        //[self updateBindingsForAST:exps[i] table:[[self env] symbolTable]];
         //[self updateEnvFromSymbolTable:[_env symbolTable] env:_env callback:nil];
         ret = [self print:[self eval:exps[i] withEnv:[self env]]];
     }

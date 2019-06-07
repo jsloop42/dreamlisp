@@ -26,8 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
   The arity count of the function. For variadic functions it returns @c n and @c n+m where @c m is the non-variadic arguments if present.
 
  @code
- (def! a (fn* (&more) nil))  ; a/n
- (def! a (fn* (x y &more) nil))  ; a/n+2
+ (def a (fn (&more) nil))  ; a/n
+ (def a (fn (x y &more) nil))  ; a/n+2
  @endcode
  */
 @property (nonatomic, readwrite) NSInteger argsCount;
