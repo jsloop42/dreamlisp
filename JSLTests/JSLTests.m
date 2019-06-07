@@ -680,6 +680,18 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(let* (a 5 b 6) [3 4 a [b 7] 8])"], @"[3 4 5 [6 7] 8]");
 }
 
+/** Test core forms with do */
+- (void)testCoreForms {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    // Test fn*
+    [jsl rep:@"(def! a (atom 0))"];
+    XCTAssertEqualObjects([jsl rep:@"(def! sum (fn* (n) (reset! a n) (reset! a (+ @a 1))))"], @"user:sum/1");
+    XCTAssertEqualObjects([jsl rep:@"(sum 5)"], @"6");
+    // Test let*
+    XCTAssertEqualObjects([jsl rep:@"(let* (x 1 y 2) (reset! a x) (reset! a (+ x y)))"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(try* (reset! a 10) (reset! a (+ @a 2)))"], @"12");
+}
+
 - (void)testFunctions {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"((fn* (a b) (+ b a)) 3 4)"], @"7");
@@ -1725,6 +1737,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
+    [jsl rep:@"*host-language*"];
 }
 
 - (void)notestPerformanceJSListDropFirst {

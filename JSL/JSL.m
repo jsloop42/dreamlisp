@@ -324,7 +324,10 @@ static NSString *langVersion;
                     return macro;
                 } else if ([[sym name] isEqual:@"try*"]) {
                     @try {
-                        return [self eval:[xs second] withEnv:env];
+                        NSMutableArray *formArr = [xs rest];
+                        [formArr insertObject:[[JSSymbol alloc] initWithName:@"do"] atIndex:0];
+                        JSList *form = [[JSList alloc] initWithArray:formArr];
+                        return [self eval:form withEnv:env];
                     } @catch (NSException *exception) {
                         if ([xs count] > 2) {
                             JSList *catchxs = (JSList *)[xs nth:2];
