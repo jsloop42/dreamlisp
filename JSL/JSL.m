@@ -372,7 +372,10 @@ static NSString *langVersion;
                         id<JSDataProtocol> val = [self eval:[bindings nth: i + 1] withEnv:letEnv];
                         [letEnv setObject:val forKey:[JSSymbol symbolWithArityCheck:[bindings nth:i] withObject:val]];
                     }
-                    ast = [xs nth:2];
+                    NSMutableArray *formArr = [xs drop:2];
+                    [formArr insertObject:[[JSSymbol alloc] initWithName:@"do"] atIndex:0];
+                    JSList *form = [[JSList alloc] initWithArray:formArr];
+                    ast = form;
                     env = letEnv;
                     continue;
                 } else if ([[sym name] isEqual:@"quote"]) {

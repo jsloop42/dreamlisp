@@ -175,7 +175,7 @@ static NSMapTable<NSString *, Env *> *_modules;
         elem = [_importTable objectForSymbol:key];
         if (elem) return elem;
         if ([self outer]) {
-            elem = [_outer objectForKey:key];
+            elem = [_outer objectForKey:key isThrow:isThrow];
             if (elem) return elem;
         }
     } else {
