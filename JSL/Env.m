@@ -70,10 +70,6 @@ static NSMapTable<NSString *, Env *> *_modules;
 - (instancetype)initWithEnv:(Env *)env {
     self = [super init];
     if (self) {
-        _exportTable = [env exportTable];
-        _importTable = [env importTable];
-        _internalTable = [env internalTable];
-        _symbolTable = [env symbolTable];
         [self bootstrap];
         _moduleName = [env moduleName];
         _isExportAll = [env isExportAll];
@@ -122,12 +118,9 @@ static NSMapTable<NSString *, Env *> *_modules;
     NSUInteger len = [binds count];
     NSUInteger i = 0;
     if (self) {
-        _internalTable = [env internalTable];
-        _importTable = [env importTable];
-        _exportTable = [env exportTable];
-        _symbolTable = [env symbolTable];
         [self bootstrap];
         _moduleName = [env moduleName];
+        _outer = env;
         for (i = 0; i < len; i++) {
             JSSymbol *sym = (JSSymbol *)binds[i];
             if ([[sym name] isEqual:@"&"]) {
