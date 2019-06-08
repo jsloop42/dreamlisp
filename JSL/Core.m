@@ -962,6 +962,21 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"time-ms" moduleName:[Const coreModuleName]]];
 }
 
+- (NSArray * _Nullable)moduleFunctions:(NSString *)moduleName {
+    Env *env = [Env forModuleName:moduleName];
+    if (!env) {
+        info(@"%@", [NSString stringWithFormat:ModuleNotFound, moduleName]);
+        return nil;
+    }
+    NSArray *allKeys = nil;
+    NSArray *fnKeys = nil;
+    if (env) {
+        allKeys = [[env exportTable] allKeys];
+        fnKeys = [allKeys filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.arity > -2"]];
+    }
+    return fnKeys;
+}
+
 - (void)addModuleFunctions {
     JSFunction *fn = nil;
 
@@ -970,6 +985,16 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:currentModuleName argCount:0 name:@"current-module-name/0"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"current-module-name" moduleName:[Const coreModuleName]]];
+
+    id<JSDataProtocol>(^moduleInfo)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        JSSymbol *mod = [JSSymbol dataToSymbol:[xs first] fnName:@"module-info/1"];
+        NSString* moduleName = (NSString *)[mod value];
+        NSArray *fns = [self moduleFunctions:moduleName];
+        if (!fns) return nil;
+        return [[JSVector alloc] initWithArray:[fns mutableCopy]];
+    };
+    fn = [[JSFunction alloc] initWithFn:moduleInfo argCount:1 name:@"module-info/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"module-info" moduleName:[Const coreModuleName]]];
 }
 
 - (Env *)env {

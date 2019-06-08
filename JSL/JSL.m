@@ -574,7 +574,7 @@ static NSString *langVersion;
         [[self reader] setModuleName:moduleName];
         if (_isREPL) _prompt = [moduleName stringByAppendingString:@"> "];
     } else {
-        info(@"Module %@ not found", moduleName);
+        info(@"%@", [NSString stringWithFormat:ModuleNotFound, moduleName]);
     }
 }
 

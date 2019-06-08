@@ -50,6 +50,23 @@
     return [self isSymbol:object] ? [[(JSSymbol *)object value] isEqual:name] : NO;
 }
 
++ (JSSymbol *)dataToSymbol:(id<JSDataProtocol>)data fnName:(NSString *)fnName {
+    return [self dataToSymbol:data position:-1 fnName:fnName];
+}
+
++ (JSSymbol *)dataToSymbol:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
+    if (![JSSymbol isSymbol:data]) {
+        JSError *err = nil;
+        if (position > 0) {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'symbol'", position, [data dataTypeName]];
+        } else {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'symbol'", [data dataTypeName]];
+        }
+        [err throw];
+    }
+    return (JSSymbol *)data;
+}
+
 /**
   Update the symbol with function info and function with the bounded symbol info.
 
@@ -71,32 +88,6 @@
     }
     return symbol;
 }
-
-/** Update function bounded symbols properties from the given ast. */
-//+ (void)updateProperties:(JSSymbol *)symbol list:(id<JSDataProtocol>)ast {
-//    if ([JSList isList:ast]) {
-//        JSList *list = (JSList *)ast;
-//        if ([JSSymbol isSymbol:[list first] withName:@"fn*"]) {
-//            JSList *args = (JSList *)[list second];
-//            if (![args isEmpty]) {
-//                NSMutableArray<JSSymbol *> *arr = [args value];
-//                NSPredicate *pred = [NSPredicate predicateWithFormat:@"SELF.value contains [c] %@", @"&"];
-//                NSArray *filtered = [arr filteredArrayUsingPredicate:pred];
-//                if ([filtered count] > 0) {
-//                    [symbol setInitialArity:-1];
-//                    [symbol resetArity];
-//                } else {
-//                    NSUInteger count = [args count];
-//                    [symbol setInitialArity:count];
-//                    [symbol resetArity];
-//                }
-//            } else {
-//                [symbol setInitialArity:0];
-//                [symbol resetArity];
-//            }
-//        }
-//    }
-//}
 
 - (instancetype)initWithName:(NSString *)name {
     self = [self initWithName:name moduleName:_moduleName];
