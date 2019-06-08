@@ -74,7 +74,7 @@
     return symbol;
 }
 
-/** Update function bounded symbols properties from the given ast used in autogensym. */
+/** Update function bounded symbols properties from the given ast. */
 + (void)updateProperties:(JSSymbol *)symbol list:(id<JSDataProtocol>)ast {
     if ([JSList isList:ast]) {
         JSList *list = (JSList *)ast;
@@ -169,7 +169,6 @@
 - (instancetype)initWithArity:(NSInteger)arity string:(NSString *)string {
     return [self initWithArity:arity position:-1 string:string];
 }
-
 
 - (instancetype)initWithArity:(NSInteger)arity string:(NSString *)string moduleName:(NSString *)moduleName {
     self = [self initWithArity:arity position:-1 string:string];

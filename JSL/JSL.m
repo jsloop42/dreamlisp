@@ -322,7 +322,10 @@ static NSString *langVersion;
                     [env setObject:val forKey:[JSSymbol symbolWithArityCheck:[xs second] withObject:val]];
                     return val;
                 } else if ([[sym name] isEqual:@"defmacro"]) {
-                    JSFunction *fn = (JSFunction *)[self eval:[xs nth:2] withEnv:env];
+                    NSMutableArray *args = [xs drop:2];
+                    [args add:[[JSSymbol alloc] initWithName:@"fn"] atIndex:0];
+                    JSList *fnList = [[JSList alloc] initWithArray: args];
+                    JSFunction *fn = (JSFunction *)[self eval:fnList withEnv:env];
                     [fn setName:[(JSSymbol *)[xs second] name]];
                     JSFunction *macro = [[JSFunction alloc] initWithMacro:fn];
                     [env setObject:macro forKey:[JSSymbol symbolWithArityCheck:[xs second] withObject:macro]];

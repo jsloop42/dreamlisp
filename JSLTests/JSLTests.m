@@ -1138,13 +1138,46 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"`[1 ~@c 3]"], @"(1 1 \"b\" \"d\" 3)");
 }
 
-- (void)notestMacro {
+/** Testing macros without nesting */
+- (void)testSimpleMacros {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-    [jsl rep:@"(defmacro one (fn () 1))"];
+    [jsl rep:@"(defmacro one () 1)"];
     XCTAssertEqualObjects([jsl rep:@"(one)"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(macro? one/0)"], @"true");
-    [jsl rep:@"(defmacro two (fn () 2))"];
+    [jsl rep:@"(defmacro two () 2)"];
     XCTAssertEqualObjects([jsl rep:@"(two)"], @"2");
+    [jsl rep:@"(defmacro identity (x) x)"];
+    XCTAssertEqualObjects([jsl rep:@"(let (a 123) (identity a))"], @"123");
+    [jsl rep:@"(defmacro foo (& more) `(count (list ~@more)))"];
+    XCTAssertEqualObjects([jsl rep:@"(foo 1 2 3)"], @"3");
+    // macro with hash-map
+    [jsl rep:@"(defmacro hm (k v) `(hash-map ~k ~v))"];
+    XCTAssertEqualObjects([jsl rep:@"(hm 1 '(3 4 5))"], @"{1 (3 4 5)}");
+    [jsl rep:@"(defmacro hm1 (k v) `(let (x ~v) (hash-map ~k (first x))))"];
+    XCTAssertEqualObjects([jsl rep:@"(hm1 1 '(3 4 5))"], @"{1 3}");
+    [jsl rep:@"(defmacro p (x) `(let (z ~x) (list z 4 5 6 7)))"];
+    XCTAssertEqualObjects([jsl rep:@"(p 3)"], @"(3 4 5 6 7)");
+    XCTAssertEqualObjects([jsl rep:@"(hm 2 (p 3))"], @"{2 (3 4 5 6 7)}");
+    XCTAssertEqualObjects([jsl rep:@"(hm1 2 (p 3))"], @"{2 3}");
+    [jsl rep:@"(defmacro p (x) `(let (z (atom 3)) (list z 4 5 6 7)))"];
+    XCTAssertEqualObjects([jsl rep:@"(hm :b @(first(p 3)))"], @"{:b 3}");
+    XCTAssertEqualObjects([jsl rep:@"(hm1 :a (p 5))"], @"{:a (atom 3)}");
+    // test macro definition print
+    XCTAssertEqualObjects([jsl rep:@"(defmacro a (x) `(+ 1 ~x))"], @"user:a/1");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro a (& more) `(first (list ~@more)))"], @"user:a/n");
+    // misc
+    XCTAssertEqualObjects([jsl rep:@"(defun inc (x) (+ x 1))"], @"user:inc/1");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro apply1 (x) `(apply inc/1 ~x))"], @"user:apply1/1");
+    XCTAssertEqualObjects([jsl rep:@"(apply1 [3])"], @"4");
+    // vector binding in let
+    XCTAssertEqualObjects([jsl rep:@"(defmacro foo1 () `(let (xs [(atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))]) (@(first xs) 10)))"], @"user:foo1/0");
+    XCTAssertEqualObjects([jsl rep:@"(foo1)"], @"11");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro foo2 () `(let (xs [(atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))]) (@(nth xs 1) 10)))"], @"user:foo2/0");
+    XCTAssertEqualObjects([jsl rep:@"(foo2)"], @"12");
+}
+
+- (void)notestMacro {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
     [jsl rep:@"(defmacro unless (fn (pred a b) `(if ~pred ~b ~a)))"];
     XCTAssertEqualObjects([jsl rep:@"(unless false 7 8)"], @"7");
     XCTAssertEqualObjects([jsl rep:@"(unless true 7 8)"], @"8");
@@ -1153,10 +1186,6 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(unless2 true 7 8)"], @"8");
     // testing macro expand
     XCTAssertEqualObjects([jsl rep:@"(macroexpand (unless2 2 3 4))"], @"(user:if (core:not 2) 3 4)");
-    [jsl rep:@"(defmacro identity (fn (x) x))"];
-    XCTAssertEqualObjects([jsl rep:@"(let (a 123) (identity a))"], @"123");
-    [jsl rep:@"(defmacro foo (fn (& more) (count more)))"];
-    XCTAssertEqualObjects([jsl rep:@"(foo 1 2 3)"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(cond false 7 false 8 false 9)"], @"nil");
     // testing gensym
     XCTAssertEqualObjects([jsl rep:@"(= (gensym) (gensym))"], @"false");
@@ -1186,32 +1215,8 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     // (let (x__6__auto__ (1 2 3)) (let (y__11__auto__ (first x__6__auto__)) y__11__auto__))
     [jsl rep:@"(defmacro nested-let-1 (fn () `(let [x '(1 2 3)] (let (y (first x)) y))))"];
     XCTAssertEqualObjects([jsl rep:@"(nested-let-1)"], @"1");
-    // macro with hash-map
-    [jsl rep:@"(defmacro hm (fn (k v) `(hash-map ~k ~v)))"];
-    XCTAssertEqualObjects([jsl rep:@"(hm 1 '(3 4 5))"], @"{1 (3 4 5)}");
-    [jsl rep:@"(defmacro hm1 (fn (k v) `(let (x ~v) (hash-map ~k (first x)))))"];
-    XCTAssertEqualObjects([jsl rep:@"(hm1 1 '(3 4 5))"], @"{1 3}");
-    [jsl rep:@"(defmacro p (fn (x) `(let (z ~x) (list z 4 5 6 7))))"];
-    XCTAssertEqualObjects([jsl rep:@"(p 3)"], @"(3 4 5 6 7)");
-    XCTAssertEqualObjects([jsl rep:@"(hm 2 (p 3))"], @"{2 (3 4 5 6 7)}");
-    XCTAssertEqualObjects([jsl rep:@"(hm1 2 (p 3))"], @"{2 3}");
-    [jsl rep:@"(defmacro p (fn (x) `(let (z (atom 3)) (list z 4 5 6 7))))"];
-    XCTAssertEqualObjects([jsl rep:@"(hm :b @(first(p 3)))"], @"{:b 3}");
-    XCTAssertEqualObjects([jsl rep:@"(hm1 :a (p 5))"], @"{:a (atom 3)}");
-    // test macro definition print
-    XCTAssertEqualObjects([jsl rep:@"(defmacro a (fn (x) `(+ 1 ~x)))"], @"user:a/1");
-    XCTAssertEqualObjects([jsl rep:@"(defmacro a (fn (& more) `(first (list ~@more))))"], @"user:a/n");
-    // misc
-    XCTAssertEqualObjects([jsl rep:@"(defun inc (x) (+ x 1))"], @"user:inc/1");
-    XCTAssertEqualObjects([jsl rep:@"(defmacro apply1 (x) `(apply inc/1 ~x))"], @"user:apply1/1");
-    XCTAssertEqualObjects([jsl rep:@"(apply1 [3])"], @"4");
-    // vector binding in let
-    XCTAssertEqualObjects([jsl rep:@"(defmacro m (fn (x) `(let (a [1 2 3]) (let [b [4 5]] (+ ~x (first b))))))"], @"user:m/1");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro m (x) `(let (a [1 2 3]) (let [b [4 5]] (+ ~x (first b)))))"], @"user:m/1");
     XCTAssertEqualObjects([jsl rep:@"(m 3)"], @"7");
-    XCTAssertEqualObjects([jsl rep:@"(defmacro foo1 () `(let (xs [(atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))]) (@(first xs) 10)))"], @"user:foo1/0");
-    XCTAssertEqualObjects([jsl rep:@"(foo1)"], @"11");
-    XCTAssertEqualObjects([jsl rep:@"(defmacro foo2 () `(let (xs [(atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))]) (@(nth xs 1) 10)))"], @"user:foo2/0");
-    XCTAssertEqualObjects([jsl rep:@"(foo2)"], @"12");
 }
 
 void errorHandleFn(id param, int tag, int counter, const char *s) {
