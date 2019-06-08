@@ -171,7 +171,7 @@ static NSMapTable<NSString *, Env *> *_modules;
     JSSymbol *sym = [key copy];
     [sym setModuleName:[fault moduleName]];
     [sym setInitialModuleName:[fault moduleName]];
-    id<JSDataProtocol> val = [self objectForExportedSymbol:key module:[fault moduleName]];
+    id<JSDataProtocol> val = [self objectForExportedSymbol:sym module:[fault moduleName]];
     if (val) {  // update object in export table
         [sym setIsFault:NO];
         [sym setIsQualified:YES];

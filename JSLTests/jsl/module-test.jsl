@@ -1,21 +1,10 @@
-(def test-in-user (fn () 123))
+(defmodule bbar (export (bba 1)))
+(defun bba (n) (+ n 1))
 
-(defmodule foo (export all))
+(defmodule ffoo (export (ffb 1)) (import (from bbar (bba 1))))
+(defun ffb (n) (bba n))
 
-(def greet-name (fn (n) "Hello Olivia"))
-
-(def greet (fn () "Hello there"))
-
-(defun fringe-me () 42)
-
-(defun magic (n) (if (= n 42) "Now you see me" "Now you don't"))
-
-(defmacro fdefun (fn (symname args & form) `(def ~symname (fn ~args ~@form))))
-
-(defmodule bar (export all) (import (from foo (magic 1))))
-
-(defun do-magic () (* (magic 42) 0))
-
-(defun magic-magic (n) (* (magic 42) n))
-
-(defun bar (x) (str "I am " x))
+(defmodule bbaz (export all))
+(defun zza (n) (* n n))
+(defun zzb (n) (* (bbar:bba n) n))
+(defun zzc (n) (* (ffoo:ffb n) n))

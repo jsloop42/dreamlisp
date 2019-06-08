@@ -1671,48 +1671,6 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(eval (read-string \"(foo:greet)\"))"], @"42");
 }
 
-#pragma mark Env
-
-- (void)notestEnvUpdateModuleNameForExprs {
-//    Env *env = [Env new];
-//    // Current module name is "user"
-//    NSString *currModName = @"user";
-//    JSSymbol *sym = [[JSSymbol alloc] initWithName:@"random-sym-1"];
-//    // A new symbol before any processing or from current module
-//    [sym setInitialModuleName:[Const defaultModuleName]];
-//    [sym resetModuleName];
-//    [sym resetArity];
-//    [env updateModuleNameForExprs:sym moduleName:currModName];
-//    XCTAssertEqualObjects([sym moduleName], currModName);
-//    XCTAssertEqualObjects([sym initialModuleName], currModName);
-//    // A symbol from core module
-//    [sym setInitialModuleName:[Const coreModuleName]];
-//    [sym resetModuleName];
-//    // If a symbol from "core" module is encountered, the module names are reset to core.
-//    [env updateModuleNameForExprs:sym moduleName:currModName];
-//    XCTAssertEqualObjects([sym moduleName], [Const coreModuleName]);
-//    XCTAssertEqualObjects([sym initialModuleName], [Const coreModuleName]);
-//    // A symbol from a new module is found
-//    NSString *newModName = @"io";
-//    [sym setInitialModuleName:newModName];
-//    [sym resetModuleName];
-//    XCTAssertEqualObjects([sym moduleName], newModName);
-//    XCTAssertEqualObjects([sym initialModuleName], newModName);
-//    // An symbol with different module names encountered
-//    [sym setInitialModuleName:[Const defaultModuleName]];
-//    XCTAssertEqualObjects([sym moduleName], newModName);
-//    XCTAssertEqualObjects([sym initialModuleName], [Const defaultModuleName]);
-//    // An qualified symbol is found
-//    [sym setIsQualified:YES];
-//    XCTAssertEqualObjects([sym moduleName], newModName);
-//    XCTAssertEqualObjects([sym initialModuleName], [Const defaultModuleName]);  // No change is made to module names
-//    // An imported symbol is found
-//    [sym setIsQualified:NO];
-//    [sym setIsImported:YES];
-//    XCTAssertEqualObjects([sym moduleName], newModName);
-//    XCTAssertEqualObjects([sym initialModuleName], [Const defaultModuleName]);  // No change is made to module names
-}
-
 - (void)testExportSymbolResolveFault {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     [jsl rep:@"(defmodule foo (export all))"];
@@ -1757,9 +1715,19 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(bar:bb 21)"], @"20");
 }
 
+- (void)testCodeLoadedFromFile {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    NSString *moduleTest = [self pathForFile:@"module-test.jsl"];
+    XCTAssertTrue([moduleTest isNotEmpty]);
+    [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", moduleTest]];
+    XCTAssertEqualObjects([jsl rep:@"(bbar:bba 5)"], @"6");
+    XCTAssertEqualObjects([jsl rep:@"(bbaz:zza 5)"], @"25");
+    XCTAssertEqualObjects([jsl rep:@"(bbaz:zzb 5)"], @"30");
+    XCTAssertEqualObjects([jsl rep:@"(bbaz:zzc 5)"], @"30");
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-
 }
 
 - (void)notestPerformanceJSListDropFirst {
