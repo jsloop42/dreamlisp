@@ -523,6 +523,16 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"seq" moduleName:[Const coreModuleName]]];
 }
 
+- (NSString *)nameFromObject:(id<JSDataProtocol>)obj {
+    NSString *name = @"G";
+    if ([JSSymbol isSymbol:obj]) {
+        name = [(JSSymbol *)obj name];
+    } else if ([JSString isString:obj]) {
+        name = [(JSString *)obj value];
+    }
+    return name;
+}
+
 /** Exposes the reader which is used for eval */
 - (void)addEvalFunctions {
     Core * __weak weakSelf = self;
@@ -546,6 +556,16 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:slurp argCount:1 name:@"slurp/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"slurp" moduleName:[Const coreModuleName]]];
+
+    id<JSDataProtocol>(^gensym)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        NSString *name = @"G";
+        if ([xs count] == 1) {
+            name = [self nameFromObject:[xs first]];
+        }
+        return [[JSSymbol alloc] initWithName:[NSString stringWithFormat:@"%@__%ld", name, [State counter]]];
+    };
+    fn = [[JSFunction alloc] initWithFn:gensym argCount:-1 name:@"gensym/n"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"gensym" moduleName:[Const coreModuleName]]];
 }
 
 - (void)addAtomFunctions {

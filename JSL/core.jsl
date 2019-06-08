@@ -1,45 +1,28 @@
-;; A macro to define macros
-(defmacro! defmacro (fn* (symname args & form)
- `(defmacro! ~symname (fn* ~args (do ~@form)))))
+(defmacro defun (symname args & form)
+  "A macro to define functions."
+  `(def ~symname (fn ~args ~@form)))
 
-;; A macro to define functions
-(defmacro! defun (fn* (symname args & form)
- `(def! ~symname (fn* ~args (do ~@form)))))
+(defun not (a) 
+  "Negates the given boolean value."
+  (if a false true))
 
-;; A macro that evaluates all forms passed in a let binding
-(defmacro! let (fn* (b & form)
-  `(let* ~b (do ~@form))))
-
-;; A macro that evaluates all forms passed to a function
-(defmacro! fn (fn* (args & form)
-  `(fn* ~args (do ~@form))))
-
-(def! greet (fn* () (println "hello")))
-
-;; Negates the given boolean value
-(def! not (fn* (a) (if a false true)))
-
-;; Evaluates the expression and if true, evaluates the corresponding form, else continues with the next expression
-(defmacro! cond (fn* (& xs)
+(defmacro cond (& xs)
+  "Evaluates the expression and if true, evaluates the corresponding form, else continues with the next expression."
   (if (> (count xs) 0)
    `(if ~(first xs)
      ~(if (> (count xs) 1)
        (nth xs 1)
        (throw "Odd number of forms to cond"))
-    (cond ~@(rest (rest xs)))))))
+    (cond ~@(rest (rest xs))))))
 
-;; Evaluates expressions one at a time. If an expression returns false, the function returns with the result else continues evaluation till the last expression
-;; is evaluated.
 (defmacro or () nil)
 (defmacro or (x) x)
-(defmacro or (x & more) `(let* (res ~x) (if res res (or ~@more))))
+(defmacro or (x & more) 
+  "Evaluates expressions one at a time. If an expression returns false, the function returns with the result else continues evaluation till the last expression
+  is evaluated."
+  (let (res x) `(if ~res ~res (or ~@more))))
 
-;; A counter to generate unique symbol name
-(def! *gensym-counter* (atom 0))
-
-;; Generate unique symbol name
-(def! gensym (fn* () (symbol (str "G__" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))
-(def! gensym (fn* (sym) (symbol (str sym (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))
-
-;; Exit the REPL
-(def! exit (fn* () (do (println "Bye") (exit*))))
+(defun exit ()
+  "Exit the REPL"
+  (println "Bye")
+  (exit*))
