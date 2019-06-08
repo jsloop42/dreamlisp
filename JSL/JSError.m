@@ -30,6 +30,7 @@ NSString *JSLUnderlyingException = @"JSLUnderlyingException";
 NSString *MacroSymbolNotFound = @"'%@' not found, used outside quasiquote";
 NSString *ModuleEmpty = @"'%@' module is empty";
 NSString *ModuleNotFound = @"'%@' module not found";
+NSString *QuotedSymbol = @"Expecting quoted symbol for %@";
 NSString *SequenceError = @"Not a sequence";
 NSString *SymbolNotFound = @"'%@' not found";
 NSString *SymbolParseError = @"Symbol parse error for %@";

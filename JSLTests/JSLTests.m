@@ -108,7 +108,7 @@
     XCTAssertEqualObjects([(JSSymbol *)[(JSList *)[xs nth:1] first] moduleName], @"foo");
     xs = [xs nth:2];
     XCTAssertEqualObjects([(JSSymbol *)[xs nth:1] moduleName], @"foo");
-    ast = [reader readString:@"(in-module user)"];
+    ast = [reader readString:@"(in-module 'user)"];
     XCTAssertEqualObjects([reader moduleName], [Const defaultModuleName]);
     ast = [reader readString:@"(def b 2)"];
     xs = (JSList *)ast[0];
@@ -1601,7 +1601,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     [jsl rep:@"(defmodule tree (export (create-tree 0) (right-node 1) (left-node 1)))"];
     [jsl rep:@"(def a 1)"];
     XCTAssertEqualObjects([jsl rep:@"a"], @"1");
-    [jsl rep:@"(in-module user)"];
+    [jsl rep:@"(in-module 'user)"];
 }
 
 - (void)testMacroWithModules {
@@ -1611,11 +1611,11 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(defmodule foo ())"], @"foo");
     XCTAssertEqualObjects([jsl rep:@"(user:d t 2)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(defun inc (n) (+ n 1))"], @"foo:inc/1");
-    [jsl rep:@"(in-module user)"];
-    XCTAssertEqualObjects([jsl rep:@"(try (foo:random-1 4) (catch ex (str ex)))"], @"\"'user:random-1/1' not found\"");  // function not exported
+    [jsl rep:@"(in-module 'user)"];
+    XCTAssertEqualObjects([jsl rep:@"(try (foo:random-1 4) (catch ex (str ex)))"], @"\"'foo:random-1/1' not found\"");  // function not exported
 }
 
-- (void)notestModuleExports {
+- (void)testModuleExports {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(defmodule foo (export (inc 1)) (export (dec 1)))"], @"foo");
     XCTAssertEqualObjects([jsl rep:@"(defun inc (n) (+ n 1))"], @"foo:inc/1");
@@ -1623,12 +1623,12 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(defun dec (n) (- n 1))"], @"foo:dec/1");
     XCTAssertEqualObjects([jsl rep:@"(defun greet () 42)"], @"foo:greet/0");
     XCTAssertEqualObjects([jsl rep:@"(greet)"], @"42");
-    XCTAssertEqualObjects([jsl rep:@"(in-module user)"], @"user");
+    XCTAssertEqualObjects([jsl rep:@"(in-module 'user)"], @"user");
     XCTAssertEqualObjects([jsl rep:@"(foo:inc 4)"], @"5");
     XCTAssertEqualObjects([jsl rep:@"(try (foo:random-2) (catch ex (str ex)))"], @"\"'foo:random-2/0' not found\"");  // function not exported
 }
 
-- (void)notestModuleExportAll {
+- (void)testModuleExportAll {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(defmodule foo (export (inc 1)) (export all))"], @"foo");
     XCTAssertEqualObjects([jsl rep:@"(defun inc (n) (+ n 1))"], @"foo:inc/1");
@@ -1637,7 +1637,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(inc 4)"], @"5");
     XCTAssertEqualObjects([jsl rep:@"(dec 4)"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(greet)"], @"42");
-    XCTAssertEqualObjects([jsl rep:@"(in-module user)"], @"user");
+    XCTAssertEqualObjects([jsl rep:@"(in-module 'user)"], @"user");
     XCTAssertEqualObjects([jsl rep:@"(foo:inc 41)"], @"42");
     XCTAssertEqualObjects([jsl rep:@"(foo:dec 43)"], @"42");
     XCTAssertEqualObjects([jsl rep:@"(foo:greet)"], @"42");
@@ -1646,15 +1646,15 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(defun diff (x y) (- x y))"], @"bar:diff/2");
     XCTAssertEqualObjects([jsl rep:@"(sum 40 2)"], @"42");
     XCTAssertEqualObjects([jsl rep:@"(diff 45 3)"], @"42");
-    XCTAssertEqualObjects([jsl rep:@"(in-module user)"], @"user");
+    XCTAssertEqualObjects([jsl rep:@"(in-module 'user)"], @"user");
     XCTAssertEqualObjects([jsl rep:@"(bar:sum 40 2)"], @"42");
     XCTAssertEqualObjects([jsl rep:@"(try (bar:diff 45 3) (catch ex (str ex)))"], @"\"'bar:diff/2' not found\"");  // function not exported
-    XCTAssertEqualObjects([jsl rep:@"(in-module foo)"], @"foo");
+    XCTAssertEqualObjects([jsl rep:@"(in-module 'foo)"], @"foo");
     XCTAssertEqualObjects([jsl rep:@"(bar:sum 40 2)"], @"42");
     XCTAssertEqualObjects([jsl rep:@"(try (bar:diff 45 3) (catch ex (str ex)))"], @"\"'bar:diff/2' not found\"");  // function not exported
 }
 
-- (void)notestModuleImport {
+- (void)testModuleImport {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(defmodule bar (export (sum 2) (sum 1)))"], @"bar");
     XCTAssertEqualObjects([jsl rep:@"(defun sum (x y) (+ x y))"], @"bar:sum/2");
@@ -1665,10 +1665,21 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(defun greet () (sum 32))"], @"foo:greet/0");
     XCTAssertEqualObjects([jsl rep:@"(defmacro a () 1)"], @"foo:a/0");
     XCTAssertEqualObjects([jsl rep:@"(greet)"], @"42");
-    XCTAssertEqualObjects([jsl rep:@"(in-module user)"], @"user");
+    XCTAssertEqualObjects([jsl rep:@"(in-module 'user)"], @"user");
     XCTAssertEqualObjects([jsl rep:@"(foo:greet)"], @"42");
     // Invoke MFA from string format
     XCTAssertEqualObjects([jsl rep:@"(eval (read-string \"(foo:greet)\"))"], @"42");
+}
+
+- (void)testRemoveModule {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(defmodule rfoo (export (sum 2)))"], @"rfoo");
+    XCTAssertEqualObjects([jsl rep:@"(defun sum (x y) (+ x y))"], @"rfoo:sum/2");
+    XCTAssertEqualObjects([jsl rep:@"(in-module 'user)"], @"user");
+    XCTAssertEqualObjects([jsl rep:@"(rfoo:sum 10 20)"], @"30");
+    XCTAssertEqualObjects([jsl rep:@"(remove-module 'rfoo)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(try (rfoo:sum 45 3) (catch ex (str ex)))"], @"\"'rfoo:sum/2' not found\"");
+    XCTAssertThrows([jsl rep:@"(in-module 'rfoo)"]);
 }
 
 - (void)testExportSymbolResolveFault {
@@ -1679,7 +1690,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertNotNil(fooEnv);
     XCTAssertEqualObjects([jsl rep:@"(defun fa (n) n)"], @"foo:fa/1");
     XCTAssertEqualObjects([jsl rep:@"(fa 21)"], @"21");
-    [jsl rep:@"(in-module user)"];
+    [jsl rep:@"(in-module 'user)"];
     XCTAssertEqualObjects([jsl rep:@"(foo:fa 21)"], @"21");
     [jsl rep:@"(defmodule bar (export (ba 1) (bb 1)))"];
     XCTAssertEqualObjects([State currentModuleName], @"bar");
@@ -1695,7 +1706,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(defun bb (n) (- n 1))"], @"bar:bb/1");
     XCTAssertEqualObjects([jsl rep:@"(ba 21)"], @"22");
     XCTAssertEqualObjects([jsl rep:@"(bb 21)"], @"20");
-    [jsl rep:@"(in-module foo)"];
+    [jsl rep:@"(in-module 'foo)"];
     [fooEnv resolveFault:elem forKey:sym inEnv:barEnv];
     elem = [[barEnv exportTable] objectForSymbol:sym];
     XCTAssertNotNil(elem);
@@ -1710,7 +1721,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     elem = [[barEnv exportTable] objectForSymbol:sym];
     XCTAssertNotNil(elem);
     XCTAssertFalse([JSFault isFault:elem]);
-    [jsl rep:@"(in-module user)"];
+    [jsl rep:@"(in-module 'user)"];
     XCTAssertEqualObjects([jsl rep:@"(bar:ba 21)"], @"22");
     XCTAssertEqualObjects([jsl rep:@"(bar:bb 21)"], @"20");
 }

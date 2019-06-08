@@ -87,6 +87,14 @@
     return _tokens[_position];
 }
 
+/** Returns the nth token without incrementing the position. */
+- (nullable NSString *)peek:(NSUInteger)n {
+    NSUInteger count = [_tokens count];
+    NSUInteger pos = n + _position - 1;
+    if (pos >= count) return nil;
+    return _tokens[pos];
+}
+
 /** Increments the token position. */
 - (void)pass {
     if (_position >= [_tokens count]) return;
@@ -167,8 +175,20 @@
     if ([token isEqual:@"/"]) {
         return [[JSSymbol alloc] initWithArity:-1 string:@"/" moduleName:[Const coreModuleName]];
     }
-    if ([token isEqual:@"defmodule"] || [token isEqual:@"in-module"]) {
+    if ([token isEqual:@"defmodule"]) {
         _moduleName = [self peek];
+    } else if ([token isEqual:@"in-module"]) {
+        NSString *elem = [self peek:1];
+        if ([elem isNotEqualTo:@"'"] && [elem isNotEqualTo:@"("]) [[[JSError alloc] initWithFormat:QuotedSymbol, @"module name"] throw];
+        if ([elem isNotEqualTo:@"'"]) {
+            elem = [self peek:2];
+            if ([elem isNotEqualTo:@"quote"]) [[[JSError alloc] initWithFormat:QuotedSymbol, @"module name"] throw];
+            elem = [self peek:4];
+            if ([elem isNotEqualTo:@")"]) [[[JSError alloc] initWithFormat:QuotedSymbol, @"module name"] throw];
+            _moduleName = [self peek:3];
+        } else {
+            _moduleName = [self peek:2];
+        }
     }
     NSArray *modArr = [token componentsSeparatedByString:@":"];
     NSUInteger modCount = [modArr count];

@@ -381,7 +381,8 @@ static NSString *langVersion;
                 } else if ([[sym value] isEqual:@"in-module"]) {
                     return [self changeModule:ast];
                 } else if ([[sym value] isEqual:@"remove-module"]) {
-                    [self removeModule:[(JSSymbol *)[(JSList *)ast second] value]];
+                    [self removeModule:ast];
+                    //[self removeModule:[(JSSymbol *)[(JSList *)ast second] value]];
                     return [JSNil new];
                 }
             }
@@ -435,8 +436,9 @@ static NSString *langVersion;
     [Env setEnv:env forModuleName:[env moduleName]];
 }
 
-- (void)removeModule:(NSString *)name {
-    [Env removeModule:name];
+- (void)removeModule:(id<JSDataProtocol>)ast {
+    JSSymbol *modSym = [self moduleNameFromAST:ast];
+    [Env removeModule:[modSym value]];
     _env = _globalEnv;
     [self updateModuleName:[_env moduleName]];
 }
@@ -539,10 +541,18 @@ static NSString *langVersion;
     }
 }
 
+- (JSSymbol *)moduleNameFromAST:(id<JSDataProtocol>)ast {
+    JSList *xs = (JSList *)ast;
+    JSList *modList = nil;
+    if (![JSList isList:[xs second]]) [[[JSError alloc] initWithFormat:QuotedSymbol, @"module name"] throw];
+    if ([modList count] > 2) [[[JSError alloc] initWithFormat:ArityError, 1, [modList count]] throw];
+    modList = [xs second];
+    return [modList second];
+}
+
 /** Change current module to the given one. */
 - (JSSymbol *)changeModule:(id<JSDataProtocol>)ast {
-    JSList *xs = (JSList *)ast;
-    JSSymbol *modSym = [xs second];
+    JSSymbol *modSym = [self moduleNameFromAST:ast];
     [modSym setIsModule:YES];
     NSString *modName = [modSym value];
     if ([modName isEqual:[Const defaultModuleName]]) {

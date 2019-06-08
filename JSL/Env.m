@@ -202,6 +202,7 @@ static NSMapTable<NSString *, Env *> *_modules;
 - (id<JSDataProtocol>)objectForKey:(JSSymbol *)key isThrow:(BOOL)isThrow {
     id<JSDataProtocol> elem = [self resolveFault:[self objectForSymbol:key isThrow:isThrow] forKey:key inEnv:self];
     if (!elem && isThrow) {
+        if ([key isQualified]) [key setModuleName:[key initialModuleName]];
         [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
     }
     return elem;
@@ -231,9 +232,7 @@ static NSMapTable<NSString *, Env *> *_modules;
     elem = [self objectForSymbol:key inModule:[Env forModuleName:[Const coreModuleName]]];
     if (elem) return elem;
     [key resetModuleName];
-    if (isThrow) {
-        [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
-    }
+    if (isThrow) [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
     return nil;
 }
 
