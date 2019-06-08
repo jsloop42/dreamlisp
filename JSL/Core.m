@@ -526,7 +526,7 @@ double dmod(double a, double n) {
 - (NSString *)nameFromObject:(id<JSDataProtocol>)obj {
     NSString *name = @"G";
     if ([JSSymbol isSymbol:obj]) {
-        name = [(JSSymbol *)obj name];
+        name = [(JSSymbol *)obj value];
     } else if ([JSString isString:obj]) {
         name = [(JSString *)obj value];
     }

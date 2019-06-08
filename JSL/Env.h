@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "Types.h"
 #import "JSError.h"
-#import "SymbolTable.h"
 #import "Logger.h"
 #import "ModuleTable.h"
 #import <objc/NSObjCRuntime.h>
@@ -29,7 +28,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) ModuleTable *exportTable;
 @property (nonatomic, readwrite) ModuleTable *importTable;
 @property (nonatomic, readwrite) ModuleTable *internalTable;
-@property (nonatomic, readwrite) SymbolTable *symbolTable;
 @property (nonatomic, readwrite) NSString *moduleName;
 @property (nonatomic, readwrite) BOOL isUserDefined;
 @property (nonatomic, readwrite) BOOL isExportAll;
@@ -42,7 +40,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithModuleName:(NSString *)name isUserDefined:(BOOL)isUserDefined;
 - (instancetype)initWithEnv:(Env *)env;
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs;
-- (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs isImported:(BOOL)isImported currentEnv:(Env *)currentEnv;
 - (void)setObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key;
 - (void)updateObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key;
 - (id<JSDataProtocol>)objectForKey:(JSSymbol *)key;

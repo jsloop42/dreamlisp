@@ -14,19 +14,15 @@
 #import "NSMutableArray+JSList.h"
 #import "JSError.h"
 #import "State.h"
-#import "SymbolTable.h"
-#import "SymbolTableKey.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class JSFunction;
 @class JSList;
-@class SymbolTableKey;
 
 @interface JSSymbol: NSObject <JSDataProtocol>
 @property (nonatomic, readwrite) NSInteger arity;
 @property (nonatomic, readwrite) NSInteger initialArity;
-@property (nonatomic, readwrite) NSString *initialValue;
 @property (nonatomic, readwrite) BOOL isFunction;
 @property (nonatomic, readonly) BOOL hasNArity;
 @property (nonatomic, readwrite) NSString *fnName;
@@ -53,10 +49,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position string:(NSString *)string moduleName:(NSString *)moduleName;
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta symbol:(JSSymbol *)symbol;
 - (instancetype)initWithMeta:(_Nullable id<JSDataProtocol>)meta name:(NSString *)name;
-- (JSSymbol *)gensym;
-- (JSSymbol *)autoGensym;
-- (BOOL)isGensym;
-- (NSString *)name;
 - (JSSymbol *)toNArity;
 - (JSSymbol *)resetArity;
 - (void)updateArity;

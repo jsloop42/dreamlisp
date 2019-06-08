@@ -20,8 +20,6 @@ static NSMapTable<NSString *, Env *> *_modules;
     ModuleTable *_importTable;
     /** The internal env table containing evaluated symbols with its binding. */
     ModuleTable *_internalTable;
-    /** Used for auto gensym symbols */
-    SymbolTable *_symbolTable;
     NSString *_moduleName;
     /** Is user defined module */
     BOOL _isUserDefined;
@@ -32,7 +30,6 @@ static NSMapTable<NSString *, Env *> *_modules;
 @synthesize exportTable = _exportTable;
 @synthesize importTable = _importTable;
 @synthesize internalTable = _internalTable;
-@synthesize symbolTable = _symbolTable;
 @synthesize moduleName = _moduleName;
 @synthesize isUserDefined = _isUserDefined;
 @synthesize isExportAll = _isExportAll;
@@ -123,7 +120,7 @@ static NSMapTable<NSString *, Env *> *_modules;
         _outer = env;
         for (i = 0; i < len; i++) {
             JSSymbol *sym = (JSSymbol *)binds[i];
-            if ([[sym name] isEqual:@"&"]) {
+            if ([[sym value] isEqual:@"&"]) {
                 JSSymbol *key = (JSSymbol *)binds[i + 1];
                 if ([exprs count] > i) {
                     [self setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:key];
@@ -143,7 +140,6 @@ static NSMapTable<NSString *, Env *> *_modules;
     if (!_exportTable) _exportTable = [ModuleTable new];
     if (!_importTable) _importTable = [ModuleTable new];
     if (!_internalTable) _internalTable = [ModuleTable new];
-    if (!_symbolTable) _symbolTable = [SymbolTable new];
     _moduleName = [Const defaultModuleName];
     _isExportAll = NO;
     _isUserDefined = YES;

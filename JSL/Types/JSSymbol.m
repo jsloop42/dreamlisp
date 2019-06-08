@@ -10,7 +10,6 @@
 
 @implementation JSSymbol {
     NSString *_name;
-    NSString *_initialName;
     id<JSDataProtocol> _meta;
     NSInteger _arity;
     NSInteger _initialArity;
@@ -34,7 +33,6 @@
 @synthesize hasNArity = _hasNArity;
 @synthesize meta = _meta;
 @synthesize value = _name;
-@synthesize initialValue = _initialName;
 @synthesize fnName = _fnName;
 @synthesize moduleName = _moduleName;
 @synthesize initialModuleName = _initialModuleName;
@@ -96,8 +94,6 @@
                 [symbol setInitialArity:0];
                 [symbol resetArity];
             }
-            //[symbol setInitialModuleName:[State currentModuleName]];
-            //[symbol setModuleName:[State currentModuleName]];
         }
     }
 }
@@ -114,7 +110,6 @@
     if (self) {
         [self bootstrap];
         _name = name;
-        _initialName = name;
         _arity = -2;
         _initialArity = -2;
         _moduleName = moduleName;
@@ -124,14 +119,12 @@
     return self;
 }
 
-
 /** Initialise a symbol with function details and module name. */
 - (instancetype)initWithFunction:(JSFunction *)func name:(NSString *)name moduleName:(NSString *)moduleName {
     self = [super init];
     if (self) {
         [self bootstrap];
         _name = name;
-        _initialName = name;
         _initialArity = [func argsCount];
         _moduleName = moduleName;
         _initialModuleName = moduleName;
@@ -151,7 +144,6 @@
     self = [super init];
     if (self) {
         _name = [symbol name];
-        _initialName = [symbol initialValue];
         _meta = [symbol meta];
         _initialArity = arity;
         _arity = arity;
@@ -187,7 +179,6 @@
     if (self) {
         [self bootstrap];
         _name = string;
-        _initialName = _name;
         _arity = arity;
         _initialArity = arity;
         _position = position;
@@ -203,7 +194,6 @@
     if (self) {
         [self bootstrap];
         _name = [symbol name];
-        _initialName = [symbol initialValue];
         _isFunction = [symbol isFunction];
         _hasNArity = [symbol hasNArity];
         _position = [symbol position];
@@ -221,7 +211,6 @@
     if (self) {
         [self bootstrap];
         _name = name;
-        _initialName = name;
         _meta = meta;
         _moduleName = [State currentModuleName];
         _initialModuleName = _moduleName;
@@ -244,20 +233,6 @@
 
 - (NSString *)dataTypeName {
     return @"symbol";
-}
-
-- (BOOL)isGensym {
-    return [_name isNotEqualTo:_initialName];
-}
-
-- (JSSymbol *)gensym {
-    if (_position == 0) _name = [[NSString alloc] initWithFormat:@"%@__%ld__auto__", [_name substringToIndex:[_name count]], [State counter]];
-    return self;
-}
-
-- (JSSymbol *)autoGensym {
-    _name = [[NSString alloc] initWithFormat:@"%@__%ld__auto__", [_name substringToIndex:[_name count]], [State counter]];
-    return self;
 }
 
 - (NSInteger)position {
@@ -317,9 +292,6 @@
 
 - (BOOL)isEqual:(id)symbol {
     if (![JSSymbol isSymbol:symbol]) return NO;
-//    if ([SymbolTableKey isSymbolTableKey:symbol]) {  // FIXME: remove?
-//        symbol = [(SymbolTableKey *)symbol toSymbol];
-//    }
     return [_name isEqual:[symbol name]] && _arity == [symbol arity] && [_moduleName isEqual:[symbol moduleName]];
 }
 
