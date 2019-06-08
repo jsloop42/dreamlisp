@@ -44,6 +44,7 @@
     [self addIOFunctions];
     [self addMetaFunctions];
     [self addMiscFunctions];
+    [self addModuleFunctions];
 }
 
 /** Perform modulus with double numbers. */
@@ -959,6 +960,16 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:timems argCount:0 name:@"time-ms/0"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"time-ms" moduleName:[Const coreModuleName]]];
+}
+
+- (void)addModuleFunctions {
+    JSFunction *fn = nil;
+
+    id<JSDataProtocol>(^currentModuleName)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        return [[JSString alloc] initWithString:[State currentModuleName]];
+    };
+    fn = [[JSFunction alloc] initWithFn:currentModuleName argCount:0 name:@"current-module-name/0"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"current-module-name" moduleName:[Const coreModuleName]]];
 }
 
 - (Env *)env {

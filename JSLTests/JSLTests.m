@@ -1546,6 +1546,15 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(= start-time 0)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(let [sumdown (fn (N) (if (> N 0) (+ N (sumdown (- N 1))) 0))] (sumdown 100)) ; Waste some time"], @"5050");  // not tail recursive
     XCTAssertEqualObjects([jsl rep:@"(> (time-ms) start-time)"], @"true");
+    // Object updates
+    JSSymbol *s = [[JSSymbol alloc] initWithName:@"foo"];
+    [s setModuleName:@"s"];
+    JSSymbol *a = s;
+    [a setModuleName:@"a"];
+    XCTAssertNotEqualObjects([s moduleName], @"s");
+    a = [s copy];
+    [a setModuleName:@"b"];
+    XCTAssertNotEqualObjects([s moduleName], @"s");
 }
 
 - (void)testErrorMessages {
@@ -1570,7 +1579,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 }
 
 /** The expressions loaded and evaluated from file should be added to the env just like it is evaluated from REPL. */
-- (void)notestScopeWithFile {
+- (void)testScopeWithFile {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     NSString *scopePath = [self pathForFile:@"scope.jsl"];
     XCTAssertTrue([scopePath isNotEmpty]);
@@ -1587,7 +1596,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(f1 4 6)"], @"30");
 }
 
-- (void)notestModule {
+- (void)testModule {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     [jsl rep:@"(defmodule tree (export (create-tree 0) (right-node 1) (left-node 1)))"];
     [jsl rep:@"(def a 1)"];
@@ -1595,15 +1604,15 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     [jsl rep:@"(in-module user)"];
 }
 
-- (void)notestMacroWithModules {
+- (void)testMacroWithModules {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-    [jsl rep:@"(defmacro d (fn (n v) `(def ~n ~v)))"];
+    [jsl rep:@"(defmacro d (n v) `(def ~n ~v))"];
     XCTAssertEqualObjects([jsl rep:@"(d x 4)"], @"4");
     XCTAssertEqualObjects([jsl rep:@"(defmodule foo ())"], @"foo");
     XCTAssertEqualObjects([jsl rep:@"(user:d t 2)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(defun inc (n) (+ n 1))"], @"foo:inc/1");
     [jsl rep:@"(in-module user)"];
-    XCTAssertEqualObjects([jsl rep:@"(try (foo:random-1 4) (catch ex (str ex)))"], @"\"'foo:random-1/1' not found\"");  // function not exported
+    XCTAssertEqualObjects([jsl rep:@"(try (foo:random-1 4) (catch ex (str ex)))"], @"\"'user:random-1/1' not found\"");  // function not exported
 }
 
 - (void)notestModuleExports {
@@ -1704,27 +1713,53 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 //    XCTAssertEqualObjects([sym initialModuleName], [Const defaultModuleName]);  // No change is made to module names
 }
 
-- (void)notestCodeLoadedFromFile {
+- (void)testExportSymbolResolveFault {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-    NSString *moduleTest = [self pathForFile:@"module-test.jsl"];
-    XCTAssertTrue([moduleTest isNotEmpty]);
-    [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", moduleTest]];
-    XCTAssertEqualObjects([jsl rep:@"(test-in-user)"], @"123");
-    XCTAssertEqualObjects([jsl rep:@"(foo:greet-name \"o\")"], @"\"Hello Olivia\"");
-    XCTAssertEqualObjects([jsl rep:@"(foo:greet)"], @"\"Hello there\"");
-    XCTAssertEqualObjects([jsl rep:@"(foo:fringe-me)"], @"42");
-    XCTAssertEqualObjects([jsl rep:@"(foo:magic 42)"], @"\"Now you see me\"");
-    XCTAssertEqualObjects([jsl rep:@"(foo:magic 24)"], @"\"Now you don't\"");
-    XCTAssertEqualObjects([jsl rep:@"foo:fdefun"], @"foo:fdefun/n");
-    XCTAssertEqualObjects([jsl rep:@"(foo:fdefun a () 21)"], @"user:a/0");
-    XCTAssertEqualObjects([jsl rep:@"(a)"], @"21");
-    XCTAssertEqualObjects([jsl rep:@"(bar:do-magic)"], @"0");
-    XCTAssertEqualObjects([jsl rep:@"(bar:magic-magic 42)"], @"1764");
-    XCTAssertEqualObjects([jsl rep:@"(bar:bar \"Olive\")"], @"\"I am Olive\"");
+    [jsl rep:@"(defmodule foo (export all))"];
+    XCTAssertEqualObjects([State currentModuleName], @"foo");
+    Env *fooEnv = [Env forModuleName:@"foo"];
+    XCTAssertNotNil(fooEnv);
+    XCTAssertEqualObjects([jsl rep:@"(defun fa (n) n)"], @"foo:fa/1");
+    XCTAssertEqualObjects([jsl rep:@"(fa 21)"], @"21");
+    [jsl rep:@"(in-module user)"];
+    XCTAssertEqualObjects([jsl rep:@"(foo:fa 21)"], @"21");
+    [jsl rep:@"(defmodule bar (export (ba 1) (bb 1)))"];
+    XCTAssertEqualObjects([State currentModuleName], @"bar");
+    Env *barEnv = [Env forModuleName:@"bar"];
+    XCTAssertNotNil(barEnv);
+    NSArray *barKeys = [[barEnv exportTable] allKeys];
+    XCTAssertEqual([barKeys count], 2);
+    JSSymbol *sym = [barKeys firstObject];
+    id<JSDataProtocol> elem = [[barEnv exportTable] objectForSymbol:sym];
+    XCTAssertNotNil(elem);
+    XCTAssertTrue([JSFault isFault:elem]);
+    XCTAssertEqualObjects([jsl rep:@"(defun ba (n) (+ n 1))"], @"bar:ba/1");
+    XCTAssertEqualObjects([jsl rep:@"(defun bb (n) (- n 1))"], @"bar:bb/1");
+    XCTAssertEqualObjects([jsl rep:@"(ba 21)"], @"22");
+    XCTAssertEqualObjects([jsl rep:@"(bb 21)"], @"20");
+    [jsl rep:@"(in-module foo)"];
+    [fooEnv resolveFault:elem forKey:sym inEnv:barEnv];
+    elem = [[barEnv exportTable] objectForSymbol:sym];
+    XCTAssertNotNil(elem);
+    XCTAssertFalse([JSFault isFault:elem]);
+    XCTAssertEqualObjects([jsl rep:@"(bar:ba 21)"], @"22");
+    sym = [[barKeys filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.value contains [c] %@", @"bb"]] firstObject];
+    elem = [[barEnv exportTable] objectForSymbol:sym];
+    XCTAssertNotNil(elem);
+    XCTAssertTrue([JSFault isFault:elem]);
+    XCTAssertEqualObjects([jsl rep:@"(bar:bb 21)"], @"20");
+    sym = [[[[barEnv exportTable] allKeys] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.value contains [c] %@", @"bb"]] firstObject];
+    elem = [[barEnv exportTable] objectForSymbol:sym];
+    XCTAssertNotNil(elem);
+    XCTAssertFalse([JSFault isFault:elem]);
+    [jsl rep:@"(in-module user)"];
+    XCTAssertEqualObjects([jsl rep:@"(bar:ba 21)"], @"22");
+    XCTAssertEqualObjects([jsl rep:@"(bar:bb 21)"], @"20");
 }
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-    [jsl rep:@"*host-language*"];
+
 }
 
 - (void)notestPerformanceJSListDropFirst {

@@ -145,36 +145,90 @@ static NSMapTable<NSString *, Env *> *_modules;
     _isUserDefined = YES;
 }
 
+- (id<JSDataProtocol>)resolveImportFault:(JSFault *)fault forKey:(JSSymbol *)key inEnv:(Env *)env {
+    id<JSDataProtocol> val = nil;
+    Env *modEnv = [Env forModuleName:[fault moduleName]];
+    JSSymbol *sym = [key copy];
+    if (modEnv) {
+        [sym setModuleName:[fault moduleName]];  // update module name so that the key can be retrieved from the original module
+        val = [[modEnv exportTable] objectForSymbol:sym];
+        if (val) {
+            [val setIsImported:YES];
+            [key setIsImported:YES];
+            [key setIsFault:NO];
+            [key setInitialModuleName:[modEnv moduleName]];
+            [key setModuleName:[env moduleName]];
+            [key setIsQualified:YES];
+            [env updateImportedObject:val forKey:key];
+            return val;
+        }
+    }
+    [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
+    return val;
+}
+
+- (id<JSDataProtocol>)resolveExportFault:(JSFault *)fault forKey:(JSSymbol *)key inEnv:(Env *)env {
+    JSSymbol *sym = [key copy];
+    [sym setModuleName:[fault moduleName]];
+    [sym setInitialModuleName:[fault moduleName]];
+    id<JSDataProtocol> val = [self objectForExportedSymbol:key module:[fault moduleName]];
+    if (val) {  // update object in export table
+        [sym setIsFault:NO];
+        [sym setIsQualified:YES];
+        [env updateExportedObject:val forKey:sym];
+        return val;
+    }
+    [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
+    return val;
+}
+
+- (id<JSDataProtocol>)resolveFault:(id<JSDataProtocol>)object forKey:(JSSymbol *)key inEnv:(Env *)env {
+    if ([JSFault isFault:object]) {
+        JSFault *fault = (JSFault *)object;
+        if ([fault isImported]) {
+            [self resolveExportFault:fault forKey:key inEnv:[Env forModuleName:[fault moduleName]]];
+            object = [self resolveImportFault:fault forKey:key inEnv:env];
+        } else {  // Exported symbol
+            object = [self resolveExportFault:fault forKey:key inEnv:[Env forModuleName:[fault moduleName]]];
+        }
+    }
+    return object;
+}
+
 - (id<JSDataProtocol>)objectForKey:(JSSymbol *)key {
     return [self objectForKey:key isThrow:YES];
 }
 
 - (id<JSDataProtocol>)objectForKey:(JSSymbol *)key isThrow:(BOOL)isThrow {
-    if ([key isQualified]) return [self objectForKey:key inModule:[key initialModuleName]];
+    id<JSDataProtocol> elem = [self resolveFault:[self objectForSymbol:key isThrow:isThrow] forKey:key inEnv:self];
+    if (!elem && isThrow) {
+        [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
+    }
+    return elem;
+}
+
+- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isThrow:(BOOL)isThrow {
+    if ([key isQualified]) return [self objectForSymbol:key inModule:[Env forModuleName:[key initialModuleName]]];
     NSString *moduleName = [key moduleName];
     id<JSDataProtocol> elem = nil;
     if ([moduleName isEqual:_moduleName]) {
         if (_isExportAll || [moduleName isEqual:[Const defaultModuleName]] || [moduleName isEqual:[Const coreModuleName]]) {
-            elem = [_exportTable objectForSymbol:key];
+            elem = [self objectForKeyFromExportTable:key];
             if (elem) return elem;
         } else {
-            elem = [_internalTable objectForSymbol:key];
+            elem = [self objectForKeyFromInternalTable:key];
             if (elem) return elem;
         }
-        elem = [_importTable objectForSymbol:key];
+        elem = [self objectForKeyFromImportTable:key];
         if (elem) return elem;
-        if ([self outer]) {
-            elem = [_outer objectForKey:key isThrow:isThrow];
-            if (elem) return elem;
-        }
     } else {
         // Symbol belongs to another module
-        elem = [self objectForKey:key inModule:[key moduleName]];
+        elem = [self objectForSymbol:key inModule:[Env forModuleName:[key moduleName]]];
         if (elem) return elem;
     }
     // Symbol may belong to core
     [key setModuleName:[Const coreModuleName]];
-    elem = [self objectForKey:key inModule:[Const coreModuleName]];
+    elem = [self objectForSymbol:key inModule:[Env forModuleName:[Const coreModuleName]]];
     if (elem) return elem;
     [key resetModuleName];
     if (isThrow) {
@@ -183,22 +237,65 @@ static NSMapTable<NSString *, Env *> *_modules;
     return nil;
 }
 
-- (id<JSDataProtocol> _Nullable)objectForKey:(JSSymbol *)key inModule:(NSString *)name {
-    Env *env = [Env forModuleName:name];
-    JSSymbol *sym = key;
-    if (env) {
-        id<JSDataProtocol> elem;
-        if ([key isQualified]) {
-            [sym setModuleName:[key initialModuleName]];
+- (id<JSDataProtocol> _Nullable)objectForKeyFromImportTable:(JSSymbol *)key {
+    id<JSDataProtocol> elem = [_importTable objectForSymbol:key];
+    if (elem) return elem;
+    return [self outer] ? [[self outer] objectForKeyFromImportTable:key] : nil;
+}
+
+- (id<JSDataProtocol> _Nullable)objectForKeyFromExportTable:(JSSymbol *)key {
+    id<JSDataProtocol> elem = [_exportTable objectForSymbol:key];
+    if (elem) return elem;
+    return [self outer] ? [[self outer] objectForKeyFromExportTable:key] : nil;
+}
+
+- (id<JSDataProtocol> _Nullable)objectForKeyFromInternalTable:(JSSymbol *)key {
+    id<JSDataProtocol> elem = [_internalTable objectForSymbol:key];
+    if (elem) return elem;
+    return [self outer] ? [[self outer] objectForKeyFromInternalTable:key] : nil;
+}
+
+- (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key inModule:(Env *)env {
+    JSSymbol *sym = [key copy];
+    id<JSDataProtocol> elem;
+    NSString *modName = [env moduleName];
+    if ([key isQualified]) {
+        [sym setModuleName:[key initialModuleName]];
+    }
+    if ([env isExportAll] || [modName isEqual:[Const defaultModuleName]] || [modName isEqual:[Const coreModuleName]]) {
+        elem = [[env exportTable] objectForSymbol:sym];
+        if (elem) return elem;
+    } else {
+        if ([[State currentModuleName] isEqual:modName]) {
+            elem = [[env internalTable] objectForSymbol:sym];
+            if (elem) return elem;
+        } else {
+            elem = [[env exportTable] objectForSymbol:sym];
+            if (elem) return elem;
         }
-        if ([env isExportAll] || [name isEqual:[Const defaultModuleName]] || [name isEqual:[Const coreModuleName]]) {
+    }
+    if ([[State currentModuleName] isEqual:modName]) {
+        elem = [[env importTable] objectForSymbol:key];
+        if (elem) return elem;
+    }
+    return [env outer] ? [self objectForSymbol:key inModule:[env outer]] : nil;
+}
+
+/** Get object for exported symbol from the module. Used only for resolving export fault. */
+- (id<JSDataProtocol> _Nullable)objectForExportedSymbol:(JSSymbol *)key module:(NSString *)name {
+    Env *env = [Env forModuleName:name];
+    JSSymbol *sym = [key copy];
+    if (env) {
+        [sym setModuleName:[key initialModuleName]];
+        id<JSDataProtocol> elem;
+        if ([env isExportAll]) {
             elem = [[env exportTable] objectForSymbol:sym];
             if (elem) return elem;
         } else {
             elem = [[env internalTable] objectForSymbol:sym];
             if (elem) return elem;
         }
-        return [env outer] ? [[env outer] objectForKey:key] : nil;
+        return [env outer] ? [[env outer] objectForKey:key isThrow:NO] : nil;
     }
     return nil;
 }
@@ -211,12 +308,18 @@ static NSMapTable<NSString *, Env *> *_modules;
     }
 }
 
-- (void)updateObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key {
+/** Update an existing key value pair with new properties for an imported symbol. Used only for resolving import fault. */
+- (void)updateImportedObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key {
     if (_isExportAll || [_moduleName isEqual:[Const defaultModuleName]] || [_moduleName isEqual:[Const coreModuleName]]) {
         [_exportTable updateObject:obj forKey:key];
     } else {
         [_internalTable updateObject:obj forKey:key];
     }
+}
+
+/** Update an existing key value pair with new properties for an exported symbol. Used only for resolving export fault. */
+- (void)updateExportedObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key {
+    [_exportTable updateObject:obj forKey:key];
 }
 
 - (NSString *)description {

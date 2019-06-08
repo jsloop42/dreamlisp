@@ -117,7 +117,6 @@ static NSString *langVersion;
             info(@"%@ %@", @"Error loading", path);
             return nil;
         } else {
-            Env *current = this->_env;
             BOOL __block hasError = NO;
             [files enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                  @try {
@@ -127,9 +126,8 @@ static NSString *langVersion;
                      [this printException:exception log:YES readably:YES];
                  }
             }];
-            this->_env = current;
-            [this updateModuleName:[current moduleName]];
-            if (!hasError) info(@"%@", [[NSString alloc] initWithFormat:@"#(ok %@)", [path lastPathComponent]]);
+            [this changeModuleTo:[Const defaultModuleName]];
+            if (!hasError && [this isREPL]) info(@"%@", [[NSString alloc] initWithFormat:@"#(ok %@)", [path lastPathComponent]]);
         }
         return [JSNil new];
     };
@@ -566,6 +564,18 @@ static NSString *langVersion;
 - (void)updateModuleName:(NSString *)moduleName {
     if (_isREPL) _prompt = [moduleName stringByAppendingString:@"> "];
     [State setCurrentModuleName:moduleName];
+}
+
+- (void)changeModuleTo:(NSString *)moduleName {
+    Env *env = [Env forModuleName:moduleName];
+    if (env) {
+        [self setEnv:env];
+        [State setCurrentModuleName:moduleName];
+        [[self reader] setModuleName:moduleName];
+        if (_isREPL) _prompt = [moduleName stringByAppendingString:@"> "];
+    } else {
+        info(@"Module %@ not found", moduleName);
+    }
 }
 
 #pragma mark Print

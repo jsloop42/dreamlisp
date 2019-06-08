@@ -73,30 +73,30 @@
 }
 
 /** Update function bounded symbols properties from the given ast. */
-+ (void)updateProperties:(JSSymbol *)symbol list:(id<JSDataProtocol>)ast {
-    if ([JSList isList:ast]) {
-        JSList *list = (JSList *)ast;
-        if ([JSSymbol isSymbol:[list first] withName:@"fn*"]) {
-            JSList *args = (JSList *)[list second];
-            if (![args isEmpty]) {
-                NSMutableArray<JSSymbol *> *arr = [args value];
-                NSPredicate *pred = [NSPredicate predicateWithFormat:@"SELF.name contains [c] %@", @"&"];
-                NSArray *filtered = [arr filteredArrayUsingPredicate:pred];
-                if ([filtered count] > 0) {
-                    [symbol setInitialArity:-1];
-                    [symbol resetArity];
-                } else {
-                    NSUInteger count = [args count];
-                    [symbol setInitialArity:count];
-                    [symbol resetArity];
-                }
-            } else {
-                [symbol setInitialArity:0];
-                [symbol resetArity];
-            }
-        }
-    }
-}
+//+ (void)updateProperties:(JSSymbol *)symbol list:(id<JSDataProtocol>)ast {
+//    if ([JSList isList:ast]) {
+//        JSList *list = (JSList *)ast;
+//        if ([JSSymbol isSymbol:[list first] withName:@"fn*"]) {
+//            JSList *args = (JSList *)[list second];
+//            if (![args isEmpty]) {
+//                NSMutableArray<JSSymbol *> *arr = [args value];
+//                NSPredicate *pred = [NSPredicate predicateWithFormat:@"SELF.value contains [c] %@", @"&"];
+//                NSArray *filtered = [arr filteredArrayUsingPredicate:pred];
+//                if ([filtered count] > 0) {
+//                    [symbol setInitialArity:-1];
+//                    [symbol resetArity];
+//                } else {
+//                    NSUInteger count = [args count];
+//                    [symbol setInitialArity:count];
+//                    [symbol resetArity];
+//                }
+//            } else {
+//                [symbol setInitialArity:0];
+//                [symbol resetArity];
+//            }
+//        }
+//    }
+//}
 
 - (instancetype)initWithName:(NSString *)name {
     self = [self initWithName:name moduleName:_moduleName];
@@ -304,8 +304,20 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id elem = [[JSSymbol alloc] initWithName:_name];
-    [elem setIsImported:_isImported];
+    JSSymbol *elem = [[JSSymbol alloc] initWithName:_name];
+    [elem setPosition:_position];
+    [elem setArity:_arity];
+    [elem setInitialArity:_initialArity];
+    [elem setModuleName:_moduleName];
+    [elem setInitialModuleName:_initialModuleName];
+    [elem setIsFunction:_isFunction];
+    [elem setFnName:_fnName];
+    [elem setIsQualified:_isQualified];
+    [elem setIsFault:_isFault];
+    [elem setIsCore:_isCore];
+    [elem setIsFunction:_isFunction];
+    [elem setIsModule:_isModule];
+    [elem setMeta:_meta];
     return elem;
 }
 

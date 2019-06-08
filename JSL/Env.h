@@ -40,8 +40,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithModuleName:(NSString *)name isUserDefined:(BOOL)isUserDefined;
 - (instancetype)initWithEnv:(Env *)env;
 - (instancetype)initWithEnv:(Env *)env binds:(NSMutableArray *)binds exprs:(NSMutableArray *)exprs;
+- (id<JSDataProtocol>)resolveFault:(id<JSDataProtocol>)object forKey:(JSSymbol *)key inEnv:(Env *)env;
 - (void)setObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key;
-- (void)updateObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key;
+- (void)updateImportedObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key;
+- (void)updateExportedObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key;
 - (id<JSDataProtocol>)objectForKey:(JSSymbol *)key;
 - (id<JSDataProtocol>)objectForKey:(JSSymbol *)key isThrow:(BOOL)isThrow;
 - (void)setModuleName:(NSString *)name;
