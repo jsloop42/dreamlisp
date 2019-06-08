@@ -65,7 +65,9 @@
         [symbol setIsFunction:YES];
         [symbol setInitialArity:[fn argsCount]];
         [symbol resetArity];
-        [symbol setModuleName:[fn moduleName]];
+        if (![fn moduleName] || [[fn moduleName] isEmpty]) {
+            [fn setModuleName:[symbol moduleName]];
+        }
         [symbol setIsImported:[object isImported]];
         [fn setName:[symbol string]];
     }
