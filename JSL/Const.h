@@ -17,6 +17,10 @@ extern NSArray * keywords;
 + (NSArray *)keyword;
 + (NSString *)defaultModuleName;
 + (NSString *)coreModuleName;
++ (NSString *)exports;
++ (NSString *)imports;
++ (NSString *)internal;
++ (NSString *)name;
 @end
 
 // Error constants

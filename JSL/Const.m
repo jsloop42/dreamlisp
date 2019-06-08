@@ -12,6 +12,10 @@ NSString * const JSLVersion = @"3.2";
 static NSArray *_keywords;
 static NSString * _defaultModuleName;
 static NSString * _coreModuleName;
+static NSString *_exports;
+static NSString *_imports;
+static NSString *_internal;
+static NSString *_name;
 
 @implementation Const
 
@@ -21,6 +25,10 @@ static NSString * _coreModuleName;
                       @"in-module", @"import", @"export", @"remove-module"];
         _defaultModuleName = @"user";
         _coreModuleName = @"core";
+        _exports = @"exports";
+        _imports = @"imports";
+        _internal = @"internal";
+        _name = @"name";
     }
 }
 
@@ -34,6 +42,22 @@ static NSString * _coreModuleName;
 
 + (NSString *)coreModuleName {
     return _coreModuleName;
+}
+
++ (NSString *)exports {
+    return _exports;
+}
+
++ (NSString *)imports {
+    return _imports;
+}
+
++ (NSString *)internal {
+    return _internal;
+}
+
++ (NSString *)name {
+    return _name;
 }
 
 @end

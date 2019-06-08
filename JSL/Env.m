@@ -322,6 +322,37 @@ static NSMapTable<NSString *, Env *> *_modules;
     [_exportTable updateObject:obj forKey:key];
 }
 
+- (NSArray *)exportedFunctions {
+    return [self exportedFunctions:[NSMutableArray new]];
+}
+
+- (NSArray *)exportedFunctions:(NSMutableArray *)acc {
+    [acc addObjectsFromArray:[[[self exportTable] allKeys] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.arity > -2"]]];
+    if (![self outer]) return acc;
+    return [[self outer] exportedFunctions:acc];
+}
+
+- (NSArray *)importedFunctions {
+    return [self importedFunctions:[NSMutableArray new]];
+}
+
+- (NSArray *)importedFunctions:(NSMutableArray *)acc {
+    [acc addObjectsFromArray:[[[self importTable] allKeys] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.arity > -2"]]];
+    if (![self outer]) return acc;
+    return [[self outer] importedFunctions:acc];
+}
+
+- (NSArray *)internalFunctions {
+    return [self internalFunctions:[NSMutableArray new]];
+}
+
+- (NSArray *)internalFunctions:(NSMutableArray *)acc {
+    [acc addObjectsFromArray:[[[self internalTable] allKeys] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.arity > -2"]]];
+    if (![self outer]) return acc;
+    return [[self outer] internalFunctions:acc];
+}
+
+
 - (NSString *)description {
     return [NSString stringWithFormat:@"<%@ %p moduleName: %@, isExportAll: %hhd>", NSStringFromClass([self class]), self, [self moduleName], _isExportAll];
 }

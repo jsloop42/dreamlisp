@@ -1726,6 +1726,19 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(bbaz:zzc 5)"], @"30");
 }
 
+- (void)testModuleInfo {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(defmodule ifoo (export (ifa 1) (ifa 2)) (import (from core (empty? 1))))"], @"ifoo");
+    [jsl rep:@"(defun iinc (n) (+ n 1))"];
+    [jsl rep:@"(def info (module-info 'ifoo))"];
+    NSDecimalNumber *count = [NSDecimalNumber decimalNumberWithString:[jsl rep:@"(count (get info :exports))"]];
+    XCTAssertEqual([count integerValue], 2);
+    count = [NSDecimalNumber decimalNumberWithString:[jsl rep:@"(count (get info :imports))"]];
+    XCTAssertEqual([count integerValue], 1);
+    count = [NSDecimalNumber decimalNumberWithString:[jsl rep:@"(count (get info :internal))"]];
+    XCTAssertEqual([count integerValue], 1);
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
 }

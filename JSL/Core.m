@@ -962,19 +962,25 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"time-ms" moduleName:[Const coreModuleName]]];
 }
 
-- (NSArray * _Nullable)moduleFunctions:(NSString *)moduleName {
+- (NSMapTable * _Nullable)moduleFunctions:(NSString *)moduleName {
     Env *env = [Env forModuleName:moduleName];
     if (!env) {
         info(@"%@", [NSString stringWithFormat:ModuleNotFound, moduleName]);
         return nil;
     }
-    NSArray *allKeys = nil;
-    NSArray *fnKeys = nil;
+    NSArray *exportedFns = nil;
+    NSArray *importedFns = nil;
+    NSArray *internalFns = nil;
+    NSMapTable *info = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
     if (env) {
-        allKeys = [[env exportTable] allKeys];
-        fnKeys = [allKeys filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.arity > -2"]];
+        exportedFns = [env exportedFunctions];
+        importedFns = [env importedFunctions];
+        internalFns = [env internalFunctions];
     }
-    return fnKeys;
+    [info setObject:[[JSVector alloc] initWithArray:[exportedFns mutableCopy]] forKey:[[JSKeyword alloc] initWithString:[Const exports]]];
+    [info setObject:[[JSVector alloc] initWithArray:[importedFns mutableCopy]] forKey:[[JSKeyword alloc] initWithString:[Const imports]]];
+    [info setObject:[[JSVector alloc] initWithArray:[internalFns mutableCopy]] forKey:[[JSKeyword alloc] initWithString:[Const internal]]];
+    return info;
 }
 
 - (void)addModuleFunctions {
@@ -989,9 +995,10 @@ double dmod(double a, double n) {
     id<JSDataProtocol>(^moduleInfo)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         JSSymbol *mod = [JSSymbol dataToSymbol:[xs first] fnName:@"module-info/1"];
         NSString* moduleName = (NSString *)[mod value];
-        NSArray *fns = [self moduleFunctions:moduleName];
+        NSMapTable *fns = [self moduleFunctions:moduleName];
         if (!fns) return nil;
-        return [[JSVector alloc] initWithArray:[fns mutableCopy]];
+        [fns setObject:[[JSString alloc] initWithString:moduleName] forKey:[[JSKeyword alloc] initWithString:[Const name]]];
+        return [[JSHashMap alloc] initWithMapTable:fns];
     };
     fn = [[JSFunction alloc] initWithFn:moduleInfo argCount:1 name:@"module-info/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"module-info" moduleName:[Const coreModuleName]]];
