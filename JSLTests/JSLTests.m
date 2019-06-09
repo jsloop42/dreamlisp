@@ -790,6 +790,9 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(when (= 1 1) (reset! a 2) (reset! a (+ 2 @a)) 10)"], @"10");
     XCTAssertEqualObjects([jsl rep:@"@a"], @"4");
     XCTAssertEqualObjects([jsl rep:@"(when (= 2 1) 10)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(when-not (= 2 1) (reset! a 20) (reset! a (+ 20 @a)) 100)"], @"100");
+    XCTAssertEqualObjects([jsl rep:@"@a"], @"40");
+    XCTAssertEqualObjects([jsl rep:@"(when-not (= 1 1) 10)"], @"nil");
 }
 
 - (void)testString {
