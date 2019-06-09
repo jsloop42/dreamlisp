@@ -1802,6 +1802,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqual([count integerValue], 1);
     count = [NSDecimalNumber decimalNumberWithString:[jsl rep:@"(count (get info :internal))"]];
     XCTAssertEqual([count integerValue], 1);
+    XCTAssertThrows([jsl rep:@"(in-module 'nope.ifoo)"]);
 }
 
 - (void)testModuleDescription {

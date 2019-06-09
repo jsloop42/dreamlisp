@@ -115,7 +115,7 @@ static NSString *langVersion;
         NSString *path = [[JSString dataToString:arg[0] fnName:@"load-file/1"] value];
         NSMutableArray<FileResult *> *files = [this->_fileOps loadFileFromPath:[@[path] mutableCopy] isConcurrent:NO isLookup:NO];
         if ([files count] == 0) {
-            info(@"%@ %@", @"Error loading", path);
+            error(@"%@ %@", @"Error loading", path);
             return nil;
         } else {
             BOOL __block hasError = NO;
@@ -152,7 +152,7 @@ static NSString *langVersion;
     NSMutableArray<FileResult *> *files = [_fileOps loadFileFromPath:paths isConcurrent:YES isLookup:YES];
     NSString *moduleName = [Const coreModuleName];
     if ([files count] == 0) {
-        info(@"%@ %@", @"Error loading", coreLibFileName);
+        error(@"%@ %@", @"Error loading", coreLibFileName);
     } else {
         _env = [_core env];
         [_reader setModuleName:moduleName];
@@ -501,7 +501,6 @@ static NSString *langVersion;
             [[env exportTable] setObject:[[JSFault alloc] initWithModule:[env moduleName] isImportFault:NO] forKey:sym];
         }
     }
-    //info(@"Exports\n%@", [[[env module] table] allKeys]);
 }
 
 - (void)processImportDirective:(JSList *)ast module:(Env *)env {
@@ -535,7 +534,6 @@ static NSString *langVersion;
             }
         }
     }
-    //info(@"Imports\n%@", [[env table] allKeys]);
 }
 
 /** Process module import exports. The ast can be of the form (export (a 1) (b 0)) (export (c 2) (d 1)) (import (from list (all 2)) (from io (read 1))) .. */
@@ -580,6 +578,7 @@ static NSString *langVersion;
         if (modEnv) {
             _env = modEnv;
         } else {
+            [[self reader] setModuleName:[State currentModuleName]];
             [[[JSError alloc] initWithFormat:ModuleNotFound, modName] throw];
         }
     }
@@ -595,14 +594,11 @@ static NSString *langVersion;
 
 - (void)changeModuleTo:(NSString *)moduleName {
     Env *env = [Env forModuleName:moduleName];
-    if (env) {
-        [self setEnv:env];
-        [State setCurrentModuleName:moduleName];
-        [[self reader] setModuleName:moduleName];
-        if (_isREPL) _prompt = [moduleName stringByAppendingString:@"> "];
-    } else {
-        info(@"%@", [NSString stringWithFormat:ModuleNotFound, moduleName]);
-    }
+    if (!env) [[[JSError alloc] initWithFormat:ModuleNotFound, moduleName] throw];
+    [self setEnv:env];
+    [State setCurrentModuleName:moduleName];
+    [[self reader] setModuleName:moduleName];
+    if (_isREPL) _prompt = [moduleName stringByAppendingString:@"> "];
 }
 
 #pragma mark Print

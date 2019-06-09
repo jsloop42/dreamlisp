@@ -991,10 +991,7 @@ double dmod(double a, double n) {
 
 - (NSMapTable * _Nullable)moduleInfo:(NSString *)moduleName {
     Env *env = [Env forModuleName:moduleName];
-    if (!env) {
-        info(@"%@", [NSString stringWithFormat:ModuleNotFound, moduleName]);
-        return nil;
-    }
+    if (!env) [[[JSError alloc] initWithFormat:ModuleNotFound, moduleName] throw];
     NSArray *exportedFns = nil;
     NSArray *importedFns = nil;
     NSArray *internalFns = nil;
