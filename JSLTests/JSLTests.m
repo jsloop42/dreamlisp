@@ -1587,6 +1587,25 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertNotEqualObjects([s moduleName], @"s");
 }
 
+- (void)testTypeFunction {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(type \"a\")"], @"\"string\"");
+    XCTAssertEqualObjects([jsl rep:@"(type 1)"], @"\"number\"");
+    XCTAssertEqualObjects([jsl rep:@"(type 3.14)"], @"\"number\"");
+    XCTAssertEqualObjects([jsl rep:@"(type +)"], @"\"function\"");
+    XCTAssertEqualObjects([jsl rep:@"(type when)"], @"\"function\"");
+    XCTAssertEqualObjects([jsl rep:@"(type 'a)"], @"\"symbol\"");
+    XCTAssertEqualObjects([jsl rep:@"(type [1 2])"], @"\"vector\"");
+    XCTAssertEqualObjects([jsl rep:@"(type '(1 2))"], @"\"list\"");
+    XCTAssertEqualObjects([jsl rep:@"(type {:a 1})"], @"\"hash-map\"");
+    XCTAssertEqualObjects([jsl rep:@"(type :a)"], @"\"keyword\"");
+    XCTAssertEqualObjects([jsl rep:@"(type (atom 1))"], @"\"atom\"");
+    XCTAssertEqualObjects([jsl rep:@"(type (fn () 1))"], @"\"function\"");
+    XCTAssertEqualObjects([jsl rep:@"(def a 1)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(type a)"], @"\"number\"");
+    XCTAssertEqualObjects([jsl rep:@"(type nil)"], @"\"nil\"");
+}
+
 - (void)testErrorMessages {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     // data type error

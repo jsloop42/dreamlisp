@@ -979,6 +979,14 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:timems argCount:0 name:@"time-ms/0"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"time-ms" moduleName:[Const coreModuleName]]];
+
+    /** Returns the type of the given element. */
+    id<JSDataProtocol>(^type)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArityCount:[xs count] arity:1 fnName:@"type:1"];
+        return [[JSString alloc] initWithString:[[xs first] dataTypeName]];
+    };
+    fn = [[JSFunction alloc] initWithFn:type argCount:1 name:@"type/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"type" moduleName:[Const coreModuleName]]];
 }
 
 - (NSMapTable * _Nullable)moduleInfo:(NSString *)moduleName {
