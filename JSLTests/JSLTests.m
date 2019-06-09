@@ -605,7 +605,12 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"{a 2}"], @"{1 2}");
     XCTAssertThrows([jsl rep:@"{b 2}"], @"'b' not found");
     XCTAssertEqualObjects([jsl rep:@"(contains? {a 2} a)"], @"true");
-    // hash map keyword key as get function
+}
+
+/** Test hash map keyword key as get function*/
+- (void)testHashMapKeywordFuncKey {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(:a {:a '(+ 1 2)})"], @"(user:+ 1 2)");
     [jsl rep:@"(def khm {:a 2 :b 3 :c 5 :d [10 11 \"a\"]})"];
     XCTAssertEqualObjects([jsl rep:@"(:a khm)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(:b khm)"], @"3");
