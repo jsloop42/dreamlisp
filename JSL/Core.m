@@ -8,6 +8,8 @@
 
 #import "Core.h"
 
+static NSString *_description = @"The core module.";
+
 /** Core functions exposed to the environment. */
 @implementation Core {
     Env *_env;
@@ -25,6 +27,7 @@
 - (void)bootstrap {
     _env = [[Env alloc] init];
     [_env setModuleName:[Const coreModuleName]];
+    [_env setModuleDescription:_description];
     [_env setIsUserDefined:NO];
     _reader = [Reader new];
     _printer = [Printer new];
@@ -962,7 +965,7 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"time-ms" moduleName:[Const coreModuleName]]];
 }
 
-- (NSMapTable * _Nullable)moduleFunctions:(NSString *)moduleName {
+- (NSMapTable * _Nullable)moduleInfo:(NSString *)moduleName {
     Env *env = [Env forModuleName:moduleName];
     if (!env) {
         info(@"%@", [NSString stringWithFormat:ModuleNotFound, moduleName]);
@@ -980,6 +983,8 @@ double dmod(double a, double n) {
     [info setObject:[[JSVector alloc] initWithArray:[exportedFns mutableCopy]] forKey:[[JSKeyword alloc] initWithString:[Const exports]]];
     [info setObject:[[JSVector alloc] initWithArray:[importedFns mutableCopy]] forKey:[[JSKeyword alloc] initWithString:[Const imports]]];
     [info setObject:[[JSVector alloc] initWithArray:[internalFns mutableCopy]] forKey:[[JSKeyword alloc] initWithString:[Const internal]]];
+    [info setObject:[[JSString alloc] initWithString:moduleName] forKey:[[JSKeyword alloc] initWithString:[Const name]]];
+    [info setObject:[[JSString alloc] initWithString:[env moduleDescription]] forKey:[[JSKeyword alloc] initWithString:[Const description]]];
     return info;
 }
 
@@ -995,9 +1000,8 @@ double dmod(double a, double n) {
     id<JSDataProtocol>(^moduleInfo)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         JSSymbol *mod = [JSSymbol dataToSymbol:[xs first] fnName:@"module-info/1"];
         NSString* moduleName = (NSString *)[mod value];
-        NSMapTable *fns = [self moduleFunctions:moduleName];
+        NSMapTable *fns = [self moduleInfo:moduleName];
         if (!fns) return nil;
-        [fns setObject:[[JSString alloc] initWithString:moduleName] forKey:[[JSKeyword alloc] initWithString:[Const name]]];
         return [[JSHashMap alloc] initWithMapTable:fns];
     };
     fn = [[JSFunction alloc] initWithFn:moduleInfo argCount:1 name:@"module-info/1"];

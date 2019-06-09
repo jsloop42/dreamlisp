@@ -35,7 +35,6 @@
 		9E3055552261A162001D4597 /* TypeUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3055532261A162001D4597 /* TypeUtils.m */; };
 		9E3055602262633E001D4597 /* JSError.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30555F2262633E001D4597 /* JSError.m */; };
 		9E3055612262633E001D4597 /* JSError.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30555F2262633E001D4597 /* JSError.m */; };
-		9E30B8DE2281F6F000D4D737 /* core.jsl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
 		9E33AAB52275775800A6EB98 /* JSString.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB42275775800A6EB98 /* JSString.m */; };
 		9E33AAB62275775800A6EB98 /* JSString.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB42275775800A6EB98 /* JSString.m */; };
 		9E33AAB9227577C000A6EB98 /* JSKeyword.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB8227577C000A6EB98 /* JSKeyword.m */; };
@@ -76,6 +75,8 @@
 		9E5D7B4C225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
 		9E6F444822578E5600777A24 /* JSL.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F444722578E5600777A24 /* JSL.m */; };
 		9E6F444922578E5600777A24 /* JSL.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F444722578E5600777A24 /* JSL.m */; };
+		9E70861822ACF1F700ADD464 /* core.jsl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
+		9E70861A22ACF2A200ADD464 /* test.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E70861922ACF29600ADD464 /* test.jsl */; };
 		9E9458562274EB4400A3D449 /* NSMapTable+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9458552274EB4400A3D449 /* NSMapTable+JSHashMap.m */; };
 		9E9458572274EB4400A3D449 /* NSMapTable+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9458552274EB4400A3D449 /* NSMapTable+JSHashMap.m */; };
 		9E94585B2274F04F00A3D449 /* JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E94585A2274F04F00A3D449 /* JSHashMap.m */; };
@@ -92,7 +93,7 @@
 			dstPath = .;
 			dstSubfolderSpec = 16;
 			files = (
-				9E30B8DE2281F6F000D4D737 /* core.jsl in CopyFiles */,
+				9E70861822ACF1F700ADD464 /* core.jsl in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -176,6 +177,7 @@
 		9E6F444622578E5600777A24 /* JSL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSL.h; sourceTree = "<group>"; };
 		9E6F444722578E5600777A24 /* JSL.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSL.m; sourceTree = "<group>"; };
 		9E6F444A2257C00900777A24 /* JSLTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSLTests.h; sourceTree = "<group>"; };
+		9E70861922ACF29600ADD464 /* test.jsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = test.jsl; sourceTree = "<group>"; };
 		9E9458542274EB4400A3D449 /* NSMapTable+JSHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSMapTable+JSHashMap.h"; sourceTree = "<group>"; };
 		9E9458552274EB4400A3D449 /* NSMapTable+JSHashMap.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSMapTable+JSHashMap.m"; sourceTree = "<group>"; };
 		9E9458592274F04F00A3D449 /* JSHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSHashMap.h; sourceTree = "<group>"; };
@@ -274,6 +276,7 @@
 		9E3A9D4C22568AFC00348529 /* JSL */ = {
 			isa = PBXGroup;
 			children = (
+				9E70861722ACF1CB00ADD464 /* Libs */,
 				9E30554122612BA4001D4597 /* Types */,
 				9E281CEC225908480038A5AF /* Const.h */,
 				9E281CED225908480038A5AF /* Const.m */,
@@ -302,7 +305,6 @@
 				9E5D7B4A225B947E00970453 /* Terminal.m */,
 				9E281CE8225890B10038A5AF /* Utils.h */,
 				9E281CE9225890B10038A5AF /* Utils.m */,
-				9E3F324A227B694300B56B6A /* core.jsl */,
 			);
 			path = JSL;
 			sourceTree = "<group>";
@@ -320,6 +322,15 @@
 				9E3A9D5C22568B1300348529 /* Info.plist */,
 			);
 			path = JSLTests;
+			sourceTree = "<group>";
+		};
+		9E70861722ACF1CB00ADD464 /* Libs */ = {
+			isa = PBXGroup;
+			children = (
+				9E3F324A227B694300B56B6A /* core.jsl */,
+				9E70861922ACF29600ADD464 /* test.jsl */,
+			);
+			path = Libs;
 			sourceTree = "<group>";
 		};
 		9E9458582274F01300A3D449 /* Category */ = {
@@ -427,6 +438,7 @@
 				9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */,
 				9E281CFF225A60770038A5AF /* runtest.py in Resources */,
 				9E38FC7D227F075F00405BE5 /* jsl in Resources */,
+				9E70861A22ACF2A200ADD464 /* test.jsl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

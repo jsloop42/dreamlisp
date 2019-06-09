@@ -21,6 +21,7 @@ static NSMapTable<NSString *, Env *> *_modules;
     /** The internal env table containing evaluated symbols with its binding. */
     ModuleTable *_internalTable;
     NSString *_moduleName;
+    NSString *_moduleDescription;
     /** Is user defined module */
     BOOL _isUserDefined;
     BOOL _isExportAll;
@@ -31,6 +32,7 @@ static NSMapTable<NSString *, Env *> *_modules;
 @synthesize importTable = _importTable;
 @synthesize internalTable = _internalTable;
 @synthesize moduleName = _moduleName;
+@synthesize moduleDescription = _moduleDescription;
 @synthesize isUserDefined = _isUserDefined;
 @synthesize isExportAll = _isExportAll;
 
@@ -141,6 +143,7 @@ static NSMapTable<NSString *, Env *> *_modules;
     if (!_importTable) _importTable = [ModuleTable new];
     if (!_internalTable) _internalTable = [ModuleTable new];
     _moduleName = [Const defaultModuleName];
+    _moduleDescription = @"";
     _isExportAll = NO;
     _isUserDefined = YES;
 }

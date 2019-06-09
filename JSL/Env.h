@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) ModuleTable *importTable;
 @property (nonatomic, readwrite) ModuleTable *internalTable;
 @property (nonatomic, readwrite) NSString *moduleName;
+@property (nonatomic, readwrite) NSString *moduleDescription;
 @property (nonatomic, readwrite) BOOL isUserDefined;
 @property (nonatomic, readwrite) BOOL isExportAll;
 + (void)initialize;

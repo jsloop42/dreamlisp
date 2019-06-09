@@ -16,11 +16,13 @@ extern NSArray * keywords;
 @interface Const : NSObject
 + (NSArray *)keyword;
 + (NSString *)defaultModuleName;
++ (NSString *)defaultModuleDescription;
 + (NSString *)coreModuleName;
 + (NSString *)exports;
 + (NSString *)imports;
 + (NSString *)internal;
 + (NSString *)name;
++ (NSString *)description;
 @end
 
 // Error constants

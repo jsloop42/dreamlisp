@@ -77,7 +77,7 @@ function build() {
 	fi
     cp $(tail -4 $buildlog | head -1 | rev | cut -d " " -f1 | rev) $bin/$ret
     cp $bin/$ret ~/bin/
-    cp JSL/core.jsl ~/bin/
+    cp JSL/Libs/core.jsl ~/bin/
 }
 
 (build $@) & spinner

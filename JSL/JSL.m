@@ -71,6 +71,7 @@ static NSString *langVersion;
     _printer = [Printer new];
     _core = [Core new];
     _env = [[Env alloc] initWithModuleName:[Const defaultModuleName] isUserDefined:NO];
+    [_env setModuleDescription:[Const defaultModuleDescription]];
     [State setCurrentModuleName:[_env moduleName]];
     // Add modules to module table
     [self addModule:_env];  // default module
@@ -531,12 +532,16 @@ static NSString *langVersion;
     NSUInteger len = [arr count];
     NSUInteger i = 0;
     for (i = 0; i < len; i++) {
-        JSList *xs = (JSList *)arr[i];
-        id<JSDataProtocol> modDir = [xs first];
-        if ([JSSymbol isSymbol:modDir withName:@"export"]) {
-            [self processExportDirective:xs module:env];
-        } else if ([JSSymbol isSymbol:modDir withName:@"import"]) {
-            [self processImportDirective:xs module:env];
+        if ([JSList isList:arr[i]]) {
+            JSList *xs = (JSList *)arr[i];
+            id<JSDataProtocol> modDir = [xs first];
+            if ([JSSymbol isSymbol:modDir withName:@"export"]) {
+                [self processExportDirective:xs module:env];
+            } else if ([JSSymbol isSymbol:modDir withName:@"import"]) {
+                [self processImportDirective:xs module:env];
+            }
+        } else if ([JSString isString:arr[i]]) {
+            [env setModuleDescription:[(JSString *)arr[i] value]];
         }
     }
 }

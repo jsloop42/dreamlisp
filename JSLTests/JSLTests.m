@@ -1750,6 +1750,15 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqual([count integerValue], 1);
 }
 
+- (void)testModuleDescription {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(defmodule mdesc \"A test module.\" (export all))"], @"mdesc");
+    Env *mdescEnv = [Env forModuleName:@"mdesc"];
+    XCTAssertEqualObjects([mdescEnv moduleDescription], @"A test module.");
+    [jsl rep:@"(def info (module-info 'mdesc))"];
+    XCTAssertEqualObjects([jsl rep:@"(get info :description)"], @"\"A test module.\"");
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
 }

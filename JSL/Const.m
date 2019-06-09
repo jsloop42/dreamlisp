@@ -11,11 +11,13 @@
 NSString * const JSLVersion = @"3.2";
 static NSArray *_keywords;
 static NSString * _defaultModuleName;
+static NSString *_defaultModuleDescription;
 static NSString * _coreModuleName;
 static NSString *_exports;
 static NSString *_imports;
 static NSString *_internal;
 static NSString *_name;
+static NSString *_description;
 
 @implementation Const
 
@@ -24,11 +26,13 @@ static NSString *_name;
         _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*", @"defmodule",
                       @"in-module", @"import", @"export", @"remove-module"];
         _defaultModuleName = @"user";
+        _defaultModuleDescription = @"The default module.";
         _coreModuleName = @"core";
         _exports = @"exports";
         _imports = @"imports";
         _internal = @"internal";
         _name = @"name";
+        _description = @"description";
     }
 }
 
@@ -38,6 +42,10 @@ static NSString *_name;
 
 + (NSString *)defaultModuleName {
     return _defaultModuleName;
+}
+
++ (NSString *)defaultModuleDescription {
+    return _defaultModuleDescription;
 }
 
 + (NSString *)coreModuleName {
@@ -58,6 +66,10 @@ static NSString *_name;
 
 + (NSString *)name {
     return _name;
+}
+
++ (NSString *)description {
+    return _description;
 }
 
 @end
