@@ -127,7 +127,9 @@
     return [[JSList alloc] initWithArray:arr];
 }
 
-- (id<JSDataProtocol>)last {
+- (id<JSDataProtocol> _Nullable)last {
+    NSInteger count = [_array count] - 1;
+    if (count < 0) return nil;
     return [_array objectAtIndex:[_array count] - 1];
 }
 

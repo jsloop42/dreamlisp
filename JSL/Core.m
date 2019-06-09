@@ -525,6 +525,22 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:seq argCount:1 name:@"seq/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"seq" moduleName:[Const coreModuleName]]];
+
+    /** Returns the last element of the list. If the list is empty, this returns nil. */
+    id<JSDataProtocol>(^last)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        id<JSDataProtocol> list = [xs first];
+        if ([xs isEmpty] || [JSNil isNil:list]) return [JSNil new];
+        id<JSDataProtocol> last = nil;
+        if ([JSList isKindOfList:list]) {
+            last = (id<JSDataProtocol>)[(JSList *)list last];
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"last/1", @"'list' or 'vector'", 1, [list dataTypeName]] throw];
+        }
+        return (last == nil) ? [JSNil new] : last;
+    };
+    fn = [[JSFunction alloc] initWithFn:last argCount:1 name:@"last/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"last" moduleName:[Const coreModuleName]]];
 }
 
 - (NSString *)nameFromObject:(id<JSDataProtocol>)obj {

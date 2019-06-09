@@ -1040,6 +1040,12 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(seq '())"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(seq '(2 3 4))"], @"(2 3 4)");
     XCTAssertEqualObjects([jsl rep:@"(seq nil)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(last [1 2 3 4])"], @"4");
+    XCTAssertEqualObjects([jsl rep:@"(last [1 2 3 [4]])"], @"[4]");
+    XCTAssertEqualObjects([jsl rep:@"(last '(1 2 3 4))"], @"4");
+    XCTAssertEqualObjects([jsl rep:@"(last '(1 2 [3] [4 5]))"], @"[4 5]");
+    XCTAssertEqualObjects([jsl rep:@"(last '())"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(last [])"], @"nil");
 }
 
 - (void)testVectorCoreFunctions {

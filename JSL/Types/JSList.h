@@ -31,7 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (id<JSDataProtocol>)first;
 - (id<JSDataProtocol>)second;
 - (id<JSDataProtocol>)rest;
-- (id<JSDataProtocol>)last;
+- (id<JSDataProtocol> _Nullable)last;
 - (id<JSDataProtocol>)dropLast;
 - (id<JSDataProtocol>)nth:(NSInteger)n;
 - (NSMutableArray *)map:(id (^)(id arg))block;
