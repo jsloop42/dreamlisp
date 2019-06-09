@@ -1198,9 +1198,9 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(defmacro apply1 (x) `(apply inc/1 ~x))"], @"user:apply1/1");
     XCTAssertEqualObjects([jsl rep:@"(apply1 [3])"], @"4");
     // vector binding in let
-    XCTAssertEqualObjects([jsl rep:@"(defmacro foo1 () `(let (xs [(atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))]) (@(first xs) 10)))"], @"user:foo1/0");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro foo1 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(first xs) 10)))"], @"user:foo1/0");
     XCTAssertEqualObjects([jsl rep:@"(foo1)"], @"11");
-    XCTAssertEqualObjects([jsl rep:@"(defmacro foo2 () `(let (xs [(atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))]) (@(nth xs 1) 10)))"], @"user:foo2/0");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro foo2 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(nth xs 1) 10)))"], @"user:foo2/0");
     XCTAssertEqualObjects([jsl rep:@"(foo2)"], @"12");
 }
 
