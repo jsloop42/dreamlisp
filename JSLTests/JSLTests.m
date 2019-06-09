@@ -784,6 +784,14 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(not 0)"], @"false");
 }
 
+- (void)testWhenMacro {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(def a (atom 0))"], @"(atom 0)");
+    XCTAssertEqualObjects([jsl rep:@"(when (= 1 1) (reset! a 2) (reset! a (+ 2 @a)) 10)"], @"10");
+    XCTAssertEqualObjects([jsl rep:@"@a"], @"4");
+    XCTAssertEqualObjects([jsl rep:@"(when (= 2 1) 10)"], @"nil");
+}
+
 - (void)testString {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"\"\""], @"\"\"");

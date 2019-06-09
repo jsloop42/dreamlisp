@@ -22,6 +22,10 @@
   is evaluated."
   (let (res x) `(if ~res ~res (or ~@more))))
 
+(defmacro when (x & form)
+  "Evaluates the first expression and if true, evaluates the body."
+  `(if ~x (do ~@form)))
+
 (defun exit ()
   "Exit the REPL"
   (println "Bye")
