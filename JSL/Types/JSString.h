@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSString : NSObject <JSDataProtocol>
 + (BOOL)isString:(id)object;
++ (BOOL)isString:(id)object withValue:(NSString *)name;
 + (JSString *)dataToString:(id<JSDataProtocol>)data fnName:(NSString *)fnName;
 + (JSString *)dataToString:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)init;

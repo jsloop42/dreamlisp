@@ -31,6 +31,7 @@ extern NSString *InvalidDataType;
 extern NSString *JSLException;
 extern NSString *JSLUnderlyingException;
 extern NSString *MacroSymbolNotFound;
+extern NSString *ModuleArityDefinitionError;
 extern NSString *ModuleEmpty;
 extern NSString *ModuleNotFound;
 extern NSString *QuotedSymbol;

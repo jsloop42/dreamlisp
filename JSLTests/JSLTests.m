@@ -1759,6 +1759,18 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(get info :description)"], @"\"A test module.\"");
 }
 
+- (void)testModuleArity {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(defmodule foo.arity (export (foo 1) (bar n)))"], @"foo.arity");
+    XCTAssertEqualObjects([jsl rep:@"(defun bar (& more) more)"], @"foo.arity:bar/n");
+    XCTAssertEqualObjects([jsl rep:@"(defun foo (n) n)"], @"foo.arity:foo/1");
+    XCTAssertEqualObjects([jsl rep:@"(defmodule bar.arity (export all) (import (from foo.arity (bar n))))"], @"bar.arity");
+    XCTAssertEqualObjects([jsl rep:@"(defun zoo (n) (bar 1 2 n))"], @"bar.arity:zoo/1");
+    XCTAssertEqualObjects([jsl rep:@"(foo.arity:foo 1)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(foo.arity:bar 1 2 3)"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(bar.arity:zoo 3)"], @"(1 2 3)");
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
 }

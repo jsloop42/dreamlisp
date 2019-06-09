@@ -465,6 +465,17 @@ static NSString *langVersion;
     return modSym;
 }
 
+- (NSInteger)arityFromObject:(id<JSDataProtocol>)object {
+    id<JSDataProtocol> arityElem = object;
+    NSInteger arity = -2;
+    if ([JSSymbol isSymbol:object withName:@"n"]) {
+        arity = -1;
+    } else if ([JSNumber isNumber:arityElem]) {
+        arity = [(JSNumber *)arityElem integerValue];
+    }
+    return arity;
+}
+
 - (void)processExportDirective:(JSList *)ast module:(Env *)env {
     JSList *elem = [ast rest];
     if ([elem count] == 1 && [JSSymbol isSymbol:[elem first] withName:@"all"]) {
@@ -478,8 +489,8 @@ static NSString *langVersion;
         for (i = 0; i < len; i++) {
             NSMutableArray *aExp = (NSMutableArray *)[(JSList *)fnList[i] value];
             JSSymbol *sym = (JSSymbol *)[aExp first];
-            JSNumber *arityNum = (JSNumber *)[aExp second];
-            NSInteger arity = [arityNum integerValue];
+            NSInteger arity = [self arityFromObject:[aExp second]];
+            if (arity == -2) [[[JSError alloc] initWithDescription:ModuleArityDefinitionError] throw];
             [sym setArity:arity];
             [sym setInitialArity:arity];
             [sym updateArity];
@@ -509,8 +520,8 @@ static NSString *langVersion;
                 for (j = 0; j < fnLen; j++) {
                     JSList *aExp = (JSList *)impFns[j];
                     JSSymbol *sym = (JSSymbol *)[aExp first];
-                    JSNumber *arityNum = (JSNumber *)[aExp second];
-                    NSInteger arity = [arityNum integerValue];
+                    NSInteger arity = [self arityFromObject:[aExp second]];
+                    if (arity == -2) [[[JSError alloc] initWithDescription:ModuleArityDefinitionError] throw];
                     [sym setArity:arity];
                     [sym setInitialArity:arity];
                     [sym updateArity];

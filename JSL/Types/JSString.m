@@ -25,6 +25,11 @@
     return [[object className] isEqual:[self className]];
 }
 
++ (BOOL)isString:(id)object withValue:(NSString *)name {
+    if (![self isString:object]) return false;
+    return [[(JSString *)object value] isEqual:name];
+}
+
 + (JSString *)dataToString:(id<JSDataProtocol>)data fnName:(NSString *)fnName {
     return [self dataToString:data position:-1 fnName:fnName];
 }
