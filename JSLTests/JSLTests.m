@@ -611,6 +611,8 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(:b khm)"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(:c khm)"], @"5");
     XCTAssertEqualObjects([jsl rep:@"(:d khm)"], @"[10 11 \"a\"]");
+    XCTAssertEqualObjects([jsl rep:@"(:a {:a 1})"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(:a (hash-map :a 1))"], @"1");
 }
 
 - (void)testEnv {

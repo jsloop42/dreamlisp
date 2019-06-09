@@ -381,14 +381,11 @@ static NSString *langVersion;
                     return [JSNil new];
                 }
             } else if ([xs count] == 2 && [JSKeyword isKeyword:[xs first]]) {
-                id<JSDataProtocol> second = [xs second];
-                if ([JSSymbol isSymbol:second]) {
-                    second = [self eval:second withEnv:env];
-                    if ([JSHashMap isHashMap:second]) {
-                        ast = [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithArity:2 string:@"get" moduleName:[Const coreModuleName]],
-                                                               second, [xs first]] mutableCopy]];
-                        continue;
-                    }
+                id<JSDataProtocol> second = [self eval:[xs second] withEnv:env];
+                if ([JSHashMap isHashMap:second]) {
+                    ast = [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithArity:2 string:@"get" moduleName:[Const coreModuleName]],
+                                                           second, [xs first]] mutableCopy]];
+                    continue;
                 }
             }
             // Function
