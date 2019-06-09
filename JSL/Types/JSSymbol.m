@@ -261,9 +261,13 @@
 }
 
 - (NSString *)string {
-    if (_initialArity <= -2) return _isModule ? _name : [[NSString alloc] initWithFormat:@"%@:%@", _moduleName, _name];
+    if (_initialArity <= -2) {
+        if (_isModule) return _name;
+        if (_position == 0 && _isQualified) return [[NSString alloc] initWithFormat:@"%@:%@", _initialModuleName, _name];  // => function position
+        return [[NSString alloc] initWithFormat:@"%@:%@", _moduleName, _name];
+    }
     return [[NSString alloc] initWithFormat:@"%@:%@/%@", _moduleName, _name, (_initialArity == -1) ? @"n" : [[NSString alloc]
-                                                                                                             initWithFormat:@"%ld", _initialArity]];
+                                                                                                             initWithFormat:@"%ld", _initialArity]];    return @"";
 }
 
 - (void)copyProperties:(JSSymbol *)symbol {

@@ -68,6 +68,16 @@
     XCTAssertFalse([JSKeyword isKeyword:[JSString new]]);
 }
 
+- (void)testJSSymbol {
+    JSSymbol *sym = [[JSSymbol alloc] initWithName:@"count" moduleName:[Const coreModuleName]]; // `(core:count a [1])
+    [sym setArity:-2];
+    [sym resetArity];
+    [sym setModuleName:[Const defaultModuleName]];
+    [sym setPosition:0];
+    [sym setIsQualified:YES];
+    XCTAssertEqualObjects([sym string], @"core:count");
+}
+
 - (void)testTokenize {
     Reader *reader = [Reader new];
     NSString *exp = @"(+ 1 2)";
