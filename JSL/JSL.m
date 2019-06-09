@@ -380,16 +380,16 @@ static NSString *langVersion;
                     [self removeModule:ast];
                     return [JSNil new];
                 }
-            } else if ([JSKeyword isKeyword:[xs first]]) {
+            } else if ([xs count] == 2 && [JSKeyword isKeyword:[xs first]]) {
                 id<JSDataProtocol> second = [xs second];
                 if ([JSSymbol isSymbol:second]) {
                     second = [self eval:second withEnv:env];
                     if ([JSHashMap isHashMap:second]) {
                         ast = [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithArity:2 string:@"get" moduleName:[Const coreModuleName]],
                                                                second, [xs first]] mutableCopy]];
+                        continue;
                     }
                 }
-                continue;
             }
             // Function
             NSMutableArray *list = [(JSList *)[self evalAST:ast withEnv:env] value];

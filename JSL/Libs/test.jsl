@@ -1,0 +1,52 @@
+(defmodule test  
+  "A module to work with unit tests."
+  (export all))
+
+(defmacro deftest (name desc & form)
+  "A macro to define a test case. Takes test case name, description and expressions."
+  `(def ~name ^(vector :test-case) (fn () ~desc ~@form)))
+
+(defmacro testing (desc & form)
+  "A macro to evaluate individual test cases. Takes a description string and expressions."
+  `(do ~@form))
+
+(defmacro is (exp res)
+  `(is ~exp ~res ""))
+
+(defmacro is (exp res msg)
+  "A macro to evaluate the given expression, `exp` and checks if the result is same as the given `res`. If the test fails `msg` is printed if given, else the
+   result is printed."
+  (let (ret (gensym) body (gensym))
+    `(let (~ret ~exp
+           ~body (macroexpand ~exp))
+      (when (not (= ~ret ~res))
+        (map core:println/n (vector (str "\nexpected: " ~body) 
+                                    (str "actual:   (not " ~body ")")
+                                    (if (empty? ~msg) (str ~ret) ~msg)))))))
+
+(defmacro run ()
+
+)
+
+
+;; --- example ---
+
+(defmodule i.test (export all) (import (from test (deftest n) (testing n) (is 2) (is 3))))
+(deftest a "foo" 1)
+
+(def info (module-info 'i.test))
+
+; (println info)
+; (println (first (:exports info)))
+; (println (meta a/0))
+; (println (meta (eval (first (:exports info)))))
+
+(deftest b
+  "Testing b test case"
+  (testing "test b case 1"
+    (is (= 1 1) true)
+    (is (= 4 1) true)
+    (is (= 2 1) true "Nope")))
+
+(b)
+(println "")
