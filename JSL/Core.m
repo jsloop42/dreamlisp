@@ -1027,6 +1027,15 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:moduleInfo argCount:1 name:@"module-info/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"module-info" moduleName:[Const coreModuleName]]];
+
+    id<JSDataProtocol>(^moduleExist)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        JSSymbol *mod = [JSSymbol dataToSymbol:[xs first] fnName:@"module-exist?/1"];
+        NSString* moduleName = (NSString *)[mod value];
+        Env *env = [Env forModuleName:moduleName];
+        return [[JSBool alloc] initWithBool:(env != nil)];
+    };
+    fn = [[JSFunction alloc] initWithFn:moduleExist argCount:1 name:@"module-exist?/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"module-exist?" moduleName:[Const coreModuleName]]];
 }
 
 - (Env *)env {

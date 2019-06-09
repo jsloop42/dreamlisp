@@ -1791,8 +1791,9 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(bbaz:zzc 5)"], @"30");
 }
 
-- (void)testModuleInfo {
+- (void)testModuleFunctions {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
+    // Test module-info
     XCTAssertEqualObjects([jsl rep:@"(defmodule ifoo (export (ifa 1) (ifa 2)) (import (from core (empty? 1))))"], @"ifoo");
     [jsl rep:@"(defun iinc (n) (+ n 1))"];
     [jsl rep:@"(def info (module-info 'ifoo))"];
@@ -1803,6 +1804,13 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     count = [NSDecimalNumber decimalNumberWithString:[jsl rep:@"(count (get info :internal))"]];
     XCTAssertEqual([count integerValue], 1);
     XCTAssertThrows([jsl rep:@"(in-module 'nope.ifoo)"]);
+    // Test module-exist?
+    XCTAssertEqualObjects([jsl rep:@"(module-exist? 'nope.ifoo)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(module-exist? 'core)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(module-exist? 'user)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(module-exist? 'ifoo)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(remove-module 'ifoo)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(module-exist? 'ifoo)"], @"false");
 }
 
 - (void)testModuleDescription {
