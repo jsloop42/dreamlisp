@@ -18,9 +18,16 @@
 (defmacro or () nil)
 (defmacro or (x) x)
 (defmacro or (x & more) 
-  "Evaluates expressions one at a time. If an expression returns `false`, the function returns with the result, else continues evaluation till the last
+  "Evaluates expressions one at a time. If any expression returns `true`, the function returns with the result, else continues evaluation till the last
    expression is evaluated."
   (let (res x) `(if ~res ~res (or ~@more))))
+
+(defmacro and () nil)
+(defmacro and (x) x)
+(defmacro and (x & more) 
+  "Evaluates expressions one at a time. If any expression returns `false`, the function returns with the result, else continues evaluation till the last
+   expression is evaluated."
+  (let (res x) `(if (not ~res) ~res (or ~@more))))
 
 (defmacro when (x & form)
   "Evaluates the first expression and if `true`, evaluates the body."

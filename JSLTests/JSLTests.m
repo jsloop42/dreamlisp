@@ -791,6 +791,28 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(not 0)"], @"false");
 }
 
+- (void)testOrFunction {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(or ())"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(or nil)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(or (= 1 1))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(or (= [1] [2]) (= (+ 1 1) 2))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(or (= 1 2) (= 3 4))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(or (= 1 2) (= 3 4) (= \"a\" \"a\"))"], @"true");
+}
+
+- (void)testAndFunction {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(and ())"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(and nil)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(and (= 1 1))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(and (= [1] [2]) (= (+ 1 1) 2))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(and (= [1] [1]) (= (+ 1 2) 2))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(and (= [1] [1]) (= (+ 1 1) 2))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(and (= 1 1) (= 4 4) (= -1 -1))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(and (= '(1) '(1)) true (= 4 4) (= \"a\" \"a\"))"], @"true");
+}
+
 - (void)testWhenMacro {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(def a (atom 0))"], @"(atom 0)");
