@@ -381,15 +381,9 @@ static NSString *langVersion;
                     return [JSNil new];
                 }
             } else if ([xs count] == 2 && [JSKeyword isKeyword:[xs first]]) {
-                id<JSDataProtocol> second = [xs second];
-                if (![JSHashMap isHashMap:second]) {
-                    second = [self eval:second withEnv:env];
-                }
-                if ([JSHashMap isHashMap:second]) {
-                    ast = [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithArity:2 string:@"get" moduleName:[Const coreModuleName]],
-                                                           second, [xs first]] mutableCopy]];
-                    continue;
-                }
+                ast = [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithArity:2 string:@"get" moduleName:[Const coreModuleName]],
+                                                           [xs second], [xs first]] mutableCopy]];
+                continue;
             }
             // Function
             NSMutableArray *list = [(JSList *)[self evalAST:ast withEnv:env] value];
