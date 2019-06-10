@@ -119,6 +119,7 @@ static NSMapTable<NSString *, Env *> *_modules;
     if (self) {
         [self bootstrap];
         _moduleName = [env moduleName];
+        _isExportAll = [env isExportAll];
         _outer = env;
         for (i = 0; i < len; i++) {
             JSSymbol *sym = (JSSymbol *)binds[i];

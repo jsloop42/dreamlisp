@@ -587,6 +587,7 @@ static NSString *langVersion;
 - (void)updateModuleName:(NSString *)moduleName {
     if (_isREPL) _prompt = [moduleName stringByAppendingString:@"> "];
     [State setCurrentModuleName:moduleName];
+    [[self reader] setModuleName:moduleName];
 }
 
 - (void)changeModuleTo:(NSString *)moduleName {

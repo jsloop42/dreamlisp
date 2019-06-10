@@ -67,6 +67,36 @@
     return (JSSymbol *)data;
 }
 
+/** Returns a symbol from the given name. If symbol is of the form MFA, then the module and arity is updated accordingly. This */
++ (JSSymbol *)processName:(NSString *)name {
+    NSArray *modArr = [name componentsSeparatedByString:@":"];
+    NSUInteger modCount = [modArr count];
+    if (modCount > 2) [[[JSError alloc] initWithFormat:SymbolParseError, name] throw];
+    if (modCount == 2) name = modArr[1];  // the function part
+    NSArray *symArr = [name componentsSeparatedByString:@"/"];
+    NSUInteger count = [symArr count];
+    NSString *arity = nil;
+    JSSymbol *sym = nil;
+    if (count > 2) [[[JSError alloc] initWithFormat:SymbolParseError, name] throw];
+    if (count == 2) {
+        arity = symArr[1];
+        if ([arity isNotEmpty]) {
+            sym = [[JSSymbol alloc] initWithArity:[arity isEqual:@"n"] ? -1 : [arity integerValue] string:symArr[0]];
+        } else {
+            [[[JSError alloc] initWithFormat:SymbolParseError, name] throw];
+        }
+    } else if (count == 1) {
+        sym = [[JSSymbol alloc] initWithName:name];
+    }
+    // Fully qualified symbol with module name included
+    if (modCount == 2) {
+        [sym setIsQualified:YES];
+        [sym setInitialModuleName:modArr[0]];
+    }
+    [sym setModuleName:[State currentModuleName]];
+    return sym;
+}
+
 /**
   Update the symbol with function info and function with the bounded symbol info.
 

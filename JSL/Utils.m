@@ -22,6 +22,11 @@
     return range.location != NSNotFound;
 }
 
+/** Returns an array of containing all the matches. */
++ (NSArray<NSTextCheckingResult *> *)matchesInString:(NSString *)string withExpression:(NSRegularExpression *)pattern {
+    return [pattern matchesInString:string options:0 range:NSMakeRange(0, [string length])];
+}
+
 /** Returns current timestamp in millisecond. */
 + (double)timestamp {
     return (double)(NSTimeInterval)[[NSDate date] timeIntervalSince1970] * 1000;

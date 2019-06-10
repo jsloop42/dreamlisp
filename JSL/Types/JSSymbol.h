@@ -36,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isSymbol:(id)object withName:(NSString *)name;
 + (JSSymbol *)dataToSymbol:(id<JSDataProtocol>)data fnName:(NSString *)fnName;
 + (JSSymbol *)dataToSymbol:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
++ (JSSymbol *)processName:(NSString *)name;
 + (JSSymbol *)symbolWithArityCheck:(JSSymbol *)symbol withObject:(id)object;
 // Should not instantiate with empty name
 - (instancetype)init NS_UNAVAILABLE;

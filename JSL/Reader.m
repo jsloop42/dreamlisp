@@ -177,44 +177,11 @@
     }
     if ([token isEqual:@"defmodule"]) {
         _moduleName = [self peek];
-    } else if ([token isEqual:@"in-module"]) {
-        NSString *elem = [self peek:1];
-        if ([elem isNotEqualTo:@"'"] && [elem isNotEqualTo:@"("]) [[[JSError alloc] initWithFormat:QuotedSymbol, @"module name"] throw];
-        if ([elem isNotEqualTo:@"'"]) {
-            elem = [self peek:2];
-            if ([elem isNotEqualTo:@"quote"]) [[[JSError alloc] initWithFormat:QuotedSymbol, @"module name"] throw];
-            elem = [self peek:4];
-            if ([elem isNotEqualTo:@")"]) [[[JSError alloc] initWithFormat:QuotedSymbol, @"module name"] throw];
-            _moduleName = [self peek:3];
-        } else {
-            _moduleName = [self peek:2];
-        }
     }
-    NSArray *modArr = [token componentsSeparatedByString:@":"];
-    NSUInteger modCount = [modArr count];
-    if (modCount > 2) [self symbolParseError:token];
-    if (modCount == 2) token = modArr[1];  // the function part
-    NSArray *symArr = [token componentsSeparatedByString:@"/"];
-    NSUInteger count = [symArr count];
-    NSString *arity = nil;
-    JSSymbol *sym = nil;
-    if (count > 2) [self symbolParseError:token];
-    if (count == 2) {
-        arity = symArr[1];
-        if ([arity isNotEmpty]) {
-            sym = [[JSSymbol alloc] initWithArity:[arity isEqual:@"n"] ? -1 : [arity integerValue] string:symArr[0]];
-        } else {
-            [self symbolParseError:token];
-        }
-    } else if (count == 1) {
-        sym = [[JSSymbol alloc] initWithName:token];
-    }
-    [sym setInitialModuleName:_moduleName];
-    [sym resetModuleName];
-    // Fully qualified symbol with module name included
-    if (modCount == 2) {
-        [sym setIsQualified:YES];
-        [sym setInitialModuleName:modArr[0]];
+    JSSymbol *sym = [JSSymbol processName:token];
+    if (![sym isQualified]) {
+        [sym setInitialModuleName:_moduleName];
+        [sym resetModuleName];
     }
     return sym;
 }

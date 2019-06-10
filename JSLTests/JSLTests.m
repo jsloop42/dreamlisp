@@ -78,6 +78,58 @@
     XCTAssertEqualObjects([sym string], @"core:count");
 }
 
+- (void)testJSSymbolProcess {
+    [State setCurrentModuleName:[Const defaultModuleName]];
+    JSSymbol *sym = [JSSymbol processName:@"mod:func/1"];
+    XCTAssertEqualObjects([sym moduleName], [State currentModuleName]);
+    XCTAssertEqualObjects([sym initialModuleName], @"mod");
+    XCTAssertEqual([sym arity], 1);
+    XCTAssertEqual([sym initialArity], 1);
+    XCTAssertTrue([sym isQualified]);
+    XCTAssertTrue([sym isFunction]);
+    sym = [JSSymbol processName:@"func/1"];
+    XCTAssertEqualObjects([sym moduleName], [State currentModuleName]);
+    XCTAssertEqualObjects([sym initialModuleName], [State currentModuleName]);
+    XCTAssertEqual([sym arity], 1);
+    XCTAssertEqual([sym initialArity], 1);
+    XCTAssertFalse([sym isQualified]);
+    XCTAssertTrue([sym isFunction]);
+    sym = [JSSymbol processName:@"var"];
+    XCTAssertEqualObjects([sym moduleName], [State currentModuleName]);
+    XCTAssertEqualObjects([sym initialModuleName], [State currentModuleName]);
+    XCTAssertEqual([sym arity], -2);
+    XCTAssertEqual([sym initialArity], -2);
+    XCTAssertFalse([sym isQualified]);
+    XCTAssertFalse([sym isFunction]);
+}
+
+- (void)testSym {
+    NSString *mfaPattern = @"((.*)?:)?(.*)\\/([0-9]+|[n])?";
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:mfaPattern options:0 error:nil];
+    NSString *str = @"module:func/2";
+    NSArray *matches = [regex matchesInString:str options:0 range:NSMakeRange(0, [str count])];
+    for (NSTextCheckingResult *match in matches) {
+        info(@"%ld", [match numberOfRanges]);
+        NSUInteger len = [match numberOfRanges];
+        NSUInteger i = 0;
+        NSString *module = nil;
+        NSString *func = nil;
+        NSString *arityStr = nil;
+        NSInteger arity = -2;
+
+        if (len == 5) {  // => m:f/a
+            module = [str substringWithRange:[match rangeAtIndex:2]];
+            func = [str substringWithRange:[match rangeAtIndex:3]];
+            arityStr = [str substringWithRange:[match rangeAtIndex:4]];
+            if ([arityStr isEqual:@"n"]) {
+                arity = -1;
+            } else {
+                arity = [arityStr integerValue];
+            }
+        }
+    }
+}
+
 - (void)testTokenize {
     Reader *reader = [Reader new];
     NSString *exp = @"(+ 1 2)";
@@ -103,7 +155,8 @@
 }
 
 - (void)testReader {
-    Reader *reader = [Reader new];
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    Reader *reader = [jsl reader];
     NSMutableArray<id<JSDataProtocol>> *ast = [reader readString:@"(def a 1)"];
     JSList *xs = (JSList *)ast[0];
     XCTAssertEqualObjects([(JSSymbol *)[xs first] moduleName], [Const defaultModuleName]);
@@ -119,6 +172,8 @@
     xs = [xs nth:2];
     XCTAssertEqualObjects([(JSSymbol *)[xs nth:1] moduleName], @"foo");
     ast = [reader readString:@"(in-module 'user)"];
+    XCTAssertEqualObjects([reader moduleName], @"foo");
+    [jsl rep:@"(in-module 'user)"];
     XCTAssertEqualObjects([reader moduleName], [Const defaultModuleName]);
     ast = [reader readString:@"(def b 2)"];
     xs = (JSList *)ast[0];
@@ -262,6 +317,13 @@
     XCTAssertEqual([xs count], 3);
     XCTAssertEqual([list count], 2);
     XCTAssertEqualObjects([list last], [xs second]);
+}
+
+- (void)testSymbol {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(symbol \"foo:bar/1\")"], @"foo:bar/1");
+    XCTAssertEqualObjects([jsl rep:@"(def z 3)"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(eval (symbol \"user:z\"))"], @"3");
 }
 
 - (void)testArithmeticEval {
@@ -1693,7 +1755,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(user:d t 2)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(defun inc (n) (+ n 1))"], @"foo:inc/1");
     [jsl rep:@"(in-module 'user)"];
-    XCTAssertEqualObjects([jsl rep:@"(try (foo:random-1 4) (catch ex (str ex)))"], @"\"'foo:random-1/1' not found\"");  // function not exported
+    XCTAssertThrows([jsl rep:@"(foo:random-1 4)"]);  // function not exported
 }
 
 - (void)testModuleExports {
@@ -1706,7 +1768,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(greet)"], @"42");
     XCTAssertEqualObjects([jsl rep:@"(in-module 'user)"], @"user");
     XCTAssertEqualObjects([jsl rep:@"(foo:inc 4)"], @"5");
-    XCTAssertEqualObjects([jsl rep:@"(try (foo:random-2) (catch ex (str ex)))"], @"\"'foo:random-2/0' not found\"");  // function not exported
+    XCTAssertThrows([jsl rep:@"(foo:random-2)"]);  // function not exported
 }
 
 - (void)testModuleExportAll {
@@ -1729,10 +1791,10 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(diff 45 3)"], @"42");
     XCTAssertEqualObjects([jsl rep:@"(in-module 'user)"], @"user");
     XCTAssertEqualObjects([jsl rep:@"(bar:sum 40 2)"], @"42");
-    XCTAssertEqualObjects([jsl rep:@"(try (bar:diff 45 3) (catch ex (str ex)))"], @"\"'bar:diff/2' not found\"");  // function not exported
+    XCTAssertThrows([jsl rep:@"(bar:diff 45 3)"]);  // function not exported
     XCTAssertEqualObjects([jsl rep:@"(in-module 'foo)"], @"foo");
     XCTAssertEqualObjects([jsl rep:@"(bar:sum 40 2)"], @"42");
-    XCTAssertEqualObjects([jsl rep:@"(try (bar:diff 45 3) (catch ex (str ex)))"], @"\"'bar:diff/2' not found\"");  // function not exported
+    XCTAssertThrows([jsl rep:@"(bar:diff 45 3)"]);  // function not exported
 }
 
 - (void)testModuleImport {
@@ -1759,7 +1821,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(in-module 'user)"], @"user");
     XCTAssertEqualObjects([jsl rep:@"(rfoo:sum 10 20)"], @"30");
     XCTAssertEqualObjects([jsl rep:@"(remove-module 'rfoo)"], @"nil");
-    XCTAssertEqualObjects([jsl rep:@"(try (rfoo:sum 45 3) (catch ex (str ex)))"], @"\"'rfoo:sum/2' not found\"");
+    XCTAssertThrows([jsl rep:@"(rfoo:sum 45 3)"]);
     XCTAssertThrows([jsl rep:@"(in-module 'rfoo)"]);
 }
 
@@ -1824,11 +1886,11 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(defmodule ifoo (export (ifa 1) (ifa 2)) (import (from core (empty? 1))))"], @"ifoo");
     [jsl rep:@"(defun iinc (n) (+ n 1))"];
     [jsl rep:@"(def info (module-info 'ifoo))"];
-    NSDecimalNumber *count = [NSDecimalNumber decimalNumberWithString:[jsl rep:@"(count (get info :exports))"]];
+    NSString *count = [jsl rep:@"(count (get info :exports))"];
     XCTAssertEqual([count integerValue], 2);
-    count = [NSDecimalNumber decimalNumberWithString:[jsl rep:@"(count (get info :imports))"]];
+    count = [jsl rep:@"(count (get info :imports))"];
     XCTAssertEqual([count integerValue], 1);
-    count = [NSDecimalNumber decimalNumberWithString:[jsl rep:@"(count (get info :internal))"]];
+    count = [jsl rep:@"(count (get info :internal))"];
     XCTAssertEqual([count integerValue], 1);
     XCTAssertThrows([jsl rep:@"(in-module 'nope.ifoo)"]);
     // Test module-exist?
