@@ -1452,6 +1452,19 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(meta +)"], @"nil");
 }
 
+/** Tests meta associated with the bound symbol */
+- (void)testMetaForSymbol {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(def a (with-meta (fn (n) 1) [123]))"], @"user:a/1");
+    XCTAssertEqualObjects([jsl rep:@"(meta a/1)"], @"[123]");
+    XCTAssertEqualObjects([jsl rep:@"(meta (first (:exports (module-info 'user))))"], @"[123]");  // meta copied to the bound symbol
+    XCTAssertEqualObjects([jsl rep:@"(meta (eval (first (:exports (module-info 'user)))))"], @"[123]");  // meta associated with the value
+    XCTAssertEqualObjects([jsl rep:@"(defmodule foo (export all))"], @"foo");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro m (with-meta (fn (n) 1) [:a :b :c]))"], @"foo:m/3");
+    XCTAssertEqualObjects([jsl rep:@"(meta (first (:exports (module-info 'foo))))"], @"[:a :b :c]");
+    XCTAssertEqualObjects([jsl rep:@"(meta (eval (first (:exports (module-info 'foo)))))"], @"[:a :b :c]");
+}
+
 - (void)testTCO {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     [jsl rep:@"(def sum2 (fn (n acc) (if (= n 0) acc (sum2 (- n 1) (+ n acc)))))"];  // tail recursive

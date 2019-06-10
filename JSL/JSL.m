@@ -301,7 +301,9 @@ static NSString *langVersion;
                 JSSymbol *sym = (JSSymbol *)[xs first];
                 if ([[sym value] isEqual:@"def"]) {
                     id<JSDataProtocol> val = [self eval:[xs nth:2] withEnv:env];
-                    [env setObject:val forKey:[JSSymbol symbolWithArityCheck:[xs second] withObject:val]];
+                    JSSymbol *sym = [JSSymbol symbolWithArityCheck:[xs second] withObject:val];
+                    [sym copyMeta:val];
+                    [env setObject:val forKey:sym];
                     return val;
                 } else if ([[sym value] isEqual:@"defmacro"]) {
                     NSMutableArray *args = [xs drop:2];

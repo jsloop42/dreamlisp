@@ -300,6 +300,10 @@
                                                                                                              initWithFormat:@"%ld", _initialArity]];    return @"";
 }
 
+- (void)copyMeta:(id<JSDataProtocol>)object {
+    _meta = [object meta];
+}
+
 - (void)copyProperties:(JSSymbol *)symbol {
     _initialArity = [symbol initialArity];
     _arity = _initialArity;
