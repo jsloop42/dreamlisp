@@ -586,6 +586,8 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(= [(list)] (list []))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(= [1 2 (list 3 4 [5 6])] (list 1 2 [3 4 (list 5 6)]))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(vector 3 4 5)"], @"[3 4 5]");
+    XCTAssertEqualObjects([jsl rep:@"[:a :b :c]"], @"[:a :b :c]");
+    XCTAssertEqualObjects([jsl rep:@"[:a (+ 1 2) \"z\"]"], @"[:a 3 \"z\"]");
 }
 
 - (void)testHashMap {
@@ -1332,6 +1334,16 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(n 4)"], @"400");
     XCTAssertEqualObjects([jsl rep:@"(n 5)"], @"500");
     XCTAssertEqualObjects([jsl rep:@"`local-sym#"], @"user:local-sym#");
+}
+
+- (void)testVectorBasedMacros {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(defmacro foo1 () `(let (xs [(atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))]) (@(first xs) 10)))"], @"user:foo1/0");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro foo1 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(first xs) 10)))"], @"user:foo1/0");
+    XCTAssertEqualObjects([jsl rep:@"(foo1)"], @"11");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro foo2 () `(let (xs [(atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))]) (@(nth xs 1) 10)))"], @"user:foo2/0");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro foo2 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(nth xs 1) 10)))"], @"user:foo2/0");
+    XCTAssertEqualObjects([jsl rep:@"(foo2)"], @"12");
 }
 
 void errorHandleFn(id param, int tag, int counter, const char *s) {

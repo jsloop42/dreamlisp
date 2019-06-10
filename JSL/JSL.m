@@ -229,14 +229,20 @@ static NSString *langVersion;
 /** Process quasiquote. */
 - (id<JSDataProtocol>)quasiquote:(id<JSDataProtocol>)ast {
     if (![self isPair:ast]) {
-        id<JSDataProtocol>arg = ast;
-        return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], arg] mutableCopy]];
+        return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"quote"], ast] mutableCopy]];
     }
     JSList *lst = (JSList *)ast;
     NSMutableArray *xs = [lst value];
     id<JSDataProtocol> first = [xs first];
     if ([JSSymbol isSymbol:first] && [[(JSSymbol *)first value] isEqual:@"unquote"]) return [xs second];
     if ([self isPair:first]) {
+        if ([JSVector isVector:first] && [xs count] == 1) {
+            NSMutableArray *arr = [NSMutableArray new];
+            [arr addObject:[[JSSymbol alloc] initWithName:@"vector"]];
+            [arr addObjectsFromArray:[(JSVector *)first value]];
+            // (quote (vector 1 2 3)) -> JSList:(quote JSList:(vector 1 2 3))
+            return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"list"], [[JSList alloc] initWithArray:arr]] mutableCopy]];
+        }
         NSMutableArray *list = [(JSList *)first value];
         if (![list isEmpty] && [JSSymbol isSymbol:[list first]] && [[(JSSymbol *)[list first] value] isEqual:@"splice-unquote"]) {
             return [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithName:@"concat"], [list second],
