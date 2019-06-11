@@ -20,33 +20,22 @@
     `(let (~ret ~exp
            ~body (macroexpand ~exp))
       (when (not (= ~ret ~res))
-        (map core:println/n (vector (str "\nexpected: " ~body) 
+        (map core:println/n (vector (str "\nexpected: " ~res) 
                                     (str "actual:   (not " ~body ")")
                                     (if (empty? ~msg) (str ~ret) ~msg)))))))
 
-(defmacro run ()
-
-)
-
-
-;; --- example ---
-
-(defmodule i.test (export all) (import (from test (deftest n) (testing n) (is 2) (is 3))))
-(deftest a "foo" 1)
-
-(def info (module-info 'i.test))
-
-; (println info)
-; (println (first (:exports info)))
-; (println (meta a/0))
-; (println (meta (eval (first (:exports info)))))
-
-(deftest b
-  "Testing b test case"
-  (testing "test b case 1"
-    (is (= 1 1) true)
-    (is (= 4 1) true)
-    (is (= 2 1) true "Nope")))
-
-(b)
-(println "")
+(defmacro run (module-name)
+  "A test runner function which takes a string, `module-name` as its argument and executes all test functions found in the module."
+  (let (info (gensym) runner (gensym) f (gensym) fn-meta (gensym) xs (gensym) caller-module (current-module-name))
+    `(do
+      (let (~info (:exports (module-info ~module-name))
+            ~runner (fn (~xs)
+                      (when-not (empty? ~xs)
+                        (let (~f (first ~xs) ~fn-meta (meta ~f))
+                          (when (and (not (nil? ~fn-meta)) (vector? ~fn-meta) (= (first ~fn-meta) :test-case))
+                            (in-module ~module-name)  ; the deftest symbol belongs to different module => change module
+                            ((eval ~f))
+                            (in-module "test")) ; change back to `test` module where the rest of the macro symbols exists
+                          (~runner (rest ~xs))))))
+        (~runner ~info))
+        (in-module ~caller-module))))

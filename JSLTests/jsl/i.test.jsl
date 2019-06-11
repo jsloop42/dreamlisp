@@ -1,0 +1,21 @@
+(defmodule i.test (export all) (import (from test (deftest n) (testing n) (is 2) (is 3) (run 1))))
+(deftest a "foo" 1)
+
+(defun z (n) n)
+
+(deftest b
+  "Testing b test case"
+  (testing "test b case 1"
+    (is (= 1 1) true)
+    (is (= 5 4) true)
+    (is (= "a" "b") true "Wrong string")))
+
+(deftest c
+  "Testing groups"
+  (testing "test c - case 1"
+    (is (= 21 31) true)
+    (testing "test c - case 2"
+      (is (= 33 33) true)
+      (is (= 41 51) true))))
+
+(run "i.test")
