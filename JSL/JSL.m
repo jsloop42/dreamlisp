@@ -306,13 +306,34 @@ static NSString *langVersion;
                     [env setObject:val forKey:sym];
                     return val;
                 } else if ([[sym value] isEqual:@"defmacro"]) {
-                    NSMutableArray *args = [xs drop:2];
-                    [args add:[[JSSymbol alloc] initWithName:@"fn"] atIndex:0];
+                    NSMutableArray *args = [NSMutableArray new];
+                    BOOL isWithMeta = NO;
+                    JSSymbol *fnSym = [[JSSymbol alloc] initWithName:@"fn"];
+                    JSSymbol *bind = nil;
+                    if ([JSList isList:[xs second]]) {  // => meta
+                        JSList *list = (JSList *)[xs second];
+                        if ([JSSymbol isSymbol:[list first] withName:@"with-meta"]) {
+                            isWithMeta = YES;
+                            bind = [JSSymbol dataToSymbol:[list second] fnName:@"defmacro"];  // bind symbol
+                            [args addObject:[list first]];  // with-meta sym
+                            NSMutableArray *fnArr = [NSMutableArray new];
+                            [fnArr addObject:fnSym];  // fn sym
+                            [fnArr addObject:[xs nth:2]];  // fn arg
+                            [fnArr addObjectsFromArray:[xs drop:3]];  // fn body
+                            [args addObject:[[JSList alloc] initWithArray:fnArr]];  // with-meta fn list
+                            [args addObject:[list nth:2]];  // meta value
+                        }
+                    } else {
+                        bind = [JSSymbol dataToSymbol:[xs second] fnName:@"defmacro"];
+                        args = [xs drop:2];
+                        [args add:fnSym atIndex:0];
+                    }
                     JSList *fnList = [[JSList alloc] initWithArray: args];
                     JSFunction *fn = (JSFunction *)[self eval:fnList withEnv:env];
                     [fn setName:[(JSSymbol *)[xs second] value]];
                     JSFunction *macro = [[JSFunction alloc] initWithMacro:fn];
-                    [env setObject:macro forKey:[JSSymbol symbolWithArityCheck:[xs second] withObject:macro]];
+                    if ([macro hasMeta]) [bind setMeta:[macro meta]];
+                    [env setObject:macro forKey:[JSSymbol symbolWithArityCheck:bind withObject:macro]];
                     return macro;
                 } else if ([[sym value] isEqual:@"try"]) {
                     NSMutableArray *form = [xs rest];

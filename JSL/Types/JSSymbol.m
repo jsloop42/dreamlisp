@@ -67,7 +67,7 @@
     return (JSSymbol *)data;
 }
 
-/** Returns a symbol from the given name. If symbol is of the form MFA, then the module and arity is updated accordingly. This */
+/** Returns a symbol from the given name. If symbol is of the form MFA, then the module and arity is updated accordingly. */
 + (JSSymbol *)processName:(NSString *)name {
     NSArray *modArr = [name componentsSeparatedByString:@":"];
     NSUInteger modCount = [modArr count];
