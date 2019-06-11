@@ -103,33 +103,6 @@
     XCTAssertFalse([sym isFunction]);
 }
 
-- (void)testSym {
-    NSString *mfaPattern = @"((.*)?:)?(.*)\\/([0-9]+|[n])?";
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:mfaPattern options:0 error:nil];
-    NSString *str = @"module:func/2";
-    NSArray *matches = [regex matchesInString:str options:0 range:NSMakeRange(0, [str count])];
-    for (NSTextCheckingResult *match in matches) {
-        info(@"%ld", [match numberOfRanges]);
-        NSUInteger len = [match numberOfRanges];
-        NSUInteger i = 0;
-        NSString *module = nil;
-        NSString *func = nil;
-        NSString *arityStr = nil;
-        NSInteger arity = -2;
-
-        if (len == 5) {  // => m:f/a
-            module = [str substringWithRange:[match rangeAtIndex:2]];
-            func = [str substringWithRange:[match rangeAtIndex:3]];
-            arityStr = [str substringWithRange:[match rangeAtIndex:4]];
-            if ([arityStr isEqual:@"n"]) {
-                arity = -1;
-            } else {
-                arity = [arityStr integerValue];
-            }
-        }
-    }
-}
-
 - (void)testTokenize {
     Reader *reader = [Reader new];
     NSString *exp = @"(+ 1 2)";
@@ -1459,8 +1432,13 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(meta a/1)"], @"[123]");
     XCTAssertEqualObjects([jsl rep:@"(meta (first (:exports (module-info 'user))))"], @"[123]");  // meta copied to the bound symbol
     XCTAssertEqualObjects([jsl rep:@"(meta (eval (first (:exports (module-info 'user)))))"], @"[123]");  // meta associated with the value
+    XCTAssertEqualObjects([jsl rep:@"(defmodule bar (export all))"], @"bar");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro ml (n) (with-meta 1 [:a :b :c]))"], @"bar:ml/1");
+    XCTAssertEqualObjects([jsl rep:@"(meta ml/1)"], @"[:a :b :c]");
+    XCTAssertEqualObjects([jsl rep:@"(meta (first (:exports (module-info 'bar))))"], @"[:a :b :c]");
+    XCTAssertEqualObjects([jsl rep:@"(meta (eval (first (:exports (module-info 'bar)))))"], @"[:a :b :c]");
     XCTAssertEqualObjects([jsl rep:@"(defmodule foo (export all))"], @"foo");
-    XCTAssertEqualObjects([jsl rep:@"(defmacro m (with-meta (fn (n) 1) [:a :b :c]))"], @"foo:m/3");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro m () (with-meta (fn (n) 1) [:a :b :c]))"], @"foo:m/0");
     XCTAssertEqualObjects([jsl rep:@"(meta (first (:exports (module-info 'foo))))"], @"[:a :b :c]");
     XCTAssertEqualObjects([jsl rep:@"(meta (eval (first (:exports (module-info 'foo)))))"], @"[:a :b :c]");
 }

@@ -309,22 +309,23 @@ static NSString *langVersion;
                     NSMutableArray *args = [NSMutableArray new];
                     BOOL isWithMeta = NO;
                     JSSymbol *fnSym = [[JSSymbol alloc] initWithName:@"fn"];
-                    JSSymbol *bind = nil;
-                    if ([JSList isList:[xs second]]) {  // => meta
-                        JSList *list = (JSList *)[xs second];
+                    JSSymbol *bind = [JSSymbol dataToSymbol:[xs second] fnName:@"defmacro"];
+                    if ([JSList isList:[xs nth:3]]) {  // check for with-meta
+                        JSList *list = (JSList *)[xs nth:3];
                         if ([JSSymbol isSymbol:[list first] withName:@"with-meta"]) {
                             isWithMeta = YES;
-                            bind = [JSSymbol dataToSymbol:[list second] fnName:@"defmacro"];  // bind symbol
                             [args addObject:[list first]];  // with-meta sym
                             NSMutableArray *fnArr = [NSMutableArray new];
                             [fnArr addObject:fnSym];  // fn sym
                             [fnArr addObject:[xs nth:2]];  // fn arg
-                            [fnArr addObjectsFromArray:[xs drop:3]];  // fn body
+                            [fnArr addObject:[list second]];  // fn body
                             [args addObject:[[JSList alloc] initWithArray:fnArr]];  // with-meta fn list
                             [args addObject:[list nth:2]];  // meta value
+                        } else {
+                            args = [xs drop:2];
+                            [args add:fnSym atIndex:0];
                         }
                     } else {
-                        bind = [JSSymbol dataToSymbol:[xs second] fnName:@"defmacro"];
                         args = [xs drop:2];
                         [args add:fnSym atIndex:0];
                     }
