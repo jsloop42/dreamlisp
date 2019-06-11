@@ -67,33 +67,40 @@
     return (JSSymbol *)data;
 }
 
-/** Returns a symbol from the given name. If symbol is of the form MFA, then the module and arity is updated accordingly. */
+/**
+ Returns a symbol from the given name. If symbol is of the form MFA, then the module and arity is updated accordingly. Works according to the reader logic
+ for module. If qualified, the initial module is set to that module and module name is set to current one. */
 + (JSSymbol *)processName:(NSString *)name {
+    JSSymbol *sym = nil;
     NSArray *modArr = [name componentsSeparatedByString:@":"];
     NSUInteger modCount = [modArr count];
+    NSString *symName = name;
     if (modCount > 2) [[[JSError alloc] initWithFormat:SymbolParseError, name] throw];
-    if (modCount == 2) name = modArr[1];  // the function part
-    NSArray *symArr = [name componentsSeparatedByString:@"/"];
+    if (modCount == 2) symName = modArr[1];  // the function part
+    NSArray *symArr = [symName componentsSeparatedByString:@"/"];
     NSUInteger count = [symArr count];
-    NSString *arity = nil;
-    JSSymbol *sym = nil;
-    if (count > 2) [[[JSError alloc] initWithFormat:SymbolParseError, name] throw];
-    if (count == 2) {
-        arity = symArr[1];
-        if ([arity isNotEmpty]) {
-            sym = [[JSSymbol alloc] initWithArity:[arity isEqual:@"n"] ? -1 : [arity integerValue] string:symArr[0]];
-        } else {
-            [[[JSError alloc] initWithFormat:SymbolParseError, name] throw];
-        }
-    } else if (count == 1) {
-        sym = [[JSSymbol alloc] initWithName:name];
+    NSString *arityStr = nil;
+    NSInteger arity = -2;
+    if (count == 3 && [symArr[1] isEmpty]) {  // (core://n 4 2)
+        arityStr = symArr[2];
+        symName = @"/";
+    } else if (count > 2) {
+        [[[JSError alloc] initWithFormat:SymbolParseError, name] throw];
+    } else if (count == 2) {
+        symName = symArr[0];
+        arityStr = symArr[1];
     }
+    if ([arityStr isNotEmpty]) {
+        arity = [arityStr isEqual:@"n"] ? -1 : [arityStr integerValue];
+    }
+    sym = [[JSSymbol alloc] initWithName:symName moduleName:[State currentModuleName]];
+    [sym setInitialArity:arity];
+    [sym resetArity];
     // Fully qualified symbol with module name included
     if (modCount == 2) {
         [sym setIsQualified:YES];
         [sym setInitialModuleName:modArr[0]];
     }
-    [sym setModuleName:[State currentModuleName]];
     return sym;
 }
 

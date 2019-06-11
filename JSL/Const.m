@@ -10,9 +10,10 @@
 
 NSString * const JSLVersion = @"3.2";
 static NSArray *_keywords;
-static NSString * _defaultModuleName;
+static NSString *_emptyModuleName;
+static NSString *_defaultModuleName;
 static NSString *_defaultModuleDescription;
-static NSString * _coreModuleName;
+static NSString *_coreModuleName;
 static NSString *_exports;
 static NSString *_imports;
 static NSString *_internal;
@@ -25,6 +26,7 @@ static NSString *_description;
     if (self == [self class]) {
         _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*", @"defmodule",
                       @"in-module", @"import", @"export", @"remove-module"];
+        _emptyModuleName = @"*";
         _defaultModuleName = @"user";
         _defaultModuleDescription = @"The default module.";
         _coreModuleName = @"core";
@@ -38,6 +40,10 @@ static NSString *_description;
 
 + (NSArray *)keyword {
     return _keywords;
+}
+
++ (NSString *)emptyModuleName {
+    return _emptyModuleName;
 }
 
 + (NSString *)defaultModuleName {

@@ -15,6 +15,7 @@ extern NSArray * keywords;
 
 @interface Const : NSObject
 + (NSArray *)keyword;
++ (NSString *)emptyModuleName;
 + (NSString *)defaultModuleName;
 + (NSString *)defaultModuleDescription;
 + (NSString *)coreModuleName;

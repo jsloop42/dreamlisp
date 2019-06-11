@@ -466,8 +466,8 @@ static NSString *langVersion;
 }
 
 - (void)removeModule:(id<JSDataProtocol>)ast {
-    JSSymbol *modSym = [self moduleNameFromAST:ast];
-    [Env removeModule:[modSym value]];
+    NSString *modName = (NSString *)[[self moduleNameFromAST:ast] value];
+    [Env removeModule:modName];
     _env = _globalEnv;
     [self updateModuleName:[_env moduleName]];
 }
@@ -583,20 +583,22 @@ static NSString *langVersion;
     }
 }
 
-- (JSSymbol *)moduleNameFromAST:(id<JSDataProtocol>)ast {
+- (JSString *)moduleNameFromAST:(id<JSDataProtocol>)ast {
     JSList *xs = (JSList *)ast;
-    JSList *modList = nil;
-    if (![JSList isList:[xs second]]) [[[JSError alloc] initWithFormat:QuotedSymbol, @"module name"] throw];
-    if ([modList count] > 2) [[[JSError alloc] initWithFormat:ArityError, 1, [modList count]] throw];
-    modList = [xs second];
-    return [modList second];
+    if ([xs count] > 2) [[[JSError alloc] initWithFormat:ArityError, 1, [xs count]] throw];
+    JSString *modName = nil;
+    if ([JSString isString:[xs second]]) {
+        modName = (JSString *)[xs second];
+    } else {
+        modName = [JSString dataToString:[self eval:[xs second] withEnv:[self env]] fnName:@"in-module/1"];
+    }
+    return modName;
 }
 
 /** Change current module to the given one. */
-- (JSSymbol *)changeModule:(id<JSDataProtocol>)ast {
-    JSSymbol *modSym = [self moduleNameFromAST:ast];
-    [modSym setIsModule:YES];
-    NSString *modName = [modSym value];
+- (JSString *)changeModule:(id<JSDataProtocol>)ast {
+    JSString *modStr = [self moduleNameFromAST:ast];
+    NSString *modName = (NSString *)[modStr value];
     if ([modName isEqual:[Const defaultModuleName]]) {
         _env = _globalEnv;
     } else {
@@ -610,7 +612,7 @@ static NSString *langVersion;
         }
     }
     [self updateModuleName:modName];
-    return modSym;
+    return modStr;
 }
 
 /** Changes the prompt if in REPL and updates the @c currentModuleName */

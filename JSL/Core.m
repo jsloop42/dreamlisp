@@ -746,9 +746,13 @@ double dmod(double a, double n) {
     /** Creates a symbol from the given string. */
     id<JSDataProtocol>(^symbol)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
-        JSSymbol *sym = [JSSymbol processName:[(JSString *)[xs first] value]];
+        NSString *name = [[JSString dataToString:[xs first] fnName:@"symbol/1"] value];
+        JSSymbol *sym = [JSSymbol processName:name];
         if ([sym isQualified]) {
             [sym setModuleName:[sym initialModuleName]];
+        } else {
+            [sym setInitialModuleName:[Const emptyModuleName]];
+            [sym resetModuleName];
         }
         return sym;
     };
@@ -1023,7 +1027,7 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"current-module-name" moduleName:[Const coreModuleName]]];
 
     id<JSDataProtocol>(^moduleInfo)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
-        JSSymbol *mod = [JSSymbol dataToSymbol:[xs first] fnName:@"module-info/1"];
+        JSString *mod = [JSString dataToString:[xs first] fnName:@"module-info/1"];
         NSString* moduleName = (NSString *)[mod value];
         NSMapTable *fns = [self moduleInfo:moduleName];
         if (!fns) return nil;
@@ -1033,7 +1037,7 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"module-info" moduleName:[Const coreModuleName]]];
 
     id<JSDataProtocol>(^moduleExist)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
-        JSSymbol *mod = [JSSymbol dataToSymbol:[xs first] fnName:@"module-exist?/1"];
+        JSString *mod = [JSString dataToString:[xs first] fnName:@"module-exist?/1"];
         NSString* moduleName = (NSString *)[mod value];
         Env *env = [Env forModuleName:moduleName];
         return [[JSBool alloc] initWithBool:(env != nil)];
