@@ -4,11 +4,11 @@
 
 (defmacro deftest (name desc & form)
   "A macro to define a test case. Takes test case name, description and expressions."
-  `(def ~name ^(vector :test-case) (fn () ~desc ~@form)))
+  `(def ~name ^(vector :test-case ~desc) (fn () ~desc ~@form)))
 
 (defmacro testing (desc & form)
   "A macro to evaluate individual test cases. Takes a description string and expressions."
-  `(do ~@form))
+  `(do (print (str "\n" ~desc)) ~@form))
 
 (defmacro is (exp res)
   `(is ~exp ~res ""))
@@ -33,6 +33,7 @@
                       (when-not (empty? ~xs)
                         (let (~f (first ~xs) ~fn-meta (meta ~f))
                           (when (and (not (nil? ~fn-meta)) (vector? ~fn-meta) (= (first ~fn-meta) :test-case))
+                            (print (str "\n" (nth ~fn-meta 1)))
                             ((eval ~f)))
                           (~runner (rest ~xs))))))
         (~runner ~info))

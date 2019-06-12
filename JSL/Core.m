@@ -268,12 +268,13 @@ double dmod(double a, double n) {
         for (i = 0; i < len; i++) {
             [ret addObject:[this->_printer printStringFor:[xs nth:i] readably:false]];
         }
-        info(@"%@", [ret componentsJoinedByString:@" "]);
+        info3(@"", @"%@", [ret componentsJoinedByString:@" "]);
         return nil;
     };
-    // prints to stdout without returning nil
+    // prints to stdout without newline and  without returning nil
     fn = [[JSFunction alloc] initWithFn:print argCount:-1 name:@"print/n"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"print" moduleName:[Const coreModuleName]]];
+
     id<JSDataProtocol>(^prstr)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         Core *this = weakSelf;
         NSUInteger len = [xs count];
