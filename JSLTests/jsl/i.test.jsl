@@ -1,7 +1,6 @@
 (defmodule i.test (export all) (import (from test (deftest n) (testing n) (is 2) (is 3) (run 1))))
-(deftest a "foo" 1)
 
-(defun z (n) n)
+(defun z (n) n) 
 
 (deftest b
   "Testing b test case"
@@ -17,5 +16,10 @@
     (testing "test c - case 2"
       (is (= 33 33) true)
       (is (= 41 51) true))))
+
+(deftest d
+  "Testing a success case"
+   (testing "success"
+     (is (= :a :a) true)))
 
 (run "i.test")

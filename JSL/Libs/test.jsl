@@ -2,6 +2,22 @@
   "A module to work with unit tests."
   (export all))
 
+(def info (atom {:success 0 :fail 0}))
+
+(def status (atom :success))
+
+(defun get-test-info () @info)
+
+(defun update-test-info (hm) (reset! info hm))
+
+(defun inc (tag)
+  "Increment test case info for the given tag, where tag can be :success, :fail."
+  (reset! info (assoc @info tag (+ (get @info tag) 1))))
+
+(defun dec (tag) 
+  "Decrement test case info for the given tag, where tag can be :success, :fail."
+  (reset! info (assoc @info tag (- (get @info tag) 1))))
+
 (defmacro deftest (name desc & form)
   "A macro to define a test case. Takes test case name, description and expressions."
   `(def ~name ^(vector :test-case ~desc) (fn () ~desc ~@form)))
@@ -19,14 +35,17 @@
   (let (ret (gensym) body (gensym))
     `(let (~ret ~exp
            ~body (quote ~exp))
-      (when (not (= ~ret ~res))
-        (map core:println/n (vector (str "\nexpected: " ~res) 
-                                    (str "actual:   (not " ~body ")")
-                                    (if (empty? ~msg) (str ~ret) ~msg)))))))
+      (if (not (= ~ret ~res))
+        (do
+          (reset! status :fail)
+          (map core:println/n (vector (str "\nexpected: " ~res) 
+                                      (str "actual:   (not " ~body ")")
+                                      (if (empty? ~msg) (str ~ret) ~msg))))
+          (reset! status :success)))))
 
 (defmacro run (module-name)
   "A test runner function which takes a string, `module-name` as its argument and executes all test functions found in the module."
-  (let (info (gensym) runner (gensym) f (gensym) fn-meta (gensym) xs (gensym) caller-module (current-module-name))
+  (let (info (gensym) runner (gensym) f (gensym) fn-meta (gensym) xs (gensym) stat (gensym))
     `(do
       (let (~info (:exports (module-info ~module-name))
             ~runner (fn (~xs)
@@ -34,7 +53,8 @@
                         (let (~f (first ~xs) ~fn-meta (meta ~f))
                           (when (and (not (nil? ~fn-meta)) (vector? ~fn-meta) (= (first ~fn-meta) :test-case))
                             (print (str "\n" (nth ~fn-meta 1)))
-                            ((eval ~f)))
+                            ((eval ~f))
+                            (if (= @status :success) (inc :success) (inc :fail)))
                           (~runner (rest ~xs))))))
-        (~runner ~info))
-        (in-module ~caller-module))))
+        (~runner ~info)
+        (print (str "\n" @info "\n"))))))
