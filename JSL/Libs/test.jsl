@@ -18,7 +18,7 @@
    result is printed."
   (let (ret (gensym) body (gensym))
     `(let (~ret ~exp
-           ~body (macroexpand ~exp))
+           ~body (quote ~exp))
       (when (not (= ~ret ~res))
         (map core:println/n (vector (str "\nexpected: " ~res) 
                                     (str "actual:   (not " ~body ")")
@@ -33,9 +33,7 @@
                       (when-not (empty? ~xs)
                         (let (~f (first ~xs) ~fn-meta (meta ~f))
                           (when (and (not (nil? ~fn-meta)) (vector? ~fn-meta) (= (first ~fn-meta) :test-case))
-                            (in-module ~module-name)  ; the deftest symbol belongs to different module => change module
-                            ((eval ~f))
-                            (in-module "test")) ; change back to `test` module where the rest of the macro symbols exists
+                            ((eval ~f)))
                           (~runner (rest ~xs))))))
         (~runner ~info))
         (in-module ~caller-module))))
