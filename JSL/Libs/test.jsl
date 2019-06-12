@@ -2,7 +2,7 @@
   "A module to work with unit tests."
   (export all))
 
-(def info (atom {:success 0 :fail 0}))
+(def info (atom {:success 0 :fail 0 :count 0}))
 
 (def status (atom :success))
 
@@ -17,6 +17,11 @@
 (defun dec (tag) 
   "Decrement test case info for the given tag, where tag can be :success, :fail."
   (reset! info (assoc @info tag (- (get @info tag) 1))))
+
+(defun inc-test-count ()
+  "Increment test case count."
+  (reset! info (assoc @info :count (+ (get @info :count) 1))))
+
 
 (defmacro deftest (name desc & form)
   "A macro to define a test case. Takes test case name, description and expressions."
@@ -53,6 +58,7 @@
                         (let (~f (first ~xs) ~fn-meta (meta ~f))
                           (when (and (not (nil? ~fn-meta)) (vector? ~fn-meta) (= (first ~fn-meta) :test-case))
                             (print (str "\n" (nth ~fn-meta 1)))
+                            (inc-test-count)
                             ((eval ~f))
                             (if (= @status :success) (inc :success) (inc :fail)))
                           (~runner (rest ~xs))))))

@@ -41,7 +41,8 @@ int main(int argc, const char * argv[]) {
         [jsl printVersion];
         [jsl bootstrap];
         [jsl loadCoreLib];
-        //[jsl rep:@"(load-file \"/Users/jsloop/dev/inc.jsl\")"];
+        [jsl rep:@"(load-file \"/Users/jsloop/dev/inc.jsl\")"];
+        //[jsl rep:@"(load-file \"/Users/jsloop/dev/JSL/JSL/Libs/test.jsl\")"];
         Terminal *term = [Terminal new];
         NSString *inp;
         NSString *ret;
