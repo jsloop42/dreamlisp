@@ -1950,6 +1950,39 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(bar.arity:zoo 3)"], @"(1 2 3)");
 }
 
+- (void)testInfo {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(def a 3)"], @"3");
+    [jsl rep:@"(def a-info (info a))"];
+    XCTAssertEqualObjects([jsl rep:@"(:type a-info)"], @"\"number\"");
+    XCTAssertEqualObjects([jsl rep:@"(:module a-info)"], @"\"user\"");
+    XCTAssertEqualObjects([jsl rep:@"(:position a-info)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(def s (symbol \"foo:bar/n\"))"], @"user:bar/n");
+    [jsl rep:@"(def s-info (info s))"];
+    XCTAssertEqualObjects([jsl rep:@"(:type s-info)"], @"\"symbol\"");
+    XCTAssertEqualObjects([jsl rep:@"(:module s-info)"], @"\"user\"");
+    XCTAssertEqualObjects([jsl rep:@"(:initial-module s-info)"], @"\"foo\"");
+    XCTAssertEqualObjects([jsl rep:@"(:qualified? s-info)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(:function? s-info)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(:arity s-info)"], @"-1");
+    XCTAssertEqualObjects([jsl rep:@"(def f (fn (n) (+ n 3)))"], @"user:f/1");
+    [jsl rep:@"(def f-info (info user:f/1))"];
+    XCTAssertEqualObjects([jsl rep:@"(:type f-info)"], @"\"function\"");
+    XCTAssertEqualObjects([jsl rep:@"(:module f-info)"], @"\"user\"");
+    XCTAssertEqualObjects([jsl rep:@"(:arity f-info)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(:macro? f-info)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro m (n) (+ n 3))"], @"user:m/1");
+    [jsl rep:@"(def m-info (info user:m/1))"];
+    XCTAssertEqualObjects([jsl rep:@"(:type m-info)"], @"\"function\"");
+    XCTAssertEqualObjects([jsl rep:@"(:module m-info)"], @"\"user\"");
+    XCTAssertEqualObjects([jsl rep:@"(:arity m-info)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(:macro? m-info)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(def z (atom {:a 4}))"], @"(atom {:a 4})");
+    [jsl rep:@"(def z-info (info z))"];
+    XCTAssertEqualObjects([jsl rep:@"(:type z-info)"], @"\"atom\"");
+    XCTAssertEqualObjects([jsl rep:@"(:value-type z-info)"], @"\"hash-map\"");
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
 }

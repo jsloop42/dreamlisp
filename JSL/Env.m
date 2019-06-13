@@ -304,6 +304,7 @@ static NSMapTable<NSString *, Env *> *_modules;
 }
 
 - (void)setObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key {
+    [obj setModuleName:[State currentModuleName]];
     if (_isExportAll || [_moduleName isEqual:[Const defaultModuleName]] || [_moduleName isEqual:[Const coreModuleName]]) {
         [_exportTable setObject:obj forKey:key];
     } else {

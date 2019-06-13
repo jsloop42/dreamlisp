@@ -253,6 +253,7 @@
     _moduleName = [State currentModuleName];
     _initialModuleName = _moduleName;
     _isQualified = NO;
+    _fnName = @"";
 }
 
 - (NSString *)dataType {

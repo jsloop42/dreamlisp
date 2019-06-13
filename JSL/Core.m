@@ -991,11 +991,66 @@ double dmod(double a, double n) {
 
     /** Returns the type of the given element. */
     id<JSDataProtocol>(^type)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
-        [TypeUtils checkArityCount:[xs count] arity:1 fnName:@"type:1"];
+        [TypeUtils checkArityCount:[xs count] arity:1 fnName:@"type/1"];
         return [[JSString alloc] initWithString:[[xs first] dataTypeName]];
     };
     fn = [[JSFunction alloc] initWithFn:type argCount:1 name:@"type/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"type" moduleName:[Const coreModuleName]]];
+
+    /** Returns details on the given element. */
+    id<JSDataProtocol>(^info)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArityCount:[xs count] arity:1 fnName:@"info/1"];
+        NSMapTable *hm = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+        id<JSDataProtocol> elem = [xs first];
+        [hm setObject:[[JSString alloc] initWithString:[elem dataTypeName]] forKey:[[JSKeyword alloc] initWithString:@"type"]];
+        [hm setObject:[[JSString alloc] initWithString:[elem moduleName] ? [elem moduleName] : @"*"] forKey:[[JSKeyword alloc] initWithString:@"module"]];
+        [hm setObject:[elem meta] forKey:[[JSKeyword alloc] initWithString:@"meta"]];
+        [hm setObject:[[JSNumber alloc] initWithInteger:[elem position]] forKey:[[JSKeyword alloc] initWithString:@"position"]];
+        if ([JSSymbol isSymbol:elem]) {
+            JSSymbol *sym = (JSSymbol *)elem;
+            [hm setObject:[[JSString alloc] initWithString:[sym value]] forKey:[[JSKeyword alloc] initWithString:@"name"]];
+            [hm setObject:[[JSString alloc] initWithString:[sym fnName]] forKey:[[JSKeyword alloc] initWithString:@"function-name"]];
+            [hm setObject:[[JSString alloc] initWithString:[sym initialModuleName] ? [sym initialModuleName] : @"*"] forKey:[[JSKeyword alloc] initWithString:@"initial-module"]];
+            [hm setObject:[[JSNumber alloc] initWithInteger:[sym arity]] forKey:[[JSKeyword alloc] initWithString:@"arity"]];
+            [hm setObject:[[JSNumber alloc] initWithInteger:[sym initialArity]] forKey:[[JSKeyword alloc] initWithString:@"initial-arity"]];
+            [hm setObject:[[JSBool alloc] initWithBool:[sym isFault]] forKey:[[JSKeyword alloc] initWithString:@"fault?"]];
+            [hm setObject:[[JSBool alloc] initWithBool:[sym isFunction]] forKey:[[JSKeyword alloc] initWithString:@"function?"]];
+            [hm setObject:[[JSBool alloc] initWithBool:[sym isModule]] forKey:[[JSKeyword alloc] initWithString:@"module?"]];
+            [hm setObject:[[JSBool alloc] initWithBool:[sym isImported]] forKey:[[JSKeyword alloc] initWithString:@"imported?"]];
+            [hm setObject:[[JSBool alloc] initWithBool:[sym isQualified]] forKey:[[JSKeyword alloc] initWithString:@"qualified?"]];
+            [hm setObject:[[JSString alloc] initWithString:[sym string]] forKey:[[JSKeyword alloc] initWithString:@"value"]];
+        } else if ([JSFunction isFunction:elem]) {
+            JSFunction *fn = (JSFunction *)elem;
+            [hm setObject:[[JSVector alloc] initWithArray:[fn params]] forKey:[[JSKeyword alloc] initWithString:@"arguments"]];
+            [hm setObject:[[JSBool alloc] initWithBool:[fn isMacro]] forKey:[[JSKeyword alloc] initWithString:@"macro?"]];
+            [hm setObject:[[JSNumber alloc] initWithInteger:[fn argsCount]] forKey:[[JSKeyword alloc] initWithString:@"arity"]];
+            [hm setObject:[[JSString alloc] initWithString:[fn name]] forKey:[[JSKeyword alloc] initWithString:@"name"]];
+            [hm setObject:[[JSBool alloc] initWithBool:[fn isImported]] forKey:[[JSKeyword alloc] initWithString:@"imported?"]];
+        } else if ([JSList isList:elem]) {
+            JSList *xs = (JSList *)elem;
+            [hm setObject:[[JSNumber alloc] initWithInteger:[xs count]] forKey:[[JSKeyword alloc] initWithString:@"count"]];
+            [hm setObject:[[JSBool alloc] initWithBool:[xs isEmpty]] forKey:[[JSKeyword alloc] initWithString:@"empty?"]];
+        } else if ([JSVector isVector:elem]) {
+            JSVector *vec = (JSVector *)elem;
+            [hm setObject:[[JSNumber alloc] initWithInteger:[vec count]] forKey:[[JSKeyword alloc] initWithString:@"count"]];
+            [hm setObject:[[JSBool alloc] initWithBool:[vec isEmpty]] forKey:[[JSKeyword alloc] initWithString:@"empty?"]];
+        } else if ([JSHashMap isHashMap:elem]) {
+            JSHashMap *hm = (JSHashMap *)elem;
+            [hm setObject:[[JSNumber alloc] initWithInteger:[hm count]] forKey:[[JSKeyword alloc] initWithString:@"count"]];
+        } else if ([JSKeyword isKeyword:elem]) {
+            JSKeyword *kwd = (JSKeyword *)elem;
+            [hm setObject:[kwd value] forKey:[[JSKeyword alloc] initWithString:@"name"]];
+        } else if ([JSAtom isAtom:elem]) {
+            JSAtom *atom = (JSAtom *)elem;
+            [hm setObject:[[JSString alloc] initWithString:[[atom value] dataTypeName]] forKey:[[JSKeyword alloc] initWithString:@"value-type"]];
+        } else if ([JSNumber isNumber:elem]) {
+            JSNumber *num = (JSNumber *)elem;
+            [hm setObject:[[JSBool alloc] initWithBool:[num isDouble]] forKey:[[JSKeyword alloc] initWithString:@"double?"]];
+        }
+        return [[JSHashMap alloc] initWithMapTable:hm];
+    };
+    fn = [[JSFunction alloc] initWithFn:info argCount:1 name:@"info/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"info" moduleName:[Const coreModuleName]]];
 }
 
 - (NSMapTable * _Nullable)moduleInfo:(NSString *)moduleName {
