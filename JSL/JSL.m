@@ -117,20 +117,19 @@ static NSString *langVersion;
         if ([files count] == 0) {
             error(@"%@ %@", @"Error loading", path);
             return nil;
-        } else {
-            BOOL __block hasError = NO;
-            [files enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                 @try {
-                     [this rep:[obj content]];
-                 } @catch (NSException *exception) {
-                     hasError = YES;
-                     [this printException:exception log:YES readably:YES];
-                 }
-            }];
-            [this changeModuleTo:[Const defaultModuleName]];
-            if (!hasError && [this isREPL]) info(@"%@", [[NSString alloc] initWithFormat:@"#(ok %@)", [path lastPathComponent]]);
         }
-        return [JSNil new];
+        BOOL __block hasError = NO;
+        [files enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+             @try {
+                 [this rep:[obj content]];
+             } @catch (NSException *exception) {
+                 hasError = YES;
+                 [this printException:exception log:YES readably:YES];
+             }
+        }];
+        [this changeModuleTo:[Const defaultModuleName]];
+        return [[JSVector alloc] initWithArray:[@[[[JSKeyword alloc] initWithString: hasError ? @"fail" : @"ok"],
+                                                  [[NSString alloc] initWithFormat:@"%@", [path lastPathComponent]]] mutableCopy]];
     };
     Env *coreEnv = [Env forModuleName:[Const coreModuleName]];
     JSSymbol *sym = [[JSSymbol alloc] initWithArity:1 string:@"load-file" moduleName:[Const coreModuleName]];
