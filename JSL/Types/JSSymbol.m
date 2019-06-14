@@ -363,7 +363,7 @@
 }
 
 - (NSString *)description {
-    return [[NSString alloc] initWithFormat:@"<%@ %p - ModuleName: %@, InitialModuleName: %@, " \
+    return [NSString stringWithFormat:@"<%@ %p - ModuleName: %@, InitialModuleName: %@, " \
             @"Name: %@, Arity:%ld, InitialArity: %ld, " \
             @"isQualified: %hhd, isFault: %hhd, " \
             @"meta: %@>",

@@ -90,7 +90,7 @@
 }
 
 - (NSString *)description {
-    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@>", NSStringFromClass([self class]), self, _value];
+    return [NSString stringWithFormat:@"<%@ %p - value: %@>", NSStringFromClass([self class]), self, _value];
 }
 
 @end
