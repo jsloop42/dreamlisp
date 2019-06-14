@@ -59,14 +59,23 @@
     return [[[self reverseObjectEnumerator] allObjects] mutableCopy];
 }
 
-/** Drops first @c n elements from the array. */
-- (NSMutableArray * _Nullable)drop:(NSInteger)n {
+/** Drops @c n elements from the array. If n is negative, drops from last. If n is not within bounds, the array is returned as is. */
+- (NSMutableArray *)drop:(NSInteger)n {
     NSMutableArray *arr = [self mutableCopy];
-    if (n > 0 && n <= [arr count]) {
-        [arr removeObjectsInRange:NSMakeRange(0, n)];
-        return arr;
+    NSUInteger count = [arr count];
+    NSUInteger start = 0;
+    NSUInteger len = 0;
+    if (n < 0) {
+        start = count + n;
+        len = n * -1;
+    } else if (n > 0) {
+        start = 0;
+        len = n;
     }
-    return nil;
+    if (start >= 0 && start < count && len >= 0 && len <= count) {
+        [arr removeObjectsInRange:NSMakeRange(start, len)];
+    }
+    return arr;
 }
 
 @end

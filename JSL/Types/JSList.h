@@ -40,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)isEqual:(JSList *)list;
 - (NSUInteger)hash;
 - (JSList *)reverse;
-- (JSList * _Nullable)drop:(NSInteger)n;
+- (JSList *)drop:(NSInteger)n;
 @end
 
 NS_ASSUME_NONNULL_END

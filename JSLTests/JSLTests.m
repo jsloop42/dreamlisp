@@ -18,6 +18,31 @@
 
 }
 
+- (void)testNSMapTable {
+    NSMapTable *table1 = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    [table1 setObject:@"1" forKey:@"1"];
+    NSMapTable *table2 = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    [table2 setObject:@"1" forKey:@"1"];
+    XCTAssertTrue([table1 isEqual:table2]);
+}
+
+- (void)testNSMutableArray {
+    NSMutableArray *arr = [@[@1, @2, @3, @4] mutableCopy];
+    XCTAssertEqualObjects([arr drop:0], arr);
+    NSMutableArray *res = [@[@2, @3, @4] mutableCopy];
+    XCTAssertEqualObjects([arr drop:1], res);
+    res = [@[@3, @4] mutableCopy];
+    XCTAssertEqualObjects([arr drop:2], res);
+    res = [@[@1, @2, @3] mutableCopy];
+    XCTAssertEqualObjects([arr drop:-1], res);
+    res = [@[@1, @2] mutableCopy];
+    XCTAssertEqualObjects([arr drop:-2], res);
+    res = [@[@1] mutableCopy];
+    XCTAssertEqualObjects([arr drop:-3], res);
+    res = [@[] mutableCopy];
+    XCTAssertEqualObjects([arr drop:-4], res);
+}
+
 - (void)testDataType {
     JSString* str = [[JSString alloc] initWithString:@"Foo"];
     XCTAssertEqualObjects([str dataType], @"JSString");
@@ -265,14 +290,6 @@
     aRet = [hm objectForKey:aKeys[0]];
     XCTAssertNotNil(aRet);
     XCTAssertEqualObjects([aRet dataType], @"JSNumber");
-}
-
-- (void)testNSMapTable {
-    NSMapTable *table1 = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
-    [table1 setObject:@"1" forKey:@"1"];
-    NSMapTable *table2 = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
-    [table2 setObject:@"1" forKey:@"1"];
-    XCTAssertTrue([table1 isEqual:table2]);
 }
 
 - (void)testJSListRest {
@@ -1153,6 +1170,16 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(last '(1 2 [3] [4 5]))"], @"[4 5]");
     XCTAssertEqualObjects([jsl rep:@"(last '())"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(last [])"], @"nil");
+    // drop on list
+    XCTAssertEqualObjects([jsl rep:@"(drop 1 '(1 2 3))"], @"(2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(drop 2 '(1 2 3))"], @"(3)");
+    XCTAssertEqualObjects([jsl rep:@"(drop 3 '(1 2 3))"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(drop 4 '(1 2 3))"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(drop -4 '(1 2 3))"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(drop -3 '(1 2 3))"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(drop -2 '(1 2 3))"], @"(1)");
+    XCTAssertEqualObjects([jsl rep:@"(drop -1 '(1 2 3))"], @"(1 2)");
+    XCTAssertEqualObjects([jsl rep:@"(drop 0 '(1 2 3))"], @"(1 2 3)");
 }
 
 - (void)testVectorCoreFunctions {
@@ -1181,6 +1208,16 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(rest [10 11 12])"], @"(11 12)");
     XCTAssertEqualObjects([jsl rep:@"(seq [2 3 4])"], @"(2 3 4)");
     XCTAssertEqualObjects([jsl rep:@"(seq [])"], @"nil");
+    // drop on vector
+    XCTAssertEqualObjects([jsl rep:@"(drop 1 [1 2 3])"], @"[2 3]");
+    XCTAssertEqualObjects([jsl rep:@"(drop 2 [1 2 3])"], @"[3]");
+    XCTAssertEqualObjects([jsl rep:@"(drop 3 [1 2 3])"], @"[]");
+    XCTAssertEqualObjects([jsl rep:@"(drop 4 [1 2 3])"], @"[1 2 3]");
+    XCTAssertEqualObjects([jsl rep:@"(drop -4 [1 2 3])"], @"[1 2 3]");
+    XCTAssertEqualObjects([jsl rep:@"(drop -3 [1 2 3])"], @"[]");
+    XCTAssertEqualObjects([jsl rep:@"(drop -2 [1 2 3])"], @"[1]");
+    XCTAssertEqualObjects([jsl rep:@"(drop -1 [1 2 3])"], @"[1 2]");
+    XCTAssertEqualObjects([jsl rep:@"(drop 0 [1 2 3])"], @"[1 2 3]");
 }
 
 - (void)testKeyword {

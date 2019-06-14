@@ -542,6 +542,32 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:last argCount:1 name:@"last/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"last" moduleName:[Const coreModuleName]]];
+
+    /** Returns the element of the list after removing n elements. */
+    id<JSDataProtocol>(^drop)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:2];
+        id<JSDataProtocol> first = [xs first];
+        id<JSDataProtocol> second = [xs second];
+        if ([xs isEmpty] || [JSNil isNil:list]) return [JSNil new];
+        JSNumber *num = [JSNumber dataToNumber:first position:1 fnName:@"drop/2"];
+        JSList *list = nil;
+        BOOL isVector = NO;
+        if ([JSList isList:second]) {
+            list = (JSList *)second;
+        } else if ([JSVector isVector:second]) {
+            isVector = YES;
+            list = (JSList *)second;
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"drop/2", @"'list' or 'vector'", 2, [list dataTypeName]] throw];
+        }
+        list = [list drop:[num integerValue]];
+        if (isVector) {
+            return [[JSVector alloc] initWithArray:[list value]];
+        }
+        return list;
+    };
+    fn = [[JSFunction alloc] initWithFn:drop argCount:2 name:@"drop/2"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"drop" moduleName:[Const coreModuleName]]];
 }
 
 - (NSString *)nameFromObject:(id<JSDataProtocol>)obj {
