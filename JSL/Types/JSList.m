@@ -175,7 +175,7 @@
 
 /** Returns a new list which the reverse of the current list. */
 - (JSList *)reverse {
-    return [[JSList alloc] initWithArray:[[[[_array rest] reverseObjectEnumerator] allObjects] mutableCopy]];
+    return [[JSList alloc] initWithArray:[_array reverse]];
 }
 
 /** Drops n elements. */

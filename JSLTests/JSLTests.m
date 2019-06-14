@@ -1170,7 +1170,8 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(last '(1 2 [3] [4 5]))"], @"[4 5]");
     XCTAssertEqualObjects([jsl rep:@"(last '())"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(last [])"], @"nil");
-    // drop on list
+    XCTAssertThrows([jsl rep:@"(last nil)"]);
+    // drop
     XCTAssertEqualObjects([jsl rep:@"(drop 1 '(1 2 3))"], @"(2 3)");
     XCTAssertEqualObjects([jsl rep:@"(drop 2 '(1 2 3))"], @"(3)");
     XCTAssertEqualObjects([jsl rep:@"(drop 3 '(1 2 3))"], @"()");
@@ -1180,6 +1181,9 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(drop -2 '(1 2 3))"], @"(1)");
     XCTAssertEqualObjects([jsl rep:@"(drop -1 '(1 2 3))"], @"(1 2)");
     XCTAssertEqualObjects([jsl rep:@"(drop 0 '(1 2 3))"], @"(1 2 3)");
+    // reverse
+    XCTAssertEqualObjects([jsl rep:@"(reverse '())"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(reverse '(1 2 3))"], @"(3 2 1)");
 }
 
 - (void)testVectorCoreFunctions {
@@ -1208,7 +1212,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(rest [10 11 12])"], @"(11 12)");
     XCTAssertEqualObjects([jsl rep:@"(seq [2 3 4])"], @"(2 3 4)");
     XCTAssertEqualObjects([jsl rep:@"(seq [])"], @"nil");
-    // drop on vector
+    // drop
     XCTAssertEqualObjects([jsl rep:@"(drop 1 [1 2 3])"], @"[2 3]");
     XCTAssertEqualObjects([jsl rep:@"(drop 2 [1 2 3])"], @"[3]");
     XCTAssertEqualObjects([jsl rep:@"(drop 3 [1 2 3])"], @"[]");
@@ -1218,6 +1222,9 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(drop -2 [1 2 3])"], @"[1]");
     XCTAssertEqualObjects([jsl rep:@"(drop -1 [1 2 3])"], @"[1 2]");
     XCTAssertEqualObjects([jsl rep:@"(drop 0 [1 2 3])"], @"[1 2 3]");
+    // reverse
+    XCTAssertEqualObjects([jsl rep:@"(reverse [])"], @"[]");
+    XCTAssertEqualObjects([jsl rep:@"(reverse [1 2 3])"], @"[3 2 1]");
 }
 
 - (void)testKeyword {

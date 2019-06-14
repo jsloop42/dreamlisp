@@ -531,7 +531,6 @@ double dmod(double a, double n) {
     id<JSDataProtocol>(^last)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         id<JSDataProtocol> list = [xs first];
-        if ([xs isEmpty] || [JSNil isNil:list]) return [JSNil new];
         id<JSDataProtocol> last = nil;
         if ([JSList isKindOfList:list]) {
             last = (id<JSDataProtocol>)[(JSList *)list last];
@@ -548,7 +547,6 @@ double dmod(double a, double n) {
         [TypeUtils checkArity:xs arity:2];
         id<JSDataProtocol> first = [xs first];
         id<JSDataProtocol> second = [xs second];
-        if ([xs isEmpty] || [JSNil isNil:list]) return [JSNil new];
         JSNumber *num = [JSNumber dataToNumber:first position:1 fnName:@"drop/2"];
         JSList *list = nil;
         BOOL isVector = NO;
@@ -558,7 +556,7 @@ double dmod(double a, double n) {
             isVector = YES;
             list = (JSList *)second;
         } else {
-            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"drop/2", @"'list' or 'vector'", 2, [list dataTypeName]] throw];
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"drop/2", @"'list' or 'vector'", 2, [second dataTypeName]] throw];
         }
         list = [list drop:[num integerValue]];
         if (isVector) {
@@ -568,6 +566,21 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:drop argCount:2 name:@"drop/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"drop" moduleName:[Const coreModuleName]]];
+
+    /** Returns the reverse of the given list. */
+    id<JSDataProtocol>(^reverse)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        id<JSDataProtocol> first = [xs first];
+        if ([JSList isList:first]) {
+            return [(JSList *)first reverse];
+        } else if ([JSVector isVector:first]) {
+            return [[JSVector alloc] initWithArray:[[(JSVector *)first value] reverse]];
+        }
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"reverse/1", @"'list' or 'vector'", 1, [first dataTypeName]] throw];
+        return nil;
+    };
+    fn = [[JSFunction alloc] initWithFn:reverse argCount:1 name:@"reverse/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"reverse" moduleName:[Const coreModuleName]]];
 }
 
 - (NSString *)nameFromObject:(id<JSDataProtocol>)obj {
