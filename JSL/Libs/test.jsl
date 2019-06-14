@@ -57,7 +57,7 @@
                       (when-not (empty? ~xs)
                         (let (~f (first ~xs) ~fn-meta (meta ~f))
                           (when (and (not (nil? ~fn-meta)) (vector? ~fn-meta) (= (first ~fn-meta) :test-case))
-                            (print (str "\n" (nth ~fn-meta 1)))
+                            (print (str "\n" (nth 1 ~fn-meta)))
                             (inc-test-count)
                             ((eval ~f))
                             (if (= @status :success) (inc :success) (inc :fail)))

@@ -612,10 +612,10 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(vals hm2)"], @"(1)");
     XCTAssertEqualObjects([jsl rep:@"(count (keys (assoc hm2 \"b\" 2 \"c\" 3)))"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(assoc {} :bcd 234)"], @"{:bcd 234}");
-    XCTAssertEqualObjects([jsl rep:@"(keyword? (nth (keys {:abc 123 :def 456}) 0))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(keyword? (nth 0 (keys {:abc 123 :def 456})))"], @"true");
     [jsl rep:@"(def hm3 (assoc hm2 \"b\" 2))"];
-    XCTAssertEqualObjects([jsl rep:@"(keyword? (nth (keys {\":abc\" 123 \":def\" 456}) 0))"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(keyword? (nth (vals {\"a\" :abc \"b\" :def}) 0))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(keyword? (nth 0 (keys {\":abc\" 123 \":def\" 456})))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(keyword? (nth 0 (vals {\"a\" :abc \"b\" :def})))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(assoc {} :bcd nil)"], @"{:bcd nil}");
     // overwrite duplicate key
     XCTAssertEqualObjects([jsl rep:@"(assoc {:a 1} :a 3)"], @"{:a 3}");
@@ -1110,8 +1110,8 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(cons [1] [2 3])"], @"([1] 2 3)");
     XCTAssertEqualObjects([jsl rep:@"(cons 1 [2 3])"], @"(1 2 3)");
     XCTAssertEqualObjects([jsl rep:@"(concat [1 2] (list 3 4) [5 6])"], @"(1 2 3 4 5 6)");
-    XCTAssertEqualObjects([jsl rep:@"(nth (list 1) 0)"], @"1");
-    XCTAssertEqualObjects([jsl rep:@"(nth (list 1 2) 1)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(nth 0 (list 1))"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(nth 1 (list 1 2))"], @"2");
     [jsl rep:@"(def x \"x\")"];
     XCTAssertNotEqualObjects(@"(def x (nth (list 1 2) 2))", @"Index out of bounds");
     XCTAssertEqualObjects([jsl rep:@"x"], @"\"x\"");
@@ -1168,8 +1168,8 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(conj [2 3] 4 5 6)"], @"[2 3 4 5 6]");
     XCTAssertEqualObjects([jsl rep:@"(conj [1] [2 3])"], @"[1 [2 3]]");
     XCTAssertEqualObjects([jsl rep:@"(conj [1 2 3] 4 5 6)"], @"[1 2 3 4 5 6]");
-    XCTAssertEqualObjects([jsl rep:@"(nth [1] 0)"], @"1");
-    XCTAssertEqualObjects([jsl rep:@"(nth [1 2] 1)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(nth 0 [1])"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(nth 1 [1 2])"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(def x \"x\")"], @"\"x\"");
     XCTAssertThrows([jsl rep:@"(def x (nth [1 2] 2))"], @"Index out of bounds");
     XCTAssertEqualObjects([jsl rep:@"x"], @"\"x\"");
@@ -1189,7 +1189,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(= :abc :def)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(= :abc \":abc\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(keyword? (keyword \"abc\"))"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"(keyword? (nth (keys {:abc 123 :def 456}) 0))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(keyword? (nth 0 (keys {:abc 123 :def 456})))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(keyword? 'abc)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(keyword? \"abc\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(keyword? \"\")"], @"false");
@@ -1283,7 +1283,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     // vector binding in let
     XCTAssertEqualObjects([jsl rep:@"(defmacro foo1 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(first xs) 10)))"], @"user:foo1/0");
     XCTAssertEqualObjects([jsl rep:@"(foo1)"], @"11");
-    XCTAssertEqualObjects([jsl rep:@"(defmacro foo2 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(nth xs 1) 10)))"], @"user:foo2/0");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro foo2 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(nth 1 xs) 10)))"], @"user:foo2/0");
     XCTAssertEqualObjects([jsl rep:@"(foo2)"], @"12");
 }
 
@@ -1328,8 +1328,8 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(defmacro foo1 () `(let (xs [(atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))]) (@(first xs) 10)))"], @"user:foo1/0");
     XCTAssertEqualObjects([jsl rep:@"(defmacro foo1 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(first xs) 10)))"], @"user:foo1/0");
     XCTAssertEqualObjects([jsl rep:@"(foo1)"], @"11");
-    XCTAssertEqualObjects([jsl rep:@"(defmacro foo2 () `(let (xs [(atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))]) (@(nth xs 1) 10)))"], @"user:foo2/0");
-    XCTAssertEqualObjects([jsl rep:@"(defmacro foo2 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(nth xs 1) 10)))"], @"user:foo2/0");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro foo2 () `(let (xs [(atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))]) (@(nth 1 xs) 10)))"], @"user:foo2/0");
+    XCTAssertEqualObjects([jsl rep:@"(defmacro foo2 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(nth 1 xs) 10)))"], @"user:foo2/0");
     XCTAssertEqualObjects([jsl rep:@"(foo2)"], @"12");
 }
 
@@ -1352,7 +1352,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(try (abc 1 2) (catch exc (prn \"exc is:\" exc)))"], @"nil");
     freeInfoCallback();
     infoCallback(self, 1, &errorHandleFn);
-    XCTAssertEqualObjects([jsl rep:@"(try (nth [] 1) (catch exc (prn \"exc is:\" exc)))"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(try (nth 1 []) (catch exc (prn \"exc is:\" exc)))"], @"nil");
     freeInfoCallback();
     XCTAssertEqualObjects([jsl rep:@"(try (map throw/1 (list \"my err\")) (catch exc exc))"], @"\"my err\"");
     infoCallback(self, 2, &errorHandleFn);

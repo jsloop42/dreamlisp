@@ -11,7 +11,7 @@
   (if (> (count xs) 0)
    `(if ~(first xs)
      ~(if (> (count xs) 1)
-       (nth xs 1)
+       (nth 1 xs)
        (throw "Odd number of forms to cond"))
     (cond ~@(rest (rest xs))))))
 

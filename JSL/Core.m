@@ -397,8 +397,8 @@ double dmod(double a, double n) {
         [TypeUtils checkArity:xs arity:2];
         id<JSDataProtocol> first = [xs first];
         id<JSDataProtocol> second = [xs second];
-        NSMutableArray *list = [[JSVector dataToList:first position:1 fnName:@"nth/2"] value];
-        JSNumber *num = [JSNumber dataToNumber:second position:2 fnName:@"nth/2"];
+        JSNumber *num = [JSNumber dataToNumber:first position:1 fnName:@"nth/2"];
+        NSMutableArray *list = [[JSVector dataToList:second position:2 fnName:@"nth/2"] value];
         NSUInteger n = [num integerValue];
         [TypeUtils checkIndexBounds:list index:n];
         return [list nth:n];
