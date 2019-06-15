@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "Types.h"
+#import "JSLDelegate.h"
 #import "Reader.h"
 #import "Printer.h"
 #import "Logger.h"
@@ -19,6 +20,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Core : NSObject
+@property (nonatomic, weak) id<JSLDelegate> delegate;
 - (Env *)env;
 @end
 

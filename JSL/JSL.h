@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "Const.h"
 #import "Types.h"
+#import "JSLDelegate.h"
 #import "Reader.h"
 #import "Printer.h"
 #import "Core.h"
@@ -17,7 +18,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface JSL : NSObject
+@interface JSL: NSObject <JSLDelegate>
 @property (nonatomic, readwrite) Reader *reader;
 @property (nonatomic, readwrite) Env *globalEnv;
 @property (nonatomic, readwrite) Env *env;

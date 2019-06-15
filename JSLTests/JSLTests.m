@@ -2101,6 +2101,15 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(partition (fn (x) (> x 4)) [4 2 5 3 1])"], @"[[5] [4 2 3 1]]");
 }
 
+- (void)testFlatten {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(flatten [[1] [2 [3]] [[[4]]] [5]])"], @"[1 2 3 4 5]");
+    XCTAssertEqualObjects([jsl rep:@"(flatten '('(1) '(2 '(3)) '('('(4))) '(5)))"], @"(1 2 3 4 5)");
+    XCTAssertEqualObjects([jsl rep:@"(flatten [])"], @"[]");
+    XCTAssertEqualObjects([jsl rep:@"(flatten '())"], @"()");
+    XCTAssertThrows([jsl rep:@"(flatten nil)"]);
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
 }

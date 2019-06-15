@@ -16,7 +16,10 @@ static NSString *_description = @"The core module.";
     Reader *_reader;
     Printer *_printer;
     Terminal *_terminal;
+    id<JSLDelegate> __weak _delegate;
 }
+
+@synthesize delegate = _delegate;
 
 - (instancetype)init {
     self = [super init];
@@ -718,6 +721,22 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:parition argCount:2 name:@"partition/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"partition" moduleName:[Const coreModuleName]]];
+
+    /** Takes any nested collection and returns its contents as a single collection. */
+    id<JSDataProtocol>(^flatten)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
+        NSMutableArray *acc = [NSMutableArray new];
+        if ([JSList isList:first]) {
+            return [[JSList alloc] initWithArray:[self flatten:(JSList *)first acc:acc]];
+        } else if ([JSVector isVector:first]) {
+            return [[JSVector alloc] initWithArray:[self flatten:(JSVector *)first acc:acc]];
+        }
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"flatten/1", @"'list' or 'vector'", [first dataTypeName]] throw];
+        return nil;
+    };
+    fn = [[JSFunction alloc] initWithFn:flatten argCount:1 name:@"flatten/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"flatten" moduleName:[Const coreModuleName]]];
 }
 
 - (NSMutableArray *)filterArray:(NSMutableArray *)array withPredicate:(JSFunction *)predicate {
@@ -782,6 +801,22 @@ double dmod(double a, double n) {
         [ret value] ? [res setObject:obj forKey:key] : [resFail setObject:obj forKey:key];
     }
     return @[res, resFail];
+}
+
+- (NSMutableArray *)flatten:(JSList *)xs acc:(NSMutableArray *)acc {
+    if (!acc) acc = [NSMutableArray new];
+    NSUInteger len = [xs count];
+    NSUInteger i = 0;
+    id<JSDataProtocol> elem = nil;
+    for (i = 0; i < len; i++) {
+        elem = [_delegate eval:[xs nth:i]];
+        if ([JSList isKindOfList:elem]) {
+            [self flatten:elem acc:acc];
+        } else {
+            [acc addObject:elem];
+        }
+    }
+    return acc;
 }
 
 - (NSString *)nameFromObject:(id<JSDataProtocol>)obj {

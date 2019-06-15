@@ -70,6 +70,7 @@ static NSString *langVersion;
     _reader = [Reader new];
     _printer = [Printer new];
     _core = [Core new];
+    [_core setDelegate:self];
     _env = [[Env alloc] initWithModuleName:[Const defaultModuleName] isUserDefined:NO];
     [_env setModuleDescription:[Const defaultModuleDescription]];
     [State setCurrentModuleName:[_env moduleName]];
@@ -689,4 +690,11 @@ static NSString *langVersion;
     return desc;
 }
 
+#pragma mark Delegate
+
+- (nonnull id<JSDataProtocol>)eval:(nonnull id<JSDataProtocol>)ast {
+    return [self eval:ast withEnv:[self env]];
+}
+
 @end
+

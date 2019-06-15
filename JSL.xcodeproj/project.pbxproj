@@ -185,6 +185,7 @@
 		9E9B6226225B9FC20060DA9A /* FileOps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileOps.h; sourceTree = "<group>"; };
 		9E9B6227225B9FC20060DA9A /* FileOps.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileOps.m; sourceTree = "<group>"; };
 		9E9B622A225BAA270060DA9A /* libedit.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libedit.tbd; path = usr/lib/libedit.tbd; sourceTree = SDKROOT; };
+		9ED5348A22B54E91004A2CB2 /* JSLDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSLDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -290,6 +291,7 @@
 				9E30555F2262633E001D4597 /* JSError.m */,
 				9E6F444622578E5600777A24 /* JSL.h */,
 				9E6F444722578E5600777A24 /* JSL.m */,
+				9ED5348A22B54E91004A2CB2 /* JSLDelegate.h */,
 				9E3055392260FA8F001D4597 /* Logger.h */,
 				9E30553A2260FA8F001D4597 /* Logger.m */,
 				9E3A9D4D22568AFC00348529 /* main.m */,
