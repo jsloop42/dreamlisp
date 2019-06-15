@@ -1143,13 +1143,13 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"keys" moduleName:[Const coreModuleName]]];
 
     /** Returns a list containing the hash map values. */
-    id<JSDataProtocol>(^vals)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+    id<JSDataProtocol>(^values)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
-        JSHashMap *first = [JSHashMap dataToHashMap:[xs first] fnName:@"vals/1"];
+        JSHashMap *first = [JSHashMap dataToHashMap:[xs first] fnName:@"values/1"];
         return [[JSList alloc] initWithArray:[first allObjects]];
     };
-    fn = [[JSFunction alloc] initWithFn:vals argCount:1 name:@"vals/1"];
-    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"vals" moduleName:[Const coreModuleName]]];
+    fn = [[JSFunction alloc] initWithFn:values argCount:1 name:@"values/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"values" moduleName:[Const coreModuleName]]];
 }
 
 - (void)addIOFunctions {

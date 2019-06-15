@@ -625,21 +625,21 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(contains? hm2 \"a\")"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(keys hm1)"], @"()");
     XCTAssertEqualObjects([jsl rep:@"(keys hm2)"], @"(\"a\")");
-    XCTAssertEqualObjects([jsl rep:@"(vals hm1)"], @"()");
-    XCTAssertEqualObjects([jsl rep:@"(vals hm2)"], @"(1)");
+    XCTAssertEqualObjects([jsl rep:@"(values hm1)"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(values hm2)"], @"(1)");
     XCTAssertEqualObjects([jsl rep:@"(count (keys (assoc hm2 \"b\" 2 \"c\" 3)))"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(assoc {} :bcd 234)"], @"{:bcd 234}");
     XCTAssertEqualObjects([jsl rep:@"(keyword? (nth 0 (keys {:abc 123 :def 456})))"], @"true");
     [jsl rep:@"(def hm3 (assoc hm2 \"b\" 2))"];
     XCTAssertEqualObjects([jsl rep:@"(keyword? (nth 0 (keys {\":abc\" 123 \":def\" 456})))"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(keyword? (nth 0 (vals {\"a\" :abc \"b\" :def})))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(keyword? (nth 0 (values {\"a\" :abc \"b\" :def})))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(assoc {} :bcd nil)"], @"{:bcd nil}");
     // overwrite duplicate key
     XCTAssertEqualObjects([jsl rep:@"(assoc {:a 1} :a 3)"], @"{:a 3}");
     // testing dissoc
     [jsl rep:@"(def hm3 (assoc hm2 \"b\" 2))"];
     XCTAssertEqualObjects([jsl rep:@"(count (keys hm3))"], @"2");
-    XCTAssertEqualObjects([jsl rep:@"(count (vals hm3))"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(count (values hm3))"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(dissoc hm3 \"a\")"], @"{\"b\" 2}");
     XCTAssertEqualObjects([jsl rep:@"(dissoc hm3 \"a\" \"b\")"], @"{}");
     XCTAssertEqualObjects([jsl rep:@"(dissoc hm3 \"a\" \"b\" \"c\")"], @"{}");
