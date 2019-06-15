@@ -110,6 +110,17 @@
  */
 + (void)checkIndexBounds:(NSMutableArray *)xs index:(NSUInteger)index {
     NSUInteger count = [xs count];
+    [self checkIndexBoundsCount:count index:index];
+}
+
+/**
+ Checks if the given index is within [0, count].
+
+ @param count The count to check against.
+ @param index The index to check.
+ @throw @c IndexOutOfBounds exception.
+ */
++ (void)checkIndexBoundsCount:(NSUInteger)count index:(NSUInteger)index {
     if (index < 0 || index >= count) {
         JSError *info = [[JSError alloc] initWithFormat:IndexOutOfBounds, index, count];
         [info throw];

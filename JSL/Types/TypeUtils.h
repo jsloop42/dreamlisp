@@ -30,6 +30,7 @@ typedef NS_ENUM(NSUInteger, ArityPredicate) {
 + (void)checkArity:(NSMutableArray *)xs arity:(NSUInteger)arity fnName:(NSString *)fnName;
 + (void)checkArityCount:(NSUInteger)count arity:(NSUInteger)arity fnName:(NSString *)fnName;
 + (void)checkIndexBounds:(NSMutableArray *)xs index:(NSUInteger)index;
++ (void)checkIndexBoundsCount:(NSUInteger)count index:(NSUInteger)index;
 + (void)checkArity:(NSMutableArray *)xs arities:(NSArray *)arities;
 + (void)checkArity:(NSMutableArray *)xs arity:(NSUInteger)arity predicate:(enum ArityPredicate)predicate;
 @end

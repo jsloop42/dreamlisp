@@ -1200,6 +1200,10 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     // reverse
     XCTAssertEqualObjects([jsl rep:@"(reverse '())"], @"()");
     XCTAssertEqualObjects([jsl rep:@"(reverse '(1 2 3))"], @"(3 2 1)");
+    // nth-tail
+    XCTAssertEqualObjects([jsl rep:@"(nth-tail 0 '(0))"], @"(0)");
+    XCTAssertEqualObjects([jsl rep:@"(nth-tail 2 '(0 1 2 3 4))"], @"(2 3 4)");
+    XCTAssertThrows([jsl rep:@"(nth-tail 5 '(0 1 2))"]);
 }
 
 - (void)testVectorCoreFunctions {
@@ -1241,6 +1245,10 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     // reverse
     XCTAssertEqualObjects([jsl rep:@"(reverse [])"], @"[]");
     XCTAssertEqualObjects([jsl rep:@"(reverse [1 2 3])"], @"[3 2 1]");
+    // nth-tail
+    XCTAssertEqualObjects([jsl rep:@"(nth-tail 0 [0])"], @"[0]");
+    XCTAssertEqualObjects([jsl rep:@"(nth-tail 2 [0 1 2 3 4])"], @"[2 3 4]");
+    XCTAssertThrows([jsl rep:@"(nth-tail 5 [0 1 2])"]);
 }
 
 - (void)testKeyword {
@@ -1431,7 +1439,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
             XCTAssertEqualObjects(message, @"\"exc is:\" \"'user:abc/2' not found\"");
             break;
         case 1:
-            XCTAssertEqualObjects(message, @"\"exc is:\" \"Index 1 is out of bounds of 0\"");
+            XCTAssertEqualObjects(message, @"\"exc is:\" \"Index 1 is out of bounds for length 0\"");
             break;
         case 2:
             XCTAssertEqualObjects(message, @"\"exc is:\" [\"data\" \"foo\"]");

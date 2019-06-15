@@ -402,8 +402,8 @@ double dmod(double a, double n) {
     /**
      Returns the nth indexed element from the list.
 
-     (nth [1 2 3] 2) ; 3
-     (nth [1 2 3] 0) ; 1
+     (nth 2 [1 2 3]) ; 3
+     (nth 0 [1 2 3]) ; 1
      */
     id<JSDataProtocol>(^nth)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:2];
@@ -417,6 +417,23 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:nth argCount:2 name:@"nth/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"nth" moduleName:[Const coreModuleName]]];
+
+    id<JSDataProtocol>(^nthTail)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:2];
+        id<JSDataProtocol> first = [xs first];
+        id<JSDataProtocol> second = [xs second];
+        NSInteger n = [[JSNumber dataToNumber:first position:1 fnName:@"nth-tail/2"] integerValue];
+        NSUInteger count = 0;
+        NSMutableArray *list = [[JSVector dataToList:second position:2 fnName:@"nth-tail/2"] value];
+        count = [list count];
+        [TypeUtils checkIndexBoundsCount:count index:n];
+        if ([JSList isList:second]) {
+            return [[JSList alloc] initWithArray:[list subarrayWithRange:NSMakeRange(n, count - n)]];
+        }
+        return [[JSVector alloc] initWithArray:[list subarrayWithRange:NSMakeRange(n, count - n)]];
+    };
+    fn = [[JSFunction alloc] initWithFn:nthTail argCount:2 name:@"nth-tail/2"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"nth-tail" moduleName:[Const coreModuleName]]];
 
     /** Returns the first element of the list. If the list is empty, this returns nil. */
     id<JSDataProtocol>(^first)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
