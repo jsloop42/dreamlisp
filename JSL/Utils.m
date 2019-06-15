@@ -32,4 +32,21 @@
     return (double)(NSTimeInterval)[[NSDate date] timeIntervalSince1970] * 1000;
 }
 
++ (NSMutableArray *)toArray:(id<JSDataProtocol>)object {
+    NSMutableArray *res = [NSMutableArray new];
+    if ([JSList isKindOfList:object]) {
+        res = [(JSList *)object value];
+    } else if ([JSString isString:object]) {
+        NSString *str = [(JSString *)object value];
+        NSUInteger len = [str count];
+        NSUInteger i = 0;
+        for (i = 0; i < len; i++) {
+            [res addObject:[str substringWithRange:NSMakeRange(i, 1)]];
+        }
+    } else {
+        [[[JSError alloc] initWithFormat:DataTypeMismatch, @"'list', 'vector' or 'string'", [object dataTypeName]] throw];
+    }
+    return res;
+}
+
 @end

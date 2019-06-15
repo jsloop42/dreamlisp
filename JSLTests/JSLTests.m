@@ -2149,6 +2149,15 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertThrows([jsl rep:@"(flatten nil)"]);
 }
 
+- (void)testJoin {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(join \"->\" \"abcd\")"], @"\"a->b->c->d\"");
+    XCTAssertEqualObjects([jsl rep:@"(join \"->\" [1 2 3])"], @"[1 \"->\" 2 \"->\" 3]");
+    XCTAssertEqualObjects([jsl rep:@"(join 0 '(1 2 3))"], @"(1 0 2 0 3)");
+    XCTAssertEqualObjects([jsl rep:@"(join nil '(1 2 3))"], @"(1 nil 2 nil 3)");
+    XCTAssertThrows([jsl rep:@"(join 0 1)"]);
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
 

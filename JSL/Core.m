@@ -811,13 +811,43 @@ double dmod(double a, double n) {
         NSUInteger n = [num integerValue];
         [TypeUtils checkIndexBounds:list index:n];
         NSMutableArray *res = [[list subarrayWithRange:NSMakeRange(0, n)] mutableCopy];
-        if ([JSList isList:second]) {
-            return [[JSList alloc] initWithArray:res];
-        }
+        if ([JSList isList:second]) return [[JSList alloc] initWithArray:res];
         return [[JSVector alloc] initWithArray:res];
     };
     fn = [[JSFunction alloc] initWithFn:take argCount:2 name:@"take/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"take" moduleName:[Const coreModuleName]]];
+
+    #pragma mark join
+    id<JSDataProtocol>(^join)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:2];
+        id<JSDataProtocol> first = [xs first];
+        id<JSDataProtocol> second = [xs second];
+        NSString *sep = nil;
+        BOOL isString = NO;
+        NSMutableArray *list = [Utils toArray:second];
+        NSMutableArray *res = [NSMutableArray new];
+        NSMutableString *str = [NSMutableString new];
+        NSUInteger len = [list count];
+        NSUInteger i = 0;
+        if ([JSString isString:second]) {
+            isString = YES;
+            sep = [[JSString dataToString:first fnName:@"join/2"] value];
+        }
+        for (i = 0; i < len; i++) {
+            if (isString) {
+                [str appendString:[list nth:i]];
+                if (i != len - 1) [str appendString:sep];
+            } else {
+                [res addObject:[list nth:i]];
+                if (i != len - 1) [res addObject:first];
+            }
+        }
+        if (isString) return [[JSString alloc] initWithString:str];
+        if ([JSList isList:second]) return [[JSList alloc] initWithArray:res];
+        return [[JSVector alloc] initWithArray:res];
+    };
+    fn = [[JSFunction alloc] initWithFn:join argCount:2 name:@"join/2"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"join" moduleName:[Const coreModuleName]]];
 }
 
 - (NSMutableArray *)filterArray:(NSMutableArray *)array withPredicate:(JSFunction *)predicate {

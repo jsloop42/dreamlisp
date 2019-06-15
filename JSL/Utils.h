@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)matchString:(NSString *)string withPattern:(NSString *)pattern;
 + (NSArray *)matchesInString:(NSString *)string withExpression:(NSRegularExpression *)pattern;
 + (double)timestamp;
++ (NSMutableArray *)toArray:(id<JSDataProtocol>)object;
 - (instancetype)init NS_UNAVAILABLE;
 @end
 
