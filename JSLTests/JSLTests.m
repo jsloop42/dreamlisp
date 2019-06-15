@@ -1664,16 +1664,17 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)testPredicate {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-    XCTAssertEqualObjects([jsl rep:@"(symbol? 'abc)"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"(symbol? \"abc\")"], @"false");
+    // nil?
     XCTAssertEqualObjects([jsl rep:@"(nil? nil)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(nil? true)"], @"false");
+    // true?
     XCTAssertEqualObjects([jsl rep:@"(true? true)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(true? false)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(true? true?/1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(true? 1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(true? \"a\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(true? :a)"], @"false");
+    // false?
     XCTAssertEqualObjects([jsl rep:@"(false? false)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(false? true)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(false? true)"], @"false");
@@ -1697,11 +1698,15 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     [jsl rep:@"(def double (fn (a) (* 2 a)))"];
     XCTAssertEqualObjects([jsl rep:@"(double 3)"], @"6");
     XCTAssertEqualObjects([jsl rep:@"(map double/1 nums)"], @"(2 4 6)");
+    // symbol?
     XCTAssertEqualObjects([jsl rep:@"(map (fn (x) (symbol? x)) (list 1 (quote two) \"three\"))"], @"(false true false)");
+    XCTAssertEqualObjects([jsl rep:@"(symbol? 'abc)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(symbol? \"abc\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(symbol? :abc)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(symbol? 'abc)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(symbol? \"abc\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(symbol? (symbol \"abc\"))"], @"true");
+    // keyword?
     XCTAssertEqualObjects([jsl rep:@"(keyword? :abc)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(keyword? 'abc)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(keyword? \"\")"], @"false");
@@ -1709,16 +1714,19 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(symbol \"abc\")"], @"*:abc");
     XCTAssertEqualObjects([jsl rep:@"(keyword :abc)"], @":abc");
     XCTAssertEqualObjects([jsl rep:@"(keyword \"abc\")"], @":abc");
+    // sequential?
     XCTAssertEqualObjects([jsl rep:@"(sequential? (list 1 2 3))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(sequential? [15])"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(sequential? sequential?/1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(sequential? nil)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(sequential? \"abc\")"], @"false");
+    // hash-map?
     XCTAssertEqualObjects([jsl rep:@"(hash-map? {})"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(hash-map? '())"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(hash-map? [])"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(hash-map? 'abc)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(hash-map? :abc)"], @"false");
+    // string?
     XCTAssertEqualObjects([jsl rep:@"(string? \"\")"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(string? 'abc)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(string? \"abc\")"], @"true");
@@ -1726,22 +1734,31 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(string? (keyword \"abc\"))"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(string? 234)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(string? nil)"], @"false");
+    // number?
     XCTAssertEqualObjects([jsl rep:@"(number? 123)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(number? -1)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(number? nil)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(number? false)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(number? \"123\")"], @"false");
+    // fn?
     [jsl rep:@"(def add1 (fn (x) (+ x 1)))"];
     XCTAssertEqualObjects([jsl rep:@"(fn? +)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(fn? add1/1)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(fn? cond)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(fn? \"+\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(fn? :+)"], @"false");
+    // macro?
     XCTAssertEqualObjects([jsl rep:@"(macro? cond)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(macro? +)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(macro? add1/1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(macro? \"+\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(macro? :+)"], @"false");
+    // zero?
+    XCTAssertEqualObjects([jsl rep:@"(zero? 0)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(zero? -1)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(zero? (+ 1 -1))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(zero? (* 1 0))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(zero? 1)"], @"false");
 }
 
 - (void)predicateCallback:(NSString *)message withTag:(int)tag counter:(int)counter {
