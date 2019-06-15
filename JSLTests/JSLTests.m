@@ -819,15 +819,17 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"((fn (a & more) (count more)) 1 2 3)"], @"2");
     XCTAssertEqualObjects([jsl rep:@"((fn (a & more) (count more)) 1)"], @"0");
     XCTAssertEqualObjects([jsl rep:@"((fn (a & more) (list? more)) 1)"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"(apply + (list 2 3))"], @"5");
-    XCTAssertEqualObjects([jsl rep:@"(apply + 4 (list 5))"], @"9");
-    XCTAssertEqualObjects([jsl rep:@"(apply + 4 [5])"], @"9");
+    // Test apply
+    XCTAssertEqualObjects([jsl rep:@"(apply + 2 3)"], @"5");
+    XCTAssertEqualObjects([jsl rep:@"(apply + 4 5 10)"], @"19");
     XCTAssertEqualObjects([jsl rep:@"(apply list [])"], @"()");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn (a b) (+ a b)) [2 3])"], @"5");
-    XCTAssertEqualObjects([jsl rep:@"(apply (fn (a b) (+ a b)) 4 [5])"], @"9");
+    XCTAssertEqualObjects([jsl rep:@"(apply (fn (a b) (+ a b)) [4 5])"], @"9");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn (& more) (list? more)) [1 2 3])"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn (& more) (list? more)) [])"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn (a & more) (list? more)) [1])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(apply (fn (& form) (count form)) [1 2])"], @"2");
+
     // test bindings
     [jsl rep:@"(def a (fn (x) (let (y x z (* x x)) (+ y z))))"];
     XCTAssertEqualObjects([jsl rep:@"(a 10)"], @"110");
@@ -1656,8 +1658,6 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(false? 1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(false? \"a\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(false? :a)"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(apply + (list 2 3))"], @"5");
-    XCTAssertEqualObjects([jsl rep:@"(apply + 4 (list 5))"], @"9");
     infoCallback(self, 0, &predicateFn);
     XCTAssertEqualObjects([jsl rep:@"(apply prn (list 1 2 \"3\" (list)))"], @"nil");
     freeInfoCallback();
@@ -1670,7 +1670,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(apply list (list))"], @"()");
     XCTAssertEqualObjects([jsl rep:@"(apply symbol?/1 (list (quote two)))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn (a b) (+ a b)) (list 2 3))"], @"5");
-    XCTAssertEqualObjects([jsl rep:@"(apply (fn (a b) (+ a b)) 4 (list 5))"], @"9");
+    XCTAssertEqualObjects([jsl rep:@"(apply (fn (a b) (+ a b)) (list 4 5))"], @"9");
     XCTAssertEqualObjects([jsl rep:@"(def nums (list 1 2 3))"], @"(1 2 3)");
     [jsl rep:@"(def double (fn (a) (* 2 a)))"];
     XCTAssertEqualObjects([jsl rep:@"(double 3)"], @"6");
@@ -1729,10 +1729,10 @@ void predicateFn(id param, int tag, int counter, const char *s) {
             XCTAssertEqualObjects(message, @"1 2 \"3\" ()");
             break;
         case 1:
-            XCTAssertEqualObjects(message, @"1 2 \"3\" ()");
+            XCTAssertEqualObjects(message, @"1 2 (\"3\" ())");
             break;
         case 2:
-            XCTAssertEqualObjects(message, @"1 2 \"3\" 4");
+            XCTAssertEqualObjects(message, @"1 2 [\"3\" 4]");
             break;
     }
 }

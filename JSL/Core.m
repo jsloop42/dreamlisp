@@ -898,16 +898,17 @@ double dmod(double a, double n) {
     /** Takes a function and a list of arguments, invokes the function with the elements in the list as its arguments. */
     id<JSDataProtocol>(^apply)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1];
-        NSMutableArray *last = [[[JSList dataToList:[xs last] position:[xs count] fnName:@"apply/n"] value] mutableCopy];
-        NSMutableArray *params = [NSMutableArray new];
-        NSMutableArray *args = [xs mutableCopy];
-        if ([args count] >= 2) {
-            args = [args drop:1];
-            args = [args dropLast];
+        NSMutableArray *arr = [NSMutableArray new];
+        NSMutableArray *rest = [xs rest];
+        if ([rest count] == 1 && [JSList isKindOfList:[rest first]]) {
+            [arr addObjectsFromArray:[(JSList *)[rest first] value]];
+        } else {
+            [arr addObjectsFromArray:[xs rest]];
         }
-        if (args) params = args;
-        [params addObjectsFromArray:last];
-        return [fn apply:params];
+        NSInteger fnArgsCount = [fn argsCount];
+        NSInteger paramsCount = [arr count];
+        if (fnArgsCount != -1 && fnArgsCount != paramsCount) [[[JSError alloc] initWithFormat:ArityError, fnArgsCount, paramsCount] throw];
+        return [fn apply:arr];
     };
     fn = [[JSFunction alloc] initWithFn:apply argCount:-1 name:@"apply/n"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"apply" moduleName:[Const coreModuleName]]];
