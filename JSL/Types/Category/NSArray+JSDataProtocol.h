@@ -11,6 +11,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSArray (JSDataProtocol)
+- (id)first;
+- (id)second;
 - (NSMutableArray *)map:(id (^)(id arg))block;
 - (BOOL)isEmpty;
 @end

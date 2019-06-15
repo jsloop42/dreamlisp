@@ -41,6 +41,16 @@
   "Negates the result of applying `=` on the given form."
   `(not (= ~@form)))
 
+(defun second (xs)
+  "Returns the second element from the collection."
+  (nth 1 xs))
+
+(defun sort (xs)
+  "Sort the given collection in ascending order. If collection is `hash-map`, the keys are sorted."
+  (if (hash-map? xs) 
+    (sort [:key :asc] xs)
+    (sort :asc xs)))
+
 (defun exit ()
   "Exits the REPL"
   (println "Bye")

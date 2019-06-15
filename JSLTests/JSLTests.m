@@ -612,9 +612,9 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(assoc {} \"a\" 1)"], @"{\"a\" 1}");
     XCTAssertEqualObjects([jsl rep:@"(get (assoc (assoc {\"a\" 1 } \"b\" 2) \"c\" 3) \"a\")"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(def hm1 (hash-map))"], @"{}");
-    XCTAssertEqualObjects([jsl rep:@"(map? hm1)"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"(map? 1)"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(map? \"abc\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(hash-map? hm1)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(hash-map? 1)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(hash-map? \"abc\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(get nil \"a\")"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(get hm1 \"a\")"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(contains? hm1 \"a\")"], @"false");
@@ -644,6 +644,8 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(dissoc hm3 \"a\" \"b\")"], @"{}");
     XCTAssertEqualObjects([jsl rep:@"(dissoc hm3 \"a\" \"b\" \"c\")"], @"{}");
     XCTAssertEqualObjects([jsl rep:@"(count (keys hm3))"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(count hm3)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(count {:a 1 :b 2 :c 3 :d 4})"], @"4");
     XCTAssertEqualObjects([jsl rep:@"(dissoc {:cde 345 :fgh 456} :cde)"], @"{:fgh 456}");
     XCTAssertEqualObjects([jsl rep:@"(dissoc {:cde nil :fgh 456} :cde)"], @"{:fgh 456}");
     XCTAssertEqualObjects([jsl rep:@"(dissoc {:a 1 :b 4} :a)"], @"{:b 4}");
@@ -1482,7 +1484,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(meta (with-meta (list 1 2 3) {\"a\" 1}))"], @"{\"a\" 1}");
     XCTAssertEqualObjects([jsl rep:@"(list? (with-meta (list 1 2 3) {\"a\" 1}))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(meta (with-meta {\"abc\" 123} {\"a\" 1}))"], @"{\"a\" 1}");
-    XCTAssertEqualObjects([jsl rep:@"(map? (with-meta {\"abc\" 123} {\"a\" 1}))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(hash-map? (with-meta {\"abc\" 123} {\"a\" 1}))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(meta (with-meta (atom 7) {\"a\" 1}))"], @"{\"a\" 1}");
     XCTAssertEqualObjects([jsl rep:@"(def l-wm (with-meta [4 5 6] {\"b\" 2}))"], @"[4 5 6]");
     XCTAssertEqualObjects([jsl rep:@"(meta l-wm)"], @"{\"b\" 2}");
@@ -1690,11 +1692,11 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(sequential? sequential?/1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(sequential? nil)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(sequential? \"abc\")"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(map? {})"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"(map? '())"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(map? [])"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(map? 'abc)"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(map? :abc)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(hash-map? {})"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(hash-map? '())"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(hash-map? [])"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(hash-map? 'abc)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(hash-map? :abc)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(string? \"\")"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(string? 'abc)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(string? \"abc\")"], @"true");
@@ -2068,6 +2070,10 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(sort [:value :asc] {:z 2 :a 4 :p -5})"], @"[-5 2 4]");
     XCTAssertEqualObjects([jsl rep:@"(sort [:value :desc] {:z 2 :a 4 :p -5})"], @"[4 2 -5]");
     XCTAssertEqualObjects([jsl rep:@"(sort :asc [3 5 2 (atom -1) -1 8])"], @"[(atom -1) -1 2 3 5 8]");
+    // Implicit sort
+    XCTAssertEqualObjects([jsl rep:@"(sort {:a 3 :s 4 :g 5})"], @"[:a :g :s]");
+    XCTAssertEqualObjects([jsl rep:@"(sort '(3 5 2 -1 8))"], @"(-1 2 3 5 8)");
+    XCTAssertEqualObjects([jsl rep:@"(sort [1 6 2 7 4])"], @"[1 2 4 6 7]");
 }
 
 - (void)testFilter {
@@ -2082,6 +2088,17 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(filter (fn (x) (<= x 0)) '(-1 4 0 -4 -5 2))"], @"(-1 0 -4 -5)");
     [jsl rep:@"(def str-xs [\"It\" \"is\" \"an\" \"ancient\" \"Mariner\" \"And\" \"he\" \"stoppeth\" \"one\" \"of\" \"three\"])"];
     XCTAssertEqualObjects([jsl rep:@"(filter (fn (x) (= (count x) 3)) str-xs)"], @"[\"And\" \"one\"]");
+}
+
+- (void)testPartition {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    [jsl rep:@"(def hmv1 (partition (fn (k v) (= (mod v 2) 0)) {:a 1 :b 2 :c 3 :d 4}))"];
+    [jsl rep:@"(def hmv2 (partition (fn (k v) (= (mod k 2) 0)) {1 10 2 20 3 30 4 40}))"];
+    XCTAssertEqualObjects([jsl rep:@"(count (first hmv1))"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(count (second hmv1))"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(sort [:key :asc] (first hmv1))"], @"[:b :d]");
+    XCTAssertEqualObjects([jsl rep:@"(sort [:key :asc] (second hmv1))"], @"[:a :c]");
+    XCTAssertEqualObjects([jsl rep:@"(partition (fn (x) (> x 4)) [4 2 5 3 1])"], @"[[5] [4 2 3 1]]");
 }
 
 - (void)test {

@@ -15,6 +15,14 @@
     return @"NSArray";
 }
 
+- (id)first {
+    return [self objectAtIndex:0];
+}
+
+- (id)second {
+    return [self objectAtIndex:1];
+}
+
 - (NSMutableArray *)map:(id (^)(id arg))block {
     return [TypeUtils mapOnArray:[self mutableCopy] withBlock:block];
 }

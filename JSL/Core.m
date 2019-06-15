@@ -337,9 +337,18 @@ double dmod(double a, double n) {
         [TypeUtils checkArity:xs arity:1];
         id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
         if ([JSNil isNil:first]) return [[JSNumber alloc] initWithInteger:0];
-        return [[JSNumber alloc] initWithInteger:[JSString isString:first]
-                ? [(JSString *)first count]
-                : [[JSList dataToList:first fnName:@"count/1"] count]];
+        NSUInteger count = 0;
+        if ([JSString isString:first]) {
+            count = [(JSString *)first count];
+        } else if ([JSList isKindOfList:first]) {
+            count = [(JSList *)first count];
+        } else if ([JSHashMap isHashMap:first]) {
+            count = [(JSHashMap *)first count];
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"count/1", @"'list', 'vector', 'hash-map' or 'string'", 1,
+              [list dataTypeName]] throw];
+        }
+        return [[JSNumber alloc] initWithInteger:count];
     };
     fn = [[JSFunction alloc] initWithFn:count argCount:1 name:@"count/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"count" moduleName:[Const coreModuleName]]];
@@ -673,6 +682,42 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:filter argCount:2 name:@"filter/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"filter" moduleName:[Const coreModuleName]]];
+
+    /**
+     Takes a predicate function and a collection, applies the function to each element in the collection and returns the resulting collection partitioned into
+     two, where first one satisifies the pedicate and the second does not.
+     */
+    id<JSDataProtocol>(^parition)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:2];
+        JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"filter/2"];
+        id<JSDataProtocol> second = [xs second];
+        NSArray *ret = nil;
+        if ([JSList isList:second]) {
+            ret = [self partitionArray:[(JSList *)second value] withPredicate:fn];
+            JSList *xs = [JSList new];
+            [xs add:[[JSList alloc] initWithArray:[ret first]]];
+            [xs add:[[JSList alloc] initWithArray:[ret second]]];
+            return xs;
+        }
+        if ([JSVector isVector:second]) {
+            ret = [self partitionArray:[(JSVector *)second value] withPredicate:fn];
+            JSVector *vec = [JSVector new];
+            [vec add:[[JSVector alloc] initWithArray:[ret first]]];
+            [vec add:[[JSVector alloc] initWithArray:[ret second]]];
+            return vec;
+        }
+        if ([JSHashMap isHashMap:second]) {
+            ret = [self partitionMapTable:[(JSHashMap *)second value] withPredicate:fn];
+            JSVector *vec = [JSVector new];
+            [vec add:[[JSHashMap alloc] initWithMapTable:[ret first]]];
+            [vec add:[[JSHashMap alloc] initWithMapTable:[ret second]]];
+            return vec;
+        }
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"partition/2", @"'list' or 'vector'", 2, [first dataTypeName]] throw];
+        return nil;
+    };
+    fn = [[JSFunction alloc] initWithFn:parition argCount:2 name:@"partition/2"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"partition" moduleName:[Const coreModuleName]]];
 }
 
 - (NSMutableArray *)filterArray:(NSMutableArray *)array withPredicate:(JSFunction *)predicate {
@@ -704,6 +749,39 @@ double dmod(double a, double n) {
         if ([ret value]) [res setObject:obj forKey:key];
     }
     return res;
+}
+
+- (NSArray<NSMutableArray *> *)partitionArray:(NSMutableArray *)array withPredicate:(JSFunction *)predicate {
+    NSMutableArray *res = [NSMutableArray new];
+    NSMutableArray *resFail = [NSMutableArray new];
+    NSUInteger len = [array count];
+    NSUInteger i = 0;
+    JSBool *ret = nil;
+    id<JSDataProtocol> elem = nil;
+    for (i = 0; i < len; i++) {
+        elem = array[i];
+        ret = [predicate apply:[@[elem] mutableCopy]];
+        [ret value] ? [res addObject:elem] : [resFail addObject:elem];
+    }
+    return @[res, resFail];
+}
+
+- (NSArray<NSMapTable *> *)partitionMapTable:(NSMapTable *)table withPredicate:(JSFunction *)predicate {
+    NSMapTable *res = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    NSMapTable *resFail = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    NSArray *allKeys = [table allKeys];
+    NSUInteger len = [allKeys count];
+    NSUInteger i = 0;
+    JSBool *ret = nil;
+    id<JSDataProtocol> key = nil;
+    id<JSDataProtocol> obj = nil;
+    for (i = 0; i < len; i++) {
+        key = allKeys[i];
+        obj = [table objectForKey:key];
+        ret = [predicate apply:[@[key, obj] mutableCopy]];
+        [ret value] ? [res setObject:obj forKey:key] : [resFail setObject:obj forKey:key];
+    }
+    return @[res, resFail];
 }
 
 - (NSString *)nameFromObject:(id<JSDataProtocol>)obj {
@@ -988,8 +1066,8 @@ double dmod(double a, double n) {
         [TypeUtils checkArity:xs arity:1];
         return [[JSBool alloc] initWithBool:[JSHashMap isHashMap:[xs first]]];
     };
-    fn = [[JSFunction alloc] initWithFn:mapp argCount:1 name:@"map?/1"];
-    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"map?" moduleName:[Const coreModuleName]]];
+    fn = [[JSFunction alloc] initWithFn:mapp argCount:1 name:@"hash-map?/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"hash-map?" moduleName:[Const coreModuleName]]];
 
     /**
      Takes a hash map and key value pairs, add them to the hash map and return a resulting new hash map.
