@@ -2058,6 +2058,20 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(sort :asc [3 5 2 (atom -1) -1 8])"], @"[(atom -1) -1 2 3 5 8]");
 }
 
+- (void)testFilter {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    [jsl rep:@"(def hm1 (filter (fn (k v) (= (mod v 2) 0)) {:a 1 :b 2 :c 3 :d 4}))"];
+    [jsl rep:@"(def hm2 (filter (fn (k v) (= (mod k 2) 0)) {1 10 2 20 3 30 4 40}))"];
+    XCTAssertEqualObjects([jsl rep:@"(sort [:key :asc] hm1)"], @"[:b :d]");
+    XCTAssertEqualObjects([jsl rep:@"(sort [:value :asc] hm1)"], @"[2 4]");
+    XCTAssertEqualObjects([jsl rep:@"(sort [:key :asc] hm2)"], @"[2 4]");
+    XCTAssertEqualObjects([jsl rep:@"(sort [:value :asc] hm2)"], @"[20 40]");
+    XCTAssertEqualObjects([jsl rep:@"(filter (fn (x) (> x 0)) [-1 4 0 -4 -5 2])"], @"[4 2]");
+    XCTAssertEqualObjects([jsl rep:@"(filter (fn (x) (<= x 0)) '(-1 4 0 -4 -5 2))"], @"(-1 0 -4 -5)");
+    [jsl rep:@"(def str-xs [\"It\" \"is\" \"an\" \"ancient\" \"Mariner\" \"And\" \"he\" \"stoppeth\" \"one\" \"of\" \"three\"])"];
+    XCTAssertEqualObjects([jsl rep:@"(filter (fn (x) (= (count x) 3)) str-xs)"], @"[\"And\" \"one\"]");
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
 }

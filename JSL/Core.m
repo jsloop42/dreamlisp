@@ -646,11 +646,64 @@ double dmod(double a, double n) {
                 return [(JSString *)second sortedUsingComparator:comparator];
             }
         }
-        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"sort/2", @"'list' or 'vector' or 'hash-map'", 2, [second dataTypeName]] throw];
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"sort/2", @"'list', 'vector', 'hash-map' or 'string'", 2, [second dataTypeName]] throw];
         return nil;
     };
     fn = [[JSFunction alloc] initWithFn:sort argCount:2 name:@"sort/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"sort" moduleName:[Const coreModuleName]]];
+
+    /**
+     Takes a filter predicate function and a collection, applies the function to each element in the collection and returns the resulting filtered collection.
+     */
+    id<JSDataProtocol>(^filter)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:2];
+        JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"filter/2"];
+        id<JSDataProtocol> second = [xs second];
+        if ([JSList isList:second]) {
+            return [[JSList alloc] initWithArray:[self filterArray:[(JSList *)second value] withPredicate:fn]];
+        }
+        if ([JSVector isVector:second]) {
+            return [[JSVector alloc] initWithArray:[self filterArray:[(JSVector *)second value] withPredicate:fn]];
+        }
+        if ([JSHashMap isHashMap:second]) {
+            return [[JSHashMap alloc] initWithMapTable:[self filterMapTable:[(JSHashMap *)second value] withPredicate:fn]];
+        }
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"filter/2", @"'list' or 'vector'", 2, [first dataTypeName]] throw];
+        return nil;
+    };
+    fn = [[JSFunction alloc] initWithFn:filter argCount:2 name:@"filter/2"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"filter" moduleName:[Const coreModuleName]]];
+}
+
+- (NSMutableArray *)filterArray:(NSMutableArray *)array withPredicate:(JSFunction *)predicate {
+    NSMutableArray *res = [NSMutableArray new];
+    NSUInteger len = [array count];
+    NSUInteger i = 0;
+    JSBool *ret = nil;
+    id<JSDataProtocol> elem = nil;
+    for (i = 0; i < len; i++) {
+        elem = array[i];
+        ret = [predicate apply:[@[elem] mutableCopy]];
+        if ([ret value]) [res addObject:elem];
+    }
+    return res;
+}
+
+- (NSMapTable *)filterMapTable:(NSMapTable *)table withPredicate:(JSFunction *)predicate {
+    NSMapTable *res = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    NSArray *allKeys = [table allKeys];
+    NSUInteger len = [allKeys count];
+    NSUInteger i = 0;
+    JSBool *ret = nil;
+    id<JSDataProtocol> key = nil;
+    id<JSDataProtocol> obj = nil;
+    for (i = 0; i < len; i++) {
+        key = allKeys[i];
+        obj = [table objectForKey:key];
+        ret = [predicate apply:[@[key, obj] mutableCopy]];
+        if ([ret value]) [res setObject:obj forKey:key];
+    }
+    return res;
 }
 
 - (NSString *)nameFromObject:(id<JSDataProtocol>)obj {

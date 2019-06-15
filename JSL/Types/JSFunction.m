@@ -56,6 +56,19 @@
     return (JSFunction *)data;
 }
 
++ (JSFunction *)dataToFunction:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
+    if (![JSFunction isFunction:data]) {
+        JSError *err = nil;
+        if (position > 0) {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'function'", position, [data dataTypeName]];
+        } else {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'function'", [data dataTypeName]];
+        }
+        [err throw];
+    }
+    return (JSFunction *)data;
+}
+
 - (instancetype)initWithAst:(id<JSDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<JSDataProtocol> _Nullable)meta
                          fn:(id<JSDataProtocol> (^)(NSMutableArray *))fn name:(NSString *)name {
     self = [super init];

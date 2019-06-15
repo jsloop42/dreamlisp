@@ -36,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isFunction:(id)object;
 + (JSFunction *)dataToFunction:(id<JSDataProtocol>)data;
 + (JSFunction *)dataToFunction:(id<JSDataProtocol>)data position:(NSInteger)position;
++ (JSFunction *)dataToFunction:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithAst:(id<JSDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<JSDataProtocol> _Nullable)meta
                          fn:(id<JSDataProtocol> (^)(NSMutableArray *))fn;
