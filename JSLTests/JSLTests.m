@@ -1204,6 +1204,13 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(nth-tail 0 '(0))"], @"(0)");
     XCTAssertEqualObjects([jsl rep:@"(nth-tail 2 '(0 1 2 3 4))"], @"(2 3 4)");
     XCTAssertThrows([jsl rep:@"(nth-tail 5 '(0 1 2))"]);
+    // take
+    XCTAssertEqualObjects([jsl rep:@"(take 2 '(0 1 2 3))"], @"(0 1)");
+    XCTAssertEqualObjects([jsl rep:@"(take 0 '(0 1 2 3))"], @"()");
+    XCTAssertThrows([jsl rep:@"(take -1 '(0))"]);
+    XCTAssertThrows([jsl rep:@"(take 2 '(0))"]);
+    XCTAssertThrows([jsl rep:@"(take 2 nil)"]);
+    XCTAssertThrows([jsl rep:@"(take 2 \"\"))"]);
 }
 
 - (void)testVectorCoreFunctions {
@@ -1249,6 +1256,13 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(nth-tail 0 [0])"], @"[0]");
     XCTAssertEqualObjects([jsl rep:@"(nth-tail 2 [0 1 2 3 4])"], @"[2 3 4]");
     XCTAssertThrows([jsl rep:@"(nth-tail 5 [0 1 2])"]);
+    // take
+    XCTAssertEqualObjects([jsl rep:@"(take 2 '[0 1 2 3])"], @"[0 1]");
+    XCTAssertEqualObjects([jsl rep:@"(take 0 '[0 1 2 3])"], @"[]");
+    XCTAssertThrows([jsl rep:@"(take -1 '[0])"]);
+    XCTAssertThrows([jsl rep:@"(take 2 '[0])"]);
+    XCTAssertThrows([jsl rep:@"(take 2 nil)"]);
+    XCTAssertThrows([jsl rep:@"(take 2 \"\"))"]);
 }
 
 - (void)testKeyword {
@@ -2120,6 +2134,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
+
 }
 
 - (void)notestPerformanceJSListDropFirst {

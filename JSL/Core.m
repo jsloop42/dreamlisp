@@ -754,6 +754,23 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:flatten argCount:1 name:@"flatten/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"flatten" moduleName:[Const coreModuleName]]];
+
+    id<JSDataProtocol>(^take)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:2];
+        id<JSDataProtocol> first = [xs first];
+        id<JSDataProtocol> second = [xs second];
+        JSNumber *num = [JSNumber dataToNumber:first position:1 fnName:@"take/2"];
+        NSMutableArray *list = [[JSVector dataToList:second position:2 fnName:@"take/2"] value];
+        NSUInteger n = [num integerValue];
+        [TypeUtils checkIndexBounds:list index:n];
+        NSMutableArray *res = [[list subarrayWithRange:NSMakeRange(0, n)] mutableCopy];
+        if ([JSList isList:second]) {
+            return [[JSList alloc] initWithArray:res];
+        }
+        return [[JSVector alloc] initWithArray:res];
+    };
+    fn = [[JSFunction alloc] initWithFn:take argCount:2 name:@"take/2"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"take" moduleName:[Const coreModuleName]]];
 }
 
 - (NSMutableArray *)filterArray:(NSMutableArray *)array withPredicate:(JSFunction *)predicate {
