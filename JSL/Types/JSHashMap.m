@@ -151,6 +151,28 @@
     return [_table count];
 }
 
+- (NSInteger)sortValue {
+    return [self hash];
+}
+
+/** Returns an array containing sorted keys. */
+- (NSArray *)sortKeys:(NSInteger (*)(id, id, void *))sorter {
+    return [[_table allKeys] sortedArrayUsingFunction:sorter context:nil];
+}
+
+/** Returns an array containing sorted objects. */
+- (NSArray *)sortObjects:(NSInteger (*)(id, id, void *))sorter {
+    return [[_table allObjects] sortedArrayUsingFunction:sorter context:nil];
+}
+
+- (NSArray *)sortedKeysUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator {
+    return [[_table allKeys] sortedArrayUsingComparator:comparator];
+}
+
+- (NSArray *)sortedObjectsUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator {
+    return [[_table allObjects] sortedArrayUsingComparator:comparator];
+}
+
 - (BOOL)hasMeta {
     return _meta != nil;
 }

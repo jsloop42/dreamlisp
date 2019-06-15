@@ -70,6 +70,10 @@
     return _meta != nil;
 }
 
+- (NSInteger)sortValue {
+    return [self hash];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id elem = [[JSBool allocWithZone:zone] initWithBool:_flag];
     [elem setIsImported:_isImported];

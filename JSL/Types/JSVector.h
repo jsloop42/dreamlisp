@@ -23,6 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (JSList *)list;
 - (BOOL)isEqual:(JSVector *)vector;
 - (NSUInteger)hash;
+- (JSVector *)sort:(NSInteger (*)(id, id, void *))sorter;
+- (JSVector *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator;
 @end
 
 NS_ASSUME_NONNULL_END

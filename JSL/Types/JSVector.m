@@ -106,6 +106,16 @@
     return [[JSList alloc] initWithArray:_array];
 }
 
+/** Returns a new list which the reverse of the current list. */
+- (JSVector *)reverse {
+    return [[JSVector alloc] initWithArray:[_array reverse]];
+}
+
+/** Drops n elements. */
+- (JSVector *)drop:(NSInteger)n {
+    return [[JSVector alloc] initWithArray:[[self value] drop:n]];
+}
+
 - (BOOL)isEqual:(JSVector *)vector {
     NSUInteger len = [_array count];
     NSUInteger i = 0;
@@ -118,6 +128,18 @@
 
 - (NSUInteger)hash {
     return [_array count];
+}
+
+- (JSVector *)sort:(NSInteger (*)(id, id, void *))sorter {
+    return [[JSVector alloc] initWithArray:[_array sortedArrayUsingFunction:sorter context:nil]];
+}
+
+- (JSVector *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator {
+    return [[JSVector alloc] initWithArray:[_array sortedArrayUsingComparator:comparator]];
+}
+
+- (NSInteger)sortValue {
+    return [self hash];
 }
 
 - (BOOL)hasMeta {

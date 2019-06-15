@@ -336,6 +336,10 @@
     return [_moduleName hash] + [_name hash] + _arity + 2;  // Adding 2 to offset negative arity.
 }
 
+- (NSInteger)sortValue {
+    return [self hash];
+}
+
 - (BOOL)hasMeta {
     return _meta != nil;
 }

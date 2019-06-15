@@ -196,6 +196,10 @@
     return _meta != nil;
 }
 
+- (NSInteger)sortValue {
+    return _isDouble ? [_n doubleValue] : [_n integerValue];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id elem = [[JSNumber alloc] initWithNumber:_n];
     [elem setIsImported:_isImported];

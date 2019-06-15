@@ -378,7 +378,7 @@ static NSString *langVersion;
                     JSList *form = (JSList *)[self toDoForm:[xs drop:2]];
                     id<JSDataProtocol>(^fn)(NSMutableArray *) = ^id<JSDataProtocol>(NSMutableArray * arg) {
                         Env *fnEnv = [[Env alloc] initWithEnv:env binds:[(JSList *)[xs second] value] exprs:arg];
-                        return  [self eval:form withEnv:fnEnv];
+                        return [self eval:form withEnv:fnEnv];
                     };
                     return [[JSFunction alloc] initWithAst:form params:[(JSList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
                 } else if ([[sym value] isEqual:@"let"]) {

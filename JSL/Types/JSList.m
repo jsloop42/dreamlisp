@@ -183,6 +183,18 @@
     return [[JSList alloc] initWithArray:[[self value] drop:n]];
 }
 
+- (JSList *)sort:(NSInteger (*)(id, id, void *))sorter {
+    return [[JSList alloc] initWithArray:[_array sortedArrayUsingFunction:sorter context:nil]];
+}
+
+- (JSList *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator {
+    return [[JSList alloc] initWithArray:[_array sortedArrayUsingComparator:comparator]];
+}
+
+- (NSInteger)sortValue {
+    return [self hash];
+}
+
 - (BOOL)hasMeta {
     return _meta != nil;
 }

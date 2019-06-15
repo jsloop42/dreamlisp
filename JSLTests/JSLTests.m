@@ -2027,6 +2027,37 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(:value-type z-info)"], @"\"hash-map\"");
 }
 
+- (void)testSortInternal {
+    // JSList
+    JSNumber *n1 = [[JSNumber alloc] initWithInteger:-1];
+    JSNumber *n2 = [[JSNumber alloc] initWithInteger:7];
+    JSNumber *n3 = [[JSNumber alloc] initWithInteger:3];
+    JSNumber *n4 = [[JSNumber alloc] initWithInteger:2];
+    JSList *list = [[JSList alloc] initWithArray:[@[n1, n2, n3, n4] mutableCopy]];
+    JSList *sorted = [list sort:sortAscending];
+    XCTAssertEqualObjects([sorted first], n1);
+    sorted = [list sort:sortDescending];
+    XCTAssertEqualObjects([sorted first], n2);
+}
+
+- (void)testSort {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(sort :asc '(3 5 2 -1 8))"], @"(-1 2 3 5 8)");
+    XCTAssertEqualObjects([jsl rep:@"(sort :desc '(3 5 2 -1 8))"], @"(8 5 3 2 -1)");
+    XCTAssertEqualObjects([jsl rep:@"(sort :asc [3 5 2 -1 8])"], @"[-1 2 3 5 8]");
+    XCTAssertEqualObjects([jsl rep:@"(sort :desc [3 5 2 -1 8])"], @"[8 5 3 2 -1]");
+    XCTAssertEqualObjects([jsl rep:@"(sort :asc \"We are Legends\")"], @"\"  LWadeeeegnrs\"");
+    XCTAssertEqualObjects([jsl rep:@"(sort :desc [\"We\" \"are\" \"Legends\"])"], @"[\"Legends\" \"are\" \"We\"]");
+    XCTAssertEqualObjects([jsl rep:@"(sort [:value (fn (a b) (cond (= a b) 0 (> a b) 1 (< a b) -1))] {:x \"We\" :y \"are\" :z \"Legends\"})"],
+                          @"[\"Legends\" \"We\" \"are\"]");
+    XCTAssertEqualObjects([jsl rep:@"(sort (fn (a b) (cond (= a b) 0 (> a b) 1 (< a b) -1)) [\"We\" \"are\" \"Legends\"])"], @"[\"Legends\" \"We\" \"are\"]");
+    XCTAssertEqualObjects([jsl rep:@"(sort [:key :asc] {:z 2 :a 4 :p -5})"], @"[:a :p :z]");
+    XCTAssertEqualObjects([jsl rep:@"(sort [:key :desc] {:z 2 :a 4 :p -5})"], @"[:z :p :a]");
+    XCTAssertEqualObjects([jsl rep:@"(sort [:value :asc] {:z 2 :a 4 :p -5})"], @"[-5 2 4]");
+    XCTAssertEqualObjects([jsl rep:@"(sort [:value :desc] {:z 2 :a 4 :p -5})"], @"[4 2 -5]");
+    XCTAssertEqualObjects([jsl rep:@"(sort :asc [3 5 2 (atom -1) -1 8])"], @"[(atom -1) -1 2 3 5 8]");
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
 }

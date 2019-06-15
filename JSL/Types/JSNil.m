@@ -54,6 +54,10 @@
     return 0;
 }
 
+- (NSInteger)sortValue {
+    return [self hash];
+}
+
 - (BOOL)hasMeta {
     return _meta != nil;
 }

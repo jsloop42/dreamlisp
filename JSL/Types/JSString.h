@@ -29,6 +29,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSUInteger)count;
 - (BOOL)isEqual:(JSString *)string;
 - (NSUInteger)hash;
+- (JSString *)sort:(NSInteger (*)(id, id, void *))sorter;
+- (JSString *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator;
+- (JSString *)joined:(NSArray *)arr with:(NSString *)separator;
 @end
 
 NS_ASSUME_NONNULL_END

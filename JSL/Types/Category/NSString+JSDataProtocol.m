@@ -34,4 +34,8 @@
     return [self stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 }
 
+- (NSInteger)sortValue {
+    return [self hash];
+}
+
 @end

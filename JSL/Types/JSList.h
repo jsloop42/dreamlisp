@@ -41,6 +41,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSUInteger)hash;
 - (JSList *)reverse;
 - (JSList *)drop:(NSInteger)n;
+- (JSList *)sort:(NSInteger (*)(id, id, void *))sorter;
+- (JSList *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator;
 @end
 
 NS_ASSUME_NONNULL_END

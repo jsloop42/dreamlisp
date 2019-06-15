@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)isNotEmpty;
 - (NSUInteger)count;
 - (NSString *)trim;
+- (NSInteger)sortValue;
 @end
 
 NS_ASSUME_NONNULL_END

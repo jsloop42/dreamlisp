@@ -132,6 +132,41 @@
     return [_string hash];
 }
 
+- (NSInteger)sortValue {
+    return [self hash];
+}
+
+- (JSString *)sort:(NSInteger (*)(id, id, void *))sorter {
+    NSMutableArray *arr = [NSMutableArray new];
+    NSUInteger i = 0;
+    NSUInteger len = [_string count];
+    for (i = 0; i < len; i++) {
+        [arr addObject:[_string substringWithRange:NSMakeRange(i, 1)]];
+    }
+    return [[JSString alloc] initWithString:[[arr sortedArrayUsingFunction:sorter context:nil] componentsJoinedByString:@""]];
+}
+
+- (JSString *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator {
+    NSMutableArray *arr = [NSMutableArray new];
+    NSUInteger i = 0;
+    NSUInteger len = [_string count];
+    for (i = 0; i < len; i++) {
+        [arr addObject:[[JSString alloc] initWithString:[_string substringWithRange:NSMakeRange(i, 1)]]];
+    }
+    return [self joined:[arr sortedArrayUsingComparator:comparator] with:@""];
+}
+
+/** Returns the result of concatenating the strings in the given array with the separator. */
+- (JSString *)joined:(NSArray<JSString *> *)arr with:(NSString *)separator {
+    NSMutableString *res = [NSMutableString new];
+    NSUInteger i = 0;
+    NSUInteger len = [arr count];
+    for (i = 0; i < len; i++) {
+        [res appendFormat:@"%@%@", [(JSString *)arr[i] value], separator];
+    }
+    return [[JSString alloc] initWithString:res];
+}
+
 - (BOOL)hasMeta {
     return _meta != nil;
 }

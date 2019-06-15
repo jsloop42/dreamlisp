@@ -548,21 +548,14 @@ double dmod(double a, double n) {
         id<JSDataProtocol> first = [xs first];
         id<JSDataProtocol> second = [xs second];
         JSNumber *num = [JSNumber dataToNumber:first position:1 fnName:@"drop/2"];
-        JSList *list = nil;
-        BOOL isVector = NO;
+        NSInteger n = [num integerValue];
         if ([JSList isList:second]) {
-            list = (JSList *)second;
+            return [(JSList *)second drop:n];
         } else if ([JSVector isVector:second]) {
-            isVector = YES;
-            list = (JSList *)second;
-        } else {
-            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"drop/2", @"'list' or 'vector'", 2, [second dataTypeName]] throw];
+            return [(JSVector *)second drop:n];
         }
-        list = [list drop:[num integerValue]];
-        if (isVector) {
-            return [[JSVector alloc] initWithArray:[list value]];
-        }
-        return list;
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"drop/2", @"'list' or 'vector'", 2, [second dataTypeName]] throw];
+        return nil;
     };
     fn = [[JSFunction alloc] initWithFn:drop argCount:2 name:@"drop/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"drop" moduleName:[Const coreModuleName]]];
@@ -574,13 +567,90 @@ double dmod(double a, double n) {
         if ([JSList isList:first]) {
             return [(JSList *)first reverse];
         } else if ([JSVector isVector:first]) {
-            return [[JSVector alloc] initWithArray:[[(JSVector *)first value] reverse]];
+            return [(JSVector *)first reverse];
         }
         [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"reverse/1", @"'list' or 'vector'", 1, [first dataTypeName]] throw];
         return nil;
     };
     fn = [[JSFunction alloc] initWithFn:reverse argCount:1 name:@"reverse/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"reverse" moduleName:[Const coreModuleName]]];
+
+    /**
+     Returns the collection sorted by the given criteria. The first argument depends on the data structure provided. It takes a keyword @c :asc, @c :desc for
+     @c list, @vector and @string elements. For @c hash-map, it takes these in a @c vector with first element preferably the sort indicator, @c :key or @c
+     value. The first argument can also take a comparison function which returns an integer value, in case of the former data types. For @c hash-map, the
+     function is passed as the second element in the @c vector.
+
+     (sort :asc [3 5 2 4])  ; [2 3 4 5]
+     (sort :desc '(3 5 2 4))  ; (5 4 3 2)
+     (sort :asc "Magic")  ; "Macgi"
+     (sort [:key :asc] {:z 2 :a 4 :p -5})  ; [:a :p :z]
+     (sort [:value :desc] {:z 2 :a 4 :p -5})  ; [4 2 -5]
+     (sort (fn (a b) (cond (= a b) 0 (> a b) 1 (< a b) -1)) ["We" "are" "Legends"])  ; ["Legends" "We" "are"]
+     (sort [:value (fn (a b) (cond (= a b) 0 (> a b) 1 (< a b) -1))] {:x "We" :y "are" :z "Legends"})  ; ["Legends" "We" "are"]
+     */
+    id<JSDataProtocol>(^sort)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:2 predicate:ArityPredicateLessThanOrEq];
+        id<JSDataProtocol> first = [xs first];
+        id<JSDataProtocol> second = [xs second];
+        NSInteger (*sorter)(id obj1, id obj2, void * context) = sortAscending;
+        JSFunction __block *fn = nil;
+        NSComparisonResult (^comparator)(id obj1, id obj2) = ^NSComparisonResult(id obj1, id obj2) {
+            NSMutableArray *arr = [@[obj1, obj2] mutableCopy];
+            return (NSComparisonResult)[(JSNumber *)[fn apply:arr] integerValue];
+        };
+        if ([JSKeyword isKeyword:first]) {  // (sort :asc [1 2])
+            NSString *kwd = [(JSKeyword *)first value];
+            if ([kwd isEqual:[Const ascendingKeyword]]) {
+                sorter = sortAscending;
+            } else if ([kwd isEqual:[Const descendingKeyword]]) {
+                sorter = sortDescending;
+            }
+            if ([JSList isList:second]) {
+                return [(JSList *)second sort:sorter];
+            } else if ([JSVector isVector:second]) {
+                return [(JSVector *)second sort:sorter];
+            } else if ([JSString isString:second]) {
+                return [(JSString *)second sort:sorter];
+            }
+        } else if ([JSVector isVector:first]) {  // (sort [:key :asc] {:x 2 :a 4})
+            // hash map sorter
+            JSHashMap *hm = [JSHashMap dataToHashMap:second position:2 fnName:@"sort/2"];
+            BOOL __block isAsc = NO;
+            BOOL __block isKey = NO;
+            [[(JSVector *)first value] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if ([JSKeyword isKeyword:obj]) {
+                    NSString *kwd = [(JSKeyword *)obj value];
+                    if ([kwd isEqual:[Const ascendingKeyword]]) {
+                        isAsc = YES;
+                    } else if ([kwd isEqual:[Const keyKeyword]]) {
+                        isKey = YES;
+                    }
+                } else if ([JSFunction isFunction:obj]) {
+                    fn = (JSFunction *)obj;
+                }
+            }];
+            if (isKey) {
+                if (fn) return [[JSVector alloc] initWithArray:[hm sortedKeysUsingComparator:comparator]];
+                return [[JSVector alloc] initWithArray:[hm sortKeys: isAsc ? sortAscending : sortDescending]];
+            }
+            if (fn) return [[JSVector alloc] initWithArray:[hm sortedObjectsUsingComparator:comparator]];
+            return [[JSVector alloc] initWithArray:[hm sortObjects: isAsc ? sortAscending : sortDescending]];
+        } else if ([JSFunction isFunction:first]) {  // (sort (fn (a b) (..)) [4 2 5])
+            fn = (JSFunction *)first;
+            if ([JSList isList:second]) {
+                return [(JSList *)second sortedUsingComparator:comparator];
+            } else if ([JSVector isVector:second]) {
+                return [(JSVector *)second sortedUsingComparator:comparator];
+            } else if ([JSString isString:second]) {
+                return [(JSString *)second sortedUsingComparator:comparator];
+            }
+        }
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"sort/2", @"'list' or 'vector' or 'hash-map'", 2, [second dataTypeName]] throw];
+        return nil;
+    };
+    fn = [[JSFunction alloc] initWithFn:sort argCount:2 name:@"sort/2"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"sort" moduleName:[Const coreModuleName]]];
 }
 
 - (NSString *)nameFromObject:(id<JSDataProtocol>)obj {

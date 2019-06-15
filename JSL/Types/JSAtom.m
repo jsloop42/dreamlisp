@@ -86,6 +86,10 @@
     return _meta != nil;
 }
 
+- (NSInteger)sortValue {
+    return [_data sortValue];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id elem = [[JSAtom alloc] initWithData:_data];
     [elem setIsImported:_isImported];

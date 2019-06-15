@@ -19,6 +19,10 @@ static NSString *_imports;
 static NSString *_internal;
 static NSString *_name;
 static NSString *_description;
+static NSString *_ascendingKeyword;
+static NSString *_descendingKeyword;
+static NSString *_keyKeyword;
+static NSString *_valueKeyword;
 
 @implementation Const
 
@@ -35,6 +39,10 @@ static NSString *_description;
         _internal = @"internal";
         _name = @"name";
         _description = @"description";
+        _ascendingKeyword = @":asc";
+        _descendingKeyword = @":desc";
+        _keyKeyword = @":key";
+        _valueKeyword = @":value";
     }
 }
 
@@ -76,6 +84,22 @@ static NSString *_description;
 
 + (NSString *)description {
     return _description;
+}
+
++ (NSString *)ascendingKeyword {
+    return _ascendingKeyword;
+}
+
++ (NSString *)descendingKeyword {
+    return _descendingKeyword;
+}
+
++ (NSString *)keyKeyword {
+    return _keyKeyword;
+}
+
++ (NSString *)valueKeyword {
+    return _valueKeyword;
 }
 
 @end

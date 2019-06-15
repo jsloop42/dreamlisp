@@ -117,6 +117,10 @@
     return [_string hash];
 }
 
+- (NSInteger)sortValue {
+    return [self hash];
+}
+
 - (BOOL)hasMeta {
     return _meta != nil;
 }

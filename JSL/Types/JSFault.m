@@ -78,6 +78,10 @@
     return self;
 }
 
+- (NSInteger)sortValue {
+    return [self hash];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     JSFault *fault = [JSFault new];
     [fault setValue:_value];

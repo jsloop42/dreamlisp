@@ -24,6 +24,10 @@ extern NSArray * keywords;
 + (NSString *)internal;
 + (NSString *)name;
 + (NSString *)description;
++ (NSString *)ascendingKeyword;
++ (NSString *)descendingKeyword;
++ (NSString *)keyKeyword;
++ (NSString *)valueKeyword;
 @end
 
 // Error constants

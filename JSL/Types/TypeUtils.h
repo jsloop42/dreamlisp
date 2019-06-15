@@ -34,4 +34,7 @@ typedef NS_ENUM(NSUInteger, ArityPredicate) {
 + (void)checkArity:(NSMutableArray *)xs arity:(NSUInteger)arity predicate:(enum ArityPredicate)predicate;
 @end
 
+extern NSInteger sortAscending(id obj1, id obj2, void *context);
+extern NSInteger sortDescending(id obj1, id obj2, void *context);
+
 NS_ASSUME_NONNULL_END

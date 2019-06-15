@@ -11,6 +11,7 @@
 #import "JSError.h"
 #import "Logger.h"
 #import "Const.h"
+#import "TypeUtils.h"
 #import "NSMapTable+JSHashMap.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -31,6 +32,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)containsKey:(id)key;
 - (BOOL)isEqual:(id<JSDataProtocol>)hashmap;
 - (NSUInteger)hash;
+- (NSArray *)sortKeys:(NSInteger (*)(id, id, void *))sorter;
+- (NSArray *)sortObjects:(NSInteger (*)(id, id, void *))sorter;
+- (NSArray *)sortedKeysUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator;
+- (NSArray *)sortedObjectsUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -170,6 +170,20 @@
     return _meta != nil;
 }
 
+- (BOOL)isEqual:(id)object {
+    if (![JSFunction isFunction:object]) return NO;
+    JSFunction *fn = (JSFunction *)object;
+    return [_name isEqual:[fn name]] && _argsCount == [fn argsCount] && [_ast isEqual:[fn ast]] && _isMacro == [fn isMacro];
+}
+
+- (NSUInteger)hash {
+    return [_name hash] + [_params hash] + _isMacro ? 1 : 0;
+}
+
+- (NSInteger)sortValue {
+    return [self hash];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     return [[JSFunction alloc] initWithFunction:self];
 }
