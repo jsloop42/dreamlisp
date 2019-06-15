@@ -37,6 +37,10 @@
   "Evaluates the first expression and if `false`, evaluates the body."
   `(if (not ~x) (do ~@form)))
 
+(defmacro not= (& form) 
+  "Negates the result of applying `=` on the given form."
+  `(not (= ~@form)))
+
 (defun exit ()
   "Exits the REPL"
   (println "Bye")

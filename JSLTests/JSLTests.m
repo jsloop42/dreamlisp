@@ -1075,6 +1075,18 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(= {1 2} {1 2} {1 2})"], @"true");
 }
 
+- (void)testNotEqual {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(not= [1] [1] [1])"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(not= 1.5 1.5 1.5)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(not= [])"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(not= (quote abc) (quote abc))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(not= (quote abc) (quote def))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(not= [1] [3])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(not= \"abc\" \"def\")"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(not= {:a 1} {:a 2})"], @"true");
+}
+
 - (void)testConditional {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(if (> (count (list 1 2 3)) 3) \"yes\" \"no\")"], @"\"no\"");
