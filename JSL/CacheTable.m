@@ -42,11 +42,11 @@
     _mruSize = 64;
 }
 
-- (id _Nullable)objectForKey:(id<JSDataProtocol>)key {
+- (id _Nullable)objectForKey:(id)key {
     return [_table objectForKey:key];
 }
 
-- (void)setObject:(id)object forKey:(id<JSDataProtocol>)key {
+- (void)setObject:(id)object forKey:(id)key {
     if ([_table count] == _mruSize) {
         [_table removeObjectForKey:[_mru drop]];
     }

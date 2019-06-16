@@ -19,8 +19,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) NSUInteger mruSize;
 - (instancetype)init;
 - (instancetype)initWithSize:(NSUInteger)size;
-- (id _Nullable)objectForKey:(id<JSDataProtocol>)key;
-- (void)setObject:(id)object forKey:(id<JSDataProtocol>)key;
+- (id _Nullable)objectForKey:(id)key;
+- (void)setObject:(id)object forKey:(id)key;
 - (void)clear;
 - (NSUInteger)count;
 - (NSArray *)allKeys;
