@@ -199,11 +199,11 @@ static NSMapTable<NSString *, Env *> *_modules;
     return object;
 }
 
-- (id<JSDataProtocol>)objectForKey:(JSSymbol *)key {
+- (id<JSDataProtocol> _Nullable)objectForKey:(JSSymbol *)key {
     return [self objectForKey:key isThrow:YES];
 }
 
-- (id<JSDataProtocol>)objectForKey:(JSSymbol *)key isThrow:(BOOL)isThrow {
+- (id<JSDataProtocol> _Nullable)objectForKey:(JSSymbol *)key isThrow:(BOOL)isThrow {
     id<JSDataProtocol> elem = [self resolveFault:[self objectForSymbol:key isThrow:isThrow] forKey:key inEnv:self];
     if (!elem && isThrow) {
         if ([key isQualified]) [key setModuleName:[key initialModuleName]];

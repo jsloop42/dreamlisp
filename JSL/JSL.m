@@ -624,7 +624,10 @@ static NSString *langVersion;
 
 - (void)changeModuleTo:(NSString *)moduleName {
     Env *env = [Env forModuleName:moduleName];
-    if (!env) [[[JSError alloc] initWithFormat:ModuleNotFound, moduleName] throw];
+    if (!env) {
+        [[[JSError alloc] initWithFormat:ModuleNotFound, moduleName] throw];
+        return;
+    }
     [self setEnv:env];
     [State setCurrentModuleName:moduleName];
     [[self reader] setModuleName:moduleName];

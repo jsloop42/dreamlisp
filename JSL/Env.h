@@ -45,8 +45,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key;
 - (void)updateImportedObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key;
 - (void)updateExportedObject:(id<JSDataProtocol>)obj forKey:(JSSymbol *)key;
-- (id<JSDataProtocol>)objectForKey:(JSSymbol *)key;
-- (id<JSDataProtocol>)objectForKey:(JSSymbol *)key isThrow:(BOOL)isThrow;
+- (id<JSDataProtocol> _Nullable)objectForKey:(JSSymbol *)key;
+- (id<JSDataProtocol> _Nullable)objectForKey:(JSSymbol *)key isThrow:(BOOL)isThrow;
 - (void)setModuleName:(NSString *)name;
 - (NSString *)moduleName;
 - (NSArray *)exportedFunctions;
