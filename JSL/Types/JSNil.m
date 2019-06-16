@@ -46,8 +46,8 @@
     return self;
 }
 
-- (BOOL)isEqual:(JSNil *)object {
-    return [object isKindOfClass:[self class]];
+- (BOOL)isEqual:(id)object {
+    return [JSNil isNil:object];
 }
 
 - (NSUInteger)hash {

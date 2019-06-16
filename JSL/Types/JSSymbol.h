@@ -59,8 +59,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)copyMeta:(id<JSDataProtocol>)object;
 - (void)copyProperties:(JSSymbol *)symbol;
 - (BOOL)isEqualToName:(NSString *)name;
-- (BOOL)isEqual:(id)sym;
-- (NSUInteger)hash;
 @end
 
 NS_ASSUME_NONNULL_END

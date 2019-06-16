@@ -33,8 +33,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSInteger)integerValue;
 - (BOOL)isDouble;
 - (NSString *)string;
-- (BOOL)isEqual:(JSNumber *)num;
-- (NSUInteger)hash;
 - (NSString *)dataTypeName;
 @end
 

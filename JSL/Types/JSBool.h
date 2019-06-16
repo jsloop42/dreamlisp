@@ -16,8 +16,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithBool:(BOOL)flag;
 - (instancetype)initWithJSBool:(JSBool *)object;
 - (BOOL)value;
-- (BOOL)isEqual:(JSBool *)boolean;
-- (NSUInteger)hash;
 @end
 
 NS_ASSUME_NONNULL_END

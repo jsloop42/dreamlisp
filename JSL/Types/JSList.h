@@ -37,8 +37,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSMutableArray *)map:(id (^)(id arg))block;
 - (void)enumerateConcurrent:(void (^)(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop))block;
 - (BOOL)isEmpty;
-- (BOOL)isEqual:(JSList *)list;
-- (NSUInteger)hash;
 - (JSList *)reverse;
 - (JSList *)drop:(NSInteger)n;
 - (JSList *)sort:(NSInteger (*)(id, id, void *))sorter;

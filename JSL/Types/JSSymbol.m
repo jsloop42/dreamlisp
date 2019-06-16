@@ -327,9 +327,10 @@
     return [_name isEqual:name];
 }
 
-- (BOOL)isEqual:(id)symbol {
-    if (![JSSymbol isSymbol:symbol]) return NO;
-    return [_name isEqual:[symbol name]] && _arity == [symbol arity] && [_moduleName isEqual:[symbol moduleName]];
+- (BOOL)isEqual:(id)object {
+    if (![JSSymbol isSymbol:object]) return NO;
+    JSSymbol *sym = (JSSymbol *)object;
+    return [_name isEqual:[sym name]] && _arity == [sym arity] && [_moduleName isEqual:[sym moduleName]];
 }
 
 - (NSUInteger)hash {

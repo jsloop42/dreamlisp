@@ -74,8 +74,9 @@
     return self;
 }
 
-- (BOOL)isEqual:(JSAtom *)atom {
-    return [[atom value] isEqual:_data];
+- (BOOL)isEqual:(id)object {
+    if (![JSAtom isAtom:object]) return NO;
+    return [[(JSAtom *)object value] isEqual:_data];
 }
 
 - (NSUInteger)hash {

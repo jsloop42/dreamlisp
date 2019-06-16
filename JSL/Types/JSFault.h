@@ -15,8 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isFault:(id)object;
 - (instancetype)init;
 - (instancetype)initWithModule:(NSString *)moduleName isImportFault:(BOOL)isImportFault;
-- (NSUInteger)hash;
-- (BOOL)isEqual:(id)object;
 @end
 
 NS_ASSUME_NONNULL_END

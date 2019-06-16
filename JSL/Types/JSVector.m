@@ -116,7 +116,9 @@
     return [[JSVector alloc] initWithArray:[[self value] drop:n]];
 }
 
-- (BOOL)isEqual:(JSVector *)vector {
+- (BOOL)isEqual:(id)object {
+    if (![JSList isKindOfList:object]) return NO;
+    JSVector *vector = (JSVector *)object;
     NSUInteger len = [_array count];
     NSUInteger i = 0;
     if (len != [vector count]) return NO;

@@ -31,12 +31,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta string:(JSString *)string;
 - (BOOL)isEmpty;
 - (NSUInteger)count;
-- (BOOL)isEqual:(JSString *)string;
-- (NSUInteger)hash;
 - (JSString *)sort:(NSInteger (*)(id, id, void *))sorter;
 - (JSString *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator;
 - (JSString *)joined:(NSArray *)arr with:(NSString *)separator;
-// NSMutableString methods
+#pragma mark - MutableString methods
+- (void)append:(JSString *)string;
 - (void)appendString:(NSString *)string;
 - (void)appendStringWithFormat:(NSString *)format, ...;
 @end

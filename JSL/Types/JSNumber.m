@@ -185,9 +185,11 @@
     return [_n stringValue];
 }
 
-- (BOOL)isEqual:(JSNumber *)number {
-    return [_n isEqualToNumber:[number value]];
+- (BOOL)isEqual:(id)object {
+    if (![JSNumber isNumber:object]) return NO;
+    return [_n isEqualToNumber:[(JSNumber *)object value]];
 }
+
 - (NSUInteger)hash {
     return [_n hash];
 }

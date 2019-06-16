@@ -20,8 +20,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithData:(id<JSDataProtocol>)data;
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta atom:(JSAtom *)atom;
-- (BOOL)isEqual:(JSAtom *)atom;
-- (NSUInteger)hash;
 @end
 
 NS_ASSUME_NONNULL_END

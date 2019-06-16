@@ -30,8 +30,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSArray *)allKeys;
 - (NSArray *)allObjects;
 - (BOOL)containsKey:(id)key;
-- (BOOL)isEqual:(id<JSDataProtocol>)hashmap;
-- (NSUInteger)hash;
 - (NSArray *)sortKeys:(NSInteger (*)(id, id, void *))sorter;
 - (NSArray *)sortObjects:(NSInteger (*)(id, id, void *))sorter;
 - (NSArray *)sortedKeysUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator;

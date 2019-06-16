@@ -132,7 +132,9 @@
     return [_table containsKey:key];
 }
 
-- (BOOL)isEqual:(JSHashMap *)hashmap {
+- (BOOL)isEqual:(id)object {
+    if (![JSHashMap isHashMap:object]) return NO;
+    JSHashMap *hashmap = (JSHashMap *)object;
     if ([self count] != [hashmap count]) return NO;
     NSObject<JSDataProtocol> *lval = nil;
     id<JSDataProtocol> rval = nil;

@@ -22,8 +22,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)string;
 - (NSString *)encoded;
 - (NSString *)decoded;
-- (BOOL)isEqual:(JSKeyword *)keyword;
-- (NSUInteger)hash;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -54,8 +54,9 @@
     return self;
 }
 
-- (BOOL)isEqual:(JSBool *)boolean {
-    return _flag == [boolean value];
+- (BOOL)isEqual:(id)object {
+    if (![JSBool isBool:object]) return NO;
+    return _flag == [(JSBool *)object value];
 }
 
 - (NSUInteger)hash {

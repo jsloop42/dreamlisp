@@ -109,8 +109,9 @@
     return _string;
 }
 
-- (BOOL)isEqual:(JSKeyword *)keyword {
-    return [_string isEqualToString:[keyword value]];
+- (BOOL)isEqual:(id)object {
+    if (![JSKeyword isKeyword:object]) return NO;
+    return [_string isEqualToString:[(JSKeyword *)object value]];
 }
 
 - (NSUInteger)hash {

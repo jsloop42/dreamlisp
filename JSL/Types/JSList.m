@@ -155,16 +155,14 @@
     return [_array count] == 0;
 }
 
-- (BOOL)isEqual:(JSList *)list {
+- (BOOL)isEqual:(id)object {
+    if (![JSList isKindOfList:object]) return NO;
+    JSList *list = (JSList *)object;
     NSUInteger len = [_array count];
     NSUInteger i = 0;
-    if (len != [list count]) {
-        return NO;
-    }
+    if (len != [list count]) return NO;
     for (i = 0; i < len; i++) {
-        if (![_array[i] isEqual:[list nth:i]]) {
-            return NO;
-        }
+        if (![_array[i] isEqual:[list nth:i]]) return NO;
     }
     return YES;
 }

@@ -19,6 +19,7 @@
 }
 
 @synthesize meta = _meta;
+@synthesize value;
 @synthesize isMutable = _isMutable;
 @synthesize isImported = _isImported;
 @synthesize moduleName = _moduleName;
@@ -158,7 +159,9 @@
     return _mstring;
 }
 
-- (BOOL)isEqual:(JSString *)string {
+- (BOOL)isEqual:(id)object {
+    if (![JSString isString:object]) return NO;
+    JSString *string = (JSString *)object;
     return _string ? [_string isEqualToString:[string value]] : [_mstring isEqualToString:[string mutableValue]];
 }
 
@@ -202,6 +205,11 @@
 }
 
 #pragma mark - Mutable
+
+- (void)append:(JSString *)string {
+    if (!_isMutable) [[[JSError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
+    [_mstring appendString:[string mutableValue]];
+}
 
 - (void)appendString:(NSString *)string {
     if (!_isMutable) [[[JSError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
