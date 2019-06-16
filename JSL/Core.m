@@ -404,7 +404,7 @@ double dmod(double a, double n) {
 
     #pragma mark concat
     /**
-     Takes two lists or vectors, combines them and returns a list
+     Takes two lists or vectors, combines them and returns a list.
 
      (concat '(-2 -1 0) '(1 2 3 4)) ; (-2 -1 0 1 2 3 4)
      (concat ["a"] ["b"]) ; ("a" "b")
@@ -544,15 +544,15 @@ double dmod(double a, double n) {
     fn = [[JSFunction alloc] initWithFn:conj argCount:-1 name:@"conj/n"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"conj" moduleName:[Const coreModuleName]]];
 
-    #pragma mark sequential?
+    #pragma mark seq?
     /** Checks if the given element is iteratable, which is a list or a vector. */
-    id<JSDataProtocol>(^sequentialp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+    id<JSDataProtocol>(^seqp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
         return [[JSBool alloc] initWithBool:([JSList isList:first] || [JSVector isVector:first])];
     };
-    fn = [[JSFunction alloc] initWithFn:sequentialp argCount:1 name:@"sequential?/1"];
-    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"sequential?" moduleName:[Const coreModuleName]]];
+    fn = [[JSFunction alloc] initWithFn:seqp argCount:1 name:@"seq?/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"seq?" moduleName:[Const coreModuleName]]];
 
     #pragma mark seq
     /**

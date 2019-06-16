@@ -1723,11 +1723,11 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(keyword :abc)"], @":abc");
     XCTAssertEqualObjects([jsl rep:@"(keyword \"abc\")"], @":abc");
     // sequential?
-    XCTAssertEqualObjects([jsl rep:@"(sequential? (list 1 2 3))"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"(sequential? [15])"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"(sequential? sequential?/1)"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(sequential? nil)"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(sequential? \"abc\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(seq? (list 1 2 3))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(seq? [15])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(seq? seq?/1)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(seq? nil)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(seq? \"abc\")"], @"false");
     // hash-map?
     XCTAssertEqualObjects([jsl rep:@"(hash-map? {})"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(hash-map? '())"], @"false");
