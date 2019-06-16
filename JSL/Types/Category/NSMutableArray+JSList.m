@@ -78,4 +78,13 @@
     return arr;
 }
 
+- (id _Nullable)drop {
+    id first = nil;
+    if ([self count] > 0) {
+        first = [self firstObject];
+        [self removeObjectAtIndex:0];
+    }
+    return first;
+}
+
 @end
