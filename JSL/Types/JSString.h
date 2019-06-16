@@ -15,6 +15,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSString : NSObject <JSDataProtocol>
+@property (nonatomic, readwrite) BOOL isMutable;
+@property (nonatomic, readwrite) NSMutableString *mutableValue;
 + (BOOL)isString:(id)object;
 + (BOOL)isString:(id)object withValue:(NSString *)name;
 + (JSString *)dataToString:(id<JSDataProtocol>)data fnName:(NSString *)fnName;
@@ -22,6 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)str;
 - (instancetype)initWithFormat:(NSString *)format, ...;
+- (instancetype)initWithMutableString;
+- (instancetype)initWithMutableString:(NSMutableString *)string;
 - (instancetype)initWithContentsOfFile:(NSString *)filePath;
 - (instancetype)initWithCString:(const char *)string;
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta string:(JSString *)string;
@@ -32,6 +36,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (JSString *)sort:(NSInteger (*)(id, id, void *))sorter;
 - (JSString *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator;
 - (JSString *)joined:(NSArray *)arr with:(NSString *)separator;
+// NSMutableString methods
+- (void)appendString:(NSString *)string;
+- (void)appendStringWithFormat:(NSString *)format, ...;
 @end
 
 NS_ASSUME_NONNULL_END

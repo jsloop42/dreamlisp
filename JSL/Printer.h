@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "Types.h"
 #import "Const.h"
+#import <objc/objc-runtime.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

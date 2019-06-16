@@ -848,6 +848,46 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:join argCount:2 name:@"join/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"join" moduleName:[Const coreModuleName]]];
+
+    #pragma mark zip
+    /**
+     Takes a list of sequence with equal length and returns a new collection containing sequence with first list containing first elements from each sequence,
+     second list containing second elements from each sequence and so on. If a sequence is a list the result is a list as well as the sequence, else a vector of
+     sequences.
+
+     (zip '(1 2) [3 4] [5 6])  ; ((1 3 5) [2 4 6])
+     (zip [1 2 3] [4 5 6])  ; [[1 4] [2 5] [3 6]]
+     (zip "abc" "xyz")  ; ["ax" "by" "cz"]
+     */
+    id<JSDataProtocol>(^zip)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        NSUInteger innerLen = [xs count];
+        NSUInteger i = 0;
+        NSUInteger j = 0;
+        id<JSDataProtocol> data = [xs first];
+        NSMutableArray *first = [Utils toArray:data];
+        //JSList *first = [JSVector dataToList:[xs first] fnName:@"zip/n"];
+        NSUInteger outerLen = [first count];
+        NSMutableArray *res = [NSMutableArray new];
+        JSString *str = nil;
+        JSVector *sub = nil;
+        BOOL isString = [JSString isString:data];
+        BOOL isList = [JSList isList:data];
+        NSMutableArray *elem = nil;
+        for (i = 0; i < outerLen; i++) { // xs: [[1 2 3] [4 5 6]] => [[1 4] [2 5] [3 6]]  => outerLen: 3, innerLen: 2
+            isString ? (str = [[JSString alloc] initWithMutableString]) : (sub = [JSVector new]);
+            for (j = 0; j < innerLen; j++) {
+                elem = [Utils toArray:xs[j]];
+                if (!isList) isList = [JSList isList:xs[j]];
+                if ([elem count] != outerLen) [[[JSError alloc] initWithFormat:ElementCountWithPositionError, outerLen, [elem count], j] throw];
+                isString ? [str appendString:[elem nth:i]] : [sub add:[elem nth:i]];
+            }
+            isString ? [res addObject:str] : isList ? [res addObject:[sub list]] : [res addObject:sub];
+        }
+        return isList ? [[JSList alloc] initWithArray:res] : [[JSVector alloc] initWithArray:res];
+    };
+    fn = [[JSFunction alloc] initWithFn:zip argCount:-1 name:@"zip/n"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"zip" moduleName:[Const coreModuleName]]];
+
 }
 
 - (NSMutableArray *)filterArray:(NSMutableArray *)array withPredicate:(JSFunction *)predicate {

@@ -75,7 +75,15 @@
     s1 = @"2";
     XCTAssertEqualObjects(s2, @"1");
     JSString *s3 = [[JSString alloc] initWithFormat:@"%d", 42];
+    XCTAssertFalse([s3 isMutable]);
     XCTAssertEqualObjects([s3 value], @"42");
+    // Mutable test
+    NSMutableString *str = [NSMutableString new];
+    [str appendString:@"abc"];
+    JSString *mstr = [[JSString alloc] initWithMutableString:str];
+    XCTAssertTrue([mstr isMutable]);
+    [mstr appendString:@"d"];
+    XCTAssertEqualObjects([mstr mutableValue], @"abcd");
 }
 
 - (void)testJSKeyword {
@@ -2158,9 +2166,16 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertThrows([jsl rep:@"(join 0 1)"]);
 }
 
+- (void)testZip {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(zip '(1 2) '(4 2) [7 8])"], @"((1 4 7) (2 2 8))");
+    XCTAssertEqualObjects([jsl rep:@"(zip \"abc\" \"xyz\")"], @"[\"ax\" \"by\" \"cz\"]");
+    XCTAssertEqualObjects([jsl rep:@"(zip [1 3] [2 0] [1 -1])"], @"[[1 2 1] [3 0 -1]]");
+    XCTAssertEqualObjects([jsl rep:@"(zip [1 2 3 4] [5 6 7 8])"], @"[[1 5] [2 6] [3 7] [4 8]]");
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-
 }
 
 - (void)notestPerformanceJSListDropFirst {

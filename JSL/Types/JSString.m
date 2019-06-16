@@ -10,14 +10,16 @@
 
 @implementation JSString {
     NSString *_string;
+    NSMutableString *_mstring;
     id<JSDataProtocol> _meta;
     NSInteger _position;
     BOOL _isImported;
     NSString *_moduleName;
+    BOOL _isMutable;
 }
 
 @synthesize meta = _meta;
-@synthesize value = _string;
+@synthesize isMutable = _isMutable;
 @synthesize isImported = _isImported;
 @synthesize moduleName = _moduleName;
 
@@ -55,6 +57,7 @@
 - (instancetype)initWithFormat:(NSString *)format, ... {
     self = [super init];
     if (self) {
+        [self bootstrap];
         va_list args;
         va_start(args, format);
         _string = [[NSString alloc] initWithFormat:format arguments:args];
@@ -67,7 +70,22 @@
 - (instancetype)initWithString:(NSString *)string {
     self = [super init];
     if (self) {
+        [self bootstrap];
         _string = string;
+    }
+    return self;
+}
+
+- (instancetype)initWithMutableString {
+    return [self initWithMutableString:[NSMutableString new]];
+}
+
+- (instancetype)initWithMutableString:(NSMutableString *)string {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+        _mstring = string;
+        _isMutable = YES;
     }
     return self;
 }
@@ -75,6 +93,7 @@
 - (instancetype)initWithContentsOfFile:(NSString *)filePath {
     self = [super init];
     if (self) {
+        [self bootstrap];
         NSError *err = nil;
         _string = [[NSString alloc] initWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:&err];
         if (!_string && err) [[[JSError alloc] initWithUserInfo:[err userInfo]] throw];
@@ -85,6 +104,7 @@
 - (instancetype)initWithCString:(const char *)string {
     self = [super init];
     if (self) {
+        [self bootstrap];
         _string = [[NSString alloc] initWithCString:string encoding:NSUTF8StringEncoding];
     }
     return self;
@@ -93,10 +113,16 @@
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta string:(JSString *)string {
     self = [super init];
     if (self) {
+        [self bootstrap];
         _string = [string value];
         _meta = meta;
     }
     return self;
+}
+
+- (void)bootstrap {
+    _isMutable = NO;
+    _isImported = NO;
 }
 
 - (NSString *)dataType {
@@ -124,12 +150,20 @@
     return [_string length];
 }
 
+- (NSString *)value {
+    return _string ? _string : _mstring;
+}
+
+- (NSMutableString *)mutableValue {
+    return _mstring;
+}
+
 - (BOOL)isEqual:(JSString *)string {
-    return [_string isEqualToString:[string value]];
+    return _string ? [_string isEqualToString:[string value]] : [_mstring isEqualToString:[string mutableValue]];
 }
 
 - (NSUInteger)hash {
-    return [_string hash];
+    return _string ? [_string hash] : [_mstring hash];
 }
 
 - (NSInteger)sortValue {
@@ -167,6 +201,21 @@
     return [[JSString alloc] initWithString:res];
 }
 
+#pragma mark - Mutable
+
+- (void)appendString:(NSString *)string {
+    if (!_isMutable) [[[JSError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
+    [_mstring appendString:string];
+}
+
+- (void)appendStringWithFormat:(NSString *)format, ... {
+    if (!_isMutable) [[[JSError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
+    va_list args;
+    va_start(args, format);
+    [_mstring appendFormat:format, args];
+    va_end(args);
+}
+
 - (BOOL)hasMeta {
     return _meta != nil;
 }
@@ -174,11 +223,17 @@
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id elem = [[JSString alloc] initWithString:_string];
     [elem setIsImported:_isImported];
+    [elem setIsMutable:NO];
+    [elem setMutableValue:_mutableValue];
     return elem;
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
-    return [self copyWithZone:zone];
+    id elem = [[JSString alloc] initWithString:_mstring];
+    [elem setIsImported:_isImported];
+    [elem setIsMutable:YES];
+    [elem setValue:_string];
+    return elem;
 }
 
 - (NSString *)description {

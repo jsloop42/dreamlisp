@@ -75,7 +75,7 @@
     } else if ([JSFault isFault:data]) {
         return [NSString stringWithFormat:@"#<fault %@>", (JSFault *)[data value]];
     }
-    [[[JSError alloc] initWithFormat:InvalidDataType, data] throw];
+    [[[JSError alloc] initWithFormat:InvalidDataType, [(id)data classForCoder], data] throw];
     return nil;
 }
 @end

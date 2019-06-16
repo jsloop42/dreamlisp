@@ -11,7 +11,7 @@
 @implementation NSString (JSDataProtocol)
 
 + (BOOL)isString:(id)object {
-    return [NSStringFromClass([object classForCoder]) isEqual:@"NSString"] ? YES : NO;
+    return [[object classForCoder] isEqual:@"NSString"];
 }
 
 - (NSString *)dataType {
