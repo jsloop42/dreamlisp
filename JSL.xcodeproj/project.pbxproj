@@ -84,6 +84,9 @@
 		9E9B6228225B9FC20060DA9A /* FileOps.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9B6227225B9FC20060DA9A /* FileOps.m */; };
 		9E9B6229225B9FC20060DA9A /* FileOps.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9B6227225B9FC20060DA9A /* FileOps.m */; };
 		9E9B622B225BAA280060DA9A /* libedit.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E9B622A225BAA270060DA9A /* libedit.tbd */; };
+		9ED5349022B67FCA004A2CB2 /* CacheTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ED5348F22B67FCA004A2CB2 /* CacheTable.m */; };
+		9ED5349122B67FCA004A2CB2 /* CacheTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ED5348F22B67FCA004A2CB2 /* CacheTable.m */; };
+		9ED5349322B6991A004A2CB2 /* CacheTableTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ED5349222B6991A004A2CB2 /* CacheTableTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -186,6 +189,9 @@
 		9E9B6227225B9FC20060DA9A /* FileOps.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileOps.m; sourceTree = "<group>"; };
 		9E9B622A225BAA270060DA9A /* libedit.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libedit.tbd; path = usr/lib/libedit.tbd; sourceTree = SDKROOT; };
 		9ED5348A22B54E91004A2CB2 /* JSLDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSLDelegate.h; sourceTree = "<group>"; };
+		9ED5348E22B67FCA004A2CB2 /* CacheTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CacheTable.h; sourceTree = "<group>"; };
+		9ED5348F22B67FCA004A2CB2 /* CacheTable.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CacheTable.m; sourceTree = "<group>"; };
+		9ED5349222B6991A004A2CB2 /* CacheTableTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CacheTableTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -279,6 +285,8 @@
 			children = (
 				9E70861722ACF1CB00ADD464 /* Libs */,
 				9E30554122612BA4001D4597 /* Types */,
+				9ED5348E22B67FCA004A2CB2 /* CacheTable.h */,
+				9ED5348F22B67FCA004A2CB2 /* CacheTable.m */,
 				9E281CEC225908480038A5AF /* Const.h */,
 				9E281CED225908480038A5AF /* Const.m */,
 				9E3A9D6322568D4B00348529 /* Core.h */,
@@ -319,6 +327,7 @@
 				9E281CFC225A60760038A5AF /* Makefile */,
 				9E281CFA225A60760038A5AF /* run_argv_test.sh */,
 				9E281CFB225A60760038A5AF /* runtest.py */,
+				9ED5349222B6991A004A2CB2 /* CacheTableTests.m */,
 				9E6F444A2257C00900777A24 /* JSLTests.h */,
 				9E3A9D5A22568B1300348529 /* JSLTests.m */,
 				9E3A9D5C22568B1300348529 /* Info.plist */,
@@ -453,6 +462,7 @@
 			files = (
 				9E30554C2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */,
 				9E33AAC5227578A700A6EB98 /* JSVector.m in Sources */,
+				9ED5349022B67FCA004A2CB2 /* CacheTable.m in Sources */,
 				9E33AAB52275775800A6EB98 /* JSString.m in Sources */,
 				9E38FC81227F343800405BE5 /* State.m in Sources */,
 				9E33AAD12275796300A6EB98 /* JSNil.m in Sources */,
@@ -494,6 +504,7 @@
 			files = (
 				9E30554D2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */,
 				9E33AAC6227578A700A6EB98 /* JSVector.m in Sources */,
+				9ED5349122B67FCA004A2CB2 /* CacheTable.m in Sources */,
 				9E33AAB62275775800A6EB98 /* JSString.m in Sources */,
 				9E38FC82227F343800405BE5 /* State.m in Sources */,
 				9E33AAD22275796300A6EB98 /* JSNil.m in Sources */,
@@ -510,6 +521,7 @@
 				9E30554022612AF1001D4597 /* NSMutableArray+JSList.m in Sources */,
 				9E3055552261A162001D4597 /* TypeUtils.m in Sources */,
 				9E3A9D7222568DB100348529 /* Printer.m in Sources */,
+				9ED5349322B6991A004A2CB2 /* CacheTableTests.m in Sources */,
 				9E30554922619F3F001D4597 /* NSNumber+JSDataProtocol.m in Sources */,
 				9E3055512261A10F001D4597 /* NSArray+JSDataProtocol.m in Sources */,
 				9E3A9D6622568D4B00348529 /* Core.m in Sources */,

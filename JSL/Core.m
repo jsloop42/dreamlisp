@@ -888,6 +888,36 @@ double dmod(double a, double n) {
     fn = [[JSFunction alloc] initWithFn:zip argCount:-1 name:@"zip/n"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"zip" moduleName:[Const coreModuleName]]];
 
+    #pragma mark zip-with
+    id<JSDataProtocol>(^zipWith)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        NSUInteger innerLen = [xs count] - 1;
+        NSUInteger i = 0;
+        NSUInteger j = 0;
+        JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"zip-with/n"];
+        id<JSDataProtocol> data = [xs second];
+        NSMutableArray *second = [Utils toArray:data];
+        NSUInteger outerLen = [second count];
+        NSMutableArray *acc = [NSMutableArray new];
+        NSMutableArray *res = [NSMutableArray new];
+        BOOL isList = [JSList isList:data];
+        NSMutableArray *elem = nil;
+        id<JSDataProtocol> ret = nil;
+        NSMutableArray *ast = [xs rest];
+        for (i = 0; i < outerLen; i++) { // xs: [[1 2 3] [4 5 6]] => [[1 4] [2 5] [3 6]]  => outerLen: 3, innerLen: 2
+            [res removeAllObjects];
+            for (j = 0; j < innerLen; j++) {
+                elem = [Utils toArray:ast[j] isNative:YES];
+                if (!isList) isList = [JSList isList:ast[j]];
+                if ([elem count] != outerLen) [[[JSError alloc] initWithFormat:ElementCountWithPositionError, outerLen, [elem count], j] throw];
+                [res addObject:[elem nth:i]];
+            }
+            ret = [fn apply:res];
+            [acc addObject:ret];
+        }
+        return [[JSVector alloc] initWithArray:acc];
+    };
+    fn = [[JSFunction alloc] initWithFn:zipWith argCount:-1 name:@"zip-with/n"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"zip-with" moduleName:[Const coreModuleName]]];
 }
 
 - (NSMutableArray *)filterArray:(NSMutableArray *)array withPredicate:(JSFunction *)predicate {

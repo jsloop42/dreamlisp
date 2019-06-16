@@ -2174,6 +2174,13 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(zip [1 2 3 4] [5 6 7 8])"], @"[[1 5] [2 6] [3 7] [4 8]]");
 }
 
+- (void)testZipWith {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(zip-with (fn (a b) (list a b)) [1 2] '(3 4))"], @"[(1 3) (2 4)]");
+    XCTAssertEqualObjects([jsl rep:@"(zip-with (fn (a b) (+ a b)) [1 2] '(3 4))"], @"[4 6]");
+    XCTAssertEqualObjects([jsl rep:@"(zip-with (fn (a b) (str a b)) \"abc\" \"xyz\")"], @"[\"ax\" \"by\" \"cz\"]");
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
 }
