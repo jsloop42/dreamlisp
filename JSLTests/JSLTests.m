@@ -1722,12 +1722,14 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(symbol \"abc\")"], @"*:abc");
     XCTAssertEqualObjects([jsl rep:@"(keyword :abc)"], @":abc");
     XCTAssertEqualObjects([jsl rep:@"(keyword \"abc\")"], @":abc");
-    // sequential?
+    // seq?
     XCTAssertEqualObjects([jsl rep:@"(seq? (list 1 2 3))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(seq? [15])"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(seq? seq?/1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(seq? nil)"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(seq? \"abc\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(seq? \"abc\")"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(seq? {:a 1 :b 2})"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(seq? 1)"], @"false");
     // hash-map?
     XCTAssertEqualObjects([jsl rep:@"(hash-map? {})"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(hash-map? '())"], @"false");
@@ -1767,6 +1769,17 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(zero? (+ 1 -1))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(zero? (* 1 0))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(zero? 1)"], @"false");
+    // coll?
+    XCTAssertEqualObjects([jsl rep:@"(coll? [])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(coll? [1 2])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(coll? '())"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(coll? '(1 2))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(coll? {})"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(coll? {:a 1})"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(coll? \"\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(coll? 1)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(coll? nil)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(coll? (atom 0))"], @"false");
 }
 
 - (void)predicateCallback:(NSString *)message withTag:(int)tag counter:(int)counter {
