@@ -2181,6 +2181,36 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(zip-with (fn (a b) (str a b)) \"abc\" \"xyz\")"], @"[\"ax\" \"by\" \"cz\"]");
 }
 
+- (void)testInto {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    // list
+    XCTAssertEqualObjects([jsl rep:@"(into '() nil)"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(into '() '(1 2 3))"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(into '(1 2) '(3 4))"], @"(1 2 3 4)");
+    XCTAssertEqualObjects([jsl rep:@"(into '(1 2) \"a\")"], @"(1 2 \"a\")");
+    XCTAssertEqualObjects([jsl rep:@"(into '(1 2) \"abc\")"], @"(1 2 \"abc\")");
+    XCTAssertEqualObjects([jsl rep:@"(into '() {:a 1})"], @"((:a 1))");
+    XCTAssertEqualObjects([jsl rep:@"(into '(1 2) {:a 1})"], @"(1 2 (:a 1))");
+    XCTAssertThrows([jsl rep:@"(into '(1 2) 1)"]);
+    // vector
+    XCTAssertEqualObjects([jsl rep:@"(into [] nil)"], @"[]");
+    XCTAssertEqualObjects([jsl rep:@"(into [] '(1 2 3))"], @"[1 2 3]");
+    XCTAssertEqualObjects([jsl rep:@"(into [1 2] '(3 4))"], @"[1 2 3 4]");
+    XCTAssertEqualObjects([jsl rep:@"(into [1 2] \"a\")"], @"[1 2 \"a\"]");
+    XCTAssertEqualObjects([jsl rep:@"(into [1 2] \"abc\")"], @"[1 2 \"abc\"]");
+    XCTAssertEqualObjects([jsl rep:@"(into [] {:a 1})"], @"[[:a 1]]");
+    XCTAssertEqualObjects([jsl rep:@"(into [1 2] {:a 1})"], @"[1 2 [:a 1]]");
+    XCTAssertThrows([jsl rep:@"(into [1 2] 1)"]);
+    // hash-map
+    XCTAssertEqualObjects([jsl rep:@"(into {} nil)"], @"{}");
+    XCTAssertEqualObjects([jsl rep:@"(into {} [:a 1])"], @"{:a 1}");
+    XCTAssertEqualObjects([jsl rep:@"(count (into {:a 1} [:b 2]))"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(into {} '(1 2))"], @"{1 2}");
+    XCTAssertEqualObjects([jsl rep:@"(into {} {:a 1})"], @"{:a 1}");
+    XCTAssertEqualObjects([jsl rep:@"(count (into {:a 1} {:b 2}))"], @"2");
+    XCTAssertThrows([jsl rep:@"(into {} 1)"]);
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
 }

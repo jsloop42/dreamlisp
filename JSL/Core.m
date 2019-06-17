@@ -918,6 +918,56 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:zipWith argCount:-1 name:@"zip-with/n"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"zip-with" moduleName:[Const coreModuleName]]];
+
+    #pragma mark into
+    id<JSDataProtocol>(^into)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:2];
+        id<JSDataProtocol> first = [xs first];
+        id<JSDataProtocol> second = [xs second];
+        if ([JSNil isNil:second]) return first;
+        id<JSDataProtocol> ret = nil;
+        if ([JSList isList:first]) {
+            JSList *list = (JSList *)first;
+            if ([JSList isKindOfList:second]) {
+                ret = [list addObjectsFrom:second];
+            } else if ([JSString isString:second]) {
+                ret = [list addObject:second];
+            } else if ([JSHashMap isHashMap:second]) {
+                ret = [list addObjectsFromHashMap:second];
+            } else {
+                [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"into/2", @"'sequence' or 'collection'", [second dataTypeName]] throw];
+                return [JSNil new];
+            }
+        } else if ([JSVector isVector:first]) {
+            JSVector *vec = (JSVector *)first;
+            if ([JSList isKindOfList:second]) {
+                ret = [vec addObjectsFrom:second];
+            } else if ([JSString isString:second]) {
+                ret = [vec addObject:second];
+            } else if ([JSHashMap isHashMap:second]) {
+                ret = [vec addObjectsFromHashMap:second];
+            } else {
+                [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"into/2", @"'sequence' or 'collection'", [second dataTypeName]] throw];
+                return [JSNil new];
+            }
+        } else if ([JSHashMap isHashMap:first]) {
+            JSHashMap *hm = (JSHashMap *)first;
+            if ([JSList isKindOfList:second]) {
+                ret = [hm addObjectsFrom:second];
+            } else if ([JSHashMap isHashMap:second]) {
+                ret = [hm addObjectsFromHashMap:second];
+            } else {
+                [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"into/2", @"'collection'", [second dataTypeName]] throw];
+                return [JSNil new];
+            }
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"into/2", @"'collection'", 1, [first dataTypeName]] throw];
+            return [JSNil new];
+        }
+        return ret;
+    };
+    fn = [[JSFunction alloc] initWithFn:into argCount:2 name:@"into/2"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"into" moduleName:[Const coreModuleName]]];
 }
 
 - (NSMutableArray *)filterArray:(NSMutableArray *)array withPredicate:(JSFunction *)predicate {

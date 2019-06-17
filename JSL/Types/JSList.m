@@ -97,6 +97,31 @@
     [_array insertObject:object atIndex:index];
 }
 
+- (JSList *)addObject:(id<JSDataProtocol>)object {
+    JSList *xs = [self copy];
+    [(NSMutableArray *)[xs value] addObject:object];
+    return xs;
+}
+
+- (JSList *)addObjectsFrom:(JSList *)list {
+    JSList *xs = [self copy];
+    [[xs value] addObjectsFromArray:[list value]];
+    return xs;
+}
+
+- (JSList *)addObjectsFromHashMap:(JSHashMap *)hashMap {
+    JSList *xs = [self copy];
+    NSMutableArray *arr = [xs value];
+    NSArray *allKeys = [hashMap allKeys];
+    id<JSDataProtocol> key = nil;
+    id<JSDataProtocol> val = nil;
+    for (key in allKeys) {
+        val = [hashMap objectForKey:key];
+        [arr addObject:[[JSList alloc] initWithArray:[@[key, val] mutableCopy]]];
+    }
+    return xs;
+}
+
 - (void)update:(id<JSDataProtocol>)object atIndex:(NSUInteger)index {
     [_array replaceObjectAtIndex:index withObject:object];
 }
