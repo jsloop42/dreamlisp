@@ -2224,6 +2224,28 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertThrows([jsl rep:@"(into {} 1)"]);
 }
 
+- (void)testIndexOf {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    //list
+    XCTAssertEqualObjects([jsl rep:@"(index-of 1 '(0 1 2))"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(index-of -1 '(0 1 -1 4 -5))"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(index-of 1 '())"], @"-1");
+    XCTAssertEqualObjects([jsl rep:@"(index-of nil '())"], @"-1");
+    XCTAssertEqualObjects([jsl rep:@"(index-of nil '(nil))"], @"0");
+    // vector
+    XCTAssertEqualObjects([jsl rep:@"(index-of 1 [0 1 2])"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(index-of \"abc\" '(\"ab\" \"z\" \"abc\"))"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(index-of {:a 1} [{:b 2} {:c 3} {:a 1}])"], @"2");
+    // string
+    XCTAssertEqualObjects([jsl rep:@"(index-of \"a\" \"abc\")"], @"0");
+    XCTAssertEqualObjects([jsl rep:@"(index-of \"abc\" \"fooabc\")"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(index-of \"a\" \"zbc\")"], @"-1");
+    XCTAssertEqualObjects([jsl rep:@"(index-of \"a\" \"bc ef ab ba\")"], @"6");
+    XCTAssertThrows([jsl rep:@"(index-of 1 {})"]);
+    XCTAssertThrows([jsl rep:@"(index-of 1 1)"]);
+    XCTAssertThrows([jsl rep:@"(index-of 1 :a)"]);
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
 }

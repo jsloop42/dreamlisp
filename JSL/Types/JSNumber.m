@@ -82,7 +82,7 @@
     return self;
 }
 
-- (instancetype)initWithInteger:(NSUInteger)number {
+- (instancetype)initWithInteger:(NSInteger)number {
     self = [super init];
     if (self) {
         [self bootstrap];

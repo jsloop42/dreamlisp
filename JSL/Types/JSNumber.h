@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithDouble:(double)num;
 - (instancetype)initWithInt:(int)number;
-- (instancetype)initWithInteger:(NSUInteger)number;
+- (instancetype)initWithInteger:(NSInteger)number;
 - (instancetype)initWithString:(NSString *)string;
 - (instancetype)initWithNumber:(NSDecimalNumber *)number;
 - (instancetype)initWithDoubleNumber:(NSDecimalNumber *)number;

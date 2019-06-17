@@ -968,6 +968,26 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:into argCount:2 name:@"into/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"into" moduleName:[Const coreModuleName]]];
+
+    #pragma mark index-of
+    id<JSDataProtocol>(^indexOf)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:2];
+        id<JSDataProtocol> first = [xs first];
+        id<JSDataProtocol> second = [xs second];
+        NSInteger idx = -1;
+        if ([JSList isKindOfList:second]) {
+            idx = [[(JSList *)second value] indexOfObject:first];
+        } else if ([JSString isString:second]) {
+            NSString *str = [[JSString dataToString:first fnName:@"index-of"] value];
+            NSRange range = [(NSString *)[(JSString *)second value] rangeOfString:str];
+            idx = range.location;
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"index-of/2", @"'sequence'", 2, [second dataTypeName]] throw];
+        }
+        return [[JSNumber alloc] initWithInteger: idx == NSNotFound ? -1 : idx];
+    };
+    fn = [[JSFunction alloc] initWithFn:indexOf argCount:2 name:@"index-of/2"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"index-of" moduleName:[Const coreModuleName]]];
 }
 
 - (NSMutableArray *)filterArray:(NSMutableArray *)array withPredicate:(JSFunction *)predicate {
