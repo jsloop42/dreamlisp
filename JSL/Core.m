@@ -377,7 +377,7 @@ double dmod(double a, double n) {
         } else if ([JSHashMap isHashMap:first]) {
             count = [(JSHashMap *)first count];
         } else {
-            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"count/1", @"'list', 'vector', 'hash-map' or 'string'", 1,
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"count/1", @"'sequence' or 'collection'", 1,
               [list dataTypeName]] throw];
         }
         return [[JSNumber alloc] initWithInteger:count];
@@ -718,7 +718,7 @@ double dmod(double a, double n) {
                 return [(JSString *)second sortedUsingComparator:comparator];
             }
         }
-        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"sort/2", @"'list', 'vector', 'hash-map' or 'string'", 2, [second dataTypeName]] throw];
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"sort/2", @"'sequence' or 'collection'", 2, [second dataTypeName]] throw];
         return nil;
     };
     fn = [[JSFunction alloc] initWithFn:sort argCount:2 name:@"sort/2"];

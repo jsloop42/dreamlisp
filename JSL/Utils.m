@@ -91,7 +91,7 @@ static CacheTable *_cache;
             [res addObject:(isNative ? [[JSString alloc] initWithString:subStr] : subStr)];
         }
     } else {
-        [[[JSError alloc] initWithFormat:DataTypeMismatch, @"'list', 'vector' or 'string'", [object dataTypeName]] throw];
+        [[[JSError alloc] initWithFormat:DataTypeMismatch, @"'sequence'", [object dataTypeName]] throw];
     }
     [[self cache] setObject:res forKey:[CacheKey fromKey:object isNative:isNative]];
     return res;
