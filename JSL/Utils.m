@@ -191,6 +191,29 @@ static CacheTable *_cache;
     return xs;
 }
 
+#pragma mark String
+
++ (void)appendStringFromArray:(NSMutableArray *)array string:(JSString *)string {
+    if (![string isMutable]) [[[JSError alloc] initWithFormat:IsImmutableError, [string dataTypeName]] throw];
+    id elem = nil;
+    for (elem in array) {
+        if ([JSNumber isNumber:elem]) {
+            [string appendString:[NSString stringWithFormat:@"%ld", [(JSNumber *)elem integerValue]]];
+        } else if ([JSList isKindOfList:elem]) {
+            id<JSDataProtocol> x = nil;
+            NSMutableArray *arr = [(JSList *)elem value];
+            for (x in arr) {
+                [self appendStringFromArray:arr string:string];
+            }
+        } else if ([NSString isString:elem]) {
+            [string appendString:(NSString *)elem];
+        } else {
+            [string appendString:[elem description]];
+        }
+    }
+}
+
+
 + (CacheTable *)cache {
     return _cache;
 }

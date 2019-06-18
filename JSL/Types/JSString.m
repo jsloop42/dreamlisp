@@ -50,6 +50,10 @@
     return (JSString *)data;
 }
 
++ (JSString *)mutable {
+    return [[JSString alloc] initWithMutableString];
+}
+
 - (instancetype)init {
     self = [super init];
     return self;
@@ -159,6 +163,14 @@
     return _mstring;
 }
 
+- (void)setValue:(id)value {
+    _string = value;
+}
+
+- (void)setMutableValue:(NSMutableString *)mutableValue {
+    _mstring = mutableValue;
+}
+
 - (BOOL)isEqual:(id)object {
     if (![JSString isString:object]) return NO;
     JSString *string = (JSString *)object;
@@ -208,7 +220,7 @@
 
 - (void)append:(JSString *)string {
     if (!_isMutable) [[[JSError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
-    [_mstring appendString:[string mutableValue]];
+    [_mstring appendString: [string isMutable] ? [string mutableValue] : [string value]];
 }
 
 - (void)appendString:(NSString *)string {
@@ -224,7 +236,7 @@
     id elem = [[JSString alloc] initWithString:_string];
     [elem setIsImported:_isImported];
     [elem setIsMutable:NO];
-    [elem setMutableValue:_mutableValue];
+    [elem setMutableValue:_mstring];
     return elem;
 }
 
@@ -236,8 +248,13 @@
     return elem;
 }
 
+- (NSString *)debugDescription {
+    return [NSString stringWithFormat:@"<%@ %p - value: %@ isMutable: %hhd meta: %@>", NSStringFromClass([self class]),
+            self, _isMutable ? _mstring : _string, _isMutable, _meta];
+}
+
 - (NSString *)description {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _string, _meta];
+    return _isMutable ? _mstring : _string;
 }
 
 @end

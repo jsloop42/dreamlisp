@@ -103,6 +103,14 @@
     return xs;
 }
 
+- (void)addObjectsFromArray:(NSMutableArray *)array {
+    [_array addObjectsFromArray:array];
+}
+
+- (void)addObjectsFromList:(JSList *)list {
+    [_array addObjectsFromArray:[list value]];
+}
+
 - (void)update:(id<JSDataProtocol>)object atIndex:(NSUInteger)index {
     [_array replaceObjectAtIndex:index withObject:object];
 }

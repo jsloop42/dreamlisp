@@ -25,6 +25,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)add:(id<JSDataProtocol>)object;
 - (void)add:(id<JSDataProtocol>)object atIndex:(NSUInteger)index;
 - (JSList *)addObject:(id<JSDataProtocol>)object;
+- (void)addObjectsFromArray:(NSMutableArray *)array;
+- (void)addObjectsFromList:(JSList *)list;
 - (void)update:(id<JSDataProtocol>)object atIndex:(NSUInteger)index;
 - (void)remove:(id<JSDataProtocol>)object;
 - (void)removeAtIndex:(NSUInteger)index;

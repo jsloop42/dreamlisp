@@ -404,28 +404,53 @@ double dmod(double a, double n) {
 
     #pragma mark concat
     /**
-     Takes two lists or vectors, combines them and returns a list.
+     Takes a list of sequences and combines them into one sequence.
 
      (concat '(-2 -1 0) '(1 2 3 4)) ; (-2 -1 0 1 2 3 4)
-     (concat ["a"] ["b"]) ; ("a" "b")
+     (concat ["a"] ["b"]) ; ["a" "b"]
+     (concat "a" "b") ; "ab"
+     (concat "a" [1 2 "b"] "c") ; "a12bc"
      */
     id<JSDataProtocol>(^concat)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
-        NSMutableArray *arr = [NSMutableArray new];
-        NSUInteger i = 0;
-        NSUInteger j = 0;
+        id<JSDataProtocol> first = [xs first];
+        BOOL isList = [JSList isList:first];
+        id<JSDataProtocol> elem = nil;
         NSUInteger len = [xs count];
-        NSUInteger jlen = 0;
-        JSList *list = nil;
-        id<JSDataProtocol> data = nil;
-        for (i = 0; i < len; i++) {
-            data = [xs nth:i];
-            list = [JSVector dataToList:data fnName:@"concat/n"];
-            jlen = [list count];
-            for (j = 0; j < jlen; j++) {
-                [arr addObject:[list nth:j]];
+        NSUInteger i = 1;
+        if ([JSList isKindOfList:first]) {
+            JSList *list = [[JSList alloc] initWithArray:[(JSList *)first value]];
+            for (i = 1; i < len; i++) {
+                elem = [xs nth:i];
+                if ([JSList isKindOfList:elem]) {
+                    if (!isList) isList = [JSList isList:elem];
+                    [list addObjectsFromList:(JSList *)elem];
+                } else if ([JSString isString:elem]) {
+                    NSMutableArray *arr = [Utils toArray:elem isNative:YES];
+                    [list addObjectsFromArray:arr];
+                } else {
+                    [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"concat/n", @"'sequence'", i + 1, [elem dataTypeName]] throw];
+                }
             }
+            return isList ? list : [[JSVector alloc] initWithArray:[list value]];
+        } else if ([JSString isString:first]) {
+            JSString *str = [JSString mutable];
+            [str setMutableValue:[(NSString *)[(JSString *)first value] mutableCopy]];
+            for (i = 1; i < len; i++) {
+                elem = [xs nth:i];
+                if ([JSList isKindOfList:elem]) {
+                    [Utils appendStringFromArray:[(JSList *)elem value] string:str];
+                } else if ([JSString isString:elem]) {
+                    [str append:elem];
+                } else {
+//                    [str appendString:[elem description]];
+                    [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"concat/n", @"'sequence'", i + 1, [elem dataTypeName]] throw];
+                }
+            }
+            return str;
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"concat/n", @"'sequence'", 1, [first dataTypeName]] throw];
         }
-        return [[JSList alloc] initWithArray:arr];
+        return [JSList new];
     };
     fn = [[JSFunction alloc] initWithFn:concat argCount:-1 name:@"concat/n"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"concat" moduleName:[Const coreModuleName]]];
@@ -985,6 +1010,25 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:indexOf argCount:2 name:@"index-of/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"index-of" moduleName:[Const coreModuleName]]];
+
+    #pragma mark foldl
+    id<JSDataProtocol>(^foldl)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:3];
+        JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"foldl/3"];
+        id<JSDataProtocol> second = [xs second];
+        NSMutableArray *arr = [Utils toArray:[xs nth:2] isNative:YES];
+        id<JSDataProtocol> elem = nil;
+        if ([JSList isList:second]) {
+            JSList *acc = (JSList *)second;
+            for (elem in arr) {
+                acc = [fn apply:[@[[[self delegate] eval:elem], acc] mutableCopy]];
+            }
+            return acc;
+        }
+        return nil;
+    };
+    fn = [[JSFunction alloc] initWithFn:foldl argCount:3 name:@"foldl/3"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"foldl" moduleName:[Const coreModuleName]]];
 }
 
 - (NSMutableArray *)filterArray:(NSMutableArray *)array withPredicate:(JSFunction *)predicate {

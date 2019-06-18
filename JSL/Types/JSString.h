@@ -21,6 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isString:(id)object withValue:(NSString *)name;
 + (JSString *)dataToString:(id<JSDataProtocol>)data fnName:(NSString *)fnName;
 + (JSString *)dataToString:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
++ (JSString *)mutable;
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)str;
 - (instancetype)initWithFormat:(NSString *)format, ...;
