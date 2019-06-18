@@ -1162,20 +1162,22 @@ double dmod(double a, double n) {
 
     #pragma mark get
     /**
-     Takes a hash map and a key and returns the value associated with the key if present. Returns nil otherwise.
+     Takes a key, a hash map and returns the value associated with the key if present else nil.
 
      (get {:a 1 :b 2 :c 3} :b) ; 2
      (get {:a 1 :b 2 :c 3} :v) ; nil
      */
     id<JSDataProtocol>(^get)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:2];
-        id<JSDataProtocol> data = (id<JSDataProtocol>)[xs first];
-        if ([JSHashMap isHashMap:data]) {
-            JSHashMap *first = (JSHashMap *)data;
-            id<JSDataProtocol> ret = (id<JSDataProtocol>)[first objectForKey:[xs second]];
-            if (ret) return ret;
+        id<JSDataProtocol> coll = [xs second];
+        id<JSDataProtocol> val = nil;
+        if ([JSHashMap isHashMap:coll]) {
+            JSHashMap *hm = (JSHashMap *)[xs second];
+             val = [hm objectForKey:[xs first]];
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"get/2",  @"'hash-map'", [coll dataTypeName]] throw];
         }
-        return [JSNil new];
+        return val ? val : [JSNil new];
     };
     fn = [[JSFunction alloc] initWithFn:get argCount:2 name:@"get/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"get" moduleName:[Const coreModuleName]]];

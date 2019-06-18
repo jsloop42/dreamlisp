@@ -12,15 +12,15 @@
 
 (defun inc (tag)
   "Increment test case info for the given tag, where tag can be :success, :fail."
-  (reset! info (assoc @info tag (+ (get @info tag) 1))))
+  (reset! info (assoc @info tag (+ (get tag @info) 1))))
 
 (defun dec (tag) 
   "Decrement test case info for the given tag, where tag can be :success, :fail."
-  (reset! info (assoc @info tag (- (get @info tag) 1))))
+  (reset! info (assoc @info tag (- (get tag @info) 1))))
 
 (defun inc-test-count ()
   "Increment test case count."
-  (reset! info (assoc @info :count (+ (get @info :count) 1))))
+  (reset! info (assoc @info :count (+ (get :count @info) 1))))
 
 
 (defmacro deftest (name desc & form)

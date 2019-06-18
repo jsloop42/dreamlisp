@@ -412,7 +412,7 @@ static NSString *langVersion;
                 }
             } else if ([xs count] == 2 && [JSKeyword isKeyword:[xs first]]) {
                 ast = [[JSList alloc] initWithArray:[@[[[JSSymbol alloc] initWithArity:2 string:@"get" moduleName:[Const coreModuleName]],
-                                                           [xs second], [xs first]] mutableCopy]];
+                                                       [xs first], [xs second]] mutableCopy]];
                 continue;
             }
             // Function

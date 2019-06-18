@@ -610,26 +610,26 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertTrue([ret isEqual:@"(:abc :def)"] || [ret isEqual:@"(:def :abc)"]);
     XCTAssertEqualObjects([jsl rep:@"(contains? :abc {:abc nil})"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(contains? :abc {:abc 123})"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"(get {:abc 123} :abc)"], @"123");
+    XCTAssertEqualObjects([jsl rep:@"(get :abc {:abc 123})"], @"123");
     [jsl rep:@"(def hm4 (assoc {:a 1 :b 2} :a 3 :c 1))"];
-    XCTAssertEqualObjects([jsl rep:@"(get hm4 :a)"], @"3");
-    XCTAssertEqualObjects([jsl rep:@"(get hm4 :b)"], @"2");
-    XCTAssertEqualObjects([jsl rep:@"(get hm4 :c)"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(get :a hm4)"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(get :b hm4)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(get :c hm4)"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(hash-map \"a\" 1)"], @"{\"a\" 1}");
     XCTAssertEqualObjects([jsl rep:@"{\"a\" 1}"], @"{\"a\" 1}");
     XCTAssertEqualObjects([jsl rep:@"(assoc {} \"a\" 1)"], @"{\"a\" 1}");
-    XCTAssertEqualObjects([jsl rep:@"(get (assoc (assoc {\"a\" 1 } \"b\" 2) \"c\" 3) \"a\")"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(get \"a\" (assoc (assoc {\"a\" 1 } \"b\" 2) \"c\" 3))"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(def hm1 (hash-map))"], @"{}");
     XCTAssertEqualObjects([jsl rep:@"(hash-map? hm1)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(hash-map? 1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(hash-map? \"abc\")"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(get nil \"a\")"], @"nil");
-    XCTAssertEqualObjects([jsl rep:@"(get hm1 \"a\")"], @"nil");
+    XCTAssertThrows([jsl rep:@"(get \"a\" nil)"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(get \"a\" hm1)"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(contains? \"a\" hm1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(def hm2 (assoc hm1 \"a\" 1))"], @"{\"a\" 1}");
-    XCTAssertEqualObjects([jsl rep:@"(get hm1 \"a\")"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(get \"a\" hm1)"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(contains? \"a\" hm1)"], @"false");
-    XCTAssertEqualObjects([jsl rep:@"(get hm2 \"a\")"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"(get \"a\" hm2)"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(contains? \"a\" hm2)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(keys hm1)"], @"()");
     XCTAssertEqualObjects([jsl rep:@"(keys hm2)"], @"(\"a\")");
@@ -695,7 +695,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(:a (hash-map :a 1))"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(def tag :success)"], @":success");
     XCTAssertEqualObjects([jsl rep:@"(def hm (atom {:success 0}))"], @"(atom {:success 0})");
-    XCTAssertEqualObjects([jsl rep:@"(reset! hm (assoc @hm tag (+ (get @hm tag) 1)))"], @"{:success 1}");
+    XCTAssertEqualObjects([jsl rep:@"(reset! hm (assoc @hm tag (+ (get tag @hm) 1)))"], @"{:success 1}");
 }
 
 - (void)testEnv {
@@ -1644,19 +1644,19 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"@atm"], @"9");
     NSString *ret = [jsl rep:@"(def a (atom {:x 1 :y 2}))"];
     XCTAssertTrue([ret isEqual:@"(atom {:x 1 :y 2})"] || [ret isEqual:@"(atom {:y 2 :x 1})"]);
-    XCTAssertEqualObjects([jsl rep:@"(get @a :x)"], @"1");
-    ret = [jsl rep:@"(reset! a {:x 1 :y (+ (get @a :y) 1)})"];
+    XCTAssertEqualObjects([jsl rep:@"(get :x @a)"], @"1");
+    ret = [jsl rep:@"(reset! a {:x 1 :y (+ (get :y @a) 1)})"];
     XCTAssertTrue([ret isEqual:@"{:x 1 :y 3}"] || [ret isEqual:@"{:y 3 :x 1}"]);
     XCTAssertEqualObjects([jsl rep:@"(def a (atom {}))"], @"(atom {})");
     XCTAssertEqualObjects([jsl rep:@"(assoc @a :z 1)"], @"{:z 1}");
     [jsl rep:@"(def e (atom {\"+\" +}))"];
     [jsl rep:@"(swap! e assoc \"-\" -)"];
-    XCTAssertEqualObjects([jsl rep:@"((get @e \"+\") 7 8)"], @"15");
-    XCTAssertEqualObjects([jsl rep:@"((get @e \"-\") 11 8)"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"((get \"+\" @e) 7 8)"], @"15");
+    XCTAssertEqualObjects([jsl rep:@"((get \"-\" @e) 11 8)"], @"3");
     [jsl rep:@"(swap! e assoc \"foo\" (list))"];
-    XCTAssertEqualObjects([jsl rep:@"(get @e \"foo\")"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(get \"foo\" @e)"], @"()");
     [jsl rep:@"(swap! e assoc \"bar\" '(1 2 3))"];
-    XCTAssertEqualObjects([jsl rep:@"(get @e \"bar\")"], @"(1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(get \"bar\" @e)"], @"(1 2 3)");
 }
 
 - (void)testEval {
@@ -2023,11 +2023,11 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(defmodule ifoo (export (ifa 1) (ifa 2)) (import (from core (empty? 1))))"], @"ifoo");
     [jsl rep:@"(defun iinc (n) (+ n 1))"];
     [jsl rep:@"(def info (module-info \"ifoo\"))"];
-    NSString *count = [jsl rep:@"(count (get info :exports))"];
+    NSString *count = [jsl rep:@"(count (get :exports info))"];
     XCTAssertEqual([count integerValue], 2);
-    count = [jsl rep:@"(count (get info :imports))"];
+    count = [jsl rep:@"(count (get :imports info))"];
     XCTAssertEqual([count integerValue], 1);
-    count = [jsl rep:@"(count (get info :internal))"];
+    count = [jsl rep:@"(count (get :internal info))"];
     XCTAssertEqual([count integerValue], 1);
     XCTAssertEqualObjects([jsl rep:@"(current-module-name)"], @"\"ifoo\"");
     XCTAssertThrows([jsl rep:@"(in-module \"nope.ifoo\")"]);
@@ -2053,7 +2053,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     Env *mdescEnv = [Env forModuleName:@"mdesc"];
     XCTAssertEqualObjects([mdescEnv moduleDescription], @"A test module.");
     [jsl rep:@"(def info (module-info \"mdesc\"))"];
-    XCTAssertEqualObjects([jsl rep:@"(get info :description)"], @"\"A test module.\"");
+    XCTAssertEqualObjects([jsl rep:@"(get :description info)"], @"\"A test module.\"");
 }
 
 - (void)testModuleArity {
