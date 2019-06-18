@@ -749,7 +749,7 @@ double dmod(double a, double n) {
         if ([JSHashMap isHashMap:second]) {
             return [[JSHashMap alloc] initWithMapTable:[self filterMapTable:[(JSHashMap *)second value] withPredicate:fn]];
         }
-        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"filter/2", @"'list' or 'vector'", 2, [first dataTypeName]] throw];
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"filter/2", @"'collection'", 2, [first dataTypeName]] throw];
         return nil;
     };
     fn = [[JSFunction alloc] initWithFn:filter argCount:2 name:@"filter/2"];
@@ -762,7 +762,7 @@ double dmod(double a, double n) {
      */
     id<JSDataProtocol>(^parition)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:2];
-        JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"filter/2"];
+        JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"partition/2"];
         id<JSDataProtocol> second = [xs second];
         NSArray *ret = nil;
         if ([JSList isList:second]) {
@@ -786,7 +786,7 @@ double dmod(double a, double n) {
             [vec add:[[JSHashMap alloc] initWithMapTable:[ret second]]];
             return vec;
         }
-        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"partition/2", @"'list' or 'vector'", 2, [first dataTypeName]] throw];
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"partition/2", @"'collection'", 2, [first dataTypeName]] throw];
         return nil;
     };
     fn = [[JSFunction alloc] initWithFn:parition argCount:2 name:@"partition/2"];
@@ -802,8 +802,11 @@ double dmod(double a, double n) {
             return [[JSList alloc] initWithArray:[self flatten:(JSList *)first acc:acc]];
         } else if ([JSVector isVector:first]) {
             return [[JSVector alloc] initWithArray:[self flatten:(JSVector *)first acc:acc]];
+        } else if ([JSHashMap isHashMap:first]) {
+            return [[JSHashMap alloc] initWithMapTable:[self flattenHashMap:first acc:[NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
+                                                                                                            valueOptions:NSMapTableStrongMemory]]];
         }
-        [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"flatten/1", @"'list' or 'vector'", [first dataTypeName]] throw];
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"flatten/1", @"'collection'", [first dataTypeName]] throw];
         return nil;
     };
     fn = [[JSFunction alloc] initWithFn:flatten argCount:1 name:@"flatten/1"];
@@ -1089,6 +1092,22 @@ double dmod(double a, double n) {
 
 #pragma mark - Hash map
 
+- (NSMapTable *)flattenHashMap:(JSHashMap *)hashMap acc:(NSMapTable *)acc {
+    if (!acc) acc = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    NSArray *allKeys = [hashMap allKeys];
+    id<JSDataProtocol> key = nil;
+    id<JSDataProtocol> val = nil;
+    for (key in allKeys) {
+        val = [hashMap objectForKey:key];
+        if ([JSHashMap isHashMap:val]) {
+            [self flattenHashMap:val acc:acc];
+        } else {
+            [acc setObject:val forKey:key];
+        }
+    }
+    return acc;
+}
+
 - (void)addHashMapFunctions {
     JSFunction *fn = nil;
 
@@ -1165,14 +1184,14 @@ double dmod(double a, double n) {
     /**
      Checks if the given hash map contains the key.
 
-     (contains? {:a 1 :b 2 :c 3} :a) ; true
-     (contains? {:a 1 :b 2 :c 3} 3) ; false
-     (contains? {:a 1 :b 2 :c 3} :v) ;false
+     (contains? :a {:a 1 :b 2 :c 3}) ; true
+     (contains? 3 {:a 1 :b 2 :c 3}) ; false
+     (contains? :v {:a 1 :b 2 :c 3}) ;false
      */
     id<JSDataProtocol>(^contains)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:2];
-        JSHashMap *first = [JSHashMap dataToHashMap:[xs first] fnName:@"contains?/2"];
-        return [[JSBool alloc] initWithBool:[first containsKey:[xs second]]];
+        JSHashMap *hm = [JSHashMap dataToHashMap:[xs second] fnName:@"contains?/2"];
+        return [[JSBool alloc] initWithBool:[hm containsKey:[xs first]]];
     };
     fn = [[JSFunction alloc] initWithFn:contains argCount:2 name:@"contains?/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"contains?" moduleName:[Const coreModuleName]]];

@@ -608,8 +608,8 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(dissoc {:a 1 :b 2} :a)"], @"{:b 2}");
     NSString *ret = [jsl rep:@"(keys {:abc 123 :def 456})"];
     XCTAssertTrue([ret isEqual:@"(:abc :def)"] || [ret isEqual:@"(:def :abc)"]);
-    XCTAssertEqualObjects([jsl rep:@"(contains? {:abc nil} :abc)"], @"true");
-    XCTAssertEqualObjects([jsl rep:@"(contains? {:abc 123} :abc)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? :abc {:abc nil})"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? :abc {:abc 123})"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(get {:abc 123} :abc)"], @"123");
     [jsl rep:@"(def hm4 (assoc {:a 1 :b 2} :a 3 :c 1))"];
     XCTAssertEqualObjects([jsl rep:@"(get hm4 :a)"], @"3");
@@ -625,12 +625,12 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(hash-map? \"abc\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(get nil \"a\")"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(get hm1 \"a\")"], @"nil");
-    XCTAssertEqualObjects([jsl rep:@"(contains? hm1 \"a\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(contains? \"a\" hm1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(def hm2 (assoc hm1 \"a\" 1))"], @"{\"a\" 1}");
     XCTAssertEqualObjects([jsl rep:@"(get hm1 \"a\")"], @"nil");
-    XCTAssertEqualObjects([jsl rep:@"(contains? hm1 \"a\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(contains? \"a\" hm1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(get hm2 \"a\")"], @"1");
-    XCTAssertEqualObjects([jsl rep:@"(contains? hm2 \"a\")"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? \"a\" hm2)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(keys hm1)"], @"()");
     XCTAssertEqualObjects([jsl rep:@"(keys hm2)"], @"(\"a\")");
     XCTAssertEqualObjects([jsl rep:@"(values hm1)"], @"()");
@@ -679,7 +679,7 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(def a 1)"], @"1");
     XCTAssertEqualObjects([jsl rep:@"{a 2}"], @"{1 2}");
     XCTAssertThrows([jsl rep:@"{b 2}"], @"'b' not found");
-    XCTAssertEqualObjects([jsl rep:@"(contains? {a 2} a)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? a {a 2})"], @"true");
 }
 
 /** Test hash map keyword key as get function*/
@@ -2167,6 +2167,13 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(flatten '('(1) '(2 '(3)) '('('(4))) '(5)))"], @"(1 2 3 4 5)");
     XCTAssertEqualObjects([jsl rep:@"(flatten [])"], @"[]");
     XCTAssertEqualObjects([jsl rep:@"(flatten '())"], @"()");
+    [jsl rep:@"(def hm (flatten {:a 1 :b {:c 2 :d 3} :e 4}))"];
+    XCTAssertEqualObjects([jsl rep:@"(contains? :a hm)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? :b hm)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(contains? :c hm)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? :d hm)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? :e hm)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(count hm)"], @"4");
     XCTAssertThrows([jsl rep:@"(flatten nil)"]);
 }
 
