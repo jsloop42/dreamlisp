@@ -116,22 +116,6 @@
 //    assert([_table objectForKey:key] != nil);
 }
 
-- (JSHashMap *)addObjectsFrom:(JSList *)list {
-    JSHashMap *hm = [self copy];
-    [hm fromArray:[list value]];
-    return hm;
-}
-
-- (JSHashMap *)addObjectsFromHashMap:(JSHashMap *)hashMap {
-    JSHashMap *hm = [self copy];
-    NSArray *allKeys = [hashMap allKeys];
-    id<JSDataProtocol> key = nil;
-    for (key in allKeys) {
-        [hm setObject:[hashMap objectForKey:key] forKey:key];
-    }
-    return hm;
-}
-
 - (NSUInteger)count {
     return [_table count];
 }

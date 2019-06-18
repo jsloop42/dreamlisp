@@ -498,26 +498,34 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"rest" moduleName:[Const coreModuleName]]];
 
     #pragma mark map
-    /**
-     Takes a function and a list and applies the function to each element of the list and return the resulting list.
-
-     (map (fn* (x) (* x x)) '(2 3 4 5)) ; (4 9 16 25)
-     (map count/1 '([1] [2 3] [4 5 6] [7 8] [9])) ; (1 2 3 2 1)
-     */
     id<JSDataProtocol>(^map)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
-        [TypeUtils checkArity:xs arity:2];
-        id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
-        JSFunction *fn = [JSFunction dataToFunction:first];
-        NSMutableArray *list = [[JSList dataToList:[xs second] fnName:@"map/2"] value];
+        NSUInteger innerLen = [xs count] - 1;
         NSUInteger i = 0;
-        NSUInteger len = [list count];
-        NSMutableArray *ret = [NSMutableArray new];
-        for (i = 0; i < len; i++) {
-            [ret addObject:[fn apply:[@[[list nth:i]] mutableCopy]]];
+        NSUInteger j = 0;
+        JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"map/n"];
+        id<JSDataProtocol> data = [xs second];
+        NSMutableArray *second = [Utils toArray:data];
+        NSUInteger outerLen = [second count];
+        NSMutableArray *acc = [NSMutableArray new];
+        NSMutableArray *res = [NSMutableArray new];
+        BOOL isList = [JSList isList:data];
+        NSMutableArray *elem = nil;
+        id<JSDataProtocol> ret = nil;
+        NSMutableArray *ast = [xs rest];
+        for (i = 0; i < outerLen; i++) { // xs: [[1 2 3] [4 5 6]] => [[1 4] [2 5] [3 6]]  => outerLen: 3, innerLen: 2
+            [res removeAllObjects];
+            for (j = 0; j < innerLen; j++) {
+                elem = [Utils toArray:ast[j] isNative:YES];
+                if (!isList) isList = [JSList isList:ast[j]];
+                if ([elem count] != outerLen) [[[JSError alloc] initWithFormat:ElementCountWithPositionError, outerLen, [elem count], j] throw];
+                [res addObject:[elem nth:i]];
+            }
+            ret = [fn apply:res];
+            [acc addObject:ret];
         }
-        return [[JSList alloc] initWithArray:ret];
+        return isList ? [[JSList alloc] initWithArray:acc] : [[JSVector alloc] initWithArray:acc];
     };
-    fn = [[JSFunction alloc] initWithFn:map argCount:2 name:@"map/2"];
+    fn = [[JSFunction alloc] initWithFn:map argCount:-1 name:@"map/n"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"map" moduleName:[Const coreModuleName]]];
 
     #pragma mark conj
@@ -865,7 +873,6 @@ double dmod(double a, double n) {
         NSUInteger j = 0;
         id<JSDataProtocol> data = [xs first];
         NSMutableArray *first = [Utils toArray:data];
-        //JSList *first = [JSVector dataToList:[xs first] fnName:@"zip/n"];
         NSUInteger outerLen = [first count];
         NSMutableArray *res = [NSMutableArray new];
         JSString *str = nil;
@@ -888,37 +895,6 @@ double dmod(double a, double n) {
     fn = [[JSFunction alloc] initWithFn:zip argCount:-1 name:@"zip/n"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"zip" moduleName:[Const coreModuleName]]];
 
-    #pragma mark zip-with
-    id<JSDataProtocol>(^zipWith)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
-        NSUInteger innerLen = [xs count] - 1;
-        NSUInteger i = 0;
-        NSUInteger j = 0;
-        JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"zip-with/n"];
-        id<JSDataProtocol> data = [xs second];
-        NSMutableArray *second = [Utils toArray:data];
-        NSUInteger outerLen = [second count];
-        NSMutableArray *acc = [NSMutableArray new];
-        NSMutableArray *res = [NSMutableArray new];
-        BOOL isList = [JSList isList:data];
-        NSMutableArray *elem = nil;
-        id<JSDataProtocol> ret = nil;
-        NSMutableArray *ast = [xs rest];
-        for (i = 0; i < outerLen; i++) { // xs: [[1 2 3] [4 5 6]] => [[1 4] [2 5] [3 6]]  => outerLen: 3, innerLen: 2
-            [res removeAllObjects];
-            for (j = 0; j < innerLen; j++) {
-                elem = [Utils toArray:ast[j] isNative:YES];
-                if (!isList) isList = [JSList isList:ast[j]];
-                if ([elem count] != outerLen) [[[JSError alloc] initWithFormat:ElementCountWithPositionError, outerLen, [elem count], j] throw];
-                [res addObject:[elem nth:i]];
-            }
-            ret = [fn apply:res];
-            [acc addObject:ret];
-        }
-        return [[JSVector alloc] initWithArray:acc];
-    };
-    fn = [[JSFunction alloc] initWithFn:zipWith argCount:-1 name:@"zip-with/n"];
-    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"zip-with" moduleName:[Const coreModuleName]]];
-
     #pragma mark into
     id<JSDataProtocol>(^into)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:2];
@@ -929,11 +905,11 @@ double dmod(double a, double n) {
         if ([JSList isList:first]) {
             JSList *list = (JSList *)first;
             if ([JSList isKindOfList:second]) {
-                ret = [list addObjectsFrom:second];
+                ret = [Utils addObjectsToList:list fromList:second];
             } else if ([JSString isString:second]) {
                 ret = [list addObject:second];
             } else if ([JSHashMap isHashMap:second]) {
-                ret = [list addObjectsFromHashMap:second];
+                ret = [Utils addObjectsToList:list fromHashMap:second];
             } else {
                 [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"into/2", @"'sequence' or 'collection'", [second dataTypeName]] throw];
                 return [JSNil new];
@@ -941,11 +917,11 @@ double dmod(double a, double n) {
         } else if ([JSVector isVector:first]) {
             JSVector *vec = (JSVector *)first;
             if ([JSList isKindOfList:second]) {
-                ret = [vec addObjectsFrom:second];
+                ret = [Utils addObjectsToVector:vec fromList:second];
             } else if ([JSString isString:second]) {
                 ret = [vec addObject:second];
             } else if ([JSHashMap isHashMap:second]) {
-                ret = [vec addObjectsFromHashMap:second];
+                ret = [Utils addObjectsToVector:vec fromHashMap:second];
             } else {
                 [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"into/2", @"'sequence' or 'collection'", [second dataTypeName]] throw];
                 return [JSNil new];
@@ -953,9 +929,9 @@ double dmod(double a, double n) {
         } else if ([JSHashMap isHashMap:first]) {
             JSHashMap *hm = (JSHashMap *)first;
             if ([JSList isKindOfList:second]) {
-                ret = [hm addObjectsFrom:second];
+                ret = [Utils addObjectsToHashMap:hm fromList:second];
             } else if ([JSHashMap isHashMap:second]) {
-                ret = [hm addObjectsFromHashMap:second];
+                ret = [Utils addObjectsToHashMap:hm fromHashMap:second];
             } else {
                 [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"into/2", @"'collection'", [second dataTypeName]] throw];
                 return [JSNil new];

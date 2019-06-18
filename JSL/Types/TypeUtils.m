@@ -10,6 +10,12 @@
 
 @implementation TypeUtils
 
+/** Checks if the given string matches the compiled regex pattern. */
++ (BOOL)matchString:(NSString *)string withExpression:(NSRegularExpression *)pattern {
+    NSArray *matches = [pattern matchesInString:string options:0 range:NSMakeRange(0, [string length])];
+    return ![matches isEmpty];
+}
+
 + (NSMutableArray *)mapOnArray:(NSMutableArray *)array withBlock:(id (^)(id arg))block {
     NSMutableArray *acc = [NSMutableArray new];
     [array enumerateObjectsUsingBlock:^(id arg, NSUInteger idx, BOOL *stop) {

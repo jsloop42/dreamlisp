@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "JSError.h"
+#import "NSArray+JSDataProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -24,6 +25,7 @@ typedef NS_ENUM(NSUInteger, ArityPredicate) {
 };
 
 @interface TypeUtils: NSObject
++ (BOOL)matchString:(NSString *)string withExpression:(NSRegularExpression *)pattern;
 + (NSMutableArray *)mapOnArray:(NSMutableArray *)array withBlock:(id (^)(id arg))block;
 + (void)checkArity:(NSMutableArray *)data arity:(NSUInteger)arity;
 + (void)checkArityCount:(NSUInteger)count arity:(NSUInteger)arity;

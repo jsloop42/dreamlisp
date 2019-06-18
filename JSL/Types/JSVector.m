@@ -108,25 +108,6 @@
     return vec;
 }
 
-- (JSVector *)addObjectsFrom:(JSList *)list {
-    JSVector *vec = [self copy];
-    [[vec value] addObjectsFromArray:[list value]];
-    return vec;
-}
-
-- (JSVector *)addObjectsFromHashMap:(JSHashMap *)hashMap {
-    JSVector *vec = [self copy];
-    NSMutableArray *arr = [vec value];
-    NSArray *allKeys = [hashMap allKeys];
-    id<JSDataProtocol> key = nil;
-    id<JSDataProtocol> val = nil;
-    for (key in allKeys) {
-        val = [hashMap objectForKey:key];
-        [arr addObject:[[JSVector alloc] initWithArray:[@[key, val] mutableCopy]]];
-    }
-    return vec;
-}
-
 - (JSList *)list {
     return [[JSList alloc] initWithArray:_array];
 }

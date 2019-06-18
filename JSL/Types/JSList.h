@@ -11,11 +11,8 @@
 #import "JSError.h"
 #import "TypeUtils.h"
 #import "NSMutableArray+JSList.h"
-#import "JSHashMap.h"
 
 NS_ASSUME_NONNULL_BEGIN
-
-@class JSHashMap;
 
 @interface JSList : NSObject <JSDataProtocol>
 + (BOOL)isList:(id)object;
@@ -27,8 +24,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta list:(JSList *)list;
 - (void)add:(id<JSDataProtocol>)object;
 - (void)add:(id<JSDataProtocol>)object atIndex:(NSUInteger)index;
-- (JSList *)addObjectsFrom:(JSList *)list;
-- (JSList *)addObjectsFromHashMap:(JSHashMap *)hashMap;
 - (JSList *)addObject:(id<JSDataProtocol>)object;
 - (void)update:(id<JSDataProtocol>)object atIndex:(NSUInteger)index;
 - (void)remove:(id<JSDataProtocol>)object;

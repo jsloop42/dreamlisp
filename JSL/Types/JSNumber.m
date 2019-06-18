@@ -168,7 +168,7 @@
 }
 
 - (BOOL)checkDouble:(NSString *)string {
-    if ([Utils matchString:string withExpression:_decimalExp]) {
+    if ([TypeUtils matchString:string withExpression:_decimalExp]) {
         return YES;
     }
     return NO;

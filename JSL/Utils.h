@@ -12,6 +12,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+//@class JSVector;
+
 @interface Utils : NSObject
 + (CacheTable *)cache;
 + (BOOL)matchString:(NSString *)string withExpression:(NSRegularExpression *)pattern;
@@ -20,6 +22,18 @@ NS_ASSUME_NONNULL_BEGIN
 + (double)timestamp;
 + (NSMutableArray *)toArray:(id<JSDataProtocol>)object;
 + (NSMutableArray *)toArray:(id<JSDataProtocol>)object isNative:(BOOL)isNative;
+#pragma mark - List
++ (JSList *)addObjectsToList:(JSList *)list fromList:(JSList *)aList;
++ (JSList *)addObjectsToList:(JSList *)list fromHashMap:(JSHashMap *)hashMap;
+#pragma mark - Vector
++ (JSVector *)addObjectsToVector:(JSVector *)vector fromList:(JSList *)list;
++ (JSVector *)addObjectsToVector:(JSVector *)vector fromVector:(JSVector *)aVector;
++ (JSVector *)addObjectsToVector:(JSVector *)vector fromHashMap:(JSHashMap *)hashMap;
+#pragma mark - HashMap
++ (JSHashMap *)addObjectsToHashMap:(JSHashMap *)hashMap fromList:(JSList *)list;
++ (JSHashMap *)addObjectsToHashMap:(JSHashMap *)hashMap fromHashMap:(JSHashMap *)aHashMap;
++ (JSList *)hashMapToList:(JSHashMap *)hashMap;
++ (JSVector *)hashMapToVector:(JSHashMap *)hashMap;
 - (instancetype)init NS_UNAVAILABLE;
 @end
 

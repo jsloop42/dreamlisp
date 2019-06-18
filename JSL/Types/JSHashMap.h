@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "JSDataProtocol.h"
-#import "JSList.h"
 #import "JSError.h"
 #import "Logger.h"
 #import "Const.h"
@@ -16,8 +15,6 @@
 #import "NSMapTable+JSHashMap.h"
 
 NS_ASSUME_NONNULL_BEGIN
-
-@class JSList;
 
 @interface JSHashMap : NSObject <JSDataProtocol>
 + (BOOL)isHashMap:(id)object;
@@ -30,8 +27,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)fromArray:(NSArray *)array;
 - (id<JSDataProtocol>)objectForKey:(id)key;
 - (void)setObject:(id<JSDataProtocol>)object forKey:(id)key;
-- (JSHashMap *)addObjectsFrom:(JSList *)list;
-- (JSHashMap *)addObjectsFromHashMap:(JSHashMap *)hashMap;
 - (NSUInteger)count;
 - (NSArray *)allKeys;
 - (NSArray *)allObjects;

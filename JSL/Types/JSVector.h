@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "JSDataProtocol.h"
 #import "JSList.h"
-#import "JSHashMap.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -21,7 +20,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta vector:(JSVector *)vector;
 - (NSMutableArray *)map:(id (^)(id arg))block;
 - (void)enumerateConcurrent:(void (^)(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop))block;
-- (JSVector *)addObjectsFrom:(JSList *)list;
 - (JSList *)list;
 - (JSVector *)sort:(NSInteger (*)(id, id, void *))sorter;
 - (JSVector *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator;
