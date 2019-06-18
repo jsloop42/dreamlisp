@@ -1198,6 +1198,7 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(conj (list 2 3) 4 5 6)"], @"(6 5 4 2 3)");
     XCTAssertEqualObjects([jsl rep:@"(conj (list 1) (list 2 3))"], @"((2 3) 1)");
     XCTAssertEqualObjects([jsl rep:@"(conj '(1 2 3) 4 5 6)"], @"(6 5 4 1 2 3)");
+    XCTAssertThrows([jsl rep:@"(conj 1 '(1 2))"]);
     // seq
     XCTAssertEqualObjects([jsl rep:@"(seq '())"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(seq '(2 3 4))"], @"(2 3 4)");
@@ -1243,23 +1244,28 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(vector? [10 11])"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(vector? '(12 13))"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(vector 3 4 5)"], @"[3 4 5]");
+    // conj
     XCTAssertEqualObjects([jsl rep:@"(conj [] 1)"], @"[1]");
     XCTAssertEqualObjects([jsl rep:@"(conj [1] 2)"], @"[1 2]");
     XCTAssertEqualObjects([jsl rep:@"(conj [2 3] 4)"], @"[2 3 4]");
     XCTAssertEqualObjects([jsl rep:@"(conj [2 3] 4 5 6)"], @"[2 3 4 5 6]");
     XCTAssertEqualObjects([jsl rep:@"(conj [1] [2 3])"], @"[1 [2 3]]");
     XCTAssertEqualObjects([jsl rep:@"(conj [1 2 3] 4 5 6)"], @"[1 2 3 4 5 6]");
+    XCTAssertThrows([jsl rep:@"(conj 1 [1 2])"]);
+    // nth
     XCTAssertEqualObjects([jsl rep:@"(nth 0 [1])"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(nth 1 [1 2])"], @"2");
     XCTAssertEqualObjects([jsl rep:@"(def x \"x\")"], @"\"x\"");
     XCTAssertThrows([jsl rep:@"(def x (nth [1 2] 2))"], @"Index out of bounds");
     XCTAssertEqualObjects([jsl rep:@"x"], @"\"x\"");
+    // first, rest
     XCTAssertEqualObjects([jsl rep:@"(first [])"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(first [10])"], @"10");
     XCTAssertEqualObjects([jsl rep:@"(first [10 11 12])"], @"10");
     XCTAssertEqualObjects([jsl rep:@"(rest [])"], @"()");
     XCTAssertEqualObjects([jsl rep:@"(rest [10])"], @"()");
     XCTAssertEqualObjects([jsl rep:@"(rest [10 11 12])"], @"(11 12)");
+    // seq
     XCTAssertEqualObjects([jsl rep:@"(seq [2 3 4])"], @"(2 3 4)");
     XCTAssertEqualObjects([jsl rep:@"(seq [])"], @"nil");
     // drop
