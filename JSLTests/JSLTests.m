@@ -2288,6 +2288,24 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(map (fn (a b) [a b]) {:a 1} {:x 3})"], @"[[[:a 1] [:x 3]]]");
 }
 
+- (void)testFold {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    // foldl
+    XCTAssertEqualObjects([jsl rep:@"(foldl (fn (x acc) (+ x acc)) 0 [1 2 3])"], @"6");
+    XCTAssertEqualObjects([jsl rep:@"(foldl (fn (x acc) (+ x acc)) 10 [])"], @"10");
+    XCTAssertEqualObjects([jsl rep:@"(foldl (fn (x acc) [(+ x (first acc))]) [0] [1 2 3])"], @"[6]");
+    XCTAssertEqualObjects([jsl rep:@"(foldl (fn (x acc) (str acc x)) \"\" [\"a\" 1 \"b\" 2 \"c\" 3])"], @"\"a1b2c3\"");
+    // foldr
+    XCTAssertEqualObjects([jsl rep:@"(foldr (fn (x acc) (+ x acc)) 0 [1 2 3])"], @"6");
+    XCTAssertEqualObjects([jsl rep:@"(foldr (fn (x acc) (+ x acc)) 10 [])"], @"10");
+    XCTAssertEqualObjects([jsl rep:@"(foldr (fn (x acc) [(+ x (first acc))]) [0] [1 2 3])"], @"[6]");
+    XCTAssertEqualObjects([jsl rep:@"(foldr (fn (x acc) (str acc x)) \"\" [\"a\" 1 \"b\" 2 \"c\" 3])"], @"\"3c2b1a\"");
+    // hash-map
+    [jsl rep:@"(def hm {:a 1 :b 2 :c 3})"];
+    [jsl rep:@"(def hm-ret (foldr (fn (x y acc) (println x y acc) (assoc acc x y)) {} hm))"];
+    XCTAssertEqualObjects([jsl rep:@"(= hm hm-ret)"], @"true");
+}
+
 - (void)test {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
 }

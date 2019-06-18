@@ -10,7 +10,15 @@
 
 @implementation NSMutableArray (JSList)
 
--(NSString *)dataType {
++ (BOOL)isMutableArray:(id)object {
+    return [object isKindOfClass:[NSMutableArray class]];
+}
+
++ (NSString *)dataType {
+    return @"NSMutableArray";
+}
+
+- (NSString *)dataType {
     return @"NSMutableArray";
 }
 

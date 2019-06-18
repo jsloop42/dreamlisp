@@ -11,6 +11,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSDecimalNumber (JSDataProtocol)
++ (NSString *)dataType;
+- (NSString *)dataType;
 @end
 
 NS_ASSUME_NONNULL_END

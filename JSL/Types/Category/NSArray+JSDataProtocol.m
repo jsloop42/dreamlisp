@@ -11,7 +11,11 @@
 
 @implementation NSArray (JSDataProtocol)
 
--(NSString *)dataType {
++ (NSString *)dataType {
+    return @"NSArray";
+}
+
+- (NSString *)dataType {
     return @"NSArray";
 }
 

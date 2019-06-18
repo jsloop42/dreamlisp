@@ -10,4 +10,12 @@
 
 @implementation NSMutableDictionary (JSHashMap)
 
++ (NSString *)dataType {
+    return @"NSMutableDictionary";
+}
+
+- (NSString *)dataType {
+    return @"NSMutableDictionary";
+}
+
 @end

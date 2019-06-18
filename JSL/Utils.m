@@ -91,7 +91,11 @@ static CacheTable *_cache;
             [res addObject:(isNative ? [[JSString alloc] initWithString:subStr] : subStr)];
         }
     } else if ([JSHashMap isHashMap:object]) {
-        res = [[self addObjectsToVector:[[JSVector alloc] initWithArray:res] fromHashMap:object] value];
+        if (isNative) {
+            res = [[self addObjectsToVector:[[JSVector alloc] initWithArray:res] fromHashMap:object] value];
+        } else {
+            res = [self hashMapToArray:object];
+        }
     } else {
         [[[JSError alloc] initWithFormat:DataTypeMismatch, @"'sequence'", [object dataTypeName]] throw];
     }
@@ -189,6 +193,21 @@ static CacheTable *_cache;
         [xs addObject:[[JSVector alloc] initWithArray:[@[key, [hashMap objectForKey:key]] mutableCopy]]];
     }
     return xs;
+}
+
+/** Creates a vector of key value pair vectors from the given hash-map. */
++ (NSMutableArray *)hashMapToArray:(JSHashMap *)hashMap {
+    NSArray *allKeys = [hashMap allKeys];
+    NSMutableArray *res = [NSMutableArray new];
+    NSMutableArray *kv = [NSMutableArray new];
+    id<JSDataProtocol> key = nil;
+    for (key in allKeys) {
+        kv = [NSMutableArray new];
+        [kv addObject:key];
+        [kv addObject:[hashMap objectForKey:key]];
+        [res addObject:kv];
+    }
+    return res;
 }
 
 #pragma mark String

@@ -10,7 +10,11 @@
 
 @implementation NSDecimalNumber (JSDataProtocol)
 
--(NSString *)dataType {
++ (NSString *)dataType {
+    return @"NSDecimalNumber";
+}
+
+- (NSString *)dataType {
     return @"NSDecimalNumber";
 }
 

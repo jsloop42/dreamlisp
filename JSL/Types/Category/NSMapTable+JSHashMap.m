@@ -10,6 +10,14 @@
 
 @implementation NSMapTable (JSHashMap)
 
++ (NSString *)dataType {
+    return @"NSMapTable";
+}
+
+- (NSString *)dataType {
+    return @"NSMapTable";
+}
+
 /** Returns all keys present in the `NSMapTable`. */
 - (NSArray *)allKeys {
     NSMutableArray *keys = [NSMutableArray new];

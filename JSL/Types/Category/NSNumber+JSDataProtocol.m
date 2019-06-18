@@ -10,7 +10,11 @@
 
 @implementation NSNumber (JSDataProtocol)
 
--(NSString *)dataType {
++ (NSString *)dataType {
+    return @"NSNumber";
+}
+
+- (NSString *)dataType {
     return @"NSNumber";
 }
 

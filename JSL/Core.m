@@ -867,8 +867,8 @@ double dmod(double a, double n) {
         id<JSDataProtocol> second = [xs second];
         NSString *sep = nil;
         BOOL isString = NO;
-        if ([JSHashMap isHashMap:first]) first = [[JSVector alloc] initWithArray:[Utils toArray:first]];
-        NSMutableArray *list = [Utils toArray:second];
+        if ([JSHashMap isHashMap:first]) first = [[JSVector alloc] initWithArray:[Utils toArray:first isNative:YES]];
+        NSMutableArray *list =  [Utils toArray:second isNative:![JSString isString:second]];
         NSMutableArray *res = [NSMutableArray new];
         NSMutableString *str = [NSMutableString new];
         NSUInteger len = [list count];
@@ -920,7 +920,7 @@ double dmod(double a, double n) {
         for (i = 0; i < outerLen; i++) { // xs: [[1 2 3] [4 5 6]] => [[1 4] [2 5] [3 6]]  => outerLen: 3, innerLen: 2
             isString ? (str = [[JSString alloc] initWithMutableString]) : (sub = [JSVector new]);
             for (j = 0; j < innerLen; j++) {
-                elem = [Utils toArray:xs[j]];
+                elem = [Utils toArray:xs[j] isNative:YES];
                 if (!isList) isList = [JSList isList:xs[j]];
                 if ([elem count] != outerLen) [[[JSError alloc] initWithFormat:ElementCountWithPositionError, outerLen, [elem count], j] throw];
                 if (isString) {
@@ -1013,22 +1013,36 @@ double dmod(double a, double n) {
 
     #pragma mark foldl
     id<JSDataProtocol>(^foldl)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
-        [TypeUtils checkArity:xs arity:3];
-        JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"foldl/3"];
-        id<JSDataProtocol> second = [xs second];
-        NSMutableArray *arr = [Utils toArray:[xs nth:2] isNative:YES];
-        id<JSDataProtocol> elem = nil;
-        if ([JSList isList:second]) {
-            JSList *acc = (JSList *)second;
-            for (elem in arr) {
-                acc = [fn apply:[@[[[self delegate] eval:elem], acc] mutableCopy]];
-            }
-            return acc;
-        }
-        return nil;
+        return [self fold:xs isRight:NO];
     };
     fn = [[JSFunction alloc] initWithFn:foldl argCount:3 name:@"foldl/3"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"foldl" moduleName:[Const coreModuleName]]];
+
+    #pragma mark foldr
+    id<JSDataProtocol>(^foldr)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        return [self fold:xs isRight:YES];
+    };
+    fn = [[JSFunction alloc] initWithFn:foldr argCount:3 name:@"foldr/3"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"foldr" moduleName:[Const coreModuleName]]];
+}
+
+- (id<JSDataProtocol>)fold:(NSMutableArray *)xs isRight:(BOOL)isRight {
+    [TypeUtils checkArity:xs arity:3];
+    JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName: isRight ? @"foldr/3" : @"foldl/3"];
+    id<JSDataProtocol> acc = [xs second];
+    NSMutableArray *arr = [Utils toArray:[xs nth:2]];
+    id<JSDataProtocol> elem = nil;
+    NSEnumerator *itr = isRight ? [arr reverseObjectEnumerator] : [arr objectEnumerator];
+    for (elem in itr) {
+        if ([NSMutableArray isMutableArray:elem]) {
+            NSMutableArray *params = (NSMutableArray *)elem;
+            [params addObject:acc];
+            acc = [fn apply:(NSMutableArray *)elem];
+        } else {
+            acc = [fn apply:[@[[[self delegate] eval:elem], acc] mutableCopy]];
+        }
+    }
+    return acc;
 }
 
 - (NSMutableArray *)filterArray:(NSMutableArray *)array withPredicate:(JSFunction *)predicate {
