@@ -212,8 +212,12 @@
     return [self copyWithZone:zone];
 }
 
-- (NSString *)description {
+- (NSString *)debugDescription {
     return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _n, _meta];
+}
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"%ld", [_n integerValue]];
 }
 
 @end

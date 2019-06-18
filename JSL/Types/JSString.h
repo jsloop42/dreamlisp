@@ -37,7 +37,6 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - MutableString methods
 - (void)append:(JSString *)string;
 - (void)appendString:(NSString *)string;
-- (void)appendStringWithFormat:(NSString *)format, ...;
 @end
 
 NS_ASSUME_NONNULL_END

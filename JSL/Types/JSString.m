@@ -216,14 +216,6 @@
     [_mstring appendString:string];
 }
 
-- (void)appendStringWithFormat:(NSString *)format, ... {
-    if (!_isMutable) [[[JSError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
-    va_list args;
-    va_start(args, format);
-    [_mstring appendFormat:format, args];
-    va_end(args);
-}
-
 - (BOOL)hasMeta {
     return _meta != nil;
 }

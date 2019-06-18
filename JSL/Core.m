@@ -826,12 +826,20 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"take" moduleName:[Const coreModuleName]]];
 
     #pragma mark join
+    /**
+     Take any element and a sequence or collection, joins, the element at each intermediate position, returning a sequence.
+
+     (join "a" [1 2 3])  ; [1 "a" 2 "a" 3]
+     (join "bc" "xyz")  ; "xbcybcz"
+     (join {:a 1} {:b 2 :c 3})  ; [[:c 3] [[:a 1]] [:b 2]]  For hash-maps order is not maintained
+     */
     id<JSDataProtocol>(^join)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:2];
         id<JSDataProtocol> first = [xs first];
         id<JSDataProtocol> second = [xs second];
         NSString *sep = nil;
         BOOL isString = NO;
+        if ([JSHashMap isHashMap:first]) first = [[JSVector alloc] initWithArray:[Utils toArray:first]];
         NSMutableArray *list = [Utils toArray:second];
         NSMutableArray *res = [NSMutableArray new];
         NSMutableString *str = [NSMutableString new];
@@ -859,13 +867,14 @@ double dmod(double a, double n) {
 
     #pragma mark zip
     /**
-     Takes a list of sequence with equal length and returns a new collection containing sequence with first list containing first elements from each sequence,
-     second list containing second elements from each sequence and so on. If a sequence is a list the result is a list as well as the sequence, else a vector of
-     sequences.
+     Takes a list of sequence or collection with equal length and returns a new collection containing sequence with first list containing first elements from
+     each sequence, second list containing second elements from each sequence and so on. If a sequence is a list the result is a list as well as the sequence,
+     else a vector of sequences. Hash maps are converted to key value pair of vectors.
 
      (zip '(1 2) [3 4] [5 6])  ; ((1 3 5) [2 4 6])
      (zip [1 2 3] [4 5 6])  ; [[1 4] [2 5] [3 6]]
      (zip "abc" "xyz")  ; ["ax" "by" "cz"]
+     (zip {:a 1} {:b 2})  ; [[[:a 1] [:b 2]]]
      */
     id<JSDataProtocol>(^zip)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         NSUInteger innerLen = [xs count];
@@ -886,7 +895,16 @@ double dmod(double a, double n) {
                 elem = [Utils toArray:xs[j]];
                 if (!isList) isList = [JSList isList:xs[j]];
                 if ([elem count] != outerLen) [[[JSError alloc] initWithFormat:ElementCountWithPositionError, outerLen, [elem count], j] throw];
-                isString ? [str appendString:[elem nth:i]] : [sub add:[elem nth:i]];
+                if (isString) {
+                    id<JSDataProtocol> obj = [elem nth:i];
+                    if ([JSNumber isNumber:obj]) {
+                        [str appendString:[NSString stringWithFormat:@"%ld", [(JSNumber *)obj integerValue]]];
+                    } else {
+                        [str appendString:[NSString stringWithFormat:@"%@", obj]];
+                    }
+                } else {
+                    [sub add:[elem nth:i]];
+                }
             }
             isString ? [res addObject:str] : isList ? [res addObject:[sub list]] : [res addObject:sub];
         }

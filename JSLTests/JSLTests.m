@@ -2176,6 +2176,8 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(join \"->\" [1 2 3])"], @"[1 \"->\" 2 \"->\" 3]");
     XCTAssertEqualObjects([jsl rep:@"(join 0 '(1 2 3))"], @"(1 0 2 0 3)");
     XCTAssertEqualObjects([jsl rep:@"(join nil '(1 2 3))"], @"(1 nil 2 nil 3)");
+    XCTAssertEqualObjects([jsl rep:@"(join {:b 4} [1 2 3])"], @"[1 [[:b 4]] 2 [[:b 4]] 3]");
+    XCTAssertEqualObjects([jsl rep:@"(sort (join {:b 4} {:a 2 :x 5}))"], @"[[[:b 4]] [:a 2] [:x 5]]");
     XCTAssertThrows([jsl rep:@"(join 0 1)"]);
 }
 
@@ -2185,6 +2187,14 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(zip \"abc\" \"xyz\")"], @"[\"ax\" \"by\" \"cz\"]");
     XCTAssertEqualObjects([jsl rep:@"(zip [1 3] [2 0] [1 -1])"], @"[[1 2 1] [3 0 -1]]");
     XCTAssertEqualObjects([jsl rep:@"(zip [1 2 3 4] [5 6 7 8])"], @"[[1 5] [2 6] [3 7] [4 8]]");
+    XCTAssertEqualObjects([jsl rep:@"(zip [1 2] \"ab\")"], @"[[1 \"a\"] [2 \"b\"]]");
+    [jsl rep:@"(def hm {:a 1 :b 2})"];
+    [jsl rep:@"(def ret (zip {:a 1 :b 2} {:x 3 :y 4}))"];
+    XCTAssertEqualObjects([jsl rep:@"(count (first ret))"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(count (second ret))"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(zip '(3) [1])"], @"((3 1))");
+    XCTAssertEqualObjects([jsl rep:@"(zip {:a 1} [1])"], @"[[[:a 1] 1]]");
+    XCTAssertEqualObjects([jsl rep:@"(zip \"abc\" [1 2 3])"], @"[\"a1\" \"b2\" \"c3\"]");
 }
 
 - (void)testInto {
