@@ -20,7 +20,7 @@
 
 (defun inc-test-count ()
   "Increment test case count."
-  (reset! info (assoc @info :count (+ (get :count @info) 1))))
+  (reset! info (assoc @info :count (+ (:count @info) 1))))
 
 
 (defmacro deftest (name desc & form)
