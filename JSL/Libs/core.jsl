@@ -51,6 +51,17 @@
     (sort [:key :asc] xs)
     (sort :asc xs)))
 
+(defmacro -> (x & form)
+  "Thread first macro, which takes an expression, evaluates it and inserts the result as the second element of the second expression and so on."
+  (if (empty? form)
+    x
+    (let (head (first form) tail (rest form))
+      (if (empty? tail)
+        (if (list? head)
+          `(~(first head) ~x ~@(rest head))
+          (list head x))
+        `(-> (-> ~x ~head) ~@tail)))))
+
 (defun exit ()
   "Exits the REPL"
   (println "Bye")
