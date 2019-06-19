@@ -62,6 +62,17 @@
           (list head x))
         `(-> (-> ~x ~head) ~@tail)))))
 
+(defmacro <- (x & form)
+  "Thread last macro, which takes an expression, evaluates it and inserts the result as the last element of the second expression and so on."
+  (if (empty? form)
+    x
+    (let (head (first form) tail (rest form))
+      (if (empty? tail)
+        (if (list? head)
+          `(~(first head) ~@(rest head) ~x)
+          (list head x))
+        `(<- (<- ~x ~head) ~@tail)))))
+
 (defun exit ()
   "Exits the REPL"
   (println "Bye")

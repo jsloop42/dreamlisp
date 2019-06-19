@@ -2314,11 +2314,17 @@ void predicateFn(id param, int tag, int counter, const char *s) {
 
 - (void)testThreadingMacro {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-    // thread left ->
+    // thread first ->
     XCTAssertEqualObjects([jsl rep:@"(-> [1 2 3] (count))"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(-> \"abc\" (zip) (rest) (first))"], @"\"b\"");
+    XCTAssertEqualObjects([jsl rep:@"(-> \"abc\" (concat \"xyz\"))"], @"\"abcxyz\"");
     XCTAssertEqualObjects([jsl rep:@"(-> [1 4] (zip [2 3]))"], @"[[1 2] [4 3]]");
     XCTAssertEqualObjects([jsl rep:@"(-> [1 4] (zip [2 3]) (flatten))"], @"[1 2 4 3]");
+    // thread last <-
+    XCTAssertEqualObjects([jsl rep:@"(<- \"abc\" (concat \"xyz\"))"], @"\"xyzabc\"");
+    XCTAssertEqualObjects([jsl rep:@"(<- [1 4] (zip [2 3]))"], @"[[2 1] [3 4]]");
+    XCTAssertEqualObjects([jsl rep:@"(<- [1 4] (zip [2 3]) (flatten))"], @"[2 1 3 4]");
+
 }
 
 - (void)test {
