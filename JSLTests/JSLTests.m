@@ -86,6 +86,26 @@
     XCTAssertEqualObjects([mstr mutableValue], @"abcd");
 }
 
+- (void)testJSStringSubString {
+    JSString *str = [[JSString alloc] initWithString:@"abcdefg"];
+    // test substringFrom:to
+    XCTAssertEqualObjects([str substringFrom:0 to:0], @"a");
+    XCTAssertEqualObjects([str substringFrom:0 to:1], @"ab");
+    XCTAssertEqualObjects([str substringFrom:1 to:1], @"b");
+    XCTAssertEqualObjects([str substringFrom:1 to:2], @"bc");
+    XCTAssertEqualObjects([str substringFrom:1 to:6], @"bcdefg");
+    XCTAssertThrows([str substringFrom:1 to:7]);
+    XCTAssertThrows([str substringFrom:1 to:0]);
+    // test substringFrom:count
+    XCTAssertEqualObjects([str substringFrom:0 count:0], @"");
+    XCTAssertEqualObjects([str substringFrom:0 count:1], @"a");
+    XCTAssertEqualObjects([str substringFrom:0 count:2], @"ab");
+    XCTAssertEqualObjects([str substringFrom:1 count:2], @"bc");
+    XCTAssertEqualObjects([str substringFrom:4 count:3], @"efg");
+    XCTAssertThrows([str substringFrom:5 count:4]);
+    XCTAssertThrows([str substringFrom:0 count:-1]);
+}
+
 - (void)testJSKeyword {
     JSKeyword *kwd = [[JSKeyword alloc] initWithString:@"foo"];
     XCTAssertEqualObjects([kwd value], @":foo");
@@ -916,6 +936,13 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(seq \"abc\")"], @"(\"a\" \"b\" \"c\")");
     XCTAssertEqualObjects([jsl rep:@"(apply str (seq \"this is a test\"))"], @"\"this is a test\"");
     XCTAssertEqualObjects([jsl rep:@"(seq \"\")"], @"nil");
+}
+
+- (void)testCoreStringFunctions {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    XCTAssertEqualObjects([jsl rep:@"(first \"\")"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(first \"abc\")"], @"\"a\"");
+    XCTAssertEqualObjects([jsl rep:@"(first \"12abc\")"], @"\"1\"");
 }
 
 - (void)testPrint {
@@ -1866,7 +1893,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(try (empty? 1) (catch ex (str ex)))"], @"\"'empty?/1' requires 'list' but obtained 'number'\"");
     XCTAssertEqualObjects([jsl rep:@"(try (empty? 1.0) (catch ex (str ex)))"], @"\"'empty?/1' requires 'list' but obtained 'number'\"");
     XCTAssertEqualObjects([jsl rep:@"(try (empty? (atom 1)) (catch ex (str ex)))"], @"\"'empty?/1' requires 'list' but obtained 'atom'\"");
-    XCTAssertEqualObjects([jsl rep:@"(try (first true) (catch ex (str ex)))"], @"\"'first/1' requires 'list' or 'vector' for argument 1 but obtained 'bool'\"");
+    XCTAssertEqualObjects([jsl rep:@"(try (first true) (catch ex (str ex)))"], @"\"'first/1' requires 'sequence' for argument 1 but obtained 'bool'\"");
     // Function not found
     XCTAssertEqualObjects([jsl rep:@"(try (abc [1 2 3]) (catch ex (str ex)))"], @"\"'user:abc/1' not found\"");
     // Arity error
@@ -2324,7 +2351,6 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(<- \"abc\" (concat \"xyz\"))"], @"\"xyzabc\"");
     XCTAssertEqualObjects([jsl rep:@"(<- [1 4] (zip [2 3]))"], @"[[2 1] [3 4]]");
     XCTAssertEqualObjects([jsl rep:@"(<- [1 4] (zip [2 3]) (flatten))"], @"[2 1 3 4]");
-
 }
 
 - (void)test {

@@ -32,6 +32,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta string:(JSString *)string;
 - (BOOL)isEmpty;
 - (NSUInteger)count;
+- (NSString *)substringFrom:(NSInteger)start;
+- (NSString *)substringFrom:(NSInteger)start to:(NSInteger)end;
+- (NSString *)substringFrom:(NSInteger)start count:(NSInteger)count;
 - (JSString *)sort:(NSInteger (*)(id, id, void *))sorter;
 - (JSString *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator;
 - (JSString *)joined:(NSArray *)arr with:(NSString *)separator;

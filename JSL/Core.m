@@ -497,15 +497,18 @@ double dmod(double a, double n) {
     /** Returns the first element of the list. If the list is empty, this returns nil. */
     id<JSDataProtocol>(^first)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
-        id<JSDataProtocol> list = [xs first];
-        if ([xs isEmpty] || [JSNil isNil:list]) return [JSNil new];
+        id<JSDataProtocol> elem = [xs first];
+        if ([xs isEmpty] || [JSNil isNil:elem]) return [JSNil new];
         id<JSDataProtocol> first = nil;
-        if ([JSList isKindOfList:list]) {
-            first = (id<JSDataProtocol>)[(JSList *)list first];
+        if ([JSList isKindOfList:elem]) {
+            first = [(JSList *)elem first];
+        } else if ([JSString isString:elem]) {
+            JSString *str = (JSString *)elem;
+            if (![str isEmpty]) first = [[JSString alloc] initWithString:[(JSString *)elem substringFrom:0 count:1]];
         } else {
-            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"first/1", @"'list' or 'vector'", 1, [list dataTypeName]] throw];
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"first/1", @"'sequence'", 1, [elem dataTypeName]] throw];
         }
-        return (first == nil) ? [JSNil new] : first;
+        return first ? first : [JSNil new];
     };
     fn = [[JSFunction alloc] initWithFn:first argCount:1 name:@"first/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"first" moduleName:[Const coreModuleName]]];

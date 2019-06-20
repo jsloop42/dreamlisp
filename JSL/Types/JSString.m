@@ -163,6 +163,28 @@
     return _mstring;
 }
 
+- (NSString *)substringFrom:(NSInteger)start {
+    NSUInteger len = [self count];
+    return [self substringFrom:start to:len - start + 1];
+}
+
+- (NSString *)substringFrom:(NSInteger)start to:(NSInteger)end {
+    NSString *str = [self value];
+    if (!str) return @"";
+    NSUInteger len = [str count];
+    if (end >= len) [[[JSError alloc] initWithFormat:IndexOutOfBounds, end, len] throw];
+    if (end < start) [[[JSError alloc] initWithFormat:IndexOutOfBounds, end, start] throw];
+    return [str substringWithRange:NSMakeRange(start, end - start + 1)];
+}
+
+- (NSString *)substringFrom:(NSInteger)start count:(NSInteger)count {
+    NSString *str = [self value];
+    if (!str) return @"";
+    NSUInteger len = [str count];
+    if (count > len) [[[JSError alloc] initWithFormat:IndexOutOfBounds, count, len] throw];
+    return [str substringWithRange:NSMakeRange(start, count)];
+}
+
 - (void)setValue:(id)value {
     _string = value;
 }
