@@ -514,13 +514,22 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"first" moduleName:[Const coreModuleName]]];
 
     #pragma mark rest
-    /** Returns a list without the first element. If the list is empty, then the list is returned. */
+    /** Returns a sequence without the first element. If the list is empty, then the list is returned. */
     id<JSDataProtocol>(^rest)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         id<JSDataProtocol> data = [xs first];
         if ([JSNil isNil:data]) return [JSList new];
-        JSList *list = [JSVector dataToList:data position:1 fnName:@"rest/1"];
-        return [list isEmpty] ? [JSList new] : (JSList *)[list rest];
+        NSMutableArray *rest = nil;
+        if ([JSList isKindOfList:data]) {
+            rest = [[(JSList *)data value] rest];
+            return [JSVector isVector:data] ? [[JSVector alloc] initWithArray:rest] : [[JSList alloc] initWithArray:rest];
+        } else if ([JSString isString:data]) {
+            NSMutableArray *arr = [Utils stringToArray:(JSString *)data isNative:YES];
+            if (![arr isEmpty]) [arr removeObjectAtIndex:0];
+            return [[JSVector alloc] initWithArray:arr];
+        }
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"rest/1", @"'sequence'", [data dataTypeName]] throw];
+        return [JSList new];
     };
     fn = [[JSFunction alloc] initWithFn:rest argCount:1 name:@"rest/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"rest" moduleName:[Const coreModuleName]]];

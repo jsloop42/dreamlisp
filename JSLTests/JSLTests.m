@@ -938,11 +938,17 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(seq \"\")"], @"nil");
 }
 
-- (void)testCoreStringFunctions {
+- (void)testStringCoreFunctions {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
+    // first
     XCTAssertEqualObjects([jsl rep:@"(first \"\")"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(first \"abc\")"], @"\"a\"");
     XCTAssertEqualObjects([jsl rep:@"(first \"12abc\")"], @"\"1\"");
+    // rest
+    XCTAssertEqualObjects([jsl rep:@"(rest \"\")"], @"[]");
+    XCTAssertEqualObjects([jsl rep:@"(rest \"a\")"], @"[]");
+    XCTAssertEqualObjects([jsl rep:@"(rest \"ab\")"], @"[\"b\"]");
+    XCTAssertEqualObjects([jsl rep:@"(rest \"abc\")"], @"[\"b\" \"c\"]");
 }
 
 - (void)testPrint {
@@ -1289,9 +1295,9 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(first [])"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(first [10])"], @"10");
     XCTAssertEqualObjects([jsl rep:@"(first [10 11 12])"], @"10");
-    XCTAssertEqualObjects([jsl rep:@"(rest [])"], @"()");
-    XCTAssertEqualObjects([jsl rep:@"(rest [10])"], @"()");
-    XCTAssertEqualObjects([jsl rep:@"(rest [10 11 12])"], @"(11 12)");
+    XCTAssertEqualObjects([jsl rep:@"(rest [])"], @"[]");
+    XCTAssertEqualObjects([jsl rep:@"(rest [10])"], @"[]");
+    XCTAssertEqualObjects([jsl rep:@"(rest [10 11 12])"], @"[11 12]");
     // seq
     XCTAssertEqualObjects([jsl rep:@"(seq [2 3 4])"], @"(2 3 4)");
     XCTAssertEqualObjects([jsl rep:@"(seq [])"], @"nil");

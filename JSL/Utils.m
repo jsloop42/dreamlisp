@@ -82,14 +82,7 @@ static CacheTable *_cache;
     if ([JSList isKindOfList:object]) {
         res = [(JSList *)object value];
     } else if ([JSString isString:object]) {
-        NSString *str = [(JSString *)object value];
-        NSString *subStr = nil;
-        NSUInteger len = [str count];
-        NSUInteger i = 0;
-        for (i = 0; i < len; i++) {
-            subStr = [str substringWithRange:NSMakeRange(i, 1)];
-            [res addObject:(isNative ? [[JSString alloc] initWithString:subStr] : subStr)];
-        }
+        res = [self stringToArray:object isNative:isNative];
     } else if ([JSHashMap isHashMap:object]) {
         if (isNative) {
             res = [[self addObjectsToVector:[[JSVector alloc] initWithArray:res] fromHashMap:object] value];
@@ -211,6 +204,19 @@ static CacheTable *_cache;
 }
 
 #pragma mark String
+
++ (NSMutableArray *)stringToArray:(JSString *)string isNative:(BOOL)isNative {
+    NSMutableArray *res = [NSMutableArray new];
+    NSString *str = [string value];
+    NSString *subStr = nil;
+    NSUInteger len = [str count];
+    NSUInteger i = 0;
+    for (i = 0; i < len; i++) {
+        subStr = [str substringWithRange:NSMakeRange(i, 1)];
+        [res addObject:(isNative ? [[JSString alloc] initWithString:subStr] : subStr)];
+    }
+    return res;
+}
 
 + (void)appendStringFromArray:(NSMutableArray *)array string:(JSString *)string {
     if (![string isMutable]) [[[JSError alloc] initWithFormat:IsImmutableError, [string dataTypeName]] throw];

@@ -41,7 +41,7 @@
 /** Returns a new mutable array without the first element. The original array remains unchanged. */
 - (NSMutableArray *)rest {
     NSMutableArray *arr = [self mutableCopy];
-    [arr removeObjectAtIndex:0];
+    if (![arr isEmpty]) [arr removeObjectAtIndex:0];
     return arr;
 }
 

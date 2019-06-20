@@ -35,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (JSList *)hashMapToList:(JSHashMap *)hashMap;
 + (JSVector *)hashMapToVector:(JSHashMap *)hashMap;
 #pragma mark String
++ (NSMutableArray *)stringToArray:(JSString *)string isNative:(BOOL)isNative;
 + (void)appendStringFromArray:(NSMutableArray *)array string:(JSString *)string;
 - (instancetype)init NS_UNAVAILABLE;
 @end
