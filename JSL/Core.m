@@ -642,14 +642,19 @@ double dmod(double a, double n) {
     /** Returns the last element of the list. If the list is empty, this returns nil. */
     id<JSDataProtocol>(^last)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
-        id<JSDataProtocol> list = [xs first];
+        id<JSDataProtocol> seq = [xs first];
         id<JSDataProtocol> last = nil;
-        if ([JSList isKindOfList:list]) {
-            last = (id<JSDataProtocol>)[(JSList *)list last];
+        if ([JSList isKindOfList:seq]) {
+            last = [(JSList *)seq last];
+        } else if ([JSString isString:seq]) {
+            JSString *str = (JSString *)seq;
+            NSUInteger len = [str count];
+            if (len == 0) return [JSNil new];
+            last = [[JSString alloc] initWithString:[(JSString *)seq substringFrom:len - 1 count:1]];
         } else {
-            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"last/1", @"'list' or 'vector'", 1, [list dataTypeName]] throw];
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"last/1", @"'sequence'", 1, [list dataTypeName]] throw];
         }
-        return (last == nil) ? [JSNil new] : last;
+        return last == nil ? [JSNil new] : last;
     };
     fn = [[JSFunction alloc] initWithFn:last argCount:1 name:@"last/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"last" moduleName:[Const coreModuleName]]];
