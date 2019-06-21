@@ -949,6 +949,12 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(rest \"a\")"], @"[]");
     XCTAssertEqualObjects([jsl rep:@"(rest \"ab\")"], @"[\"b\"]");
     XCTAssertEqualObjects([jsl rep:@"(rest \"abc\")"], @"[\"b\" \"c\"]");
+    // nth
+    XCTAssertEqualObjects([jsl rep:@"(nth 0 \"abc\")"], @"\"a\"");
+    XCTAssertEqualObjects([jsl rep:@"(nth 1 \"abc\")"], @"\"b\"");
+    XCTAssertThrows([jsl rep:@"(nth -1 \"abc\")"]);
+    XCTAssertThrows([jsl rep:@"(nth 3 \"abc\")"]);
+    XCTAssertThrows([jsl rep:@"(nth 0 \"\")"]);
 }
 
 - (void)testPrint {
@@ -1515,7 +1521,7 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
             XCTAssertEqualObjects(message, @"\"exc is:\" \"'user:abc/2' not found\"");
             break;
         case 1:
-            XCTAssertEqualObjects(message, @"\"exc is:\" \"Index 1 is out of bounds for length 0\"");
+            XCTAssertEqualObjects(message, @"\"exc is:\" \"Index 1 is out of bound for length 0\"");
             break;
         case 2:
             XCTAssertEqualObjects(message, @"\"exc is:\" [\"data\" \"foo\"]");

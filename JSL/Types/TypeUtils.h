@@ -27,14 +27,14 @@ typedef NS_ENUM(NSUInteger, ArityPredicate) {
 @interface TypeUtils: NSObject
 + (BOOL)matchString:(NSString *)string withExpression:(NSRegularExpression *)pattern;
 + (NSMutableArray *)mapOnArray:(NSMutableArray *)array withBlock:(id (^)(id arg))block;
-+ (void)checkArity:(NSMutableArray *)data arity:(NSUInteger)arity;
-+ (void)checkArityCount:(NSUInteger)count arity:(NSUInteger)arity;
-+ (void)checkArity:(NSMutableArray *)xs arity:(NSUInteger)arity fnName:(NSString *)fnName;
-+ (void)checkArityCount:(NSUInteger)count arity:(NSUInteger)arity fnName:(NSString *)fnName;
-+ (void)checkIndexBounds:(NSMutableArray *)xs index:(NSUInteger)index;
-+ (void)checkIndexBoundsCount:(NSUInteger)count index:(NSUInteger)index;
++ (void)checkArity:(NSMutableArray *)data arity:(NSInteger)arity;
++ (void)checkArityCount:(NSUInteger)count arity:(NSInteger)arity;
++ (void)checkArity:(NSMutableArray *)xs arity:(NSInteger)arity fnName:(NSString *)fnName;
++ (void)checkArityCount:(NSInteger)count arity:(NSInteger)arity fnName:(NSString *)fnName;
++ (void)checkIndexBounds:(NSMutableArray *)xs index:(NSInteger)index;
++ (void)checkIndexBoundsCount:(NSInteger)count index:(NSInteger)index;
 + (void)checkArity:(NSMutableArray *)xs arities:(NSArray *)arities;
-+ (void)checkArity:(NSMutableArray *)xs arity:(NSUInteger)arity predicate:(enum ArityPredicate)predicate;
++ (void)checkArity:(NSMutableArray *)xs arity:(NSInteger)arity predicate:(enum ArityPredicate)predicate;
 @end
 
 extern NSInteger sortAscending(id obj1, id obj2, void *context);

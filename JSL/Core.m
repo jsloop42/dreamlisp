@@ -457,20 +457,21 @@ double dmod(double a, double n) {
 
     #pragma mark nth
     /**
-     Returns the nth indexed element from the list.
+     Returns the nth element from the sequence.
 
      (nth 2 [1 2 3]) ; 3
      (nth 0 [1 2 3]) ; 1
+     (nth 3 "abcd") ; "d"
      */
     id<JSDataProtocol>(^nth)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:2];
         id<JSDataProtocol> first = [xs first];
         id<JSDataProtocol> second = [xs second];
         JSNumber *num = [JSNumber dataToNumber:first position:1 fnName:@"nth/2"];
-        NSMutableArray *list = [[JSVector dataToList:second position:2 fnName:@"nth/2"] value];
+        NSMutableArray *seq = [Utils toArray:second isNative:YES];
         NSUInteger n = [num integerValue];
-        [TypeUtils checkIndexBounds:list index:n];
-        return [list nth:n];
+        [TypeUtils checkIndexBounds:seq index:n];
+        return [seq nth:n];
     };
     fn = [[JSFunction alloc] initWithFn:nth argCount:2 name:@"nth/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"nth" moduleName:[Const coreModuleName]]];

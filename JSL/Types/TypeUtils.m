@@ -30,11 +30,11 @@
  @param xs The arguments array.
  @param arity The argument count.
  */
-+ (void)checkArity:(NSMutableArray *)xs arity:(NSUInteger)arity {
++ (void)checkArity:(NSMutableArray *)xs arity:(NSInteger)arity {
     return [self checkArityCount:[xs count] arity:arity];
 }
 
-+ (void)checkArityCount:(NSUInteger)count arity:(NSUInteger)arity {
++ (void)checkArityCount:(NSInteger)count arity:(NSInteger)arity {
     if (count != arity) [[[JSError alloc] initWithFormat:ArityError, arity, count] throw];
 }
 
@@ -45,7 +45,7 @@
  @param arity Expected arity.
  @param fnName The caller function name
  */
-+ (void)checkArity:(NSMutableArray *)xs arity:(NSUInteger)arity fnName:(NSString *)fnName {
++ (void)checkArity:(NSMutableArray *)xs arity:(NSInteger)arity fnName:(NSString *)fnName {
     return [self checkArityCount:[xs count] arity:arity fnName:fnName];
 }
 
@@ -56,7 +56,7 @@
   @param arity Expected arity.
   @param fnName The caller function name
  */
-+ (void)checkArityCount:(NSUInteger)count arity:(NSUInteger)arity fnName:(NSString *)fnName {
++ (void)checkArityCount:(NSInteger)count arity:(NSInteger)arity fnName:(NSString *)fnName {
     if (count != arity) [[[JSError alloc] initWithFormat:ArityError, arity, count] throw];
 }
 
@@ -72,7 +72,7 @@
   @param predicate The condition that should be met.
   @throw @c ArityError
  */
-+ (void)checkArity:(NSMutableArray *)xs arity:(NSUInteger)arity predicate:(enum ArityPredicate)predicate {
++ (void)checkArity:(NSMutableArray *)xs arity:(NSInteger)arity predicate:(enum ArityPredicate)predicate {
     NSUInteger count = [xs count];
     switch (predicate) {
         case ArityPredicateEq:
@@ -114,7 +114,7 @@
  @param index The index to check.
  @throw @c IndexOutOfBounds exception.
  */
-+ (void)checkIndexBounds:(NSMutableArray *)xs index:(NSUInteger)index {
++ (void)checkIndexBounds:(NSMutableArray *)xs index:(NSInteger)index {
     NSUInteger count = [xs count];
     [self checkIndexBoundsCount:count index:index];
 }
@@ -126,10 +126,11 @@
  @param index The index to check.
  @throw @c IndexOutOfBounds exception.
  */
-+ (void)checkIndexBoundsCount:(NSUInteger)count index:(NSUInteger)index {
-    if (index < 0 || index >= count) {
-        JSError *info = [[JSError alloc] initWithFormat:IndexOutOfBounds, index, count];
-        [info throw];
++ (void)checkIndexBoundsCount:(NSInteger)count index:(NSInteger)index {
+    if (index < 0) {
+        [[[JSError alloc] initWithFormat:IndexOutOfBounds, index, 0] throw];
+    } else if (index >= count) {
+        [[[JSError alloc] initWithFormat:IndexOutOfBounds, index, count] throw];
     }
 }
 
