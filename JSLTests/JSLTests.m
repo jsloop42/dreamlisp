@@ -955,6 +955,13 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertThrows([jsl rep:@"(nth -1 \"abc\")"]);
     XCTAssertThrows([jsl rep:@"(nth 3 \"abc\")"]);
     XCTAssertThrows([jsl rep:@"(nth 0 \"\")"]);
+    // take
+    XCTAssertEqualObjects([jsl rep:@"(take 1 \"abc\")"], @"\"a\"");
+    XCTAssertEqualObjects([jsl rep:@"(take 2 \"abc\")"], @"\"ab\"");
+    XCTAssertEqualObjects([jsl rep:@"(take 0 \"\")"], @"\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(try (take 1 \"\") (catch ex ex))"], @"\"Index 1 is out of bound for length 0\"");
+    XCTAssertEqualObjects([jsl rep:@"(try (take -1 \"abcd\") (catch ex ex))"], @"\"Index -1 is out of bound for length 0\"");
+    XCTAssertEqualObjects([jsl rep:@"(try (take 10 \"abcd\") (catch ex ex))"], @"\"Index 10 is out of bound for length 4\"");
 }
 
 - (void)testPrint {

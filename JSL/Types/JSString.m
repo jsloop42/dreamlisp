@@ -181,7 +181,7 @@
     NSString *str = [self value];
     if (!str) return @"";
     NSUInteger len = [str count];
-    if (count > len) [[[JSError alloc] initWithFormat:IndexOutOfBounds, count, len] throw];
+    if (count > len) [[[JSError alloc] initWithFormat:IndexOutOfBounds, count, count < 0 ? 0 : len] throw];
     return [str substringWithRange:NSMakeRange(start, count)];
 }
 

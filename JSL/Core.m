@@ -853,6 +853,7 @@ double dmod(double a, double n) {
         id<JSDataProtocol> first = [xs first];
         id<JSDataProtocol> second = [xs second];
         JSNumber *num = [JSNumber dataToNumber:first position:1 fnName:@"take/2"];
+        if ([JSString isString:second]) return [[JSString alloc] initWithString:[(JSString *)second substringFrom:0 count:[num integerValue]]];
         NSMutableArray *list = [[JSVector dataToList:second position:2 fnName:@"take/2"] value];
         NSUInteger n = [num integerValue];
         [TypeUtils checkIndexBounds:list index:n];
