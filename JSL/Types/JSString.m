@@ -152,7 +152,7 @@
 }
 
 - (NSUInteger)count {
-    return [_string length];
+    return _string ? [_string length] : [_mstring length];
 }
 
 - (NSString *)value {
@@ -254,13 +254,7 @@
 
 /** Returns the result of concatenating the strings in the given array with the separator. */
 - (JSString *)joined:(NSArray<JSString *> *)arr with:(NSString *)separator {
-    NSMutableString *res = [NSMutableString new];
-    NSUInteger i = 0;
-    NSUInteger len = [arr count];
-    for (i = 0; i < len; i++) {
-        [res appendFormat:@"%@%@", [(JSString *)arr[i] value], separator];
-    }
-    return [[JSString alloc] initWithString:res];
+    return [[JSString alloc] initWithString:[arr componentsJoinedByString:separator]];
 }
 
 #pragma mark - Mutable
@@ -273,6 +267,11 @@
 - (void)appendString:(NSString *)string {
     if (!_isMutable) [[[JSError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
     [_mstring appendString:string];
+}
+
+- (void)append:(id)object atIndex:(NSInteger)index {
+    if (!_isMutable) [[[JSError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
+    [_mstring insertString:[object description] atIndex:index];
 }
 
 - (BOOL)hasMeta {
@@ -295,13 +294,13 @@
     return elem;
 }
 
+- (NSString *)description {
+    return _isMutable ? _mstring : _string;
+}
+
 - (NSString *)debugDescription {
     return [NSString stringWithFormat:@"<%@ %p - value: %@ isMutable: %hhd meta: %@>", NSStringFromClass([self class]),
             self, _isMutable ? _mstring : _string, _isMutable, _meta];
-}
-
-- (NSString *)description {
-    return _isMutable ? _mstring : _string;
 }
 
 @end

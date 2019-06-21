@@ -12,14 +12,16 @@
     NSMutableArray *_array;
     id<JSDataProtocol> _meta;
     NSInteger _position;
-    BOOL _isImported;
     NSString *_moduleName;
+    BOOL _isImported;
+    BOOL _isMutable;
 }
 
 @synthesize meta = _meta;
 @synthesize value = _array;
 @synthesize isImported = _isImported;
 @synthesize moduleName = _moduleName;
+@synthesize isMutable = _isMutable;
 
 + (BOOL)isList:(id)object {
     return [[object className] isEqual:[self className]];
@@ -228,6 +230,18 @@
 }
 
 - (NSString *)description {
+    NSMutableString *str = [NSMutableString new];
+    NSUInteger len = [_array count];
+    NSUInteger last = len - 1;
+    NSUInteger i = 0;
+    for (i = 0; i < len; i++) {
+        [str appendString:[_array[i] description]];
+        if (i != last) [str appendString:@" "];
+    }
+    return [NSString stringWithFormat:@"(%@)", str];
+}
+
+- (NSString *)debugDescription {
     return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [_array description], _meta];
 }
 

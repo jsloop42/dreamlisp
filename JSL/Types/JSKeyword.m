@@ -12,14 +12,16 @@
     NSString *_string;
     id<JSDataProtocol> _meta;
     NSInteger _position;
-    BOOL _isImported;
     NSString *_moduleName;
+    BOOL _isImported;
+    BOOL _isMutable;
 }
 
 @synthesize value = _string;
 @synthesize meta = _meta;
 @synthesize isImported = _isImported;
 @synthesize moduleName = _moduleName;
+@synthesize isMutable = _isMutable;
 
 + (BOOL)isKeyword:(id)object {
     return [[object className] isEqual:[self className]];
@@ -137,6 +139,10 @@
 }
 
 - (NSString *)description {
+    return _string;
+}
+
+- (NSString *)debugDescription {
     return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _string, _meta];
 }
 

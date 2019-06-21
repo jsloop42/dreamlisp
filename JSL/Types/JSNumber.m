@@ -15,14 +15,16 @@
     BOOL _isDouble;
     id<JSDataProtocol> _meta;
     NSInteger _position;
-    BOOL _isImported;
     NSString *_moduleName;
+    BOOL _isImported;
+    BOOL _isMutable;
 }
 
 @synthesize meta = _meta;
 @synthesize value = _n;
 @synthesize isImported = _isImported;
 @synthesize moduleName = _moduleName;
+@synthesize isMutable = _isMutable;
 
 + (BOOL)isNumber:(id)object {
     return [[object className] isEqual:[self className]];
@@ -212,12 +214,12 @@
     return [self copyWithZone:zone];
 }
 
-- (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _n, _meta];
-}
-
 - (NSString *)description {
     return [NSString stringWithFormat:@"%ld", [_n integerValue]];
+}
+
+- (NSString *)debugDescription {
+    return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _n, _meta];
 }
 
 @end

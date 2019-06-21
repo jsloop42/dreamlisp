@@ -91,6 +91,13 @@
     XCTAssertEqualObjects([[[JSString alloc] initWithString:@""] reverse], @"");
     XCTAssertEqualObjects([[[JSString alloc] initWithString:@"1234"] reverse], @"4321");
     XCTAssertEqualObjects([[[JSString alloc] initWithString:@"[1 2 3 4]"] reverse], @"]4 3 2 1[");
+    // joined
+    JSString *str1 = [[JSString alloc] initWithString:@"a"];
+    JSString *str2 = [[JSString alloc] initWithString:@"b"];
+    JSString *str3 = [[JSString alloc] initWithString:@"c"];
+    JSString *str4 = [[JSString alloc] initWithMutableString];
+    NSArray<JSString *> *arr = @[str1, str2, str3];
+    XCTAssertEqualObjects([[str4 joined:arr with:@", "] value], @"a, b, c");
 }
 
 - (void)testJSStringSubString {
@@ -999,6 +1006,16 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertThrows([jsl rep:@"(nth-tail -1 3 \"abcd\")"]);
     XCTAssertThrows([jsl rep:@"(nth-tail 1 4 \"abcd\")"]);
     XCTAssertThrows([jsl rep:@"(nth-tail 1 0 \"abcd\")"]);
+    // append
+    XCTAssertEqualObjects([jsl rep:@"(append \"a\" 0 \"bcd\")"], @"\"abcd\"");
+    XCTAssertEqualObjects([jsl rep:@"(append \"a\" 1 \"bcd\")"], @"\"bacd\"");
+    XCTAssertEqualObjects([jsl rep:@"(append \"abc\" 0 \"d\")"], @"\"abcd\"");
+    XCTAssertEqualObjects([jsl rep:@"(append \"ab\" 3 \"bcd\")"], @"\"bcdab\"");
+    XCTAssertEqualObjects([jsl rep:@"(append 1 0 \"bcd\")"], @"\"1bcd\"");
+    XCTAssertEqualObjects([jsl rep:@"(append '(1 2 3) 0 \"bcd\")"], @"\"(1 2 3)bcd\"");
+    XCTAssertEqualObjects([jsl rep:@"(append [1 2 3] 0 \"bcd\")"], @"\"[1 2 3]bcd\"");
+    XCTAssertEqualObjects([jsl rep:@"(append {:a 1} 0 \"bcd\")"], @"\"{:a 1}bcd\"");
+    XCTAssertThrows([jsl rep:@"(append 0 4 '(1 2))"]);
 }
 
 - (void)testPrint {
@@ -1320,6 +1337,12 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertThrows([jsl rep:@"(take 2 '(0))"]);
     XCTAssertThrows([jsl rep:@"(take 2 nil)"]);
     XCTAssertThrows([jsl rep:@"(take 2 \"\"))"]);
+    // append
+    XCTAssertEqualObjects([jsl rep:@"(append 0 0 '(1))"], @"(0 1)");
+    XCTAssertEqualObjects([jsl rep:@"(append 0 1 '(1))"], @"(1 0)");
+    XCTAssertEqualObjects([jsl rep:@"(append 4 4 '(0 1 2 3 5))"], @"(0 1 2 3 4 5)");
+    XCTAssertThrows([jsl rep:@"(append 0 -1 '(1 2))"]);
+    XCTAssertThrows([jsl rep:@"(append 0 4 '(1 2))"]);
 }
 
 - (void)testVectorCoreFunctions {
@@ -1377,6 +1400,13 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertThrows([jsl rep:@"(take 2 '[0])"]);
     XCTAssertThrows([jsl rep:@"(take 2 nil)"]);
     XCTAssertThrows([jsl rep:@"(take 2 \"\"))"]);
+    // append
+    XCTAssertEqualObjects([jsl rep:@"(append 0 0 [1])"], @"[0 1]");
+    XCTAssertEqualObjects([jsl rep:@"(append 0 1 [1])"], @"[1 0]");
+    XCTAssertEqualObjects([jsl rep:@"(append 4 4 [0 1 2 3 5])"], @"[0 1 2 3 4 5]");
+    XCTAssertThrows([jsl rep:@"(append 0 -1 [1 3])"]);
+    XCTAssertThrows([jsl rep:@"(append 0 4 [1 2])"]);
+    XCTAssertThrows([jsl rep:@"(append 0 [1 2])"]);
 }
 
 - (void)testKeyword {

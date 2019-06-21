@@ -12,14 +12,16 @@
     id<JSDataProtocol> _data;
     id<JSDataProtocol> _meta;
     NSInteger _position;
-    BOOL _isImported;
     NSString *_moduleName;
+    BOOL _isImported;
+    BOOL _isMutable;
 }
 
 @synthesize meta = _meta;
 @synthesize value = _data;
 @synthesize isImported = _isImported;
 @synthesize moduleName = _moduleName;
+@synthesize isMutable = _isMutable;
 
 + (BOOL)isAtom:(id)object {
     return [[object className] isEqual:[self className]];
@@ -102,6 +104,10 @@
 }
 
 - (NSString *)description {
+    return [NSString stringWithFormat:@"(atom %@)", _data];
+}
+
+- (NSString *)debugDescription {
     return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _data, _meta];
 }
 

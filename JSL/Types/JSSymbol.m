@@ -25,6 +25,7 @@
     BOOL _isFault;
     BOOL _isImported;
     BOOL _isCore;  // If it is a core symbol of the form def, defmacro, let, if etc.
+    BOOL _isMutable;
 }
 
 @synthesize arity = _arity;
@@ -41,6 +42,7 @@
 @synthesize isFault = _isFault;
 @synthesize isImported = _isImported;
 @synthesize isCore = _isCore;
+@synthesize isMutable = _isMutable;
 
 + (BOOL)isSymbol:(id)object {
     return [[object className] isEqual:[self className]];
@@ -368,6 +370,10 @@
 }
 
 - (NSString *)description {
+    return _name;
+}
+
+- (NSString *)debugDescription {
     return [NSString stringWithFormat:@"<%@ %p - ModuleName: %@, InitialModuleName: %@, " \
             @"Name: %@, Arity:%ld, InitialArity: %ld, " \
             @"isQualified: %hhd, isFault: %hhd, " \

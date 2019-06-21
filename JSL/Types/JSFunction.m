@@ -21,6 +21,7 @@
     NSString *_name;
     NSString *_moduleName;
     BOOL _isImported;
+    BOOL _isMutable;
 }
 
 @synthesize fn = _fn;
@@ -34,6 +35,7 @@
 @synthesize name = _name;
 @synthesize moduleName = _moduleName;
 @synthesize isImported = _isImported;
+@synthesize isMutable = _isMutable;
 
 + (BOOL)isFunction:(id)object {
     return [[object className] isEqual:[self className]];
@@ -206,6 +208,10 @@
 }
 
 - (NSString *)description {
+    return [self name];
+}
+
+- (NSString *)debugDescription {
     return [NSString stringWithFormat:@"<%@ %p - params: %@, ast: %@ meta: %@>", NSStringFromClass([self class]), self, [_params description], _ast, _meta];
 }
 

@@ -15,12 +15,14 @@
     NSString *_value;
     NSString *_moduleName;
     BOOL _isImported;
+    BOOL _isMutable;
 }
 
 @synthesize meta = _meta;
 @synthesize value = _value;
 @synthesize moduleName = _moduleName;
 @synthesize isImported = _isImported;
+@synthesize isMutable = _isMutable;
 
 + (BOOL)isFault:(id)object {
     return [[object className] isEqual:[self className]];
@@ -94,6 +96,10 @@
 }
 
 - (NSString *)description {
+    return [NSString stringWithFormat:@"%@", _value];
+}
+
+- (NSString *)debugDescription {
     return [NSString stringWithFormat:@"<%@ %p - value: %@>", NSStringFromClass([self class]), self, _value];
 }
 

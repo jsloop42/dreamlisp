@@ -480,13 +480,11 @@ double dmod(double a, double n) {
     /** Takes a start, end index, a sequence and returs a sub-sequence within the given indices inclusive. */
     id<JSDataProtocol>(^nthTail)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:3 predicate:ArityPredicateLessThanOrEq];
-        id<JSDataProtocol> first = [xs first];
-        id<JSDataProtocol> second = [xs second];
         id<JSDataProtocol> data = [xs nth:2];
         NSUInteger len = [xs count];
         NSString *fnName = @"nth-tail/3";
-        NSInteger start = [[JSNumber dataToNumber:first position:1 fnName:fnName] integerValue];
-        NSInteger end = [[JSNumber dataToNumber:second position:2 fnName:fnName] integerValue];;
+        NSInteger start = [[JSNumber dataToNumber:[xs first] position:1 fnName:fnName] integerValue];
+        NSInteger end = [[JSNumber dataToNumber:[xs second] position:2 fnName:fnName] integerValue];;
         if ([JSString isString:data]) {
             JSString *str = (JSString *)data;
             return [[JSString alloc] initWithString:[str substringFrom:start to:end]];
@@ -1056,6 +1054,34 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:foldr argCount:3 name:@"foldr/3"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"foldr" moduleName:[Const coreModuleName]]];
+
+    #pragma mark append
+    /** Takes an element, an index, a sequence and appends the element at that index. */
+    id<JSDataProtocol>(^append)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:3];
+        id<JSDataProtocol> first = [xs first];
+        id<JSDataProtocol> data = [xs nth:2];
+        NSString *fnName = @"append/3";
+        NSInteger index = [[JSNumber dataToNumber:[xs second] position:2 fnName:fnName] integerValue];
+        if (index < 0) [[[JSError alloc] initWithFormat:IndexOutOfBounds, index, 0] throw];
+        if ([JSString isString:data]) {
+            JSString *str = [[JSString alloc] initWithMutableString:[[(JSString *)data value] mutableCopy]];
+            NSInteger len = [str count];
+            if (index > len) [[[JSError alloc] initWithFormat:IndexOutOfBounds, index, len] throw];
+            [str append:first atIndex:index];
+            return str;
+        } else if ([JSList isKindOfList:data]) {
+            NSMutableArray *arr = [[(JSList *)data value] mutableCopy];
+            NSInteger len = [arr count];
+            if (index > len) [[[JSError alloc] initWithFormat:IndexOutOfBounds, index, len] throw];
+            [arr insertObject:first atIndex:index];
+            return [JSVector isVector:data] ? [[JSVector alloc] initWithArray:arr] : [[JSList alloc] initWithArray:arr];
+        }
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'sequence'", 3, [data dataTypeName]] throw];
+        return [JSNil new];
+    };
+    fn = [[JSFunction alloc] initWithFn:append argCount:3 name:@"append/3"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"append" moduleName:[Const coreModuleName]]];
 }
 
 - (id<JSDataProtocol>)fold:(NSMutableArray *)xs isRight:(BOOL)isRight {

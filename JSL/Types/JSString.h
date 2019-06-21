@@ -15,7 +15,6 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JSString : NSObject <JSDataProtocol>
-@property (nonatomic, readwrite) BOOL isMutable;
 @property (nonatomic, readwrite) NSMutableString *mutableValue;
 + (BOOL)isString:(id)object;
 + (BOOL)isString:(id)object withValue:(NSString *)name;
@@ -42,6 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - MutableString methods
 - (void)append:(JSString *)string;
 - (void)appendString:(NSString *)string;
+- (void)append:(id)object atIndex:(NSInteger)index;
 @end
 
 NS_ASSUME_NONNULL_END

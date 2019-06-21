@@ -12,14 +12,16 @@
     NSMapTable *_table;
     id<JSDataProtocol> _meta;
     NSInteger _position;
-    BOOL _isImported;
     NSString *_moduleName;
+    BOOL _isImported;
+    BOOL _isMutable;
 }
 
 @synthesize meta = _meta;
 @synthesize value = _table;
 @synthesize isImported = _isImported;
 @synthesize moduleName = _moduleName;
+@synthesize isMutable = _isMutable;
 
 + (BOOL)isHashMap:(id)object {
     return [[object className] isEqual:[self className]];
@@ -190,6 +192,16 @@
 }
 
 - (NSString *)description {
+    NSArray *allKeys = [self allKeys];
+    NSMutableString *str = [NSMutableString new];
+    id<JSDataProtocol> key = nil;
+    for (key in allKeys) {
+        [str appendFormat:@"%@ %@", [key description], [[self objectForKey:key] description]];
+    }
+    return [NSString stringWithFormat:@"{%@}", str];
+}
+
+- (NSString *)debugDescription {
     return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [_table description], _meta];
 }
 

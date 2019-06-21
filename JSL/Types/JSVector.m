@@ -165,6 +165,18 @@
 }
 
 - (NSString *)description {
+    NSMutableString *str = [NSMutableString new];
+    NSUInteger len = [_array count];
+    NSUInteger last = len - 1;
+    NSUInteger i = 0;
+    for (i = 0; i < len; i++) {
+        [str appendString:[_array[i] description]];
+        if (i != last) [str appendString:@" "];
+    }
+    return [NSString stringWithFormat:@"[%@]", str];
+}
+
+- (NSString *)debugDescription {
     return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [_array description], _meta];
 }
 

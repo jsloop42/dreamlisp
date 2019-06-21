@@ -24,6 +24,8 @@
     return acc;
 }
 
+#pragma mark Check arity
+
 /**
  Checks if the given list satisfies the arity count. Else throws an exception.
 
@@ -34,8 +36,9 @@
     return [self checkArityCount:[xs count] arity:arity];
 }
 
-+ (void)checkArityCount:(NSInteger)count arity:(NSInteger)arity {
-    if (count != arity) [[[JSError alloc] initWithFormat:ArityError, arity, count] throw];
++ (void)checkArity:(NSMutableArray *)xs arities:(NSArray *)arities {
+    NSInteger count = [xs count];
+    if (![arities containsObject:@(count)]) [[[JSError alloc] initWithFormat:ArityAnyError, [arities componentsJoinedByString:@" | "], count] throw];
 }
 
 /**
@@ -50,27 +53,11 @@
 }
 
 /**
-  Check arity with count and caller function. If it does not match, throws an error.
-
-  @param count The obtained argument count.
-  @param arity Expected arity.
-  @param fnName The caller function name
- */
-+ (void)checkArityCount:(NSInteger)count arity:(NSInteger)arity fnName:(NSString *)fnName {
-    if (count != arity) [[[JSError alloc] initWithFormat:ArityError, arity, count] throw];
-}
-
-+ (void)checkArity:(NSMutableArray *)xs arities:(NSArray *)arities {
-    NSInteger count = [xs count];
-    if (![arities containsObject:@(count)]) [[[JSError alloc] initWithFormat:ArityAnyError, [arities componentsJoinedByString:@" | "], count] throw];
-}
-
-/**
-  The given array should satisfy the arity count for the given predicate.
-  @param xs An array contains arguments.
-  @param arity The arity count which needs to be checked against.
-  @param predicate The condition that should be met.
-  @throw @c ArityError
+ The given array should satisfy the arity count for the given predicate.
+ @param xs An array contains arguments.
+ @param arity The arity count which needs to be checked against.
+ @param predicate The condition that should be met.
+ @throw @c ArityError
  */
 + (void)checkArity:(NSMutableArray *)xs arity:(NSInteger)arity predicate:(enum ArityPredicate)predicate {
     NSUInteger count = [xs count];
@@ -107,6 +94,25 @@
     }
 }
 
+#pragma mark check arity count
+
++ (void)checkArityCount:(NSInteger)count arity:(NSInteger)arity {
+    if (count != arity) [[[JSError alloc] initWithFormat:ArityError, arity, count] throw];
+}
+
+/**
+  Check arity with count and caller function. If it does not match, throws an error.
+
+  @param count The obtained argument count.
+  @param arity Expected arity.
+  @param fnName The caller function name
+ */
++ (void)checkArityCount:(NSInteger)count arity:(NSInteger)arity fnName:(NSString *)fnName {
+    if (count != arity) [[[JSError alloc] initWithFormat:ArityError, arity, count] throw];
+}
+
+#pragma mark Check index bounds
+
 /**
  Checks if the given index is within the array bounds.
 
@@ -118,6 +124,8 @@
     NSUInteger count = [xs count];
     [self checkIndexBoundsCount:count index:index];
 }
+
+#pragma mark Check index bounds count
 
 /**
  Checks if the given index is within [0, count].
