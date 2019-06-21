@@ -207,6 +207,12 @@
     return [self hash];
 }
 
+- (NSMutableArray *)subArrayWithStartIndex:(NSInteger)start endIndex:(NSInteger)end {
+    if (start > end) return [NSMutableArray new];
+    if (end > [self count]) return _array;
+    return [[_array subarrayWithRange:NSMakeRange(start, end - start + 1)] mutableCopy];
+}
+
 - (BOOL)hasMeta {
     return _meta != nil;
 }

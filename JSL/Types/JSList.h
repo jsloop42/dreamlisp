@@ -44,6 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (JSList *)drop:(NSInteger)n;
 - (JSList *)sort:(NSInteger (*)(id, id, void *))sorter;
 - (JSList *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator;
+- (NSMutableArray *)subArrayWithStartIndex:(NSInteger)start endIndex:(NSInteger)end;
 @end
 
 NS_ASSUME_NONNULL_END

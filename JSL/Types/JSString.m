@@ -167,13 +167,14 @@
     NSUInteger len = [self count];
     NSInteger end = len - start;
     if (start > len) return @"";
-    return [self substringFrom:start count:len - start];
+    return [self substringFrom:start count:end];
 }
 
 - (NSString *)substringFrom:(NSInteger)start to:(NSInteger)end {
     NSString *str = [self value];
     if (!str) return @"";
     NSUInteger len = [str count];
+    if (start < 0) [[[JSError alloc] initWithFormat:IndexOutOfBounds, start, 0] throw];
     if (end >= len) [[[JSError alloc] initWithFormat:IndexOutOfBounds, end, len] throw];
     if (end < start) [[[JSError alloc] initWithFormat:IndexOutOfBounds, end, start] throw];
     return [str substringWithRange:NSMakeRange(start, end - start + 1)];
@@ -183,6 +184,7 @@
     NSString *str = [self value];
     if (!str) return @"";
     NSUInteger len = [str count];
+    if (start < 0) [[[JSError alloc] initWithFormat:IndexOutOfBounds, start, 0] throw];
     if (count > len) [[[JSError alloc] initWithFormat:IndexOutOfBounds, count, count < 0 ? 0 : len] throw];
     return [str substringWithRange:NSMakeRange(start, count)];
 }

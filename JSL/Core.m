@@ -477,21 +477,33 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"nth" moduleName:[Const coreModuleName]]];
 
     #pragma mark nth-tail
+    /** Takes a start, end index, a sequence and returs a sub-sequence within the given indices inclusive. */
     id<JSDataProtocol>(^nthTail)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
-        [TypeUtils checkArity:xs arity:2];
+        [TypeUtils checkArity:xs arity:3 predicate:ArityPredicateLessThanOrEq];
         id<JSDataProtocol> first = [xs first];
         id<JSDataProtocol> second = [xs second];
-        NSInteger n = [[JSNumber dataToNumber:first position:1 fnName:@"nth-tail/2"] integerValue];
-        NSUInteger count = 0;
-        NSMutableArray *list = [[JSVector dataToList:second position:2 fnName:@"nth-tail/2"] value];
-        count = [list count];
-        [TypeUtils checkIndexBoundsCount:count index:n];
-        if ([JSList isList:second]) {
-            return [[JSList alloc] initWithArray:[list subarrayWithRange:NSMakeRange(n, count - n)]];
+        id<JSDataProtocol> data = [xs nth:2];
+        NSUInteger len = [xs count];
+        NSString *fnName = @"nth-tail/3";
+        NSInteger start = [[JSNumber dataToNumber:first position:1 fnName:fnName] integerValue];
+        NSInteger end = [[JSNumber dataToNumber:second position:2 fnName:fnName] integerValue];;
+        if ([JSString isString:data]) {
+            JSString *str = (JSString *)data;
+            return [[JSString alloc] initWithString:[str substringFrom:start to:end]];
         }
-        return [[JSVector alloc] initWithArray:[list subarrayWithRange:NSMakeRange(n, count - n)]];
+        NSUInteger count = 0;
+        NSMutableArray *list = [[JSVector dataToList:data position:len fnName:fnName] value];
+        count = [list count];
+        [TypeUtils checkIndexBoundsCount:count startIndex:start endIndex:end];
+        if ([JSList isList:data]) {
+            return [[JSList alloc] initWithArray:[(JSList *)data subArrayWithStartIndex:start endIndex:end]];
+        } else if ([JSVector isVector:data]) {
+            return [[JSVector alloc] initWithArray:[(JSList *)data subArrayWithStartIndex:start endIndex:end]];
+        }
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithArity, fnName, @"'sequence'", len, [data dataTypeName]] throw];
+        return [JSNil new];
     };
-    fn = [[JSFunction alloc] initWithFn:nthTail argCount:2 name:@"nth-tail/2"];
+    fn = [[JSFunction alloc] initWithFn:nthTail argCount:3 name:@"nth-tail/3"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"nth-tail" moduleName:[Const coreModuleName]]];
 
     #pragma mark first

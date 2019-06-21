@@ -134,6 +134,17 @@
     }
 }
 
++ (void)checkIndexBoundsCount:(NSInteger)count startIndex:(NSInteger)start endIndex:(NSInteger)end {
+    if (start < 0) {
+        [[[JSError alloc] initWithFormat:IndexOutOfBounds, start, 0] throw];
+    } else if (start > end) {
+        [[[JSError alloc] initWithFormat:IndexOutOfBounds, start, end] throw];
+    }
+    if (end >= count) {
+        [[[JSError alloc] initWithFormat:IndexOutOfBounds, end, count] throw];
+    }
+}
+
 @end
 
 NSInteger sortAscending(id obj1, id obj2, void *context) {
