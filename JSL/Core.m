@@ -1301,7 +1301,7 @@ double dmod(double a, double n) {
 
     #pragma mark contains?
     /**
-     Checks if the given hash map contains the key.
+     Checks if the given sequence or collection contains the object.
 
      (contains? :a {:a 1 :b 2 :c 3}) ; true
      (contains? 3 {:a 1 :b 2 :c 3}) ; false
@@ -1309,8 +1309,20 @@ double dmod(double a, double n) {
      */
     id<JSDataProtocol>(^contains)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:2];
-        JSHashMap *hm = [JSHashMap dataToHashMap:[xs second] fnName:@"contains?/2"];
-        return [[JSBool alloc] initWithBool:[hm containsKey:[xs first]]];
+        id<JSDataProtocol> elem = [xs first];
+        id<JSDataProtocol> data = [xs second];
+        BOOL isExists = NO;
+        NSString *fnName = @"contains?/2";
+        if ([JSHashMap isHashMap:data]) {
+            isExists = [(JSHashMap *)data containsKey:elem];
+        } else if ([JSList isKindOfList:data]) {
+            isExists = [[(JSList *)data value] containsObject:elem];
+        } else if ([JSString isString:data]) {
+            isExists = [(NSString *)[(JSString *)data value] containsString:[elem description]];
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'sequence' or 'collection'", 2, [data dataTypeName]] throw];
+        }
+        return [[JSBool alloc] initWithBool:isExists];
     };
     fn = [[JSFunction alloc] initWithFn:contains argCount:2 name:@"contains?/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"contains?" moduleName:[Const coreModuleName]]];

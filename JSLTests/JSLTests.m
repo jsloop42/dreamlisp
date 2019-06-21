@@ -1916,6 +1916,25 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(coll? 1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(coll? nil)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(coll? (atom 0))"], @"false");
+    // contains? on list
+    XCTAssertEqualObjects([jsl rep:@"(contains? 1 '(0 1 2))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? -1 '(0 -1 -2))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? 10 '(0 1 2))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(contains? nil '(0 1 2))"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(contains? nil '(0 nil 2))"], @"true");
+    // contains? on vector
+    XCTAssertEqualObjects([jsl rep:@"(contains? 1 [0 1 2])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? -1 [0 -1 -2])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? 10 [0 1 2])"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(contains? nil [0 1 2])"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(contains? nil [0 nil 2])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? \"a\" [0 nil 2 \"a\"])"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? \"a\" [0 nil 2 \"abc\"])"], @"false");
+    // contains? on string
+    XCTAssertEqualObjects([jsl rep:@"(contains? \"a\" \"abc\")"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? \"ab\" \"abc\")"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(contains? \"ab\" \"acb\")"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(contains? 1 \"ac1b\")"], @"true");
 }
 
 - (void)predicateCallback:(NSString *)message withTag:(int)tag counter:(int)counter {
@@ -2184,7 +2203,7 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     // Test all-modules
     [jsl rep:@"(def modules (all-modules))"];
     XCTAssertGreaterThanOrEqual([[jsl rep:@"(count modules)"] integerValue], 2);
-    XCTAssertGreaterThanOrEqual([[jsl rep:@"(index-of \"core\" modules)"] integerValue], 0);
+    XCTAssertEqualObjects([jsl rep:@"(contains? \"core\" modules)"], @"true");
 }
 
 - (void)testModuleDescription {
