@@ -165,7 +165,9 @@
 
 - (NSString *)substringFrom:(NSInteger)start {
     NSUInteger len = [self count];
-    return [self substringFrom:start to:len - start + 1];
+    NSInteger end = len - start;
+    if (start > len) return @"";
+    return [self substringFrom:start count:len - start];
 }
 
 - (NSString *)substringFrom:(NSInteger)start to:(NSInteger)end {

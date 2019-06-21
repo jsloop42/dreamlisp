@@ -671,8 +671,10 @@ double dmod(double a, double n) {
             return [(JSList *)second drop:n];
         } else if ([JSVector isVector:second]) {
             return [(JSVector *)second drop:n];
+        } else if ([JSString isString:second]) {
+            return [[JSString alloc] initWithString:[(JSString *)second substringFrom:n]];
         }
-        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"drop/2", @"'list' or 'vector'", 2, [second dataTypeName]] throw];
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"drop/2", @"'sequence'", 2, [second dataTypeName]] throw];
         return nil;
     };
     fn = [[JSFunction alloc] initWithFn:drop argCount:2 name:@"drop/2"];

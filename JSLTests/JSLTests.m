@@ -104,6 +104,11 @@
     XCTAssertEqualObjects([str substringFrom:4 count:3], @"efg");
     XCTAssertThrows([str substringFrom:5 count:4]);
     XCTAssertThrows([str substringFrom:0 count:-1]);
+    // test substringFrom
+    XCTAssertEqualObjects([str substringFrom:3], @"defg");
+    XCTAssertEqualObjects([str substringFrom:6], @"g");
+    XCTAssertEqualObjects([str substringFrom:8], @"");
+    XCTAssertEqualObjects([str substringFrom:10], @"");
 }
 
 - (void)testJSKeyword {
@@ -966,6 +971,13 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(last \"abc\")"], @"\"c\"");
     XCTAssertEqualObjects([jsl rep:@"(last \"\")"], @"nil");
     XCTAssertEqualObjects([jsl rep:@"(last \"a\")"], @"\"a\"");
+    // drop
+    XCTAssertEqualObjects([jsl rep:@"(drop 0 \"abc\")"], @"\"abc\"");
+    XCTAssertEqualObjects([jsl rep:@"(drop 1 \"abc\")"], @"\"bc\"");
+    XCTAssertEqualObjects([jsl rep:@"(drop 2 \"abc\")"], @"\"c\"");
+    XCTAssertEqualObjects([jsl rep:@"(drop 3 \"abc\")"], @"\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(drop 4 \"abc\")"], @"\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(drop -1 \"abc\")"], @"\"\"");
 }
 
 - (void)testPrint {
