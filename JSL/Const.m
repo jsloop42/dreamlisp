@@ -8,7 +8,7 @@
 
 #import "Const.h"
 
-NSString * const JSLVersion = @"3.2";
+NSString * const JSLVersion = @"3.3";
 static NSArray *_keywords;
 static NSString *_emptyModuleName;
 static NSString *_defaultModuleName;
