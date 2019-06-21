@@ -1768,13 +1768,16 @@ double dmod(double a, double n) {
             JSList *xs = (JSList *)elem;
             [hm setObject:[[JSNumber alloc] initWithInteger:[xs count]] forKey:[[JSKeyword alloc] initWithString:@"count"]];
             [hm setObject:[[JSBool alloc] initWithBool:[xs isEmpty]] forKey:[[JSKeyword alloc] initWithString:@"empty?"]];
+            [hm setObject:[[JSBool alloc] initWithBool:[elem isMutable]] forKey:[[JSKeyword alloc] initWithString:@"mutable?"]];
         } else if ([JSVector isVector:elem]) {
             JSVector *vec = (JSVector *)elem;
             [hm setObject:[[JSNumber alloc] initWithInteger:[vec count]] forKey:[[JSKeyword alloc] initWithString:@"count"]];
             [hm setObject:[[JSBool alloc] initWithBool:[vec isEmpty]] forKey:[[JSKeyword alloc] initWithString:@"empty?"]];
+            [hm setObject:[[JSBool alloc] initWithBool:[elem isMutable]] forKey:[[JSKeyword alloc] initWithString:@"mutable?"]];
         } else if ([JSHashMap isHashMap:elem]) {
             JSHashMap *hm = (JSHashMap *)elem;
             [hm setObject:[[JSNumber alloc] initWithInteger:[hm count]] forKey:[[JSKeyword alloc] initWithString:@"count"]];
+            [hm setObject:[[JSBool alloc] initWithBool:[elem isMutable]] forKey:[[JSKeyword alloc] initWithString:@"mutable?"]];
         } else if ([JSKeyword isKeyword:elem]) {
             JSKeyword *kwd = (JSKeyword *)elem;
             [hm setObject:[kwd value] forKey:[[JSKeyword alloc] initWithString:@"name"]];
@@ -1784,6 +1787,10 @@ double dmod(double a, double n) {
         } else if ([JSNumber isNumber:elem]) {
             JSNumber *num = (JSNumber *)elem;
             [hm setObject:[[JSBool alloc] initWithBool:[num isDouble]] forKey:[[JSKeyword alloc] initWithString:@"double?"]];
+        } else if ([JSString isString:elem]) {
+            JSString *str = (JSString *)elem;
+            [hm setObject:[[JSBool alloc] initWithBool:[elem isMutable]] forKey:[[JSKeyword alloc] initWithString:@"mutable?"]];
+            [hm setObject:[str value] forKey:[[JSKeyword alloc] initWithString:@"value"]];
         }
         return [[JSHashMap alloc] initWithMapTable:hm];
     };
