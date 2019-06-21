@@ -187,6 +187,27 @@
     return [str substringWithRange:NSMakeRange(start, count)];
 }
 
+- (NSString * _Nullable)reverse {
+    NSString *str = [self value];
+    NSUInteger len = [str length];
+    if (len <= 1) return str;
+    NSStringEncoding encoding = NSHostByteOrder() == NS_BigEndian ? NSUTF32BigEndianStringEncoding : NSUTF32LittleEndianStringEncoding;
+    NSUInteger bytesCount = [str lengthOfBytesUsingEncoding:encoding];
+    uint32_t *chars = malloc(bytesCount);
+    if (!chars) return nil;
+    [str getBytes:chars maxLength:bytesCount usedLength:nil encoding:encoding options:0 range:NSMakeRange(0, len) remainingRange:nil];
+    NSUInteger charLen = bytesCount / sizeof(uint32_t);
+    NSUInteger halfwayPoint = charLen / 2;
+    NSUInteger i = 0;
+    uint32_t c = 0;
+    for (i = 0; i < halfwayPoint; ++i) {
+        c = chars[charLen - i - 1];
+        chars[charLen - i - 1] = chars[i];
+        chars[i] = c;
+    }
+    return [[NSString alloc] initWithBytesNoCopy:chars length:bytesCount encoding:encoding freeWhenDone:YES];
+}
+
 - (void)setValue:(id)value {
     _string = value;
 }

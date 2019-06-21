@@ -689,6 +689,8 @@ double dmod(double a, double n) {
             return [(JSList *)first reverse];
         } else if ([JSVector isVector:first]) {
             return [(JSVector *)first reverse];
+        } else if ([JSString isString:first]) {
+            return [[JSString alloc] initWithString:[(JSString *)first reverse]];
         }
         [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"reverse/1", @"'list' or 'vector'", 1, [first dataTypeName]] throw];
         return nil;

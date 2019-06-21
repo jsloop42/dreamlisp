@@ -84,6 +84,13 @@
     XCTAssertTrue([mstr isMutable]);
     [mstr appendString:@"d"];
     XCTAssertEqualObjects([mstr mutableValue], @"abcd");
+    // reverse
+    XCTAssertEqualObjects([[[JSString alloc] initWithString:@"abcd"] reverse], @"dcba");
+    XCTAssertEqualObjects([[[JSString alloc] initWithString:@"abcdefg"] reverse], @"gfedcba");
+    XCTAssertEqualObjects([[[JSString alloc] initWithString:@"a"] reverse], @"a");
+    XCTAssertEqualObjects([[[JSString alloc] initWithString:@""] reverse], @"");
+    XCTAssertEqualObjects([[[JSString alloc] initWithString:@"1234"] reverse], @"4321");
+    XCTAssertEqualObjects([[[JSString alloc] initWithString:@"[1 2 3 4]"] reverse], @"]4 3 2 1[");
 }
 
 - (void)testJSStringSubString {
@@ -978,6 +985,12 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(drop 3 \"abc\")"], @"\"\"");
     XCTAssertEqualObjects([jsl rep:@"(drop 4 \"abc\")"], @"\"\"");
     XCTAssertEqualObjects([jsl rep:@"(drop -1 \"abc\")"], @"\"\"");
+    // reverse
+    XCTAssertEqualObjects([jsl rep:@"(reverse \"abc\")"], @"\"cba\"");
+    XCTAssertEqualObjects([jsl rep:@"(reverse \"a\")"], @"\"a\"");
+    XCTAssertEqualObjects([jsl rep:@"(reverse \"\")"], @"\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(reverse \"1234\")"], @"\"4321\"");
+    XCTAssertEqualObjects([jsl rep:@"(reverse \"[1 2 3 4]\")"], @"\"]4 3 2 1[\"");
 }
 
 - (void)testPrint {

@@ -38,6 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (JSString *)sort:(NSInteger (*)(id, id, void *))sorter;
 - (JSString *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator;
 - (JSString *)joined:(NSArray *)arr with:(NSString *)separator;
+- (NSString * _Nullable)reverse;
 #pragma mark - MutableString methods
 - (void)append:(JSString *)string;
 - (void)appendString:(NSString *)string;
