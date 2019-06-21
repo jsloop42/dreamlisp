@@ -17,6 +17,7 @@ static NSString *_description = @"The core module.";
     Printer *_printer;
     Terminal *_terminal;
     id<JSLDelegate> __weak _delegate;
+    NSData *_allModuleSortHint;
 }
 
 @synthesize delegate = _delegate;
@@ -1853,12 +1854,34 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:moduleExist argCount:1 name:@"module-exist?/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"module-exist?" moduleName:[Const coreModuleName]]];
+
+    #pragma mark all-modules
+    id<JSDataProtocol>(^allModules)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        NSArray *modArr = [[[Env modules] allKeys] sortedArrayUsingFunction:sortAscending context:nil hint:[self allModulesSortHint]];
+        [self setAllModulesSortHint:[modArr sortedArrayHint]];
+        NSMutableArray *modules = [NSMutableArray new];
+        NSString *name = nil;
+        for (name in modArr) {
+            [modules addObject:[[JSString alloc] initWithString:name]];
+        }
+        return [[JSVector alloc] initWithArray:modules];
+    };
+    fn = [[JSFunction alloc] initWithFn:allModules argCount:0 name:@"all-modules/0"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"all-modules" moduleName:[Const coreModuleName]]];
 }
 
 #pragma mark - Internal
 
 - (Env *)env {
     return _env;
+}
+
+- (NSData * _Nullable)allModulesSortHint {
+    return _allModuleSortHint;
+}
+
+- (void)setAllModulesSortHint:(NSData *)hint {
+    _allModuleSortHint = hint;
 }
 
 @end

@@ -479,7 +479,7 @@ static NSString *langVersion;
  */
 - (JSSymbol *)defineModule:(id<JSDataProtocol>)ast {
     JSList *xs = (JSList *)ast;
-    JSSymbol *modSym = [xs second];
+    JSSymbol *modSym = [JSSymbol dataToSymbol:[xs second] position:1 fnName:@"defmodule/3"];
     [modSym setIsModule:YES];
     NSString *modName = [modSym value];
     Env *modEnv = [[Env alloc] initWithModuleName:modName isUserDefined:YES];

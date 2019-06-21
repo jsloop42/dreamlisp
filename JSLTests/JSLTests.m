@@ -2181,6 +2181,10 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(current-module-name)"], @"\"core\"");
     XCTAssertEqualObjects([jsl rep:@"(def mod-name \"user\")"], @"\"user\"");
     XCTAssertEqualObjects([jsl rep:@"(in-module mod-name)"], @"\"user\"");
+    // Test all-modules
+    [jsl rep:@"(def modules (all-modules))"];
+    XCTAssertGreaterThanOrEqual([[jsl rep:@"(count modules)"] integerValue], 2);
+    XCTAssertGreaterThanOrEqual([[jsl rep:@"(index-of \"core\" modules)"] integerValue], 0);
 }
 
 - (void)testModuleDescription {
