@@ -16,6 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface Utils : NSObject
 + (CacheTable *)cache;
++ (void)enableCache;
++ (void)disableCache;
++ (BOOL)isCacheEnabled;
 + (BOOL)matchString:(NSString *)string withExpression:(NSRegularExpression *)pattern;
 + (BOOL)matchString:(NSString *)string withPattern:(NSString *)pattern;
 + (NSArray *)matchesInString:(NSString *)string withExpression:(NSRegularExpression *)pattern;

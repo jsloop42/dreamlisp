@@ -20,6 +20,7 @@
 #import "Core.h"
 #import "Logger.h"
 #import "JSError.h"
+#import "SymbolTable.h"
 
 @interface JSLTests : XCTestCase
 @end

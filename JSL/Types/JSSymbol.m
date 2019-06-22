@@ -128,6 +128,17 @@
     return symbol;
 }
 
+/** Order symbol in the decreasing order of arity. -1 which is n arity, n - 1, .. 2, 1, 0, -2, which means no arity (not a function).  */
++ (NSComparisonResult)compareSymbol:(JSSymbol *)aSymbol withSymbol:(JSSymbol *)bSymbol {
+    NSInteger aSymArity = [aSymbol arity];
+    NSInteger bSymArity = [bSymbol arity];
+    if (aSymArity == -2 || bSymArity == -1) return NSOrderedDescending;
+    if (aSymArity == -1 || bSymArity == -2) return NSOrderedAscending;
+    if (aSymArity > bSymArity) return NSOrderedAscending;
+    if (aSymArity < bSymArity) return NSOrderedDescending;
+    return NSOrderedSame;
+}
+
 - (instancetype)initWithName:(NSString *)name {
     self = [self initWithName:name moduleName:_moduleName];
     _moduleName = [State currentModuleName];

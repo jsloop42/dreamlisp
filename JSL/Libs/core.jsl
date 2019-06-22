@@ -73,6 +73,18 @@
           (list head x))
         `(<- (<- ~x ~head) ~@tail)))))
 
+(defun inc (n) 
+  "Increments the given number by 1."
+  (+ n 1))
+
+(defun dec (n)
+  "Decrements the given number by 1."
+  (- n 1))
+
+(defun identity (x)
+  "Takes an element and returns the same element."
+  x)
+
 (defun exit ()
   "Exits the REPL"
   (println "Bye")

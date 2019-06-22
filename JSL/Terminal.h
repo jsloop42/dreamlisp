@@ -15,7 +15,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-
 @interface Terminal : NSObject
 @property (nonatomic, readwrite) NSString *prompt;
 - (instancetype)init;

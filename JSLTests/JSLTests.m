@@ -150,6 +150,24 @@
     XCTAssertEqualObjects([sym string], @"core:count");
 }
 
+- (void)testJSSymbolComparison {
+    JSSymbol *sym1 = [[JSSymbol alloc] initWithName:@"a" moduleName:[State currentModuleName]];
+    [sym1 setArity:-2];
+    JSSymbol *sym2 = [[JSSymbol alloc] initWithName:@"b" moduleName:[State currentModuleName]];
+    [sym2 setArity:-1];
+    JSSymbol *sym3 = [[JSSymbol alloc] initWithName:@"c" moduleName:[State currentModuleName]];
+    [sym3 setArity:0];
+    JSSymbol *sym4 = [[JSSymbol alloc] initWithName:@"d" moduleName:[State currentModuleName]];
+    [sym4 setArity:1];
+    NSMutableArray *arr = [@[sym3, sym4, sym2, sym1] mutableCopy];
+    [arr sortUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+        return [JSSymbol compareSymbol:obj1 withSymbol:obj2];
+    }];
+    XCTAssertEqualObjects([arr first], sym2);
+    XCTAssertEqualObjects([arr second], sym4);
+    XCTAssertEqualObjects([arr last], sym1);
+}
+
 - (void)testJSSymbolProcess {
     [State setCurrentModuleName:[Const defaultModuleName]];
     JSSymbol *sym = [JSSymbol processName:@"mod:func/1"];
@@ -372,6 +390,10 @@
     XCTAssertEqualObjects([jsl rep:@"(symbol \"foo:abc\")"], @"foo:abc");
     XCTAssertEqualObjects([jsl rep:@"(symbol \"foo:abc/1\")"], @"foo:abc/1");
     XCTAssertEqualObjects([jsl rep:@"(symbol \"foo:abc/n\")"], @"foo:abc/n");
+    // function argument
+    [jsl rep:@"(def a core:inc/1)"];
+    XCTAssertEqualObjects([jsl rep:@"(symbol a)"], @"user:a/1");
+    XCTAssertEqualObjects([jsl rep:@"(symbol (fn (n) 1))"], @"*:*/1");
 }
 
 - (void)testArithmeticEval {
@@ -876,7 +898,6 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(apply (fn (& more) (list? more)) [])"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn (a & more) (list? more)) [1])"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn (& form) (count form)) [1 2])"], @"2");
-
     // test bindings
     [jsl rep:@"(def a (fn (x) (let (y x z (* x x)) (+ y z))))"];
     XCTAssertEqualObjects([jsl rep:@"(a 10)"], @"110");
@@ -887,6 +908,16 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(def c' 10)"], @"10");
     XCTAssertEqualObjects([jsl rep:@"(def f' (fn (x) (+ c' x)))"], @"user:f'/1");
     XCTAssertEqualObjects([jsl rep:@"(f' 7)"], @"17");
+    // function as argument
+    [jsl rep:@"(def x 3)"];
+    [jsl rep:@"(defun identity (x) x)"];
+    XCTAssertEqualObjects([jsl rep:@"(identity (fn (n) n))"], @"#<fn/1>");
+    XCTAssertEqualObjects([jsl rep:@"(identity (fn (x y) 1))"], @"#<fn/2>");
+    XCTAssertEqualObjects([jsl rep:@"(fn? (identity (fn (x y) 1)))"], @"true");
+    // multi-arity
+    XCTAssertEqualObjects([jsl rep:@"((fn (x) (let (x (fn (a b) (+ a b))) (x 1))) (fn (y) y))"], @"1");
+    XCTAssertEqualObjects([jsl rep:@"((fn (x) (let (x (fn (a b) (+ a b))) (x 1 2))) (fn (y) y))"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"((fn (x) (let (x (fn (a b) (+ a b))) (+ (x 1) (x 2 3)))) (fn (y) y))"], @"6");
 }
 
 - (void)testMultiArityFunctions {
@@ -2479,6 +2510,21 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(<- \"abc\" (concat \"xyz\"))"], @"\"xyzabc\"");
     XCTAssertEqualObjects([jsl rep:@"(<- [1 4] (zip [2 3]))"], @"[[2 1] [3 4]]");
     XCTAssertEqualObjects([jsl rep:@"(<- [1 4] (zip [2 3]) (flatten))"], @"[2 1 3 4]");
+}
+
+- (void)testCoreLibFunctions {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    // inc
+    XCTAssertEqualObjects([jsl rep:@"(inc 1)"], @"2");
+    XCTAssertEqualObjects([jsl rep:@"(inc 1.1)"], @"2.1");
+    XCTAssertEqualObjects([jsl rep:@"(inc -1.0)"], @"0.0");
+    // dec
+    XCTAssertEqualObjects([jsl rep:@"(dec 1)"], @"0");
+    XCTAssertEqualObjects([jsl rep:@"(dec 1.1)"], @"0.1");
+    XCTAssertEqualObjects([jsl rep:@"(dec -1.0)"], @"-2.0");
+    // identity
+    XCTAssertEqualObjects([jsl rep:@"(identity -1.0)"], @"-1.0");
+    XCTAssertEqualObjects([jsl rep:@"(identity [1 2 3])"], @"[1 2 3]");
 }
 
 - (void)test {

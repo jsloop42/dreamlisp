@@ -31,7 +31,6 @@
 @synthesize env = _env;
 @synthesize macro = _isMacro;
 @synthesize meta = _meta;
-@synthesize value;  // not used
 @synthesize name = _name;
 @synthesize moduleName = _moduleName;
 @synthesize isImported = _isImported;
@@ -179,6 +178,10 @@
     return [_name isEmpty]
             ? [[NSString alloc] initWithFormat:@"#<fn/%@>", _argsCount == -1 ? @"n" : [[NSString alloc] initWithFormat:@"%ld", _argsCount]]
             : _name;
+}
+
+- (NSString *)value {
+    return _name;
 }
 
 - (BOOL)hasMeta {

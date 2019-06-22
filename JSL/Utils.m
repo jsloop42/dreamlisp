@@ -9,6 +9,7 @@
 #import "Utils.h"
 
 static CacheTable *_cache;
+static BOOL _isCacheEnabled;
 
 #pragma mark - CacheKey
 
@@ -43,7 +44,20 @@ static CacheTable *_cache;
 + (void)initialize {
     if (self == [self class]) {
         _cache = [CacheTable new];
+        [self enableCache];
     }
+}
+
++ (void)enableCache {
+    _isCacheEnabled = YES;
+}
+
++ (void)disableCache {
+    _isCacheEnabled = NO;
+}
+
++ (BOOL)isCacheEnabled {
+    return _isCacheEnabled;
 }
 
 /** Checks if the given string matches the compiled regex pattern. */
@@ -76,8 +90,11 @@ static CacheTable *_cache;
  Converts the object to an array. This method is memoized. Setting @c isNative will convert elements to JSL type instead of internal Objective-C type. This
  is required for strings only.*/
 + (NSMutableArray *)toArray:(id<JSDataProtocol>)object isNative:(BOOL)isNative {
-    NSMutableArray *res = [[self cache] objectForKey:[CacheKey fromKey:object isNative:isNative]];
-    if (res) return res;
+    NSMutableArray *res = nil;
+    if (_isCacheEnabled) {
+        res = [[self cache] objectForKey:[CacheKey fromKey:object isNative:isNative]];
+        if (res) return res;
+    }
     res = [NSMutableArray new];
     if ([JSList isKindOfList:object]) {
         res = [(JSList *)object value];
@@ -92,7 +109,7 @@ static CacheTable *_cache;
     } else {
         [[[JSError alloc] initWithFormat:DataTypeMismatch, @"'sequence'", [object dataTypeName]] throw];
     }
-    [[self cache] setObject:res forKey:[CacheKey fromKey:object isNative:isNative]];
+    if (_isCacheEnabled) [[self cache] setObject:res forKey:[CacheKey fromKey:object isNative:isNative]];
     return res;
 }
 
@@ -203,7 +220,7 @@ static CacheTable *_cache;
     return res;
 }
 
-#pragma mark String
+#pragma mark - String
 
 + (NSMutableArray *)stringToArray:(JSString *)string isNative:(BOOL)isNative {
     NSMutableArray *res = [NSMutableArray new];
@@ -237,7 +254,6 @@ static CacheTable *_cache;
         }
     }
 }
-
 
 + (CacheTable *)cache {
     return _cache;

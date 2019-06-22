@@ -1453,8 +1453,17 @@ double dmod(double a, double n) {
     /** Creates a symbol from the given string. */
     id<JSDataProtocol>(^symbol)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
-        NSString *name = [[JSString dataToString:[xs first] fnName:@"symbol/1"] value];
-        JSSymbol *sym = [JSSymbol processName:name];
+        id<JSDataProtocol> first = [xs first];
+        JSSymbol *sym = nil;
+        NSString *name = nil;
+        if ([JSFunction isFunction:first]) {
+            JSFunction *fn = (JSFunction *)first;
+            name = [fn name];
+            if ([[fn value] isEmpty]) name = [NSString stringWithFormat:@"*/%ld", [fn argsCount]];
+        } else {
+            name = [[JSString dataToString:first fnName:@"symbol/1"] value];
+        }
+        sym = [JSSymbol processName:name];
         if ([sym isQualified]) {
             [sym setModuleName:[sym initialModuleName]];
         } else {

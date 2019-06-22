@@ -11,6 +11,7 @@
 #import "JSError.h"
 #import "Logger.h"
 #import "ModuleTable.h"
+#import "SymbolTable.h"
 #import <objc/NSObjCRuntime.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -28,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) ModuleTable *exportTable;
 @property (nonatomic, readwrite) ModuleTable *importTable;
 @property (nonatomic, readwrite) ModuleTable *internalTable;
+@property (nonatomic, readwrite) SymbolTable *symbolTable;
 @property (nonatomic, readwrite) NSString *moduleName;
 @property (nonatomic, readwrite) NSString *moduleDescription;
 @property (nonatomic, readwrite) BOOL isUserDefined;

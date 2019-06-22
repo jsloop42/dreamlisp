@@ -20,6 +20,8 @@ static NSMapTable<NSString *, Env *> *_modules;
     ModuleTable *_importTable;
     /** The internal env table containing evaluated symbols with its binding. */
     ModuleTable *_internalTable;
+    /** The symbol table associated with the module. */
+    SymbolTable *_symbolTable;
     NSString *_moduleName;
     NSString *_moduleDescription;
     /** Is user defined module */
@@ -32,6 +34,7 @@ static NSMapTable<NSString *, Env *> *_modules;
 @synthesize importTable = _importTable;
 @synthesize internalTable = _internalTable;
 @synthesize moduleName = _moduleName;
+@synthesize symbolTable = _symbolTable;
 @synthesize moduleDescription = _moduleDescription;
 @synthesize isUserDefined = _isUserDefined;
 @synthesize isExportAll = _isExportAll;
@@ -73,6 +76,7 @@ static NSMapTable<NSString *, Env *> *_modules;
         _moduleName = [env moduleName];
         _isExportAll = [env isExportAll];
         _isUserDefined = [env isUserDefined];
+        _symbolTable = [env symbolTable];
         _outer = env;
     }
     return self;
@@ -95,13 +99,13 @@ static NSMapTable<NSString *, Env *> *_modules;
 }
 
 /** If the symbol is associated with a function, update the symbol with function details. */
-- (JSSymbol *)setFunctionInfo:(id<JSDataProtocol>)object symbol:(JSSymbol *)symbol {
+- (void)setFunctionInfo:(id<JSDataProtocol>)object symbol:(JSSymbol *)symbol {
     if ([JSFunction isFunction:object]) {
         [symbol setIsFunction:YES];
         [symbol setArity:[(JSFunction *)object argsCount]];
     }
     //[symbol setModuleName:[_module name]];
-    return symbol;
+//    return symbol;
 }
 
 /**
@@ -127,13 +131,18 @@ static NSMapTable<NSString *, Env *> *_modules;
                 JSSymbol *key = (JSSymbol *)binds[i + 1];
                 if ([exprs count] > i) {
                     [self setObject:[[JSList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:key];
+                    [_symbolTable setKey:key];
                 } else {
                     JSList *list = [[JSList alloc] initWithArray:@[]];
-                    [self setObject:list forKey:[self setFunctionInfo:list symbol:key]];
+                    [self setFunctionInfo:list symbol:key];
+                    [self setObject:list forKey:key];
+                    [_symbolTable setKey:key];
                 }
                 break;
             }
-            [self setObject:exprs[i] forKey:[self setFunctionInfo:exprs[i] symbol:sym]];
+            [self setFunctionInfo:exprs[i] symbol:sym];
+            [self setObject:exprs[i] forKey:sym];
+            [_symbolTable setKey:sym];
         }
     }
     return self;
@@ -143,6 +152,7 @@ static NSMapTable<NSString *, Env *> *_modules;
     if (!_exportTable) _exportTable = [ModuleTable new];
     if (!_importTable) _importTable = [ModuleTable new];
     if (!_internalTable) _internalTable = [ModuleTable new];
+    if (!_symbolTable) _symbolTable = [SymbolTable new];
     _moduleName = [Const defaultModuleName];
     _moduleDescription = @"";
     _isExportAll = NO;
@@ -200,11 +210,15 @@ static NSMapTable<NSString *, Env *> *_modules;
 }
 
 - (id<JSDataProtocol> _Nullable)objectForKey:(JSSymbol *)key {
-    return [self objectForKey:key isThrow:YES];
+    return [self objectForKey:key isThrow:YES isFromSymbolTable:NO];
 }
 
 - (id<JSDataProtocol> _Nullable)objectForKey:(JSSymbol *)key isThrow:(BOOL)isThrow {
-    id<JSDataProtocol> elem = [self resolveFault:[self objectForSymbol:key isThrow:isThrow] forKey:key inEnv:self];
+    return [self objectForKey:key isThrow:isThrow isFromSymbolTable:NO];
+}
+
+- (id<JSDataProtocol> _Nullable)objectForKey:(JSSymbol *)key isThrow:(BOOL)isThrow isFromSymbolTable:(BOOL)isFromSymbolTable {
+    id<JSDataProtocol> elem = [self resolveFault:[self objectForSymbol:key isThrow:isThrow isFromSymbolTable:isFromSymbolTable] forKey:key inEnv:self];
     if (!elem && isThrow) {
         if ([key isQualified]) [key setModuleName:[key initialModuleName]];
         [[[JSError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
@@ -213,6 +227,12 @@ static NSMapTable<NSString *, Env *> *_modules;
 }
 
 - (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isThrow:(BOOL)isThrow {
+    return [self objectForSymbol:key isThrow:isThrow isFromSymbolTable:NO];
+}
+
+- (id<JSDataProtocol>)objectForSymbol:(JSSymbol *)key isThrow:(BOOL)isThrow isFromSymbolTable:(BOOL)isFromSymbolTable {
+    JSSymbol *sym = [self symbolForKeyFromSymbolTable:key];  // Check the symbol table first to find any local scope bindings for the given symbol.
+    if (sym) key = sym;
     if ([key isQualified]) return [self objectForSymbol:key inModule:[Env forModuleName:[key initialModuleName]]];
     NSString *moduleName = [key moduleName];
     id<JSDataProtocol> elem = nil;
@@ -257,6 +277,22 @@ static NSMapTable<NSString *, Env *> *_modules;
     if (elem) return elem;
     return [self outer] ? [[self outer] objectForKeyFromInternalTable:key] : nil;
 }
+
+//- (id<JSDataProtocol> _Nullable)objectForKeyFromSymbolTable:(JSSymbol *)key isThrow:(BOOL)isThrow {
+//    JSSymbol *sym = [_symbolTable symbolForKey:key];
+//    if (sym) {
+//        key = sym;
+//        return [self objectForKey:sym isThrow:isThrow isFromSymbolTable:YES];
+//    }
+//    return [self outer] ? [[self outer] objectForKeyFromSymbolTable:key isThrow:isThrow] : nil;
+//}
+
+- (JSSymbol * _Nullable)symbolForKeyFromSymbolTable:(JSSymbol *)key {
+    JSSymbol *sym = [_symbolTable symbolForKey:key];
+    if (sym) return sym;
+    return [self outer] ? [[self outer] symbolForKeyFromSymbolTable:key] : nil;
+}
+
 
 - (id<JSDataProtocol> _Nullable)objectForSymbol:(JSSymbol *)key inModule:(Env *)env {
     JSSymbol *sym = [key copy];
@@ -310,6 +346,7 @@ static NSMapTable<NSString *, Env *> *_modules;
     } else {
         [_internalTable setObject:obj forKey:key];
     }
+    [_symbolTable setKey:key];
 }
 
 /** Update an existing key value pair with new properties for an imported symbol. Used only for resolving import fault. */
@@ -319,6 +356,7 @@ static NSMapTable<NSString *, Env *> *_modules;
     } else {
         [_internalTable updateObject:obj forKey:key];
     }
+    [_symbolTable setKey:key];
 }
 
 /** Update an existing key value pair with new properties for an exported symbol. Used only for resolving export fault. */
