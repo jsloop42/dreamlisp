@@ -1935,6 +1935,23 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(contains? \"ab\" \"abc\")"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(contains? \"ab\" \"acb\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(contains? 1 \"ac1b\")"], @"true");
+    // even?
+    XCTAssertEqualObjects([jsl rep:@"(even? 0)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(even? 1)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(even? 2)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(even? 3)"], @"false");
+    XCTAssertThrows([jsl rep:@"(even? 1.1)"]);
+    XCTAssertThrows([jsl rep:@"(even? 1.2)"]);
+    XCTAssertThrows([jsl rep:@"(even? 2.2)"]);
+    // odd?
+    XCTAssertEqualObjects([jsl rep:@"(odd? 0)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(odd? 1)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(odd? 2)"], @"false");
+    XCTAssertEqualObjects([jsl rep:@"(odd? 3)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(odd? 4)"], @"false");
+    XCTAssertThrows([jsl rep:@"(odd? 1.1)"]);
+    XCTAssertThrows([jsl rep:@"(odd? 1.2)"]);
+    XCTAssertThrows([jsl rep:@"(odd? 2.2)"]);
 }
 
 - (void)predicateCallback:(NSString *)message withTag:(int)tag counter:(int)counter {

@@ -1598,6 +1598,30 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:collp argCount:1 name:@"coll?/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"coll?" moduleName:[Const coreModuleName]]];
+
+    #pragma mark even?
+    /** Checks if the given element is @c even. */
+    id<JSDataProtocol>(^evenp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        NSString *fnName = @"even?/1";
+        JSNumber *num = [JSNumber dataToNumber:[xs first] fnName:fnName];
+        if ([num isDouble]) [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'integer'", @"double"] throw];
+        return [[JSBool alloc] initWithBool:[num integerValue] % 2 == 0];
+    };
+    fn = [[JSFunction alloc] initWithFn:evenp argCount:1 name:@"even?/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"even?" moduleName:[Const coreModuleName]]];
+
+    #pragma mark odd?
+    /** Checks if the given element is @c odd. */
+    id<JSDataProtocol>(^oddp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        NSString *fnName = @"odd?/1";
+        JSNumber *num = [JSNumber dataToNumber:[xs first] fnName:fnName];
+        if ([num isDouble]) [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'integer'", @"double"] throw];
+        return [[JSBool alloc] initWithBool:[num integerValue] % 2 != 0];
+    };
+    fn = [[JSFunction alloc] initWithFn:oddp argCount:1 name:@"odd?/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"odd?" moduleName:[Const coreModuleName]]];
 }
 
 #pragma mark - eval
