@@ -587,7 +587,7 @@ double dmod(double a, double n) {
      */
     id<JSDataProtocol>(^conj)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
-        NSMutableArray *list = [[JSVector dataToList:first position:1 fnName:@"conj/n"] value];
+        NSMutableArray *list = [[[JSVector dataToList:first position:1 fnName:@"conj/n"] value] mutableCopy];
         NSMutableArray *rest = [xs rest];
         if ([JSVector isVector:first]) {
             [list addObjectsFromArray:rest];

@@ -1323,12 +1323,15 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(cond false 7 (= 2 2) 8 \"else\" 9)"], @"8");
     XCTAssertEqualObjects([jsl rep:@"(cond false 7 false 8 false 9)"], @"nil");
     // conj
+    [jsl rep:@"(def xs '(1 2))"];
     XCTAssertEqualObjects([jsl rep:@"(conj (list) 1)"], @"(1)");
     XCTAssertEqualObjects([jsl rep:@"(conj (list 1) 2)"], @"(2 1)");
     XCTAssertEqualObjects([jsl rep:@"(conj (list 2 3) 4)"], @"(4 2 3)");
     XCTAssertEqualObjects([jsl rep:@"(conj (list 2 3) 4 5 6)"], @"(6 5 4 2 3)");
     XCTAssertEqualObjects([jsl rep:@"(conj (list 1) (list 2 3))"], @"((2 3) 1)");
     XCTAssertEqualObjects([jsl rep:@"(conj '(1 2 3) 4 5 6)"], @"(6 5 4 1 2 3)");
+    XCTAssertEqualObjects([jsl rep:@"(conj xs 6)"], @"(6 1 2)");
+    XCTAssertEqualObjects([jsl rep:@"xs"], @"(1 2)");
     XCTAssertThrows([jsl rep:@"(conj 1 '(1 2))"]);
     // seq
     XCTAssertEqualObjects([jsl rep:@"(seq '())"], @"nil");
@@ -1384,12 +1387,15 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(vector? '(12 13))"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(vector 3 4 5)"], @"[3 4 5]");
     // conj
+    [jsl rep:@"(def xs [1 2])"];
     XCTAssertEqualObjects([jsl rep:@"(conj [] 1)"], @"[1]");
     XCTAssertEqualObjects([jsl rep:@"(conj [1] 2)"], @"[1 2]");
     XCTAssertEqualObjects([jsl rep:@"(conj [2 3] 4)"], @"[2 3 4]");
     XCTAssertEqualObjects([jsl rep:@"(conj [2 3] 4 5 6)"], @"[2 3 4 5 6]");
     XCTAssertEqualObjects([jsl rep:@"(conj [1] [2 3])"], @"[1 [2 3]]");
     XCTAssertEqualObjects([jsl rep:@"(conj [1 2 3] 4 5 6)"], @"[1 2 3 4 5 6]");
+    XCTAssertEqualObjects([jsl rep:@"(conj xs 6)"], @"[1 2 6]");
+    XCTAssertEqualObjects([jsl rep:@"xs"], @"[1 2]");
     XCTAssertThrows([jsl rep:@"(conj 1 [1 2])"]);
     // nth
     XCTAssertEqualObjects([jsl rep:@"(nth 0 [1])"], @"1");
