@@ -1,0 +1,9 @@
+(defun collatz (n)
+  (collatz n []))
+
+(defun collatz (n acc)
+  (if (not= n 1)
+    (if (even? n)
+      (collatz (/ n 2) (conj acc n))
+      (collatz (+ (* 3 n) 1) (conj acc n)))
+    (conj acc n)))

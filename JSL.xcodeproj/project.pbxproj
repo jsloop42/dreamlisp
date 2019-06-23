@@ -55,6 +55,7 @@
 		9E33AAD62275799200A6EB98 /* JSBool.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD42275799200A6EB98 /* JSBool.m */; };
 		9E33AAD9227579C000A6EB98 /* JSFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD8227579C000A6EB98 /* JSFunction.m */; };
 		9E33AADA227579C000A6EB98 /* JSFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD8227579C000A6EB98 /* JSFunction.m */; };
+		9E36651F22BF6781003DC5EF /* JSLPerfTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E36651E22BF6781003DC5EF /* JSLPerfTests.m */; };
 		9E38FC7D227F075F00405BE5 /* jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E38FC7C227F075F00405BE5 /* jsl */; };
 		9E38FC81227F343800405BE5 /* State.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E38FC80227F343800405BE5 /* State.m */; };
 		9E38FC82227F343800405BE5 /* State.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E38FC80227F343800405BE5 /* State.m */; };
@@ -157,6 +158,7 @@
 		9E33AAD42275799200A6EB98 /* JSBool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSBool.m; sourceTree = "<group>"; };
 		9E33AAD7227579C000A6EB98 /* JSFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSFunction.h; sourceTree = "<group>"; };
 		9E33AAD8227579C000A6EB98 /* JSFunction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSFunction.m; sourceTree = "<group>"; };
+		9E36651E22BF6781003DC5EF /* JSLPerfTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSLPerfTests.m; sourceTree = "<group>"; };
 		9E38FC7C227F075F00405BE5 /* jsl */ = {isa = PBXFileReference; lastKnownFileType = folder; path = jsl; sourceTree = "<group>"; };
 		9E38FC7F227F343800405BE5 /* State.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = State.h; sourceTree = "<group>"; };
 		9E38FC80227F343800405BE5 /* State.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = State.m; sourceTree = "<group>"; };
@@ -334,6 +336,7 @@
 				9E281CFA225A60760038A5AF /* run_argv_test.sh */,
 				9E281CFB225A60760038A5AF /* runtest.py */,
 				9ED5349222B6991A004A2CB2 /* CacheTableTests.m */,
+				9E36651E22BF6781003DC5EF /* JSLPerfTests.m */,
 				9E6F444A2257C00900777A24 /* JSLTests.h */,
 				9E3A9D5A22568B1300348529 /* JSLTests.m */,
 				9E3A9D5C22568B1300348529 /* Info.plist */,
@@ -537,6 +540,7 @@
 				9E33AACE2275791300A6EB98 /* JSAtom.m in Sources */,
 				9E3A9D7622568DBD00348529 /* Reader.m in Sources */,
 				9E94585C2274F04F00A3D449 /* JSHashMap.m in Sources */,
+				9E36651F22BF6781003DC5EF /* JSLPerfTests.m in Sources */,
 				9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */,
 				9E9458572274EB4400A3D449 /* NSMapTable+JSHashMap.m in Sources */,
 				9E4F02D82291A1E80064081F /* JSFault.m in Sources */,
