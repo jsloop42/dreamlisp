@@ -14,8 +14,6 @@ FOUNDATION_EXPORT double JSLVersionNumber;
 //! Project version string for JSL.
 FOUNDATION_EXPORT const unsigned char JSLVersionString[];
 
-// In this header, you should import all the public headers of your framework using statements like #import <JSL/PublicHeader.h>
-
 #import "Const.h"
 #import "Logger.h"
 #import "Types.h"

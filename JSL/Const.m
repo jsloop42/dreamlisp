@@ -45,7 +45,7 @@ static NSString *_valueKeyword;
     }
 }
 
-+ (NSString *)JSLVersion {
++ (NSString *)jslVersion {
     NSDictionary *info = [[NSBundle bundleForClass:[self class]] infoDictionary];
     NSString *version = [info valueForKey:@"CFBundleShortVersionString"];
     NSString *build = [info valueForKey:@"CFBundleVersion"];

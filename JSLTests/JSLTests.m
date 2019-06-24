@@ -9,7 +9,7 @@
 #import <XCTest/XCTest.h>
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
-#import "JSLLib.h"
+#import <JSL/JSLLib.h>
 
 @interface JSLTests : XCTestCase
 @end
@@ -2520,24 +2520,6 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     // identity
     XCTAssertEqualObjects([jsl rep:@"(identity -1.0)"], @"-1.0");
     XCTAssertEqualObjects([jsl rep:@"(identity [1 2 3])"], @"[1 2 3]");
-}
-
-- (void)test {
-    JSL *jsl = [[JSL alloc] initWithoutREPL];
-}
-
-- (void)notestPerformanceJSListDropFirst {
-    NSMutableArray *arr = [NSMutableArray new];
-    for (int i = 0; i < 10000; i++) {
-        [arr addObject:@"1"];
-    }
-    JSList *xs = [[JSList alloc] initWithArray:arr];
-    [self measureBlock:^{
-        JSList *lst = (JSList *)[xs rest];
-        for (int i = 0; i < 9999; i++) {
-            lst = (JSList *)[lst rest];
-        }
-    }];
 }
 
 @end

@@ -7,16 +7,30 @@
       buildImplicitDependencies = "YES">
       <BuildActionEntries>
          <BuildActionEntry
-            buildForTesting = "NO"
+            buildForTesting = "YES"
             buildForRunning = "YES"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "NO">
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9E7942CE22C12A310086A47F"
                BuildableName = "JSL.framework"
                BlueprintName = "JSL"
+               ReferencedContainer = "container:JSL.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "9E7942D622C12A310086A47F"
+               BuildableName = "JSLTests.xctest"
+               BlueprintName = "JSLTests"
                ReferencedContainer = "container:JSL.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -62,6 +76,18 @@
             testExecutionOrdering = "random">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "9E7942D622C12A310086A47F"
+               BuildableName = "JSLTests.xctest"
+               BlueprintName = "JSLTests"
+               ReferencedContainer = "container:JSL.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES"
+            testExecutionOrdering = "random">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "9E3A9D5722568B1300348529"
                BuildableName = "JSLShellTests.xctest"
                BlueprintName = "JSLShellTests"
@@ -72,9 +98,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9E3A9D4922568AFC00348529"
-            BuildableName = "JSLShell"
-            BlueprintName = "JSLShell"
+            BlueprintIdentifier = "9E7942CE22C12A310086A47F"
+            BuildableName = "JSL.framework"
+            BlueprintName = "JSL"
             ReferencedContainer = "container:JSL.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -91,16 +117,15 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9E3A9D4922568AFC00348529"
-            BuildableName = "JSLShell"
-            BlueprintName = "JSLShell"
+            BlueprintIdentifier = "9E7942CE22C12A310086A47F"
+            BuildableName = "JSL.framework"
+            BlueprintName = "JSL"
             ReferencedContainer = "container:JSL.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -110,16 +135,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9E3A9D4922568AFC00348529"
-            BuildableName = "JSLShell"
-            BlueprintName = "JSLShell"
+            BlueprintIdentifier = "9E7942CE22C12A310086A47F"
+            BuildableName = "JSL.framework"
+            BlueprintName = "JSL"
             ReferencedContainer = "container:JSL.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

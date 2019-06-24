@@ -14,7 +14,7 @@ extern NSString * const JSLVersion;
 extern NSArray * keywords;
 
 @interface Const : NSObject
-+ (NSString *)JSLVersion;
++ (NSString *)jslVersion;
 + (NSArray *)keyword;
 + (NSString *)emptyModuleName;
 + (NSString *)defaultModuleName;

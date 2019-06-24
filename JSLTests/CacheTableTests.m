@@ -7,7 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "JSLLib.h"
+#import <JSL/JSLLib.h>
 
 @interface CacheTableTests : XCTestCase
 
