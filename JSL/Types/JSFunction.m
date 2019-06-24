@@ -32,6 +32,7 @@
 @synthesize macro = _isMacro;
 @synthesize meta = _meta;
 @synthesize name = _name;
+@synthesize value;
 @synthesize moduleName = _moduleName;
 @synthesize isImported = _isImported;
 @synthesize isMutable = _isMutable;

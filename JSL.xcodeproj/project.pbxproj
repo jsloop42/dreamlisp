@@ -7,90 +7,110 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9E2491EA226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2491E9226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m */; };
-		9E2491EB226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2491E9226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m */; };
-		9E250CEC22886ED500EDADEF /* ModuleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E250CEB22886ED500EDADEF /* ModuleTable.m */; };
-		9E250CED22886ED500EDADEF /* ModuleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E250CEB22886ED500EDADEF /* ModuleTable.m */; };
-		9E281CEA225890B10038A5AF /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CE9225890B10038A5AF /* Utils.m */; };
-		9E281CEB225890B10038A5AF /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CE9225890B10038A5AF /* Utils.m */; };
-		9E281CEE225908480038A5AF /* Const.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Const.m */; };
-		9E281CEF225908480038A5AF /* Const.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Const.m */; };
 		9E281CF8225A4C790038A5AF /* libreadline.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E281CF7225A4C790038A5AF /* libreadline.tbd */; };
 		9E281CFD225A60770038A5AF /* tests in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CF9225A60760038A5AF /* tests */; };
 		9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CFA225A60760038A5AF /* run_argv_test.sh */; };
 		9E281CFF225A60770038A5AF /* runtest.py in Resources */ = {isa = PBXBuildFile; fileRef = 9E281CFB225A60760038A5AF /* runtest.py */; };
-		9E30553B2260FA8F001D4597 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553A2260FA8F001D4597 /* Logger.m */; };
-		9E30553C2260FA8F001D4597 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553A2260FA8F001D4597 /* Logger.m */; };
-		9E30553F22612AF1001D4597 /* NSMutableArray+JSList.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553E22612AF0001D4597 /* NSMutableArray+JSList.m */; };
-		9E30554022612AF1001D4597 /* NSMutableArray+JSList.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553E22612AF0001D4597 /* NSMutableArray+JSList.m */; };
-		9E30554422612C34001D4597 /* NSString+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554322612C34001D4597 /* NSString+JSDataProtocol.m */; };
-		9E30554522612C34001D4597 /* NSString+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554322612C34001D4597 /* NSString+JSDataProtocol.m */; };
-		9E30554822619F3F001D4597 /* NSNumber+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554722619F3F001D4597 /* NSNumber+JSDataProtocol.m */; };
-		9E30554922619F3F001D4597 /* NSNumber+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554722619F3F001D4597 /* NSNumber+JSDataProtocol.m */; };
-		9E30554C2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554B2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m */; };
-		9E30554D2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554B2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m */; };
-		9E3055502261A10F001D4597 /* NSArray+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554F2261A10F001D4597 /* NSArray+JSDataProtocol.m */; };
-		9E3055512261A10F001D4597 /* NSArray+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554F2261A10F001D4597 /* NSArray+JSDataProtocol.m */; };
-		9E3055542261A162001D4597 /* TypeUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3055532261A162001D4597 /* TypeUtils.m */; };
-		9E3055552261A162001D4597 /* TypeUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3055532261A162001D4597 /* TypeUtils.m */; };
-		9E3055602262633E001D4597 /* JSError.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30555F2262633E001D4597 /* JSError.m */; };
-		9E3055612262633E001D4597 /* JSError.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30555F2262633E001D4597 /* JSError.m */; };
-		9E33AAB52275775800A6EB98 /* JSString.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB42275775800A6EB98 /* JSString.m */; };
-		9E33AAB62275775800A6EB98 /* JSString.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB42275775800A6EB98 /* JSString.m */; };
-		9E33AAB9227577C000A6EB98 /* JSKeyword.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB8227577C000A6EB98 /* JSKeyword.m */; };
-		9E33AABA227577C000A6EB98 /* JSKeyword.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB8227577C000A6EB98 /* JSKeyword.m */; };
-		9E33AABD2275783400A6EB98 /* JSSymbol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AABC2275783300A6EB98 /* JSSymbol.m */; };
-		9E33AABE2275783400A6EB98 /* JSSymbol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AABC2275783300A6EB98 /* JSSymbol.m */; };
-		9E33AAC12275786D00A6EB98 /* JSList.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAC02275786D00A6EB98 /* JSList.m */; };
-		9E33AAC22275786D00A6EB98 /* JSList.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAC02275786D00A6EB98 /* JSList.m */; };
-		9E33AAC5227578A700A6EB98 /* JSVector.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAC4227578A700A6EB98 /* JSVector.m */; };
-		9E33AAC6227578A700A6EB98 /* JSVector.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAC4227578A700A6EB98 /* JSVector.m */; };
-		9E33AAC9227578E200A6EB98 /* JSNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAC8227578E200A6EB98 /* JSNumber.m */; };
-		9E33AACA227578E200A6EB98 /* JSNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAC8227578E200A6EB98 /* JSNumber.m */; };
-		9E33AACD2275791300A6EB98 /* JSAtom.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AACC2275791300A6EB98 /* JSAtom.m */; };
-		9E33AACE2275791300A6EB98 /* JSAtom.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AACC2275791300A6EB98 /* JSAtom.m */; };
-		9E33AAD12275796300A6EB98 /* JSNil.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD02275796300A6EB98 /* JSNil.m */; };
-		9E33AAD22275796300A6EB98 /* JSNil.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD02275796300A6EB98 /* JSNil.m */; };
-		9E33AAD52275799200A6EB98 /* JSBool.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD42275799200A6EB98 /* JSBool.m */; };
-		9E33AAD62275799200A6EB98 /* JSBool.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD42275799200A6EB98 /* JSBool.m */; };
-		9E33AAD9227579C000A6EB98 /* JSFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD8227579C000A6EB98 /* JSFunction.m */; };
-		9E33AADA227579C000A6EB98 /* JSFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD8227579C000A6EB98 /* JSFunction.m */; };
-		9E36651F22BF6781003DC5EF /* JSLPerfTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E36651E22BF6781003DC5EF /* JSLPerfTests.m */; };
-		9E38FC7D227F075F00405BE5 /* jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E38FC7C227F075F00405BE5 /* jsl */; };
-		9E38FC81227F343800405BE5 /* State.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E38FC80227F343800405BE5 /* State.m */; };
-		9E38FC82227F343800405BE5 /* State.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E38FC80227F343800405BE5 /* State.m */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
-		9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D5A22568B1300348529 /* JSLTests.m */; };
-		9E3A9D6522568D4B00348529 /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6422568D4B00348529 /* Core.m */; };
-		9E3A9D6622568D4B00348529 /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6422568D4B00348529 /* Core.m */; };
-		9E3A9D6D22568D8D00348529 /* Env.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6C22568D8D00348529 /* Env.m */; };
-		9E3A9D6E22568D8D00348529 /* Env.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6C22568D8D00348529 /* Env.m */; };
-		9E3A9D7122568DB100348529 /* Printer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7022568DB100348529 /* Printer.m */; };
-		9E3A9D7222568DB100348529 /* Printer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7022568DB100348529 /* Printer.m */; };
-		9E3A9D7522568DBD00348529 /* Reader.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7422568DBD00348529 /* Reader.m */; };
-		9E3A9D7622568DBD00348529 /* Reader.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7422568DBD00348529 /* Reader.m */; };
 		9E3F324B227B694400B56B6A /* core.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
-		9E43105522BE9C6C00512081 /* SymbolTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E43105422BE9C6C00512081 /* SymbolTable.m */; };
-		9E43105622BE9C6C00512081 /* SymbolTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E43105422BE9C6C00512081 /* SymbolTable.m */; };
-		9E4F02D72291A1E80064081F /* JSFault.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F02D62291A1E80064081F /* JSFault.m */; };
-		9E4F02D82291A1E80064081F /* JSFault.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F02D62291A1E80064081F /* JSFault.m */; };
 		9E5D7B4B225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
 		9E5D7B4C225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
-		9E6F444822578E5600777A24 /* JSL.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F444722578E5600777A24 /* JSL.m */; };
-		9E6F444922578E5600777A24 /* JSL.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F444722578E5600777A24 /* JSL.m */; };
 		9E70861822ACF1F700ADD464 /* core.jsl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
 		9E70861A22ACF2A200ADD464 /* test.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E70861922ACF29600ADD464 /* test.jsl */; };
-		9E9458562274EB4400A3D449 /* NSMapTable+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9458552274EB4400A3D449 /* NSMapTable+JSHashMap.m */; };
-		9E9458572274EB4400A3D449 /* NSMapTable+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9458552274EB4400A3D449 /* NSMapTable+JSHashMap.m */; };
-		9E94585B2274F04F00A3D449 /* JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E94585A2274F04F00A3D449 /* JSHashMap.m */; };
-		9E94585C2274F04F00A3D449 /* JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E94585A2274F04F00A3D449 /* JSHashMap.m */; };
-		9E9B6228225B9FC20060DA9A /* FileOps.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9B6227225B9FC20060DA9A /* FileOps.m */; };
-		9E9B6229225B9FC20060DA9A /* FileOps.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9B6227225B9FC20060DA9A /* FileOps.m */; };
+		9E741E7B22C12C00009680E8 /* NSArray+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554F2261A10F001D4597 /* NSArray+JSDataProtocol.m */; };
+		9E741E7C22C12C07009680E8 /* NSDecimalNumber+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554B2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m */; };
+		9E741E7D22C12C12009680E8 /* NSMapTable+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9458552274EB4400A3D449 /* NSMapTable+JSHashMap.m */; };
+		9E741E7E22C12C12009680E8 /* NSMutableArray+JSList.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553E22612AF0001D4597 /* NSMutableArray+JSList.m */; };
+		9E741E7F22C12C12009680E8 /* NSMutableDictionary+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E2491E9226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m */; };
+		9E741E8022C12C12009680E8 /* NSNumber+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554722619F3F001D4597 /* NSNumber+JSDataProtocol.m */; };
+		9E741E8122C12C12009680E8 /* NSString+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554322612C34001D4597 /* NSString+JSDataProtocol.m */; };
+		9E741E8222C12C23009680E8 /* JSAtom.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AACC2275791300A6EB98 /* JSAtom.m */; };
+		9E741E8322C12C23009680E8 /* JSBool.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD42275799200A6EB98 /* JSBool.m */; };
+		9E741E8422C12C23009680E8 /* JSFault.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F02D62291A1E80064081F /* JSFault.m */; };
+		9E741E8522C12C23009680E8 /* JSFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD8227579C000A6EB98 /* JSFunction.m */; };
+		9E741E8622C12C23009680E8 /* JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E94585A2274F04F00A3D449 /* JSHashMap.m */; };
+		9E741E8722C12C23009680E8 /* JSKeyword.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB8227577C000A6EB98 /* JSKeyword.m */; };
+		9E741E8822C12C23009680E8 /* JSList.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAC02275786D00A6EB98 /* JSList.m */; };
+		9E741E8922C12C23009680E8 /* JSNil.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD02275796300A6EB98 /* JSNil.m */; };
+		9E741E8A22C12C23009680E8 /* JSNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAC8227578E200A6EB98 /* JSNumber.m */; };
+		9E741E8B22C12C23009680E8 /* JSString.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAB42275775800A6EB98 /* JSString.m */; };
+		9E741E8C22C12C23009680E8 /* JSSymbol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AABC2275783300A6EB98 /* JSSymbol.m */; };
+		9E741E8D22C12C23009680E8 /* JSVector.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAC4227578A700A6EB98 /* JSVector.m */; };
+		9E741E8E22C12C23009680E8 /* TypeUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3055532261A162001D4597 /* TypeUtils.m */; };
+		9E741E8F22C12C38009680E8 /* CacheTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ED5348F22B67FCA004A2CB2 /* CacheTable.m */; };
+		9E741E9022C12C38009680E8 /* Const.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Const.m */; };
+		9E741E9122C12C38009680E8 /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6422568D4B00348529 /* Core.m */; };
+		9E741E9222C12C38009680E8 /* Env.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6C22568D8D00348529 /* Env.m */; };
+		9E741E9322C12C38009680E8 /* FileOps.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9B6227225B9FC20060DA9A /* FileOps.m */; };
+		9E741E9422C12C38009680E8 /* JSError.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30555F2262633E001D4597 /* JSError.m */; };
+		9E741E9522C12C38009680E8 /* JSL.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F444722578E5600777A24 /* JSL.m */; };
+		9E741E9622C12C38009680E8 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553A2260FA8F001D4597 /* Logger.m */; };
+		9E741E9722C12C38009680E8 /* ModuleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E250CEB22886ED500EDADEF /* ModuleTable.m */; };
+		9E741E9822C12C38009680E8 /* Printer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7022568DB100348529 /* Printer.m */; };
+		9E741E9922C12C38009680E8 /* Reader.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7422568DBD00348529 /* Reader.m */; };
+		9E741E9A22C12C38009680E8 /* State.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E38FC80227F343800405BE5 /* State.m */; };
+		9E741E9B22C12C38009680E8 /* SymbolTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E43105422BE9C6C00512081 /* SymbolTable.m */; };
+		9E741E9C22C12C38009680E8 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CE9225890B10038A5AF /* Utils.m */; };
+		9E741E9D22C12C42009680E8 /* CacheTableTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ED5349222B6991A004A2CB2 /* CacheTableTests.m */; };
+		9E741E9E22C12C47009680E8 /* JSLPerfTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E36651E22BF6781003DC5EF /* JSLPerfTests.m */; };
+		9E741EA022C12D17009680E8 /* JSLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D5A22568B1300348529 /* JSLTests.m */; };
+		9E741EA122C12D98009680E8 /* FileOps.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E9B6226225B9FC20060DA9A /* FileOps.h */; };
+		9E741EA222C12D9E009680E8 /* NSArray+JSDataProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E30554E2261A10F001D4597 /* NSArray+JSDataProtocol.h */; };
+		9E741EA322C12DAB009680E8 /* NSDecimalNumber+JSDataProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E30554A2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.h */; };
+		9E741EA422C12DAB009680E8 /* NSMapTable+JSHashMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E9458542274EB4400A3D449 /* NSMapTable+JSHashMap.h */; };
+		9E741EA522C12DAB009680E8 /* NSMutableArray+JSList.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E30553D22612AF0001D4597 /* NSMutableArray+JSList.h */; };
+		9E741EA622C12DAB009680E8 /* NSMutableDictionary+JSHashMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E2491E8226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.h */; };
+		9E741EA722C12DAB009680E8 /* NSNumber+JSDataProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E30554622619F3F001D4597 /* NSNumber+JSDataProtocol.h */; };
+		9E741EA822C12DAB009680E8 /* NSString+JSDataProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E30554222612C34001D4597 /* NSString+JSDataProtocol.h */; };
+		9E741EA922C12DBA009680E8 /* JSAtom.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E33AACB2275791300A6EB98 /* JSAtom.h */; };
+		9E741EAA22C12DBA009680E8 /* JSBool.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E33AAD32275799200A6EB98 /* JSBool.h */; };
+		9E741EAB22C12DBA009680E8 /* JSDataProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E33AAAF2275767800A6EB98 /* JSDataProtocol.h */; };
+		9E741EAC22C12DBA009680E8 /* JSFault.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E4F02D52291A1E80064081F /* JSFault.h */; };
+		9E741EAD22C12DBA009680E8 /* JSFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E33AAD7227579C000A6EB98 /* JSFunction.h */; };
+		9E741EAE22C12DBA009680E8 /* JSHashMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E9458592274F04F00A3D449 /* JSHashMap.h */; };
+		9E741EAF22C12DBA009680E8 /* JSKeyword.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E33AAB7227577C000A6EB98 /* JSKeyword.h */; };
+		9E741EB022C12DBA009680E8 /* JSList.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E33AABF2275786D00A6EB98 /* JSList.h */; };
+		9E741EB122C12DBA009680E8 /* JSNil.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E33AACF2275796300A6EB98 /* JSNil.h */; };
+		9E741EB222C12DBA009680E8 /* JSNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E33AAC7227578E200A6EB98 /* JSNumber.h */; };
+		9E741EB322C12DBA009680E8 /* JSString.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E33AAB32275775800A6EB98 /* JSString.h */; };
+		9E741EB422C12DBA009680E8 /* JSSymbol.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E33AABB2275783300A6EB98 /* JSSymbol.h */; };
+		9E741EB522C12DBA009680E8 /* JSVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E33AAC3227578A700A6EB98 /* JSVector.h */; };
+		9E741EB622C12DBA009680E8 /* Types.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E3A9D6722568D7D00348529 /* Types.h */; };
+		9E741EB722C12DBA009680E8 /* TypeUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E3055522261A162001D4597 /* TypeUtils.h */; };
+		9E741EB822C12DCE009680E8 /* CacheTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9ED5348E22B67FCA004A2CB2 /* CacheTable.h */; };
+		9E741EB922C12DCE009680E8 /* Const.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E281CEC225908480038A5AF /* Const.h */; };
+		9E741EBA22C12DCE009680E8 /* Core.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E3A9D6322568D4B00348529 /* Core.h */; };
+		9E741EBB22C12DCE009680E8 /* Env.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E3A9D6B22568D8D00348529 /* Env.h */; };
+		9E741EBC22C12DCE009680E8 /* JSError.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E30555E2262633E001D4597 /* JSError.h */; };
+		9E741EBD22C12DCE009680E8 /* JSL.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E6F444622578E5600777A24 /* JSL.h */; };
+		9E741EBE22C12DCE009680E8 /* JSLDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9ED5348A22B54E91004A2CB2 /* JSLDelegate.h */; };
+		9E741EBF22C12DCE009680E8 /* Logger.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E3055392260FA8F001D4597 /* Logger.h */; };
+		9E741EC022C12DCE009680E8 /* ModuleTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E250CEA22886ED500EDADEF /* ModuleTable.h */; };
+		9E741EC122C12DCE009680E8 /* Printer.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E3A9D6F22568DB100348529 /* Printer.h */; };
+		9E741EC222C12DCE009680E8 /* Reader.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E3A9D7322568DBD00348529 /* Reader.h */; };
+		9E741EC322C12DCE009680E8 /* State.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E38FC7F227F343800405BE5 /* State.h */; };
+		9E741EC422C12DCE009680E8 /* SymbolTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E43105322BE9C6C00512081 /* SymbolTable.h */; };
+		9E741EC522C12DCE009680E8 /* Utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E281CE8225890B10038A5AF /* Utils.h */; };
+		9E741EC822C13257009680E8 /* core.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
+		9E741EC922C1325C009680E8 /* test.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E70861922ACF29600ADD464 /* test.jsl */; };
+		9E741ED022C13A13009680E8 /* collatz.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECB22C139AA009680E8 /* collatz.jsl */; };
+		9E741ED122C13A13009680E8 /* i.test.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECD22C139B1009680E8 /* i.test.jsl */; };
+		9E741ED222C13A13009680E8 /* module-test.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECE22C139B9009680E8 /* module-test.jsl */; };
+		9E741ED322C13A13009680E8 /* scope.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECF22C139BC009680E8 /* scope.jsl */; };
+		9E7942D822C12A310086A47F /* JSL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E7942CF22C12A310086A47F /* JSL.framework */; };
+		9E7942DF22C12A320086A47F /* JSLLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E7942D122C12A310086A47F /* JSLLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9E9B622B225BAA280060DA9A /* libedit.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E9B622A225BAA270060DA9A /* libedit.tbd */; };
-		9ED5349022B67FCA004A2CB2 /* CacheTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ED5348F22B67FCA004A2CB2 /* CacheTable.m */; };
-		9ED5349122B67FCA004A2CB2 /* CacheTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ED5348F22B67FCA004A2CB2 /* CacheTable.m */; };
-		9ED5349322B6991A004A2CB2 /* CacheTableTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9ED5349222B6991A004A2CB2 /* CacheTableTests.m */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9E7942D922C12A310086A47F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9E3A9D4222568AFC00348529 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9E7942CE22C12A310086A47F;
+			remoteInfo = JSL;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		9E3A9D4822568AFC00348529 /* CopyFiles */ = {
@@ -159,12 +179,11 @@
 		9E33AAD7227579C000A6EB98 /* JSFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSFunction.h; sourceTree = "<group>"; };
 		9E33AAD8227579C000A6EB98 /* JSFunction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSFunction.m; sourceTree = "<group>"; };
 		9E36651E22BF6781003DC5EF /* JSLPerfTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSLPerfTests.m; sourceTree = "<group>"; };
-		9E38FC7C227F075F00405BE5 /* jsl */ = {isa = PBXFileReference; lastKnownFileType = folder; path = jsl; sourceTree = "<group>"; };
 		9E38FC7F227F343800405BE5 /* State.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = State.h; sourceTree = "<group>"; };
 		9E38FC80227F343800405BE5 /* State.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = State.m; sourceTree = "<group>"; };
-		9E3A9D4A22568AFC00348529 /* JSL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = JSL; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E3A9D4A22568AFC00348529 /* JSLShell */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = JSLShell; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E3A9D4D22568AFC00348529 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		9E3A9D5822568B1300348529 /* JSLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E3A9D5822568B1300348529 /* JSLShellTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSLShellTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E3A9D5A22568B1300348529 /* JSLTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSLTests.m; sourceTree = "<group>"; };
 		9E3A9D5C22568B1300348529 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9E3A9D6322568D4B00348529 /* Core.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Core.h; sourceTree = "<group>"; };
@@ -183,10 +202,18 @@
 		9E4F02D62291A1E80064081F /* JSFault.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSFault.m; sourceTree = "<group>"; };
 		9E5D7B49225B947E00970453 /* Terminal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Terminal.h; sourceTree = "<group>"; };
 		9E5D7B4A225B947E00970453 /* Terminal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Terminal.m; sourceTree = "<group>"; };
-		9E6F444622578E5600777A24 /* JSL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSL.h; sourceTree = "<group>"; };
+		9E6F444622578E5600777A24 /* JSL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JSL.h; path = JSLShell/JSL.h; sourceTree = SOURCE_ROOT; };
 		9E6F444722578E5600777A24 /* JSL.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSL.m; sourceTree = "<group>"; };
-		9E6F444A2257C00900777A24 /* JSLTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSLTests.h; sourceTree = "<group>"; };
 		9E70861922ACF29600ADD464 /* test.jsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = test.jsl; sourceTree = "<group>"; };
+		9E741ECB22C139AA009680E8 /* collatz.jsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = collatz.jsl; sourceTree = "<group>"; };
+		9E741ECD22C139B1009680E8 /* i.test.jsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = i.test.jsl; sourceTree = "<group>"; };
+		9E741ECE22C139B9009680E8 /* module-test.jsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = "module-test.jsl"; sourceTree = "<group>"; };
+		9E741ECF22C139BC009680E8 /* scope.jsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = scope.jsl; sourceTree = "<group>"; };
+		9E7942CF22C12A310086A47F /* JSL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = JSL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E7942D122C12A310086A47F /* JSLLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSLLib.h; sourceTree = "<group>"; };
+		9E7942D222C12A310086A47F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9E7942D722C12A310086A47F /* JSLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E7942DE22C12A320086A47F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9E9458542274EB4400A3D449 /* NSMapTable+JSHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSMapTable+JSHashMap.h"; sourceTree = "<group>"; };
 		9E9458552274EB4400A3D449 /* NSMapTable+JSHashMap.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSMapTable+JSHashMap.m"; sourceTree = "<group>"; };
 		9E9458592274F04F00A3D449 /* JSHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSHashMap.h; sourceTree = "<group>"; };
@@ -214,6 +241,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E9B622B225BAA280060DA9A /* libedit.tbd in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9E7942CC22C12A310086A47F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9E7942D422C12A310086A47F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E7942D822C12A310086A47F /* JSL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -270,8 +312,10 @@
 			children = (
 				9E30555C2261C4DC001D4597 /* build */,
 				9E281D02225A608D0038A5AF /* test */,
-				9E3A9D4C22568AFC00348529 /* JSL */,
-				9E3A9D5922568B1300348529 /* JSLTests */,
+				9E7942D022C12A310086A47F /* JSL */,
+				9E7942DB22C12A310086A47F /* JSLTests */,
+				9E3A9D4C22568AFC00348529 /* JSLShell */,
+				9E3A9D5922568B1300348529 /* JSLShellTests */,
 				9E3A9D4B22568AFC00348529 /* Products */,
 				9E281CF6225A4C780038A5AF /* Frameworks */,
 			);
@@ -280,13 +324,57 @@
 		9E3A9D4B22568AFC00348529 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9E3A9D4A22568AFC00348529 /* JSL */,
-				9E3A9D5822568B1300348529 /* JSLTests.xctest */,
+				9E3A9D4A22568AFC00348529 /* JSLShell */,
+				9E3A9D5822568B1300348529 /* JSLShellTests.xctest */,
+				9E7942CF22C12A310086A47F /* JSL.framework */,
+				9E7942D722C12A310086A47F /* JSLTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		9E3A9D4C22568AFC00348529 /* JSL */ = {
+		9E3A9D4C22568AFC00348529 /* JSLShell */ = {
+			isa = PBXGroup;
+			children = (
+				9E3A9D4D22568AFC00348529 /* main.m */,
+				9E5D7B49225B947E00970453 /* Terminal.h */,
+				9E5D7B4A225B947E00970453 /* Terminal.m */,
+			);
+			path = JSLShell;
+			sourceTree = "<group>";
+		};
+		9E3A9D5922568B1300348529 /* JSLShellTests */ = {
+			isa = PBXGroup;
+			children = (
+				9E281CF9225A60760038A5AF /* tests */,
+				9E281CFC225A60760038A5AF /* Makefile */,
+				9E281CFA225A60760038A5AF /* run_argv_test.sh */,
+				9E281CFB225A60760038A5AF /* runtest.py */,
+				9E3A9D5C22568B1300348529 /* Info.plist */,
+			);
+			path = JSLShellTests;
+			sourceTree = "<group>";
+		};
+		9E70861722ACF1CB00ADD464 /* Libs */ = {
+			isa = PBXGroup;
+			children = (
+				9E3F324A227B694300B56B6A /* core.jsl */,
+				9E70861922ACF29600ADD464 /* test.jsl */,
+			);
+			path = Libs;
+			sourceTree = "<group>";
+		};
+		9E741ECA22C1399C009680E8 /* jsl */ = {
+			isa = PBXGroup;
+			children = (
+				9E741ECB22C139AA009680E8 /* collatz.jsl */,
+				9E741ECD22C139B1009680E8 /* i.test.jsl */,
+				9E741ECE22C139B9009680E8 /* module-test.jsl */,
+				9E741ECF22C139BC009680E8 /* scope.jsl */,
+			);
+			path = jsl;
+			sourceTree = "<group>";
+		};
+		9E7942D022C12A310086A47F /* JSL */ = {
 			isa = PBXGroup;
 			children = (
 				9E70861722ACF1CB00ADD464 /* Libs */,
@@ -305,10 +393,10 @@
 				9E30555F2262633E001D4597 /* JSError.m */,
 				9E6F444622578E5600777A24 /* JSL.h */,
 				9E6F444722578E5600777A24 /* JSL.m */,
+				9E7942D122C12A310086A47F /* JSLLib.h */,
 				9ED5348A22B54E91004A2CB2 /* JSLDelegate.h */,
 				9E3055392260FA8F001D4597 /* Logger.h */,
 				9E30553A2260FA8F001D4597 /* Logger.m */,
-				9E3A9D4D22568AFC00348529 /* main.m */,
 				9E250CEA22886ED500EDADEF /* ModuleTable.h */,
 				9E250CEB22886ED500EDADEF /* ModuleTable.m */,
 				9E3A9D6F22568DB100348529 /* Printer.h */,
@@ -319,38 +407,23 @@
 				9E38FC80227F343800405BE5 /* State.m */,
 				9E43105322BE9C6C00512081 /* SymbolTable.h */,
 				9E43105422BE9C6C00512081 /* SymbolTable.m */,
-				9E5D7B49225B947E00970453 /* Terminal.h */,
-				9E5D7B4A225B947E00970453 /* Terminal.m */,
 				9E281CE8225890B10038A5AF /* Utils.h */,
 				9E281CE9225890B10038A5AF /* Utils.m */,
+				9E7942D222C12A310086A47F /* Info.plist */,
 			);
 			path = JSL;
 			sourceTree = "<group>";
 		};
-		9E3A9D5922568B1300348529 /* JSLTests */ = {
+		9E7942DB22C12A310086A47F /* JSLTests */ = {
 			isa = PBXGroup;
 			children = (
-				9E38FC7C227F075F00405BE5 /* jsl */,
-				9E281CF9225A60760038A5AF /* tests */,
-				9E281CFC225A60760038A5AF /* Makefile */,
-				9E281CFA225A60760038A5AF /* run_argv_test.sh */,
-				9E281CFB225A60760038A5AF /* runtest.py */,
+				9E741ECA22C1399C009680E8 /* jsl */,
 				9ED5349222B6991A004A2CB2 /* CacheTableTests.m */,
 				9E36651E22BF6781003DC5EF /* JSLPerfTests.m */,
-				9E6F444A2257C00900777A24 /* JSLTests.h */,
 				9E3A9D5A22568B1300348529 /* JSLTests.m */,
-				9E3A9D5C22568B1300348529 /* Info.plist */,
+				9E7942DE22C12A320086A47F /* Info.plist */,
 			);
 			path = JSLTests;
-			sourceTree = "<group>";
-		};
-		9E70861722ACF1CB00ADD464 /* Libs */ = {
-			isa = PBXGroup;
-			children = (
-				9E3F324A227B694300B56B6A /* core.jsl */,
-				9E70861922ACF29600ADD464 /* test.jsl */,
-			);
-			path = Libs;
 			sourceTree = "<group>";
 		};
 		9E9458582274F01300A3D449 /* Category */ = {
@@ -376,10 +449,58 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		9E7942CA22C12A310086A47F /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E741EBB22C12DCE009680E8 /* Env.h in Headers */,
+				9E741EAE22C12DBA009680E8 /* JSHashMap.h in Headers */,
+				9E741EA222C12D9E009680E8 /* NSArray+JSDataProtocol.h in Headers */,
+				9E741EAC22C12DBA009680E8 /* JSFault.h in Headers */,
+				9E741EB122C12DBA009680E8 /* JSNil.h in Headers */,
+				9E741EB722C12DBA009680E8 /* TypeUtils.h in Headers */,
+				9E741EC322C12DCE009680E8 /* State.h in Headers */,
+				9E741EC422C12DCE009680E8 /* SymbolTable.h in Headers */,
+				9E741EAF22C12DBA009680E8 /* JSKeyword.h in Headers */,
+				9E741EC122C12DCE009680E8 /* Printer.h in Headers */,
+				9E7942DF22C12A320086A47F /* JSLLib.h in Headers */,
+				9E741EB622C12DBA009680E8 /* Types.h in Headers */,
+				9E741EC522C12DCE009680E8 /* Utils.h in Headers */,
+				9E741EA822C12DAB009680E8 /* NSString+JSDataProtocol.h in Headers */,
+				9E741EB422C12DBA009680E8 /* JSSymbol.h in Headers */,
+				9E741EAB22C12DBA009680E8 /* JSDataProtocol.h in Headers */,
+				9E741EA322C12DAB009680E8 /* NSDecimalNumber+JSDataProtocol.h in Headers */,
+				9E741EC222C12DCE009680E8 /* Reader.h in Headers */,
+				9E741EB822C12DCE009680E8 /* CacheTable.h in Headers */,
+				9E741EBA22C12DCE009680E8 /* Core.h in Headers */,
+				9E741EAA22C12DBA009680E8 /* JSBool.h in Headers */,
+				9E741EA922C12DBA009680E8 /* JSAtom.h in Headers */,
+				9E741EB522C12DBA009680E8 /* JSVector.h in Headers */,
+				9E741EB922C12DCE009680E8 /* Const.h in Headers */,
+				9E741EC022C12DCE009680E8 /* ModuleTable.h in Headers */,
+				9E741EA122C12D98009680E8 /* FileOps.h in Headers */,
+				9E741EAD22C12DBA009680E8 /* JSFunction.h in Headers */,
+				9E741EB022C12DBA009680E8 /* JSList.h in Headers */,
+				9E741EA422C12DAB009680E8 /* NSMapTable+JSHashMap.h in Headers */,
+				9E741EBE22C12DCE009680E8 /* JSLDelegate.h in Headers */,
+				9E741EA722C12DAB009680E8 /* NSNumber+JSDataProtocol.h in Headers */,
+				9E741EBD22C12DCE009680E8 /* JSL.h in Headers */,
+				9E741EB322C12DBA009680E8 /* JSString.h in Headers */,
+				9E741EA622C12DAB009680E8 /* NSMutableDictionary+JSHashMap.h in Headers */,
+				9E741EA522C12DAB009680E8 /* NSMutableArray+JSList.h in Headers */,
+				9E741EBC22C12DCE009680E8 /* JSError.h in Headers */,
+				9E741EBF22C12DCE009680E8 /* Logger.h in Headers */,
+				9E741EB222C12DBA009680E8 /* JSNumber.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
-		9E3A9D4922568AFC00348529 /* JSL */ = {
+		9E3A9D4922568AFC00348529 /* JSLShell */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9E3A9D5122568AFC00348529 /* Build configuration list for PBXNativeTarget "JSL" */;
+			buildConfigurationList = 9E3A9D5122568AFC00348529 /* Build configuration list for PBXNativeTarget "JSLShell" */;
 			buildPhases = (
 				9E3A9D4622568AFC00348529 /* Sources */,
 				9E3A9D4722568AFC00348529 /* Frameworks */,
@@ -389,14 +510,14 @@
 			);
 			dependencies = (
 			);
-			name = JSL;
+			name = JSLShell;
 			productName = JSL;
-			productReference = 9E3A9D4A22568AFC00348529 /* JSL */;
+			productReference = 9E3A9D4A22568AFC00348529 /* JSLShell */;
 			productType = "com.apple.product-type.tool";
 		};
-		9E3A9D5722568B1300348529 /* JSLTests */ = {
+		9E3A9D5722568B1300348529 /* JSLShellTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9E3A9D5D22568B1300348529 /* Build configuration list for PBXNativeTarget "JSLTests" */;
+			buildConfigurationList = 9E3A9D5D22568B1300348529 /* Build configuration list for PBXNativeTarget "JSLShellTests" */;
 			buildPhases = (
 				9E3A9D5422568B1300348529 /* Sources */,
 				9E3A9D5522568B1300348529 /* Frameworks */,
@@ -406,9 +527,45 @@
 			);
 			dependencies = (
 			);
+			name = JSLShellTests;
+			productName = JSLTests;
+			productReference = 9E3A9D5822568B1300348529 /* JSLShellTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		9E7942CE22C12A310086A47F /* JSL */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9E7942E422C12A320086A47F /* Build configuration list for PBXNativeTarget "JSL" */;
+			buildPhases = (
+				9E7942CA22C12A310086A47F /* Headers */,
+				9E7942CB22C12A310086A47F /* Sources */,
+				9E7942CC22C12A310086A47F /* Frameworks */,
+				9E7942CD22C12A310086A47F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = JSL;
+			productName = JSL;
+			productReference = 9E7942CF22C12A310086A47F /* JSL.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		9E7942D622C12A310086A47F /* JSLTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9E7942E522C12A320086A47F /* Build configuration list for PBXNativeTarget "JSLTests" */;
+			buildPhases = (
+				9E7942D322C12A310086A47F /* Sources */,
+				9E7942D422C12A310086A47F /* Frameworks */,
+				9E7942D522C12A310086A47F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9E7942DA22C12A310086A47F /* PBXTargetDependency */,
+			);
 			name = JSLTests;
 			productName = JSLTests;
-			productReference = 9E3A9D5822568B1300348529 /* JSLTests.xctest */;
+			productReference = 9E7942D722C12A310086A47F /* JSLTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -428,6 +585,12 @@
 						CreatedOnToolsVersion = 10.2;
 						LastSwiftMigration = 1020;
 					};
+					9E7942CE22C12A310086A47F = {
+						CreatedOnToolsVersion = 10.2.1;
+					};
+					9E7942D622C12A310086A47F = {
+						CreatedOnToolsVersion = 10.2.1;
+					};
 				};
 			};
 			buildConfigurationList = 9E3A9D4522568AFC00348529 /* Build configuration list for PBXProject "JSL" */;
@@ -442,8 +605,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9E3A9D4922568AFC00348529 /* JSL */,
-				9E3A9D5722568B1300348529 /* JSLTests */,
+				9E7942CE22C12A310086A47F /* JSL */,
+				9E7942D622C12A310086A47F /* JSLTests */,
+				9E3A9D4922568AFC00348529 /* JSLShell */,
+				9E3A9D5722568B1300348529 /* JSLShellTests */,
 			);
 		};
 /* End PBXProject section */
@@ -457,8 +622,27 @@
 				9E281CFD225A60770038A5AF /* tests in Resources */,
 				9E281CFE225A60770038A5AF /* run_argv_test.sh in Resources */,
 				9E281CFF225A60770038A5AF /* runtest.py in Resources */,
-				9E38FC7D227F075F00405BE5 /* jsl in Resources */,
 				9E70861A22ACF2A200ADD464 /* test.jsl in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9E7942CD22C12A310086A47F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E741EC922C1325C009680E8 /* test.jsl in Resources */,
+				9E741EC822C13257009680E8 /* core.jsl in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9E7942D522C12A310086A47F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E741ED022C13A13009680E8 /* collatz.jsl in Resources */,
+				9E741ED122C13A13009680E8 /* i.test.jsl in Resources */,
+				9E741ED222C13A13009680E8 /* module-test.jsl in Resources */,
+				9E741ED322C13A13009680E8 /* scope.jsl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -469,42 +653,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E30554C2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */,
-				9E33AAC5227578A700A6EB98 /* JSVector.m in Sources */,
-				9ED5349022B67FCA004A2CB2 /* CacheTable.m in Sources */,
-				9E33AAB52275775800A6EB98 /* JSString.m in Sources */,
-				9E38FC81227F343800405BE5 /* State.m in Sources */,
-				9E33AAD12275796300A6EB98 /* JSNil.m in Sources */,
-				9E2491EA226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */,
-				9E6F444822578E5600777A24 /* JSL.m in Sources */,
-				9E3A9D6D22568D8D00348529 /* Env.m in Sources */,
-				9E281CEA225890B10038A5AF /* Utils.m in Sources */,
-				9E33AAC12275786D00A6EB98 /* JSList.m in Sources */,
-				9E3A9D7122568DB100348529 /* Printer.m in Sources */,
-				9E33AAC9227578E200A6EB98 /* JSNumber.m in Sources */,
-				9E33AAD9227579C000A6EB98 /* JSFunction.m in Sources */,
-				9E250CEC22886ED500EDADEF /* ModuleTable.m in Sources */,
-				9E33AAD52275799200A6EB98 /* JSBool.m in Sources */,
-				9E30553F22612AF1001D4597 /* NSMutableArray+JSList.m in Sources */,
-				9E3055542261A162001D4597 /* TypeUtils.m in Sources */,
-				9E43105522BE9C6C00512081 /* SymbolTable.m in Sources */,
-				9E3A9D6522568D4B00348529 /* Core.m in Sources */,
-				9E30554822619F3F001D4597 /* NSNumber+JSDataProtocol.m in Sources */,
-				9E3055502261A10F001D4597 /* NSArray+JSDataProtocol.m in Sources */,
-				9E3A9D7522568DBD00348529 /* Reader.m in Sources */,
-				9E30553B2260FA8F001D4597 /* Logger.m in Sources */,
-				9E33AACD2275791300A6EB98 /* JSAtom.m in Sources */,
 				9E5D7B4B225B947E00970453 /* Terminal.m in Sources */,
-				9E94585B2274F04F00A3D449 /* JSHashMap.m in Sources */,
 				9E3A9D4E22568AFC00348529 /* main.m in Sources */,
-				9E9458562274EB4400A3D449 /* NSMapTable+JSHashMap.m in Sources */,
-				9E4F02D72291A1E80064081F /* JSFault.m in Sources */,
-				9E33AABD2275783400A6EB98 /* JSSymbol.m in Sources */,
-				9E33AAB9227577C000A6EB98 /* JSKeyword.m in Sources */,
-				9E30554422612C34001D4597 /* NSString+JSDataProtocol.m in Sources */,
-				9E3055602262633E001D4597 /* JSError.m in Sources */,
-				9E9B6228225B9FC20060DA9A /* FileOps.m in Sources */,
-				9E281CEE225908480038A5AF /* Const.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -512,48 +662,70 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E30554D2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m in Sources */,
-				9E33AAC6227578A700A6EB98 /* JSVector.m in Sources */,
-				9ED5349122B67FCA004A2CB2 /* CacheTable.m in Sources */,
-				9E33AAB62275775800A6EB98 /* JSString.m in Sources */,
-				9E38FC82227F343800405BE5 /* State.m in Sources */,
-				9E33AAD22275796300A6EB98 /* JSNil.m in Sources */,
-				9E2491EB226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m in Sources */,
-				9E6F444922578E5600777A24 /* JSL.m in Sources */,
 				9E5D7B4C225B947E00970453 /* Terminal.m in Sources */,
-				9E3A9D6E22568D8D00348529 /* Env.m in Sources */,
-				9E33AAC22275786D00A6EB98 /* JSList.m in Sources */,
-				9E281CEB225890B10038A5AF /* Utils.m in Sources */,
-				9E33AACA227578E200A6EB98 /* JSNumber.m in Sources */,
-				9E43105622BE9C6C00512081 /* SymbolTable.m in Sources */,
-				9E33AADA227579C000A6EB98 /* JSFunction.m in Sources */,
-				9E250CED22886ED500EDADEF /* ModuleTable.m in Sources */,
-				9E33AAD62275799200A6EB98 /* JSBool.m in Sources */,
-				9E30554022612AF1001D4597 /* NSMutableArray+JSList.m in Sources */,
-				9E3055552261A162001D4597 /* TypeUtils.m in Sources */,
-				9E3A9D7222568DB100348529 /* Printer.m in Sources */,
-				9ED5349322B6991A004A2CB2 /* CacheTableTests.m in Sources */,
-				9E30554922619F3F001D4597 /* NSNumber+JSDataProtocol.m in Sources */,
-				9E3055512261A10F001D4597 /* NSArray+JSDataProtocol.m in Sources */,
-				9E3A9D6622568D4B00348529 /* Core.m in Sources */,
-				9E30553C2260FA8F001D4597 /* Logger.m in Sources */,
-				9E33AACE2275791300A6EB98 /* JSAtom.m in Sources */,
-				9E3A9D7622568DBD00348529 /* Reader.m in Sources */,
-				9E94585C2274F04F00A3D449 /* JSHashMap.m in Sources */,
-				9E36651F22BF6781003DC5EF /* JSLPerfTests.m in Sources */,
-				9E3A9D5B22568B1300348529 /* JSLTests.m in Sources */,
-				9E9458572274EB4400A3D449 /* NSMapTable+JSHashMap.m in Sources */,
-				9E4F02D82291A1E80064081F /* JSFault.m in Sources */,
-				9E33AABE2275783400A6EB98 /* JSSymbol.m in Sources */,
-				9E33AABA227577C000A6EB98 /* JSKeyword.m in Sources */,
-				9E30554522612C34001D4597 /* NSString+JSDataProtocol.m in Sources */,
-				9E3055612262633E001D4597 /* JSError.m in Sources */,
-				9E9B6229225B9FC20060DA9A /* FileOps.m in Sources */,
-				9E281CEF225908480038A5AF /* Const.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9E7942CB22C12A310086A47F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E741E7C22C12C07009680E8 /* NSDecimalNumber+JSDataProtocol.m in Sources */,
+				9E741E8A22C12C23009680E8 /* JSNumber.m in Sources */,
+				9E741E7D22C12C12009680E8 /* NSMapTable+JSHashMap.m in Sources */,
+				9E741E9A22C12C38009680E8 /* State.m in Sources */,
+				9E741E8822C12C23009680E8 /* JSList.m in Sources */,
+				9E741E8422C12C23009680E8 /* JSFault.m in Sources */,
+				9E741E9922C12C38009680E8 /* Reader.m in Sources */,
+				9E741E9022C12C38009680E8 /* Const.m in Sources */,
+				9E741E8E22C12C23009680E8 /* TypeUtils.m in Sources */,
+				9E741E8222C12C23009680E8 /* JSAtom.m in Sources */,
+				9E741E8522C12C23009680E8 /* JSFunction.m in Sources */,
+				9E741E9422C12C38009680E8 /* JSError.m in Sources */,
+				9E741E9B22C12C38009680E8 /* SymbolTable.m in Sources */,
+				9E741E9222C12C38009680E8 /* Env.m in Sources */,
+				9E741E7E22C12C12009680E8 /* NSMutableArray+JSList.m in Sources */,
+				9E741E9822C12C38009680E8 /* Printer.m in Sources */,
+				9E741E8922C12C23009680E8 /* JSNil.m in Sources */,
+				9E741E7B22C12C00009680E8 /* NSArray+JSDataProtocol.m in Sources */,
+				9E741E8122C12C12009680E8 /* NSString+JSDataProtocol.m in Sources */,
+				9E741E7F22C12C12009680E8 /* NSMutableDictionary+JSHashMap.m in Sources */,
+				9E741E8B22C12C23009680E8 /* JSString.m in Sources */,
+				9E741E9122C12C38009680E8 /* Core.m in Sources */,
+				9E741E8D22C12C23009680E8 /* JSVector.m in Sources */,
+				9E741E9622C12C38009680E8 /* Logger.m in Sources */,
+				9E741E9722C12C38009680E8 /* ModuleTable.m in Sources */,
+				9E741E8722C12C23009680E8 /* JSKeyword.m in Sources */,
+				9E741E8F22C12C38009680E8 /* CacheTable.m in Sources */,
+				9E741E8C22C12C23009680E8 /* JSSymbol.m in Sources */,
+				9E741E8622C12C23009680E8 /* JSHashMap.m in Sources */,
+				9E741E8022C12C12009680E8 /* NSNumber+JSDataProtocol.m in Sources */,
+				9E741E9522C12C38009680E8 /* JSL.m in Sources */,
+				9E741E8322C12C23009680E8 /* JSBool.m in Sources */,
+				9E741E9322C12C38009680E8 /* FileOps.m in Sources */,
+				9E741E9C22C12C38009680E8 /* Utils.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9E7942D322C12A310086A47F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E741E9E22C12C47009680E8 /* JSLPerfTests.m in Sources */,
+				9E741E9D22C12C42009680E8 /* CacheTableTests.m in Sources */,
+				9E741EA022C12D17009680E8 /* JSLTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9E7942DA22C12A310086A47F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9E7942CE22C12A310086A47F /* JSL */;
+			targetProxy = 9E7942D922C12A310086A47F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9E3A9D4F22568AFC00348529 /* Debug */ = {
@@ -715,7 +887,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 7S7UE44956;
 				ENABLE_STRICT_OBJC_MSGSEND = NO;
-				INFOPLIST_FILE = JSLTests/Info.plist;
+				INFOPLIST_FILE = JSLShellTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -736,7 +908,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 7S7UE44956;
 				ENABLE_STRICT_OBJC_MSGSEND = NO;
-				INFOPLIST_FILE = JSLTests/Info.plist;
+				INFOPLIST_FILE = JSLShellTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -745,6 +917,108 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.JSLTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		9E7942E022C12A320086A47F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 7S7UE44956;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_STRICT_OBJC_MSGSEND = NO;
+				FRAMEWORK_VERSION = A;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = JSL/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.JSL;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		9E7942E122C12A320086A47F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 7S7UE44956;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_STRICT_OBJC_MSGSEND = NO;
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = JSL/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.JSL;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		9E7942E222C12A320086A47F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 7S7UE44956;
+				ENABLE_STRICT_OBJC_MSGSEND = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = JSLTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.JSLTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		9E7942E322C12A320086A47F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 7S7UE44956;
+				ENABLE_STRICT_OBJC_MSGSEND = NO;
+				INFOPLIST_FILE = JSLTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.JSLTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
@@ -760,7 +1034,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9E3A9D5122568AFC00348529 /* Build configuration list for PBXNativeTarget "JSL" */ = {
+		9E3A9D5122568AFC00348529 /* Build configuration list for PBXNativeTarget "JSLShell" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9E3A9D5222568AFC00348529 /* Debug */,
@@ -769,11 +1043,29 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9E3A9D5D22568B1300348529 /* Build configuration list for PBXNativeTarget "JSLTests" */ = {
+		9E3A9D5D22568B1300348529 /* Build configuration list for PBXNativeTarget "JSLShellTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9E3A9D5E22568B1300348529 /* Debug */,
 				9E3A9D5F22568B1300348529 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9E7942E422C12A320086A47F /* Build configuration list for PBXNativeTarget "JSL" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9E7942E022C12A320086A47F /* Debug */,
+				9E7942E122C12A320086A47F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9E7942E522C12A320086A47F /* Build configuration list for PBXNativeTarget "JSLTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9E7942E222C12A320086A47F /* Debug */,
+				9E7942E322C12A320086A47F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

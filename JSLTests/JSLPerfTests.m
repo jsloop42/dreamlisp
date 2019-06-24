@@ -7,7 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "JSL.h"
+#import "JSLLib.h"
 
 @interface JSLPerfTests : XCTestCase
 @end

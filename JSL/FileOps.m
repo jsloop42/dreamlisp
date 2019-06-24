@@ -139,8 +139,13 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 }
 
 /** Return the path from where the executable is placed. */
-- (NSString *)bundlePath {
-    return [[NSBundle mainBundle] bundlePath];
+- (NSBundle *)mainBundle {
+    return [NSBundle bundleForClass:[self class]];
+}
+
+/** Returns the main bundle resource path. */
+- (NSString *)resourcePath {
+    return [[self mainBundle] resourcePath];
 }
 
 /** Checks if the there are contents left for reading. */

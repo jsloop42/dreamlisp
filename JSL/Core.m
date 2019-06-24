@@ -15,7 +15,6 @@ static NSString *_description = @"The core module.";
     Env *_env;
     Reader *_reader;
     Printer *_printer;
-    Terminal *_terminal;
     id<JSLDelegate> __weak _delegate;
     NSData *_allModuleSortHint;
 }
@@ -35,7 +34,6 @@ static NSString *_description = @"The core module.";
     [_env setIsUserDefined:NO];
     _reader = [Reader new];
     _printer = [Printer new];
-    _terminal = [Terminal new];
     [self addArithmeticFunctions];
     [self addComparisonFunctions];
     [self addPrintFunctions];
@@ -1694,8 +1692,10 @@ double dmod(double a, double n) {
     id<JSDataProtocol>(^readline)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         Core *this = weakSelf;
-        return [[JSString alloc] initWithString:[this->_terminal
-                                                 readlineWithPrompt:[[[JSString dataToString:[xs first] fnName:@"readline/1"] value] UTF8String]]];
+        // FIXME: term delegate
+//        return [[JSString alloc] initWithString:[this->_terminal
+//                                                 readlineWithPrompt:[[[JSString dataToString:[xs first] fnName:@"readline/1"] value] UTF8String]]];
+        return nil;
     };
     fn = [[JSFunction alloc] initWithFn:readline argCount:1 name:@"readline/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"readline" moduleName:[Const coreModuleName]]];

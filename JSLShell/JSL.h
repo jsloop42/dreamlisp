@@ -13,7 +13,7 @@
 #import "Reader.h"
 #import "Printer.h"
 #import "Core.h"
-#import "Terminal.h"
+#import "FileOps.h"
 #import <objc/objc-api.h>
 
 NS_ASSUME_NONNULL_BEGIN

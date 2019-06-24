@@ -12,7 +12,6 @@
 #import "Reader.h"
 #import "Printer.h"
 #import "Logger.h"
-#import "Terminal.h"
 #import "ModuleTable.h"
 #import "Env.h"
 #import <objc/message.h>

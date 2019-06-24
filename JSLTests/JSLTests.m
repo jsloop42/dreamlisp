@@ -6,7 +6,13 @@
 //  Copyright © 2019 jsloop. All rights reserved.
 //
 
-#import "JSLTests.h"
+#import <XCTest/XCTest.h>
+#import <Foundation/Foundation.h>
+#import <XCTest/XCTest.h>
+#import "JSLLib.h"
+
+@interface JSLTests : XCTestCase
+@end
 
 @implementation JSLTests
 
@@ -372,6 +378,13 @@
     XCTAssertEqual([xs count], 3);
     XCTAssertEqual([list count], 2);
     XCTAssertEqualObjects([list last], [xs second]);
+}
+
+- (void)testLoadingCoreLib {
+    JSL *jsl = [[JSL alloc] init];
+    [jsl bootstrap];
+    [jsl loadCoreLib];
+    XCTAssertTrue([[Env modules] containsKey:[Const coreModuleName]]);
 }
 
 - (void)testSymbol {
@@ -1736,13 +1749,10 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(g 3)"], @"81");
 }
 
+/** Returns the file from the current bundle's resources. */
 - (NSString *)pathForFile:(NSString *)filename {
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *path = [[NSString alloc] initWithFormat:@"%@/JSLTests.xctest/Contents/Resources/jsl/%@", [fm currentDirectoryPath], filename];
-    if ([fm fileExistsAtPath:path]) {
-        return path;
-    }
-    return @"";
+    NSString *path = [[NSBundle bundleForClass:[self class]] resourcePath];
+    return [NSString stringWithFormat:@"%@/%@", path, filename];
 }
 
 - (void)testReadString {
@@ -1768,27 +1778,6 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     } @catch (NSException *excep) {
         XCTAssertTrue([Utils matchString:[jsl printException:excep log:YES readably:YES] withPattern:@".*No such file or directory.*"]);
     }
-}
-
-- (void)notestLoadFile {
-    JSL *jsl = [[JSL alloc] initWithoutREPL];
-    NSString *incPath = [self pathForFile:@"inc.mal"];
-    XCTAssertTrue([incPath isNotEmpty]);
-    [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", incPath]];
-    XCTAssertEqualObjects([jsl rep:@"(inc1 7)"], @"8");
-    XCTAssertEqualObjects([jsl rep:@"(inc2 7)"], @"9");
-    XCTAssertEqualObjects([jsl rep:@"(inc3 9)"], @"12");
-    // testing comments
-    NSString *incBPath = [self pathForFile:@"incB.mal"];
-    XCTAssertTrue([incBPath isNotEmpty]);
-    [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", incBPath]];
-    XCTAssertEqualObjects([jsl rep:@"(inc4 7)"], @"11");
-    XCTAssertEqualObjects([jsl rep:@"(inc5 7)"], @"12");
-    // testing map literal across multiple lines in a file
-    NSString *incCPath = [self pathForFile:@"incC.mal"];
-    XCTAssertTrue([incCPath isNotEmpty]);
-    [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", incCPath]];
-    XCTAssertEqualObjects([jsl rep:@"mymap"], @"{\"a\" 1}");
 }
 
 - (void)testAtom {

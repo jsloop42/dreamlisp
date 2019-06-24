@@ -16,9 +16,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "9E7942D622C12A310086A47F"
-               BuildableName = "JSLTests.xctest"
-               BlueprintName = "JSLTests"
+               BlueprintIdentifier = "9E3A9D5722568B1300348529"
+               BuildableName = "JSLShellTests.xctest"
+               BlueprintName = "JSLShellTests"
                ReferencedContainer = "container:JSL.xcodeproj">
             </BuildableReference>
          </TestableReference>

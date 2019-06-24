@@ -37,7 +37,7 @@ static NSString *langVersion;
 
 + (void)initialize {
     hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
-    langVersion = [[NSString alloc] initWithFormat:@"JSL v%@ [%@]", JSLVersion, hostLangVersion];
+    langVersion = [[NSString alloc] initWithFormat:@"JSL v%@ [%@]", [Const JSLVersion], hostLangVersion];
 }
 
 - (instancetype)initWithREPL{
@@ -144,11 +144,10 @@ static NSString *langVersion;
     return [[NSString alloc] initWithFormat:@"%@/%@", path, coreLibFileName];
 }
 
-/** Load core lib @c core.jsl from the search path. This paths includes the current working directory and the bundle directory in order. */
+/** Load core lib @c core.jsl from the framework's resource path. */
 - (void)loadCoreLib {
     NSMutableArray *paths = [NSMutableArray new];
-    [paths addObject:[self coreLibPath:[_fileOps currentDirectoryPath]]];
-    [paths addObject:[self coreLibPath:[_fileOps bundlePath]]];
+    [paths addObject:[self coreLibPath:[_fileOps resourcePath]]];
     NSMutableArray<FileResult *> *files = [_fileOps loadFileFromPath:paths isConcurrent:YES isLookup:YES];
     NSString *moduleName = [Const coreModuleName];
     if ([files count] == 0) {
