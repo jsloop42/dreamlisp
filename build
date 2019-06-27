@@ -3,10 +3,16 @@
 bin="JSLTests/objc"
 buildlog="build.log"
 proj="JSL.xcodeproj"
-scheme="JSL"
+scheme="JSLAll"
 config="Release"
 #config="Debug"
 corelib="core.jsl"
+jslshell="jslshell"
+jslfrwrk="JSL.framework"
+jslfrwrkdsym="JSL.framework.dSYM"
+jslshelldsym="jslshell.dSYM"
+rpath="/Users/jsloop/Library/Frameworks"
+bin="/Users/jsloop/bin"
 
 function getFilename() {
     if [[ "$1" == "0" ]]; then
@@ -75,9 +81,11 @@ function build() {
 		cat $buildlog
 		exit -1
 	fi
-    cp $(tail -4 $buildlog | head -1 | rev | cut -d " " -f1 | rev) $bin/$ret
-    cp $bin/$ret ~/bin/
-    cp JSL/Libs/core.jsl ~/bin/
+    dir=$( tail -4 $buildlog | head -1 | rev | cut -d " " -f1 | cut -d "/" -f2- | rev)
+    cp $dir/$jslshell $bin
+    rsync -aq $dir/$jslshelldsym $rpath
+    rsync -aq $dir/$jslfrwrk $rpath
+    rsync -aq $dir/$jslfrwrkdsym $rpath
 }
 
 (build $@) & spinner
