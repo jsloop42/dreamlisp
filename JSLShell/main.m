@@ -36,11 +36,12 @@ int main(int argc, const char * argv[]) {
                 exit(-1);
             }
         }
+        Terminal *term = [Terminal new];
         [jsl setIsREPL:YES];
         [jsl printVersion];
         [jsl bootstrap];
+        [[jsl ioService] setStdIODelegate:term];
         [jsl loadCoreLib];
-        Terminal *term = [Terminal new];
         info(@"%@", [ShellConst shellVersion]);
         NSString *inp;
         NSString *ret;
