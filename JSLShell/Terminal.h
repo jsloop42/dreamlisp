@@ -12,7 +12,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface Terminal : NSObject
+@interface Terminal : NSObject <StdIOServiceDelegate>
 @property (nonatomic, readwrite) NSString *prompt;
 - (instancetype)init;
 - (NSString *)readline;

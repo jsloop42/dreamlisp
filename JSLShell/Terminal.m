@@ -78,4 +78,18 @@ static NSString *_historyFile = @"/jsl-history";
     return exp;
 }
 
+#pragma mark - StdIOServiceDelegate
+
+- (NSString *)readInput {
+    return [self readline];
+}
+
+- (NSString *)readInputWithPrompt:(NSString *)prompt {
+    return [self readlineWithPrompt:[prompt UTF8String]];
+}
+
+- (void)writeOutput:(NSString *)string {
+    fprintf(stdout,"%s\n", [string UTF8String]);
+}
+
 @end

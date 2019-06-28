@@ -1692,10 +1692,8 @@ double dmod(double a, double n) {
     id<JSDataProtocol>(^readline)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         Core *this = weakSelf;
-        // FIXME: term delegate
-//        return [[JSString alloc] initWithString:[this->_terminal
-//                                                 readlineWithPrompt:[[[JSString dataToString:[xs first] fnName:@"readline/1"] value] UTF8String]]];
-        return nil;
+        return [[JSString alloc] initWithString:[[this->_delegate ioService]
+                                                 readInputWithPrompt:[[JSString dataToString:[xs first] fnName:@"readline/1"] value]]];
     };
     fn = [[JSFunction alloc] initWithFn:readline argCount:1 name:@"readline/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"readline" moduleName:[Const coreModuleName]]];

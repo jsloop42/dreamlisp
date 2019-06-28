@@ -7,7 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9E1E697722C5377E00E52162 /* FileIOServiceDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E1E697522C5377E00E52162 /* FileIOServiceDelegate.h */; };
+		9E1E697B22C5395500E52162 /* StdIOServiceDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E1E697A22C5395400E52162 /* StdIOServiceDelegate.h */; };
+		9E1E697E22C53EAB00E52162 /* IOService.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E1E697C22C53EAB00E52162 /* IOService.h */; };
+		9E1E697F22C53EAB00E52162 /* IOService.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1E697D22C53EAB00E52162 /* IOService.m */; };
 		9E281CF8225A4C790038A5AF /* libreadline.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E281CF7225A4C790038A5AF /* libreadline.tbd */; };
+		9E326C8722C66ED300B456A2 /* JSL.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E326C8622C66ED200B456A2 /* JSL.h */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3F324B227B694400B56B6A /* core.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
 		9E5D7B4B225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
@@ -78,7 +83,6 @@
 		9E741EBA22C12DCE009680E8 /* Core.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E3A9D6322568D4B00348529 /* Core.h */; };
 		9E741EBB22C12DCE009680E8 /* Env.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E3A9D6B22568D8D00348529 /* Env.h */; };
 		9E741EBC22C12DCE009680E8 /* JSError.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E30555E2262633E001D4597 /* JSError.h */; };
-		9E741EBD22C12DCE009680E8 /* JSL.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E6F444622578E5600777A24 /* JSL.h */; };
 		9E741EBE22C12DCE009680E8 /* JSLDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9ED5348A22B54E91004A2CB2 /* JSLDelegate.h */; };
 		9E741EBF22C12DCE009680E8 /* Logger.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E3055392260FA8F001D4597 /* Logger.h */; };
 		9E741EC022C12DCE009680E8 /* ModuleTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E250CEA22886ED500EDADEF /* ModuleTable.h */; };
@@ -133,6 +137,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9E1E697522C5377E00E52162 /* FileIOServiceDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileIOServiceDelegate.h; sourceTree = "<group>"; };
+		9E1E697A22C5395400E52162 /* StdIOServiceDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StdIOServiceDelegate.h; sourceTree = "<group>"; };
+		9E1E697C22C53EAB00E52162 /* IOService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IOService.h; sourceTree = "<group>"; };
+		9E1E697D22C53EAB00E52162 /* IOService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IOService.m; sourceTree = "<group>"; };
 		9E2491E8226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSMutableDictionary+JSHashMap.h"; sourceTree = "<group>"; };
 		9E2491E9226C39CA00B9E21C /* NSMutableDictionary+JSHashMap.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+JSHashMap.m"; sourceTree = "<group>"; };
 		9E250CEA22886ED500EDADEF /* ModuleTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModuleTable.h; sourceTree = "<group>"; };
@@ -160,6 +168,7 @@
 		9E30555C2261C4DC001D4597 /* build */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build; sourceTree = "<group>"; };
 		9E30555E2262633E001D4597 /* JSError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSError.h; sourceTree = "<group>"; };
 		9E30555F2262633E001D4597 /* JSError.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSError.m; sourceTree = "<group>"; };
+		9E326C8622C66ED200B456A2 /* JSL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSL.h; sourceTree = "<group>"; };
 		9E33AAAF2275767800A6EB98 /* JSDataProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSDataProtocol.h; sourceTree = "<group>"; };
 		9E33AAB32275775800A6EB98 /* JSString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSString.h; sourceTree = "<group>"; };
 		9E33AAB42275775800A6EB98 /* JSString.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSString.m; sourceTree = "<group>"; };
@@ -205,7 +214,6 @@
 		9E4F02D62291A1E80064081F /* JSFault.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSFault.m; sourceTree = "<group>"; };
 		9E5D7B49225B947E00970453 /* Terminal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Terminal.h; sourceTree = "<group>"; };
 		9E5D7B4A225B947E00970453 /* Terminal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Terminal.m; sourceTree = "<group>"; };
-		9E6F444622578E5600777A24 /* JSL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JSL.h; path = JSLShell/JSL.h; sourceTree = SOURCE_ROOT; };
 		9E6F444722578E5600777A24 /* JSL.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSL.m; sourceTree = "<group>"; };
 		9E70861922ACF29600ADD464 /* test.jsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = test.jsl; sourceTree = "<group>"; };
 		9E741ECB22C139AA009680E8 /* collatz.jsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = collatz.jsl; sourceTree = "<group>"; };
@@ -396,14 +404,17 @@
 				9E3A9D6422568D4B00348529 /* Core.m */,
 				9E3A9D6B22568D8D00348529 /* Env.h */,
 				9E3A9D6C22568D8D00348529 /* Env.m */,
+				9E1E697522C5377E00E52162 /* FileIOServiceDelegate.h */,
 				9E9B6226225B9FC20060DA9A /* FileOps.h */,
 				9E9B6227225B9FC20060DA9A /* FileOps.m */,
+				9E1E697C22C53EAB00E52162 /* IOService.h */,
+				9E1E697D22C53EAB00E52162 /* IOService.m */,
 				9E30555E2262633E001D4597 /* JSError.h */,
 				9E30555F2262633E001D4597 /* JSError.m */,
-				9E6F444622578E5600777A24 /* JSL.h */,
 				9E6F444722578E5600777A24 /* JSL.m */,
-				9E7942D122C12A310086A47F /* JSLLib.h */,
+				9E326C8622C66ED200B456A2 /* JSL.h */,
 				9ED5348A22B54E91004A2CB2 /* JSLDelegate.h */,
+				9E7942D122C12A310086A47F /* JSLLib.h */,
 				9E3055392260FA8F001D4597 /* Logger.h */,
 				9E30553A2260FA8F001D4597 /* Logger.m */,
 				9E250CEA22886ED500EDADEF /* ModuleTable.h */,
@@ -414,6 +425,7 @@
 				9E3A9D7422568DBD00348529 /* Reader.m */,
 				9E38FC7F227F343800405BE5 /* State.h */,
 				9E38FC80227F343800405BE5 /* State.m */,
+				9E1E697A22C5395400E52162 /* StdIOServiceDelegate.h */,
 				9E43105322BE9C6C00512081 /* SymbolTable.h */,
 				9E43105422BE9C6C00512081 /* SymbolTable.m */,
 				9E281CE8225890B10038A5AF /* Utils.h */,
@@ -468,6 +480,7 @@
 				9E741EA222C12D9E009680E8 /* NSArray+JSDataProtocol.h in Headers */,
 				9E741EAC22C12DBA009680E8 /* JSFault.h in Headers */,
 				9E741EB122C12DBA009680E8 /* JSNil.h in Headers */,
+				9E1E697B22C5395500E52162 /* StdIOServiceDelegate.h in Headers */,
 				9E741EB722C12DBA009680E8 /* TypeUtils.h in Headers */,
 				9E741EC322C12DCE009680E8 /* State.h in Headers */,
 				9E741EC422C12DCE009680E8 /* SymbolTable.h in Headers */,
@@ -475,7 +488,9 @@
 				9E741EC122C12DCE009680E8 /* Printer.h in Headers */,
 				9E7942DF22C12A320086A47F /* JSLLib.h in Headers */,
 				9E741EB622C12DBA009680E8 /* Types.h in Headers */,
+				9E326C8722C66ED300B456A2 /* JSL.h in Headers */,
 				9E741EC522C12DCE009680E8 /* Utils.h in Headers */,
+				9E1E697E22C53EAB00E52162 /* IOService.h in Headers */,
 				9E741EA822C12DAB009680E8 /* NSString+JSDataProtocol.h in Headers */,
 				9E741EB422C12DBA009680E8 /* JSSymbol.h in Headers */,
 				9E741EAB22C12DBA009680E8 /* JSDataProtocol.h in Headers */,
@@ -489,12 +504,12 @@
 				9E741EB922C12DCE009680E8 /* Const.h in Headers */,
 				9E741EC022C12DCE009680E8 /* ModuleTable.h in Headers */,
 				9E741EA122C12D98009680E8 /* FileOps.h in Headers */,
+				9E1E697722C5377E00E52162 /* FileIOServiceDelegate.h in Headers */,
 				9E741EAD22C12DBA009680E8 /* JSFunction.h in Headers */,
 				9E741EB022C12DBA009680E8 /* JSList.h in Headers */,
 				9E741EA422C12DAB009680E8 /* NSMapTable+JSHashMap.h in Headers */,
 				9E741EBE22C12DCE009680E8 /* JSLDelegate.h in Headers */,
 				9E741EA722C12DAB009680E8 /* NSNumber+JSDataProtocol.h in Headers */,
-				9E741EBD22C12DCE009680E8 /* JSL.h in Headers */,
 				9E741EB322C12DBA009680E8 /* JSString.h in Headers */,
 				9E741EA622C12DAB009680E8 /* NSMutableDictionary+JSHashMap.h in Headers */,
 				9E741EA522C12DAB009680E8 /* NSMutableArray+JSList.h in Headers */,
@@ -714,6 +729,7 @@
 				9E741E8322C12C23009680E8 /* JSBool.m in Sources */,
 				9E741E9322C12C38009680E8 /* FileOps.m in Sources */,
 				9E741E9C22C12C38009680E8 /* Utils.m in Sources */,
+				9E1E697F22C53EAB00E52162 /* IOService.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

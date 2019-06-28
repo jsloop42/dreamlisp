@@ -202,4 +202,11 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     return ret;
 }
 
+#pragma mark - FileIOServiceDelegate
+
+- (NSString *)readFile:(NSString *)path {
+    FileResult *res = [[self loadFileFromPath:[@[path] mutableCopy] isConcurrent:NO isLookup:NO] first];
+    return [res content];
+}
+
 @end
