@@ -159,7 +159,7 @@ static NSString *langVersion;
 }
 
 - (void)printVersion {
-    if (_isREPL) info(@"%@", langVersion);
+    if (_isREPL) [_ioService writeOutput:langVersion];
 }
 
 #pragma mark Read

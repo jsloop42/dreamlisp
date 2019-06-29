@@ -7,6 +7,9 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "ShellConst.h"
+#import "NSString+JSDataProtocol.h"
+#import "Terminal.h"
 
 @interface JSLShellTests : XCTestCase
 
@@ -20,7 +23,10 @@
 - (void)tearDown {
 }
 
-- (void)testExample {
+- (void)testVersion {
+    NSString *ver = [ShellConst shellVersion];
+    XCTAssertNotNil(ver);
+    XCTAssertTrue([ver isNotEmpty]);
 }
 
 @end

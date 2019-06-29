@@ -260,7 +260,7 @@ double dmod(double a, double n) {
         for (i = 0; i < len; i++) {
             [ret addObject:[this->_printer printStringFor:[xs nth:i] readably:false]];  // readably false means for viewing in REPL (println "a") -> a nil
         }
-        info(@"%@", [ret componentsJoinedByString:@" "]);
+        [[this->_delegate ioService] writeOutput:[ret componentsJoinedByString:@" "]];
         return [JSNil new];
     };
     fn = [[JSFunction alloc] initWithFn:println argCount:-1 name:@"println/n"];
@@ -275,7 +275,7 @@ double dmod(double a, double n) {
         for (i = 0; i < len; i++) {
             [ret addObject:[this->_printer printStringFor:[xs nth:i] readably:true]];  // prints strings as is with quotes (prn "a") -> "a" nil
         }
-        info(@"%@", [ret componentsJoinedByString:@" "]);
+        [[this->_delegate ioService] writeOutput:[ret componentsJoinedByString:@" "]];
         return [JSNil new];
     };
     fn = [[JSFunction alloc] initWithFn:prn argCount:-1 name:@"prn/n"];
@@ -290,7 +290,7 @@ double dmod(double a, double n) {
         for (i = 0; i < len; i++) {
             [ret addObject:[this->_printer printStringFor:[xs nth:i] readably:false]];
         }
-        info3(@"", @"%@", [ret componentsJoinedByString:@" "]);
+        [[this->_delegate ioService] writeOutput:[ret componentsJoinedByString:@" "] terminator:@""];
         return nil;
     };
     // prints to stdout without newline and  without returning nil

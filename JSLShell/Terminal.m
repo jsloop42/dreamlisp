@@ -92,4 +92,8 @@ static NSString *_historyFile = @"/jsl-history";
     fprintf(stdout,"%s\n", [string UTF8String]);
 }
 
+- (void)writeOutput:(NSString *)string terminator:(NSString *)terminator {
+    fprintf(stdout,"%s%s", [string UTF8String], [terminator UTF8String]);
+}
+
 @end

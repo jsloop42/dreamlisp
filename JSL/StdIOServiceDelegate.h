@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)readInput;
 - (NSString *)readInputWithPrompt:(NSString *)prompt;
 - (void)writeOutput:(NSString *)string;
+- (void)writeOutput:(NSString *)string terminator:(NSString *)terminator;
 @end
 
 NS_ASSUME_NONNULL_END

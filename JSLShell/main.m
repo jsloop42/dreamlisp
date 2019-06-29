@@ -38,11 +38,11 @@ int main(int argc, const char * argv[]) {
         }
         Terminal *term = [Terminal new];
         [jsl setIsREPL:YES];
-        [jsl printVersion];
         [jsl bootstrap];
         [[jsl ioService] setStdIODelegate:term];
+        [jsl printVersion];
         [jsl loadCoreLib];
-        info(@"%@", [ShellConst shellVersion]);
+        [[jsl ioService] writeOutput:[ShellConst shellVersion]];
         NSString *inp;
         NSString *ret;
         while (true) {
@@ -51,7 +51,7 @@ int main(int argc, const char * argv[]) {
                 if (inp && [inp isNotEmpty]) {
                     ret = [jsl rep:inp];
                     if (ret) {
-                        info(@"%@", ret);
+                        [[jsl ioService] writeOutput:ret];
                     }
                 }
             } @catch (NSException *exception) {
