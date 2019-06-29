@@ -2221,10 +2221,10 @@
 
 - (void)testFlatten {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-    XCTAssertEqualObjects([jsl rep:@"(flatten [[1] [2 [3]] [[[4]]] [5]])"], @"[1 2 3 4 5]");
-    XCTAssertEqualObjects([jsl rep:@"(flatten '('(1) '(2 '(3)) '('('(4))) '(5)))"], @"(1 2 3 4 5)");
-    XCTAssertEqualObjects([jsl rep:@"(flatten [])"], @"[]");
-    XCTAssertEqualObjects([jsl rep:@"(flatten '())"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(doall (flatten [[1] [2 [3]] [[[4]]] [5]]))"], @"[1 2 3 4 5]");
+    XCTAssertEqualObjects([jsl rep:@"(doall (flatten '('(1) '(2 '(3)) '('('(4))) '(5))))"], @"(1 2 3 4 5)");
+    XCTAssertEqualObjects([jsl rep:@"(doall (flatten []))"], @"[]");
+    XCTAssertEqualObjects([jsl rep:@"(doall (flatten '()))"], @"()");
     [jsl rep:@"(def hm (flatten {:a 1 :b {:c 2 :d 3} :e 4}))"];
     XCTAssertEqualObjects([jsl rep:@"(contains? :a hm)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(contains? :b hm)"], @"false");
@@ -2356,11 +2356,11 @@
     XCTAssertEqualObjects([jsl rep:@"(-> \"abc\" (zip) (rest) (first))"], @"\"b\"");
     XCTAssertEqualObjects([jsl rep:@"(-> \"abc\" (concat \"xyz\"))"], @"\"abcxyz\"");
     XCTAssertEqualObjects([jsl rep:@"(-> [1 4] (zip [2 3]))"], @"[[1 2] [4 3]]");
-    XCTAssertEqualObjects([jsl rep:@"(-> [1 4] (zip [2 3]) (flatten))"], @"[1 2 4 3]");
+    XCTAssertEqualObjects([jsl rep:@"(-> [1 4] (zip [2 3]) (flatten) (doall))"], @"[1 2 4 3]");
     // thread last <-
     XCTAssertEqualObjects([jsl rep:@"(<- \"abc\" (concat \"xyz\"))"], @"\"xyzabc\"");
     XCTAssertEqualObjects([jsl rep:@"(<- [1 4] (zip [2 3]))"], @"[[2 1] [3 4]]");
-    XCTAssertEqualObjects([jsl rep:@"(<- [1 4] (zip [2 3]) (flatten))"], @"[2 1 3 4]");
+    XCTAssertEqualObjects([jsl rep:@"(<- [1 4] (zip [2 3]) (flatten) (doall))"], @"[2 1 3 4]");
 }
 
 - (void)testCoreLibFunctions {
@@ -2393,6 +2393,10 @@
     XCTAssertEqualObjects([jsl rep:@"(next lseq)"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(has-next? lseq)"], @"false");
     XCTAssertThrows([jsl rep:@"(next lseq)"]);
+    // flatten, doall
+    XCTAssertEqualObjects([jsl rep:@"(type (flatten [1 [2 4] 3]))"], @"\"lazy-sequence\"");
+    XCTAssertEqualObjects([jsl rep:@"(doall (flatten [1 [2 4] 3]))"], @"[1 2 4 3]");
+    XCTAssertEqualObjects([jsl rep:@"(doall [1 [2 4] 3])"], @"[1 [2 4] 3]");
 }
 
 @end

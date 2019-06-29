@@ -26,9 +26,12 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isLazySequence:(id)object;
 + (JSLazySequence *)dataToLazySequence:(id<JSDataProtocol>)data fnName:(NSString *)fnName;
 + (JSLazySequence *)dataToLazySequence:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
+- (instancetype)init;
 - (instancetype)initWithArray:(NSMutableArray *)array sequenceType:(enum SequenceType)sequenceType;
 - (id<JSDataProtocol>)next;
 - (BOOL)hasNext;
+- (void)addFunction:(id<JSDataProtocol> (^)(NSMutableArray *))fn;
+- (id<JSDataProtocol>)apply;
 @end
 
 NS_ASSUME_NONNULL_END

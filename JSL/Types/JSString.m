@@ -95,6 +95,20 @@
     return self;
 }
 
+- (instancetype)initWithArray:(NSMutableArray<JSString *> *)array {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+        _isMutable = YES;
+        _mstring = [NSMutableString new];
+        JSString *str = nil;
+        for (str in array) {
+            [_mstring appendString:[str value]];
+        }
+    }
+    return self;
+}
+
 - (instancetype)initWithContentsOfFile:(NSString *)filePath {
     self = [super init];
     if (self) {

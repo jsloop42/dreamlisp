@@ -863,7 +863,30 @@ double dmod(double a, double n) {
         [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"flatten/1", @"'collection'", [first dataTypeName]] throw];
         return nil;
     };
-    fn = [[JSFunction alloc] initWithFn:flatten argCount:1 name:@"flatten/1"];
+
+    id<JSDataProtocol>(^lazyFlatten)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
+        JSLazySequence *seq = [JSLazySequence new];
+        [seq addFunction:flatten];
+        if ([JSLazySequence isLazySequence:first]) {
+            seq = (JSLazySequence *)first;
+            [seq addFunction:flatten];
+        } else if ([JSList isList:first]) {
+            [seq setValue:[(JSList *)first value]];
+            [seq setSequenceType:SequenceTypeList];
+        } else if ([JSVector isVector:first]) {
+            [seq setValue:[(JSVector *)first value]];
+            [seq setSequenceType:SequenceTypeVector];
+        } else if ([JSHashMap isHashMap:first]) {
+            return [[JSHashMap alloc] initWithMapTable:[self flattenHashMap:first acc:[NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
+                                                                                                            valueOptions:NSMapTableStrongMemory]]];
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"flatten/1", @"'collection'", [first dataTypeName]] throw];
+        }
+        return seq;
+    };
+    fn = [[JSFunction alloc] initWithFn:lazyFlatten argCount:1 name:@"flatten/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"flatten" moduleName:[Const coreModuleName]]];
 
     #pragma mark take
@@ -872,6 +895,24 @@ double dmod(double a, double n) {
         id<JSDataProtocol> first = [xs first];
         id<JSDataProtocol> second = [xs second];
         JSNumber *num = [JSNumber dataToNumber:first position:1 fnName:@"take/2"];
+        if ([JSLazySequence isLazySequence:second]) {
+            JSLazySequence *seq = (JSLazySequence *)second;
+            NSMutableArray *res = [NSMutableArray new];
+            NSUInteger i = 0;
+            NSUInteger len = [num integerValue];
+            for (i = 0; i < len; i++) {
+                if ([seq hasNext]) {
+                    [res addObject:[seq apply]];
+                }
+            }
+            if ([seq sequenceType] == SequenceTypeList) {
+                return [[JSList alloc] initWithArray:res];
+            }
+            if ([seq sequenceType] == SequenceTypeVector) {
+                return [[JSVector alloc] initWithArray:res];
+            }
+            return [[JSString alloc] initWithArray:res];
+        }
         if ([JSString isString:second]) return [[JSString alloc] initWithString:[(JSString *)second substringFrom:0 count:[num integerValue]]];
         NSMutableArray *list = [[JSVector dataToList:second position:2 fnName:@"take/2"] value];
         NSUInteger n = [num integerValue];
@@ -1553,6 +1594,46 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:next argCount:1 name:@"next/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"next" moduleName:[Const coreModuleName]]];
+
+    #pragma mark dorun
+    /** Returns the next element in the lazy sequence if present, else throws an exception. */
+    id<JSDataProtocol>(^doRun)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        JSLazySequence *seq = [JSLazySequence dataToLazySequence:[xs first] fnName:@"dorun/1"];
+        while ([seq hasNext]) {
+            [seq apply];
+        }
+        return [JSNil new];
+    };
+    fn = [[JSFunction alloc] initWithFn:doRun argCount:1 name:@"dorun/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"dorun" moduleName:[Const coreModuleName]]];
+
+    #pragma mark doall
+    /** Returns the next element in the lazy sequence if present, else throws an exception. */
+    id<JSDataProtocol>(^doAll)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        id<JSDataProtocol> first = [xs first];
+        if ([JSList isKindOfList:first] || [JSString isString:first]) return first;
+        JSLazySequence *seq = [JSLazySequence dataToLazySequence:first fnName:@"doall/1"];
+        NSMutableArray *res = [NSMutableArray new];
+        id ret = nil;
+        while ([seq hasNext]) {
+            ret = [seq apply];
+            if ([JSList isKindOfList:ret]) {
+                [res addObjectsFromArray:[(JSList *)ret value]];
+            } else {
+                [res addObject:ret];
+            }
+        }
+        if ([seq sequenceType] == SequenceTypeList) {
+            return [[JSList alloc] initWithArray:res];
+        } else if ([seq sequenceType] == SequenceTypeVector) {
+            return [[JSVector alloc] initWithArray:res];
+        }
+        return [[JSString alloc] initWithArray:res];
+    };
+    fn = [[JSFunction alloc] initWithFn:doAll argCount:1 name:@"doall/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"doall" moduleName:[Const coreModuleName]]];
 }
 
 #pragma mark - Predicate

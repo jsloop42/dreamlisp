@@ -17,7 +17,6 @@
 		9E326C8F22C7598F00B456A2 /* MockStdIOService.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C8E22C7598F00B456A2 /* MockStdIOService.m */; };
 		9E326C9222C7891800B456A2 /* JSLazySequence.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E326C9022C7891800B456A2 /* JSLazySequence.h */; };
 		9E326C9322C7891800B456A2 /* JSLazySequence.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C9122C7891800B456A2 /* JSLazySequence.m */; };
-		9E326C9422C7891800B456A2 /* JSLazySequence.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C9122C7891800B456A2 /* JSLazySequence.m */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3F324B227B694400B56B6A /* core.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
 		9E5D7B4B225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
@@ -757,7 +756,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E326C9422C7891800B456A2 /* JSLazySequence.m in Sources */,
 				9E741E9E22C12C47009680E8 /* JSLPerfTests.m in Sources */,
 				9E741E9D22C12C42009680E8 /* CacheTableTests.m in Sources */,
 				9E741EA022C12D17009680E8 /* JSLTests.m in Sources */,
