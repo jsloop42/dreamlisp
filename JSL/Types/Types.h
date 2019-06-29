@@ -6,9 +6,6 @@
 //  Copyright © 2019 jsloop. All rights reserved.
 //
 
-#ifndef Types_h
-#define Types_h
-
 #import <Foundation/Foundation.h>
 // JSTypes
 #import "JSDataProtocol.h"
@@ -24,6 +21,7 @@
 #import "JSSymbol.h"
 #import "JSVector.h"
 #import "JSFault.h"
+#import "JSLazySequence.h"
 // Categories
 #import "NSArray+JSDataProtocol.h"
 #import "NSDecimalNumber+JSDataProtocol.h"
@@ -37,4 +35,3 @@
 #import "Logger.h"
 #import "TypeUtils.h"
 #import "Utils.h"
-#endif /* Types_h */

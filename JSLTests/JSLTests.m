@@ -2378,4 +2378,13 @@
     XCTAssertEqualObjects([jsl rep:@"(identity [1 2 3])"], @"[1 2 3]");
 }
 
+- (void)testLazySeqCoreFunction {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    [jsl rep:@"(def lseq (lazy-seq [1 2 3]))"];
+    XCTAssertEqualObjects([jsl rep:@"(type lseq)"], @"\"lazy-sequence\"");
+    XCTAssertEqualObjects([jsl rep:@"(type (lazy-seq '(1 2 3)))"], @"\"lazy-sequence\"");
+    XCTAssertEqualObjects([jsl rep:@"(type (lazy-seq \"abc\"))"], @"\"lazy-sequence\"");
+    XCTAssertThrows([jsl rep:@"(lazy-seq 1)"]);
+}
+
 @end

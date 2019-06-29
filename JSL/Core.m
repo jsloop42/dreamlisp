@@ -41,6 +41,7 @@ static NSString *_description = @"The core module.";
     [self addEvalFunctions];
     [self addAtomFunctions];
     [self addInvokeFunctions];
+    [self addLazyFunctions];
     [self addPredicateFunctions];
     [self addSymbolFunctions];
     [self addKeywordFunctions];
@@ -1508,6 +1509,28 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:keywordp argCount:1 name:@"keyword?/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"keyword?" moduleName:[Const coreModuleName]]];
+}
+
+#pragma mark - Lazy
+
+- (void)addLazyFunctions {
+    JSFunction *fn = nil;
+
+    #pragma mark lazy-seq
+    /** Takes a sequence and returns a lazy-sequence object. */
+    id<JSDataProtocol>(^lazySeq)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        id<JSDataProtocol> first = [xs first];
+        if ([JSString isString:first]) {
+            return [[JSLazySequence alloc] initWithArray:[Utils toArray:first isNative:YES] sequenceType:SequenceTypeString];
+        } else if ([JSList isKindOfList:first]) {
+            return [[JSLazySequence alloc] initWithArray:[@[first] mutableCopy] sequenceType:[JSVector isVector:first] ? SequenceTypeVector : SequenceTypeList];
+        }
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"lazy-seq/1", @"sequence", [first dataTypeName]] throw];
+        return [JSNil new];
+    };
+    fn = [[JSFunction alloc] initWithFn:lazySeq argCount:1 name:@"lazy-seq/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"lazy-seq" moduleName:[Const coreModuleName]]];
 }
 
 #pragma mark - Predicate
