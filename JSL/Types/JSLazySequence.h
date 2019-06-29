@@ -24,6 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) enum SequenceType sequenceType;
 @property (nonatomic, readwrite) NSMutableArray<JSFunction *> *fns;
 + (BOOL)isLazySequence:(id)object;
++ (JSLazySequence *)dataToLazySequence:(id<JSDataProtocol>)data fnName:(NSString *)fnName;
++ (JSLazySequence *)dataToLazySequence:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)initWithArray:(NSMutableArray *)array sequenceType:(enum SequenceType)sequenceType;
 - (id<JSDataProtocol>)next;
 - (BOOL)hasNext;

@@ -1524,13 +1524,35 @@ double dmod(double a, double n) {
         if ([JSString isString:first]) {
             return [[JSLazySequence alloc] initWithArray:[Utils toArray:first isNative:YES] sequenceType:SequenceTypeString];
         } else if ([JSList isKindOfList:first]) {
-            return [[JSLazySequence alloc] initWithArray:[@[first] mutableCopy] sequenceType:[JSVector isVector:first] ? SequenceTypeVector : SequenceTypeList];
+            return [[JSLazySequence alloc] initWithArray:[(JSList *)first value]
+                                            sequenceType:[JSVector isVector:first] ? SequenceTypeVector : SequenceTypeList];
         }
         [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"lazy-seq/1", @"sequence", [first dataTypeName]] throw];
         return [JSNil new];
     };
     fn = [[JSFunction alloc] initWithFn:lazySeq argCount:1 name:@"lazy-seq/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"lazy-seq" moduleName:[Const coreModuleName]]];
+
+    #pragma mark has-next?
+    /** Returns whether the lazy sequence has elements which are not realised. */
+    id<JSDataProtocol>(^hasNext)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        JSLazySequence *seq = [JSLazySequence dataToLazySequence:[xs first] fnName:@"has-next?/1"];
+        return [[JSBool alloc] initWithBool:[seq hasNext]];
+    };
+    fn = [[JSFunction alloc] initWithFn:hasNext argCount:1 name:@"has-next?/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"has-next?" moduleName:[Const coreModuleName]]];
+
+    #pragma mark next
+    /** Returns the next element in the lazy sequence if present, else throws an exception. */
+    id<JSDataProtocol>(^next)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        JSLazySequence *seq = [JSLazySequence dataToLazySequence:[xs first] fnName:@"next/1"];
+        if (![seq hasNext]) [[[JSError alloc] initWithFormat:IndexOutOfBounds, [seq index], [seq length]] throw];
+        return [seq next];
+    };
+    fn = [[JSFunction alloc] initWithFn:next argCount:1 name:@"next/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"next" moduleName:[Const coreModuleName]]];
 }
 
 #pragma mark - Predicate
@@ -1538,7 +1560,7 @@ double dmod(double a, double n) {
 - (void)addPredicateFunctions {
     JSFunction *fn = nil;
 
-#pragma mark nil?
+    #pragma mark nil?
     /** Checks if the given element is @c nil. */
     id<JSDataProtocol>(^nilp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];

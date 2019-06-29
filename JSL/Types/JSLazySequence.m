@@ -35,6 +35,23 @@
     return [[object className] isEqual:[self className]];
 }
 
++ (JSLazySequence *)dataToLazySequence:(id<JSDataProtocol>)data fnName:(NSString *)fnName {
+    return [self dataToLazySequence:data position:-1 fnName:fnName];
+}
+
++ (JSLazySequence *)dataToLazySequence:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
+    if (![JSLazySequence isLazySequence:data]) {
+        JSError *err = nil;
+        if (position > 0) {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'lazy-sequence'", position, [data dataTypeName]];
+        } else {
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'lazy-sequence'", [data dataTypeName]];
+        }
+        [err throw];
+    }
+    return (JSLazySequence *)data;
+}
+
 - (instancetype)initWithArray:(NSMutableArray *)array sequenceType:(enum SequenceType)sequenceType {
     self = [super init];
     if (self) {
