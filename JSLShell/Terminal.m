@@ -54,7 +54,7 @@ static NSString *_historyFile = @"/jsl-history";
             if ([line length] > 0) add_history([line cStringUsingEncoding:NSUTF8StringEncoding]);
         }
     } @catch (NSException *exception) {
-        error(@"%@", exception.description);
+        [self writeOutput:exception.description];
     }
 }
 

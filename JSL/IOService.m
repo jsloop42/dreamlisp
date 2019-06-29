@@ -45,6 +45,11 @@
     [_stdIODelegate writeOutput:string];
 }
 
+- (void)writeOutput:(nonnull NSString *)string terminator:(nonnull NSString *)terminator {
+    [_stdIODelegate writeOutput:string terminator:terminator];
+}
+
+
 #pragma mark - Bundle
 
 /** Return the path from where the executable is placed. */

@@ -198,7 +198,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 - (BOOL)delete:(NSString *)path {
     NSError *err = nil;
     BOOL ret = [_fm removeItemAtPath:path error:&err];
-    if (!ret && err) error(@"Error: %@", err.description);
+    if (!ret && err) [Log error:err.description];
     return ret;
 }
 

@@ -8,80 +8,82 @@
 
 #import "Logger.h"
 
-/** Holds the info callback function mainly used for unit tests. */
-void (*callback)(id param, int tag, int counter, const char *s);
-static id self;
-/** A tag to distinguish each log which is passed to the callback */
-static int _tag = 0;
-/** A counter that increases with each callback. */
-static int _logCallCounter = 0;
+static BOOL _isDebug = NO;
+static BOOL _isVerbose = NO;
+static IOService *_ioService;
 
-/** A callback function which when set will be invoked for an info log. */
-void infoCallback(id param, int tag, void(*fn)(id param, int tag, int counter, const char *s)) {
-    callback = fn;
-    self = param;
-    _tag = tag;
+@implementation Logger
+
++ (BOOL)isDebug {
+    return _isDebug;
 }
 
-/** Clears the info callback and associated variables. */
-void freeInfoCallback() {
-    callback = NULL;
-    self = NULL;
-    _tag = 0;
-    _logCallCounter = 0;
++ (BOOL)isVerbose {
+    return _isVerbose;
 }
 
-/** Log with the given terminator string. */
-void info3(NSString *terminator, NSString *format, ...) {
++ (void)setIsDebug:(BOOL)flag {
+    _isDebug = flag;
+}
+
++ (void)setIsVerbose:(BOOL)flag {
+    _isVerbose = flag;
+}
+
++ (void)setIOService:(IOService *)ioService {
+    _ioService = ioService;
+}
+
++ (void)info:(NSString *)message {
+    [_ioService writeOutput:[NSString stringWithFormat:@"[info] %@", message]];
+}
+
++ (void)infoWithFormat:(NSString *)format, ... {
     va_list args;
     va_start(args, format);
     NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
-    if (self != nil && callback != nil) {
-        callback(self, _tag, ++_logCallCounter, [message cStringUsingEncoding:NSUTF8StringEncoding]);
-    }
     va_end(args);
-    fprintf(stdout,"%s%s", [message UTF8String], [terminator UTF8String]);
+    [_ioService writeOutput:[NSString stringWithFormat:@"[info] %@", message]];
 }
 
-/** Info level log. */
-void info(NSString *format, ...) {
-    va_list args;
-    va_start(args, format);
-    NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
-    if (self != nil && callback != nil) {
-        callback(self, _tag, ++_logCallCounter, [message cStringUsingEncoding:NSUTF8StringEncoding]);
-    }
-    va_end(args);
-    fprintf(stdout,"%s\n", [message UTF8String]);
++ (void)debug:(NSString *)message {
+    if (_isDebug) [_ioService writeOutput:[NSString stringWithFormat:@"[debug] %@", message]];
 }
 
-/** Debug log which is enabled only if the @c DEBUG flag is set. */
-void debug(NSString *format, ...) {
-    #if DEBUG
++ (void)debugWithFormat:(NSString *)format, ... {
+    if (_isDebug) {
         va_list args;
         va_start(args, format);
         NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
         va_end(args);
-        fprintf(stderr, "%s\n", [message UTF8String]);
-    #endif
+        [_ioService writeOutput:[NSString stringWithFormat:@"[debug] %@", message]];
+    }
 }
 
-/** Verbose log which is enabled only if the @c VERBOSE flag is set. */
-void verbose(NSString *format, ...) {
-    #if VERBOSE
-        va_list args;
-        va_start(args, format);
-        NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
-        va_end(args);
-        fprintf(stderr, "%s\n", [message UTF8String]);
-    #endif
++ (void)error:(NSString *)message {
+    [_ioService writeOutput:[NSString stringWithFormat:@"[error] %@", message]];
 }
 
-/** Error level log. */
-void error(NSString *format, ...) {
++ (void)errorWithFormat:(NSString *)format, ... {
     va_list args;
     va_start(args, format);
     NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
     va_end(args);
-    fprintf(stderr, "%s\n", [message UTF8String]);
+    [_ioService writeOutput:[NSString stringWithFormat:@"[error] %@", message]];
 }
+
++ (void)verbose:(NSString *)message {
+    if (_isVerbose) [_ioService writeOutput:[NSString stringWithFormat:@"[verbose] %@", message]];
+}
+
++ (void)verboseWithFormat:(NSString *)format, ... {
+    if (_isVerbose) {
+        va_list args;
+        va_start(args, format);
+        NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
+        va_end(args);
+        [_ioService writeOutput:[NSString stringWithFormat:@"[verbose] %@", message]];
+    }
+}
+
+@end

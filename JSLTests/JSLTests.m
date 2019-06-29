@@ -10,6 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 #import <JSL/JSLLib.h>
+#import "MockStdIOService.h"
 
 @interface JSLTests : XCTestCase
 @end
@@ -506,124 +507,47 @@
     XCTAssertEqualObjects([jsl rep:@"(>= 1)"], @"true");
 }
 
-void testPrintCallback(id param, int tag, int counter, const char *s) {
-    [param printCallback:[[NSString alloc] initWithCString:s encoding:NSUTF8StringEncoding] withTag:tag counter:counter];
-}
-
 - (void)testPrintFunctions {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-    infoCallback(self, 0, &testPrintCallback);
+    MockStdIOService *stdIOService = [MockStdIOService new];
+    [[jsl ioService] setStdIODelegate:stdIOService];
     XCTAssertEqualObjects([jsl rep:@"(println [33 2 3])"], @"nil");
+    XCTAssertEqualObjects([stdIOService output], @"[33 2 3]");
     XCTAssertEqualObjects([jsl rep:@"(prn [(+ 21 12) 2 3])"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 1, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"[33 2 3]");
     XCTAssertEqualObjects([jsl rep:@"(prn)"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 2, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"");
     XCTAssertEqualObjects([jsl rep:@"(prn \"\")"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 3, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"\"\"");
     XCTAssertEqualObjects([jsl rep:@"(prn \"abc\")"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 4, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"\"abc\"");
     XCTAssertEqualObjects([jsl rep:@"(prn \"abc  def\" \"ghi jkl\")"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 5, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"\"abc  def\" \"ghi jkl\"");
     XCTAssertEqualObjects([jsl rep:@"(prn \"\\\"\")"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 6, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"\"\\\"\"");
     XCTAssertEqualObjects([jsl rep:@"(prn \"abc\\ndef\\nghi\")"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 7, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"\"abc\\ndef\\nghi\"");
     XCTAssertEqualObjects([jsl rep:@"(prn \"abc\\\\\\\\def\\\\\\\\ghi\")"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 8, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"\"abc\\\\\\\\def\\\\\\\\ghi\"");
     XCTAssertEqualObjects([jsl rep:@"(prn (list 1 2 \"abc\" \"\\\"\") \"def\")"], @"nil");
-    freeInfoCallback();
+    XCTAssertEqualObjects([stdIOService output], @"(1 2 \"abc\" \"\\\"\") \"def\"");
     // (println)
-    infoCallback(self, 9, &testPrintCallback);
     XCTAssertEqualObjects([jsl rep:@"(println)"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 10, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"");
     XCTAssertEqualObjects([jsl rep:@"(println \"\")"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 11, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"");
     XCTAssertEqualObjects([jsl rep:@"(println \"abc\")"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 12, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"abc");
     XCTAssertEqualObjects([jsl rep:@"(println \"abc  def\" \"ghi jkl\")"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 13, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"abc  def ghi jkl");
     XCTAssertEqualObjects([jsl rep:@"(println \"\\\"\")"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 14, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"\"");
     XCTAssertEqualObjects([jsl rep:@"(println \"abc\\ndef\\nghi\")"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 15, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"abc\ndef\nghi");
     XCTAssertEqualObjects([jsl rep:@"(println \"abc\\\\def\\\\ghi\")"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 16, &testPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"abc\\def\\ghi");
     XCTAssertEqualObjects([jsl rep:@"(println (list 1 2 \"abc\" \"\\\"\") \"def\")"], @"nil");
-    freeInfoCallback();
-}
-
-- (void)printCallback:(NSString *)message withTag:(int)tag counter:(int)counter {
-    XCTAssertNotNil(message);
-    switch (tag) {
-        case 0:
-            XCTAssertEqualObjects(message, @"[33 2 3]");
-            break;
-        case 1:
-            XCTAssertEqualObjects(message, @"");
-            break;
-        case 2:
-            XCTAssertEqualObjects(message, @"\"\"");
-            break;
-        case 3:
-            XCTAssertEqualObjects(message, @"\"abc\"");
-            break;
-        case 4:
-            XCTAssertEqualObjects(message, @"\"abc  def\" \"ghi jkl\"");
-            break;
-        case 5:
-            XCTAssertEqualObjects(message, @"\"\\\"\"");
-            break;
-        case 6:
-            XCTAssertEqualObjects(message, @"\"abc\\ndef\\nghi\"");
-            break;
-        case 7:
-            XCTAssertEqualObjects(message, @"\"abc\\\\\\\\def\\\\\\\\ghi\"");
-            break;
-        case 8:
-            XCTAssertEqualObjects(message, @"(1 2 \"abc\" \"\\\"\") \"def\"");
-            break;
-        case 9:
-            XCTAssertEqualObjects(message, @"");
-            break;
-        case 10:
-            XCTAssertEqualObjects(message, @"");
-            break;
-        case 11:
-            XCTAssertEqualObjects(message, @"abc");
-            break;
-        case 12:
-            XCTAssertEqualObjects(message, @"abc  def ghi jkl");
-            break;
-        case 13:
-            XCTAssertEqualObjects(message, @"\"");
-            break;
-        case 14:
-            XCTAssertEqualObjects(message, @"abc\ndef\nghi");
-            break;
-        case 15:
-            XCTAssertEqualObjects(message, @"abc\\def\\ghi");
-            break;
-        case 16:
-            XCTAssertEqualObjects(message, @"(1 2 abc \") def");
-            break;
-        default:
-            break;
-    }
+    XCTAssertEqualObjects([stdIOService output], @"(1 2 abc \") def");
 }
 
 - (void)testDef {
@@ -1110,45 +1034,21 @@ void testPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(count \"abc\")"], @"3");
 }
 
-void testdoPrintCallback(id param, int tag, int counter, const char *s) {
-    [param doPrintCallback:[[NSString alloc] initWithCString:s encoding:NSUTF8StringEncoding] tag:tag counter:counter];
-}
-
-- (void)doPrintCallback:(NSString *)message tag:(int)tag counter:(int)counter {
-    switch (tag) {
-        case 0:
-            XCTAssertEqualObjects(message, @"\"prn output1\"");
-            break;
-        case 1:
-            XCTAssertEqualObjects(message, @"\"prn output2\"");
-            break;
-        case 2:
-            if (counter == 1) {
-                XCTAssertEqualObjects(message, @"\"prn output1\"");
-            } else if (counter == 2) {
-                XCTAssertEqualObjects(message, @"\"prn output2\"");
-            }
-        default:
-            break;
-    }
-}
-
 - (void)testdoForm {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
+    MockStdIOService *stdIOService = [MockStdIOService new];
+    [[jsl ioService] setStdIODelegate:stdIOService];
     XCTAssertEqualObjects([jsl rep:@"(do (def a 6) 7 (+ a 8))"], @"14");
     XCTAssertEqualObjects([jsl rep:@"a"], @"6");
     XCTAssertEqualObjects([jsl rep:@"(def DO (fn (a) 7))"], @"user:DO/1");
     XCTAssertEqualObjects([jsl rep:@"(DO 3)"], @"7");
     // printing
-    infoCallback(self, 0, &testdoPrintCallback);
     XCTAssertEqualObjects([jsl rep:@"(do (prn \"prn output1\"))"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 1, &testdoPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"\"prn output1\"");
     XCTAssertEqualObjects([jsl rep:@"(do (prn \"prn output2\") 7)"], @"7");
-    freeInfoCallback();
-    infoCallback(self, 2, &testdoPrintCallback);
+    XCTAssertEqualObjects([stdIOService output], @"\"prn output2\"");
     XCTAssertEqualObjects([jsl rep:@"(do (prn \"prn output1\") (prn \"prn output2\") (+ 1 2))"], @"3");
-    freeInfoCallback();
+    XCTAssertEqualObjects([stdIOService output], @"\"prn output2\"");
 }
 
 - (void)testEquality {
@@ -1609,12 +1509,10 @@ void testdoPrintCallback(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(foo2)"], @"12");
 }
 
-void errorHandleFn(id param, int tag, int counter, const char *s) {
-    [param errorHandleCallback:[[NSString alloc] initWithCString:s encoding:NSUTF8StringEncoding] withTag:tag counter:counter];
-}
-
 - (void)testErrorHandling {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
+    MockStdIOService *stdIOService = [MockStdIOService new];
+    [[jsl ioService] setStdIODelegate:stdIOService];
     XCTAssertThrows([jsl rep:@"(throw \"err1\")"], @"Error: err1");
     XCTAssertThrows([jsl rep:@"(throw {:msg \"err2\"})"], @"Error: {:msg \"err2\"}");
     XCTAssertEqualObjects([jsl rep:@"(try 123 (catch e 456))"], @"123");
@@ -1624,38 +1522,16 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
         XCTAssertEqualObjects([jsl printException:exception log:NO readably:YES], @"exc is:" "'abc' not found");
     }
     XCTAssertEqualObjects([jsl rep:@"(try (throw \"my exception\") (catch exc (do (prn \"exc:\" exc) 7)))"], @"7");
-    infoCallback(self, 0, &errorHandleFn);
     XCTAssertEqualObjects([jsl rep:@"(try (abc 1 2) (catch exc (prn \"exc is:\" exc)))"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 1, &errorHandleFn);
+    XCTAssertEqualObjects([stdIOService output], @"\"exc is:\" \"'user:abc/2' not found\"");
     XCTAssertEqualObjects([jsl rep:@"(try (nth 1 []) (catch exc (prn \"exc is:\" exc)))"], @"nil");
-    freeInfoCallback();
+    XCTAssertEqualObjects([stdIOService output], @"\"exc is:\" \"Index 1 is out of bound for length 0\"");
     XCTAssertEqualObjects([jsl rep:@"(try (map throw/1 (list \"my err\")) (catch exc exc))"], @"\"my err\"");
-    infoCallback(self, 2, &errorHandleFn);
     XCTAssertEqualObjects([jsl rep:@"(try (throw [\"data\" \"foo\"]) (catch exc (do (prn \"exc is:\" exc) 7)))"], @"7");
-    freeInfoCallback();
+    XCTAssertEqualObjects([stdIOService output], @"\"exc is:\" [\"data\" \"foo\"]");
     XCTAssertThrows([jsl rep:@"(try xyz)"], @"'xyz' not found");
-    infoCallback(self, 3, &errorHandleFn);
     XCTAssertEqualObjects([jsl rep:@"(try (throw (list 1 2 3)) (catch exc (do (prn \"err:\" exc) 7)))"], @"7");
-    freeInfoCallback();
-}
-
-- (void)errorHandleCallback:(NSString *)message withTag:(int)tag counter:(int)counter {
-    XCTAssertNotNil(message);
-    switch (tag) {
-        case 0:
-            XCTAssertEqualObjects(message, @"\"exc is:\" \"'user:abc/2' not found\"");
-            break;
-        case 1:
-            XCTAssertEqualObjects(message, @"\"exc is:\" \"Index 1 is out of bound for length 0\"");
-            break;
-        case 2:
-            XCTAssertEqualObjects(message, @"\"exc is:\" [\"data\" \"foo\"]");
-            break;
-        case 3:
-            XCTAssertEqualObjects(message, @"\"err:\" (1 2 3)");
-            break;
-    }
+    XCTAssertEqualObjects([stdIOService output], @"\"err:\" (1 2 3)");
 }
 
 - (void)testMeta {
@@ -1828,12 +1704,10 @@ void errorHandleFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(let (a 2) (eval (read-string \"a\")))"], @"1");
 }
 
-void predicateFn(id param, int tag, int counter, const char *s) {
-    [param predicateCallback:[[NSString alloc] initWithCString:s encoding:NSUTF8StringEncoding] withTag:tag counter:counter];
-}
-
 - (void)testPredicate {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
+    MockStdIOService *stdIOService = [MockStdIOService new];
+    [[jsl ioService] setStdIODelegate:stdIOService];
     // nil?
     XCTAssertEqualObjects([jsl rep:@"(nil? nil)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(nil? true)"], @"false");
@@ -1851,15 +1725,12 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertEqualObjects([jsl rep:@"(false? 1)"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(false? \"a\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(false? :a)"], @"false");
-    infoCallback(self, 0, &predicateFn);
     XCTAssertEqualObjects([jsl rep:@"(apply prn (list 1 2 \"3\" (list)))"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 1, &predicateFn);
+    XCTAssertEqualObjects([stdIOService output], @"1 2 \"3\" ()");
     XCTAssertEqualObjects([jsl rep:@"(apply prn/n 1 2 (list \"3\" (list)))"], @"nil");
-    freeInfoCallback();
-    infoCallback(self, 2, &predicateFn);
+    XCTAssertEqualObjects([stdIOService output], @"1 2 (\"3\" ())");
     XCTAssertEqualObjects([jsl rep:@"(apply prn/n 1 2 [\"3\" 4])"], @"nil");
-    freeInfoCallback();
+    XCTAssertEqualObjects([stdIOService output], @"1 2 [\"3\" 4]");
     XCTAssertEqualObjects([jsl rep:@"(apply list (list))"], @"()");
     XCTAssertEqualObjects([jsl rep:@"(apply symbol?/1 (list (quote two)))"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(apply (fn (a b) (+ a b)) (list 2 3))"], @"5");
@@ -1978,21 +1849,6 @@ void predicateFn(id param, int tag, int counter, const char *s) {
     XCTAssertThrows([jsl rep:@"(odd? 1.1)"]);
     XCTAssertThrows([jsl rep:@"(odd? 1.2)"]);
     XCTAssertThrows([jsl rep:@"(odd? 2.2)"]);
-}
-
-- (void)predicateCallback:(NSString *)message withTag:(int)tag counter:(int)counter {
-    XCTAssertNotNil(message);
-    switch (tag) {
-        case 0:
-            XCTAssertEqualObjects(message, @"1 2 \"3\" ()");
-            break;
-        case 1:
-            XCTAssertEqualObjects(message, @"1 2 (\"3\" ())");
-            break;
-        case 2:
-            XCTAssertEqualObjects(message, @"1 2 [\"3\" 4]");
-            break;
-    }
 }
 
 - (void)testMisc {

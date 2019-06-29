@@ -13,6 +13,7 @@
 		9E1E697F22C53EAB00E52162 /* IOService.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1E697D22C53EAB00E52162 /* IOService.m */; };
 		9E281CF8225A4C790038A5AF /* libreadline.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E281CF7225A4C790038A5AF /* libreadline.tbd */; };
 		9E326C8722C66ED300B456A2 /* JSL.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E326C8622C66ED200B456A2 /* JSL.h */; };
+		9E326C8C22C7524900B456A2 /* MockStdIOService.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C8B22C7524900B456A2 /* MockStdIOService.m */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3F324B227B694400B56B6A /* core.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
 		9E5D7B4B225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
@@ -169,6 +170,8 @@
 		9E30555E2262633E001D4597 /* JSError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSError.h; sourceTree = "<group>"; };
 		9E30555F2262633E001D4597 /* JSError.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSError.m; sourceTree = "<group>"; };
 		9E326C8622C66ED200B456A2 /* JSL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSL.h; sourceTree = "<group>"; };
+		9E326C8A22C7524900B456A2 /* MockStdIOService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MockStdIOService.h; sourceTree = "<group>"; };
+		9E326C8B22C7524900B456A2 /* MockStdIOService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MockStdIOService.m; sourceTree = "<group>"; };
 		9E33AAAF2275767800A6EB98 /* JSDataProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSDataProtocol.h; sourceTree = "<group>"; };
 		9E33AAB32275775800A6EB98 /* JSString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSString.h; sourceTree = "<group>"; };
 		9E33AAB42275775800A6EB98 /* JSString.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSString.m; sourceTree = "<group>"; };
@@ -442,6 +445,8 @@
 				9ED5349222B6991A004A2CB2 /* CacheTableTests.m */,
 				9E36651E22BF6781003DC5EF /* JSLPerfTests.m */,
 				9E3A9D5A22568B1300348529 /* JSLTests.m */,
+				9E326C8A22C7524900B456A2 /* MockStdIOService.h */,
+				9E326C8B22C7524900B456A2 /* MockStdIOService.m */,
 				9E7942DE22C12A320086A47F /* Info.plist */,
 			);
 			path = JSLTests;
@@ -740,6 +745,7 @@
 				9E741E9E22C12C47009680E8 /* JSLPerfTests.m in Sources */,
 				9E741E9D22C12C42009680E8 /* CacheTableTests.m in Sources */,
 				9E741EA022C12D17009680E8 /* JSLTests.m in Sources */,
+				9E326C8C22C7524900B456A2 /* MockStdIOService.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

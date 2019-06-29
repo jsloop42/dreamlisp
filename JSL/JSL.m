@@ -67,10 +67,11 @@ static NSString *langVersion;
 }
 
 - (void)bootstrap {
-    _reader = [Reader new];
-    _printer = [Printer new];
     _ioService = [IOService new];
     [_ioService setFileIODelegate:[FileOps new]];
+    [Logger setIOService:_ioService];
+    _reader = [Reader new];
+    _printer = [Printer new];
     _core = [Core new];
     [_core setDelegate:self];
     _env = [[Env alloc] initWithModuleName:[Const defaultModuleName] isUserDefined:NO];
@@ -662,20 +663,20 @@ static NSString *langVersion;
         NSDictionary *info = exception.userInfo;
         desc = [info valueForKey:@"description"];
         if (desc && log) {
-            error(@"%@", desc);
+            [Log error:desc];
         } else if ([[info allKeys] containsObject:@"jsdata"]) {
             id<JSDataProtocol> data = (id<JSDataProtocol>)[info valueForKey:@"jsdata"];
             if (data) {
                 desc = [[NSString alloc] initWithFormat:@"Error: %@", [_printer printStringFor:data readably:readably]];
-                if (desc && log) error(@"%@", desc);
+                if (desc && log) [Log error:desc];
             }
         } else if ([[info allKeys] containsObject:@"NSUnderlyingError"]) {
             NSError *err = [info valueForKey:@"NSUnderlyingError"];
-            error(@"%@", [err localizedDescription]);
+            [Log error:[err localizedDescription]];
         }
     } else {
         desc = exception.description;
-        if (desc && log) error(@"%@", desc);
+        if (desc && log) [Log error:desc];
     }
     return desc;
 }
