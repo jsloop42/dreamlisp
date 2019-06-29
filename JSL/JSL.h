@@ -26,7 +26,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) BOOL isREPL;
 @property (nonatomic, readwrite) NSString *prompt;
 - (instancetype)init;
-- (instancetype)initWithREPL;
 - (instancetype)initWithoutREPL;
 - (void)bootstrap;
 - (void)loadCoreLib;

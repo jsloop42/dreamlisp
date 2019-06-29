@@ -40,17 +40,6 @@ static NSString *langVersion;
     langVersion = [[NSString alloc] initWithFormat:@"JSL v%@ [%@]", [Const jslVersion], hostLangVersion];
 }
 
-- (instancetype)initWithREPL{
-    self = [super init];
-    if (self) {
-        _isREPL = YES;
-        [self bootstrap];
-        [self printVersion];
-        [self loadCoreLib];
-    }
-    return self;
-}
-
 - (instancetype)initWithoutREPL {
     self = [super init];
     if (self) {

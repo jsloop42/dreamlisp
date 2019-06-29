@@ -14,6 +14,7 @@
 		9E281CF8225A4C790038A5AF /* libreadline.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E281CF7225A4C790038A5AF /* libreadline.tbd */; };
 		9E326C8722C66ED300B456A2 /* JSL.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E326C8622C66ED200B456A2 /* JSL.h */; };
 		9E326C8C22C7524900B456A2 /* MockStdIOService.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C8B22C7524900B456A2 /* MockStdIOService.m */; };
+		9E326C8F22C7598F00B456A2 /* MockStdIOService.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C8E22C7598F00B456A2 /* MockStdIOService.m */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3F324B227B694400B56B6A /* core.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
 		9E5D7B4B225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
@@ -172,6 +173,8 @@
 		9E326C8622C66ED200B456A2 /* JSL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSL.h; sourceTree = "<group>"; };
 		9E326C8A22C7524900B456A2 /* MockStdIOService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MockStdIOService.h; sourceTree = "<group>"; };
 		9E326C8B22C7524900B456A2 /* MockStdIOService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MockStdIOService.m; sourceTree = "<group>"; };
+		9E326C8D22C7598F00B456A2 /* MockStdIOService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MockStdIOService.h; sourceTree = "<group>"; };
+		9E326C8E22C7598F00B456A2 /* MockStdIOService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MockStdIOService.m; sourceTree = "<group>"; };
 		9E33AAAF2275767800A6EB98 /* JSDataProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSDataProtocol.h; sourceTree = "<group>"; };
 		9E33AAB32275775800A6EB98 /* JSString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSString.h; sourceTree = "<group>"; };
 		9E33AAB42275775800A6EB98 /* JSString.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSString.m; sourceTree = "<group>"; };
@@ -369,6 +372,8 @@
 			isa = PBXGroup;
 			children = (
 				9E741EDB22C14556009680E8 /* JSLShellTests.m */,
+				9E326C8D22C7598F00B456A2 /* MockStdIOService.h */,
+				9E326C8E22C7598F00B456A2 /* MockStdIOService.m */,
 				9E3A9D5C22568B1300348529 /* Info.plist */,
 			);
 			path = JSLShellTests;
@@ -693,6 +698,7 @@
 				9E741EDC22C14556009680E8 /* JSLShellTests.m in Sources */,
 				9E741EE422C150DA009680E8 /* ShellConst.m in Sources */,
 				9E5D7B4C225B947E00970453 /* Terminal.m in Sources */,
+				9E326C8F22C7598F00B456A2 /* MockStdIOService.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
