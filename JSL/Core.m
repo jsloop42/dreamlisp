@@ -1574,6 +1574,15 @@ double dmod(double a, double n) {
     fn = [[JSFunction alloc] initWithFn:lazySeq argCount:1 name:@"lazy-seq/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"lazy-seq" moduleName:[Const coreModuleName]]];
 
+    #pragma mark lazy-seq?
+    /** Checks if the given element is a lazy sequence. */
+    id<JSDataProtocol>(^lazySeqp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        return [[JSBool alloc] initWithBool:[JSLazySequence isLazySequence:[xs first]]];
+    };
+    fn = [[JSFunction alloc] initWithFn:lazySeqp argCount:1 name:@"lazy-seq?/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"lazy-seq?" moduleName:[Const coreModuleName]]];
+
     #pragma mark has-next?
     /** Returns whether the lazy sequence has elements which are not realised. */
     id<JSDataProtocol>(^hasNext)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {

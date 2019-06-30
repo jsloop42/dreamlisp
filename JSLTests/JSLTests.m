@@ -2386,6 +2386,9 @@
     XCTAssertEqualObjects([jsl rep:@"(type (lazy-seq '(1 2 3)))"], @"\"lazy-sequence\"");
     XCTAssertEqualObjects([jsl rep:@"(type (lazy-seq \"abc\"))"], @"\"lazy-sequence\"");
     XCTAssertThrows([jsl rep:@"(lazy-seq 1)"]);
+    // lazy-seq?
+    XCTAssertEqualObjects([jsl rep:@"(lazy-seq? lseq)"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(lazy-seq? [1 2 3])"], @"false");
     // has-next?, next
     XCTAssertEqualObjects([jsl rep:@"(has-next? lseq)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(next lseq)"], @"1");
