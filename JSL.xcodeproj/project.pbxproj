@@ -17,6 +17,8 @@
 		9E326C8F22C7598F00B456A2 /* MockStdIOService.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C8E22C7598F00B456A2 /* MockStdIOService.m */; };
 		9E326C9222C7891800B456A2 /* JSLazySequence.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E326C9022C7891800B456A2 /* JSLazySequence.h */; };
 		9E326C9322C7891800B456A2 /* JSLazySequence.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C9122C7891800B456A2 /* JSLazySequence.m */; };
+		9E326C9722C8C5D300B456A2 /* JSLazyFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E326C9522C8C5D100B456A2 /* JSLazyFunction.h */; };
+		9E326C9822C8C5D300B456A2 /* JSLazyFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C9622C8C5D200B456A2 /* JSLazyFunction.m */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3F324B227B694400B56B6A /* core.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
 		9E5D7B4B225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
@@ -179,6 +181,8 @@
 		9E326C8E22C7598F00B456A2 /* MockStdIOService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MockStdIOService.m; sourceTree = "<group>"; };
 		9E326C9022C7891800B456A2 /* JSLazySequence.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSLazySequence.h; sourceTree = "<group>"; };
 		9E326C9122C7891800B456A2 /* JSLazySequence.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSLazySequence.m; sourceTree = "<group>"; };
+		9E326C9522C8C5D100B456A2 /* JSLazyFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSLazyFunction.h; sourceTree = "<group>"; };
+		9E326C9622C8C5D200B456A2 /* JSLazyFunction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSLazyFunction.m; sourceTree = "<group>"; };
 		9E33AAAF2275767800A6EB98 /* JSDataProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSDataProtocol.h; sourceTree = "<group>"; };
 		9E33AAB32275775800A6EB98 /* JSString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSString.h; sourceTree = "<group>"; };
 		9E33AAB42275775800A6EB98 /* JSString.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSString.m; sourceTree = "<group>"; };
@@ -327,6 +331,8 @@
 				9E33AABC2275783300A6EB98 /* JSSymbol.m */,
 				9E33AAC3227578A700A6EB98 /* JSVector.h */,
 				9E33AAC4227578A700A6EB98 /* JSVector.m */,
+				9E326C9522C8C5D100B456A2 /* JSLazyFunction.h */,
+				9E326C9622C8C5D200B456A2 /* JSLazyFunction.m */,
 				9E326C9022C7891800B456A2 /* JSLazySequence.h */,
 				9E326C9122C7891800B456A2 /* JSLazySequence.m */,
 				9E3A9D6722568D7D00348529 /* Types.h */,
@@ -494,6 +500,7 @@
 				9E741EBB22C12DCE009680E8 /* Env.h in Headers */,
 				9E741EAE22C12DBA009680E8 /* JSHashMap.h in Headers */,
 				9E741EA222C12D9E009680E8 /* NSArray+JSDataProtocol.h in Headers */,
+				9E326C9722C8C5D300B456A2 /* JSLazyFunction.h in Headers */,
 				9E741EAC22C12DBA009680E8 /* JSFault.h in Headers */,
 				9E741EB122C12DBA009680E8 /* JSNil.h in Headers */,
 				9E1E697B22C5395500E52162 /* StdIOServiceDelegate.h in Headers */,
@@ -742,6 +749,7 @@
 				9E326C9322C7891800B456A2 /* JSLazySequence.m in Sources */,
 				9E741E8F22C12C38009680E8 /* CacheTable.m in Sources */,
 				9E741E8C22C12C23009680E8 /* JSSymbol.m in Sources */,
+				9E326C9822C8C5D300B456A2 /* JSLazyFunction.m in Sources */,
 				9E741E8622C12C23009680E8 /* JSHashMap.m in Sources */,
 				9E741E8022C12C12009680E8 /* NSNumber+JSDataProtocol.m in Sources */,
 				9E741E9522C12C38009680E8 /* JSL.m in Sources */,

@@ -1294,8 +1294,8 @@
 
 - (void)testVectorCoreFunctions {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-    XCTAssertEqualObjects([jsl rep:@"(map (fn (a) (* 2 a)) [1 2 3])"], @"[2 4 6]");
-    XCTAssertEqualObjects([jsl rep:@"(map (fn [& args] (list? args)) [1 2])"], @"[true true]");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a) (* 2 a)) [1 2 3]))"], @"[2 4 6]");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn [& args] (list? args)) [1 2]))"], @"[true true]");
     XCTAssertEqualObjects([jsl rep:@"(vector? [10 11])"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(vector? '(12 13))"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(vector 3 4 5)"], @"[3 4 5]");
@@ -1526,7 +1526,7 @@
     XCTAssertEqualObjects([stdIOService output], @"\"exc is:\" \"'user:abc/2' not found\"");
     XCTAssertEqualObjects([jsl rep:@"(try (nth 1 []) (catch exc (prn \"exc is:\" exc)))"], @"nil");
     XCTAssertEqualObjects([stdIOService output], @"\"exc is:\" \"Index 1 is out of bound for length 0\"");
-    XCTAssertEqualObjects([jsl rep:@"(try (map throw/1 (list \"my err\")) (catch exc exc))"], @"\"my err\"");
+    XCTAssertEqualObjects([jsl rep:@"(try (doall (map throw/1 (list \"my err\"))) (catch exc exc))"], @"\"my err\"");
     XCTAssertEqualObjects([jsl rep:@"(try (throw [\"data\" \"foo\"]) (catch exc (do (prn \"exc is:\" exc) 7)))"], @"7");
     XCTAssertEqualObjects([stdIOService output], @"\"exc is:\" [\"data\" \"foo\"]");
     XCTAssertThrows([jsl rep:@"(try xyz)"], @"'xyz' not found");
@@ -1738,9 +1738,9 @@
     XCTAssertEqualObjects([jsl rep:@"(def nums (list 1 2 3))"], @"(1 2 3)");
     [jsl rep:@"(def double (fn (a) (* 2 a)))"];
     XCTAssertEqualObjects([jsl rep:@"(double 3)"], @"6");
-    XCTAssertEqualObjects([jsl rep:@"(map double/1 nums)"], @"(2 4 6)");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map double/1 nums))"], @"(2 4 6)");
     // symbol?
-    XCTAssertEqualObjects([jsl rep:@"(map (fn (x) (symbol? x)) (list 1 (quote two) \"three\"))"], @"(false true false)");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (x) (symbol? x)) (list 1 (quote two) \"three\")))"], @"(false true false)");
     XCTAssertEqualObjects([jsl rep:@"(symbol? 'abc)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(symbol? \"abc\")"], @"false");
     XCTAssertEqualObjects([jsl rep:@"(symbol? :abc)"], @"false");
@@ -2222,9 +2222,11 @@
 - (void)testFlatten {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     XCTAssertEqualObjects([jsl rep:@"(doall (flatten [[1] [2 [3]] [[[4]]] [5]]))"], @"[1 2 3 4 5]");
-    XCTAssertEqualObjects([jsl rep:@"(doall (flatten '('(1) '(2 '(3)) '('('(4))) '(5))))"], @"(1 2 3 4 5)");
+    XCTAssertEqualObjects([jsl rep:@"(doall (flatten '('(1) '(2 '(3)) '('('(4))) '(5))))"],
+                          @"(user:quote/1 1 user:quote/1 2 user:quote/1 3 user:quote/1 user:quote/1 user:quote/1 4 user:quote/1 5)");
     XCTAssertEqualObjects([jsl rep:@"(doall (flatten []))"], @"[]");
     XCTAssertEqualObjects([jsl rep:@"(doall (flatten '()))"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(doall (flatten '((+ 1 2) 3)))"], @"(user:+ 1 2 3)");
     [jsl rep:@"(def hm (flatten {:a 1 :b {:c 2 :d 3} :e 4}))"];
     XCTAssertEqualObjects([jsl rep:@"(contains? :a hm)"], @"true");
     XCTAssertEqualObjects([jsl rep:@"(contains? :b hm)"], @"false");
@@ -2317,18 +2319,18 @@
 - (void)testMap {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     // single arity function
-    XCTAssertEqualObjects([jsl rep:@"(map (fn (a) (+ a 2)) '(1 2 3 4))"], @"(3 4 5 6)");
-    XCTAssertEqualObjects([jsl rep:@"(map (fn (a) (+ a 2)) [1 2 3 4])"], @"[3 4 5 6]");
-    XCTAssertEqualObjects([jsl rep:@"(map (fn (a) (str a \"ok\")) \"abcd\")"], @"[\"aok\" \"bok\" \"cok\" \"dok\"]");
-    XCTAssertEqualObjects([jsl rep:@"(map (fn (a) a) {:a 1})"], @"[[:a 1]]");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a) (+ a 2)) '(1 2 3 4)))"], @"(3 4 5 6)");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a) (+ a 2)) [1 2 3 4]))"], @"[3 4 5 6]");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a) (str a \"ok\")) \"abcd\"))"], @"\"aokbokcokdok\"");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a) a) {:a 1}))"], @"{:a 1}");
     // multi arity function
-    XCTAssertEqualObjects([jsl rep:@"(map (fn (a b) [a b]) [1 2] '(3 4))"], @"([1 3] [2 4])");
-    XCTAssertEqualObjects([jsl rep:@"(map (fn (a b) (list a b)) [1 2] '(3 4))"], @"((1 3) (2 4))");
-    XCTAssertEqualObjects([jsl rep:@"(map (fn (a b) (list a b)) [1 2] '[3 4])"], @"[(1 3) (2 4)]");
-    XCTAssertEqualObjects([jsl rep:@"(map (fn (a b) (+ a b)) [1 2] '(3 4))"], @"(4 6)");
-    XCTAssertEqualObjects([jsl rep:@"(map (fn (a b) (+ a b)) [1 2] '[3 4])"], @"[4 6]");
-    XCTAssertEqualObjects([jsl rep:@"(map (fn (a b) (str a b)) \"abc\" \"xyz\")"], @"[\"ax\" \"by\" \"cz\"]");
-    XCTAssertEqualObjects([jsl rep:@"(map (fn (a b) [a b]) {:a 1} {:x 3})"], @"[[[:a 1] [:x 3]]]");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a b) [a b]) [1 2] '(3 4)))"], @"[[1 3] [2 4]]");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a b) (list a b)) [1 2] '(3 4)))"], @"[(1 3) (2 4)]");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a b) (list a b)) '(1 2) [3 4]))"], @"((1 3) (2 4))");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a b) (+ a b)) [1 2] '(3 4)))"], @"[4 6]");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a b) (+ a b)) '(1 2) [3 4]))"], @"(4 6)");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a b) (str a b)) \"abc\" \"xyz\"))"], @"\"axbycz\"");
+    XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a b) [a b]) {:a 1} {:x 3}))"], @"[{:a 1} {:x 3}]");
 }
 
 - (void)testFold {

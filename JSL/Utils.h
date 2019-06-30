@@ -37,6 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (JSHashMap *)addObjectsToHashMap:(JSHashMap *)hashMap fromHashMap:(JSHashMap *)aHashMap;
 + (JSList *)hashMapToList:(JSHashMap *)hashMap;
 + (JSVector *)hashMapToVector:(JSHashMap *)hashMap;
++ (NSMutableArray *)hashMapToHashMapArray:(JSHashMap *)hashMap;
 #pragma mark String
 + (NSMutableArray *)stringToArray:(JSString *)string isNative:(BOOL)isNative;
 + (void)appendStringFromArray:(NSMutableArray *)array string:(JSString *)string;

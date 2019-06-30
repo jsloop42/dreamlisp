@@ -75,7 +75,7 @@
     } else if ([JSFault isFault:data]) {
         return [NSString stringWithFormat:@"#<fault %@>", (JSFault *)[data value]];
     } else if ([JSLazySequence isLazySequence:data]) {
-        return [NSString stringWithFormat:@"#<lazy-seq %@>", [(JSLazySequence *)[data value] description]];
+        return [NSString stringWithFormat:@"#<lazy-seq %@>", [(JSLazySequence *)data description]];
     }
     [[[JSError alloc] initWithFormat:InvalidDataType, [(id)data classForCoder], data] throw];
     return nil;

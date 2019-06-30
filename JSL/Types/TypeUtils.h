@@ -27,7 +27,8 @@ typedef NS_ENUM(NSUInteger, ArityPredicate) {
 typedef NS_ENUM(NSUInteger, SequenceType) {
     SequenceTypeList,
     SequenceTypeVector,
-    SequenceTypeString
+    SequenceTypeString,
+    SequenceTypeHashMap
 };
 
 @interface TypeUtils: NSObject
