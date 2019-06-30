@@ -8,19 +8,19 @@
 
 #import "JSLazySequence.h"
 
-@implementation JSLazyFunction {
-    JSFunction *_lazyFn;
+@implementation JSLazySequenceFn {
+    JSLazyFunction *_lazyFn;
     JSFunction *_fn;
 }
 
 @synthesize lazyFn = _lazyFn;
 @synthesize fn = _fn;
 
-- (instancetype)initWithLazyFunction:(JSFunction *)lazyFunction {
+- (instancetype)initWithLazyFunction:(JSLazyFunction *)lazyFunction {
     return [self initWithLazyFunction:lazyFunction fn:nil];
 }
 
-- (instancetype)initWithLazyFunction:(JSFunction *)lazyFunction fn:(JSFunction *)fn {
+- (instancetype)initWithLazyFunction:(JSLazyFunction *)lazyFunction fn:(JSFunction *)fn {
     self = [super init];
     if (self) {
         _lazyFn = lazyFunction;
@@ -33,6 +33,7 @@
 
 @implementation JSLazySequence {
     NSMutableArray *_array;
+    NSMutableArray *_acc;
     NSUInteger _position;
     NSUInteger _index;
     NSUInteger _length;
@@ -41,9 +42,11 @@
     id<JSDataProtocol> _meta;
     NSString *_moduleName;
     enum SequenceType _sequenceType;
-    NSMutableArray<JSLazyFunction *> *_fns;
+    NSMutableArray<JSLazySequenceFn *> *_fns;
+    BOOL _isNative;
 }
 
+@synthesize acc = _acc;
 @synthesize isImported = _isImported;
 @synthesize isMutable = _isMutable;
 @synthesize meta = _meta;
@@ -53,6 +56,7 @@
 @synthesize length = _length;
 @synthesize sequenceType = _sequenceType;
 @synthesize fns = _fns;
+@synthesize isNative = _isNative;
 
 + (BOOL)isLazySequence:(id)object {
     return [[object className] isEqual:[self className]];
@@ -86,18 +90,23 @@
 - (instancetype)initWithArray:(NSMutableArray *)array sequenceType:(enum SequenceType)sequenceType {
     self = [super init];
     if (self) {
-        _array = array;
         [self bootstrap];
+        _array = array;
+        _length = [_array count];
         _sequenceType = sequenceType;
     }
     return self;
 }
 
 - (void)bootstrap {
+    _array = [NSMutableArray new];
+    _acc = [NSMutableArray new];
     _position = 0;
-    _length = [_array count];
+    _index = 0;
+    _length = 0;
     _sequenceType = SequenceTypeVector;
     _fns = [NSMutableArray new];
+    _isNative = YES;
 }
 
 - (NSString *)dataType {
@@ -108,66 +117,69 @@
     return @"lazy-sequence";
 }
 
+- (NSMutableArray *)value {
+    return _array;
+}
+
 - (void)setValue:(id)value {
     _array = value;
     _length = [_array count];
 }
 
-- (id<JSDataProtocol>)next {
-    if (_position >= _length) [[[JSError alloc] initWithFormat:IndexOutOfBounds, _position, _length] throw];
-    return _array[_position++];
+- (void)updateLength {
+    if (_isNative) {
+        _length = [_array count];
+    } else {
+        _length = [[_array first] count];
+    }
+}
+
+- (id)next {
+    if (_index >= _length) [[[JSError alloc] initWithFormat:IndexOutOfBounds, _index, _length] throw];
+    if (_isNative) return _array[_index++];
+    if ([_array count] > 1) {
+        NSMutableArray *res = [NSMutableArray new];
+        NSMutableArray *arr = nil;
+        for (arr in _array) {
+            [res addObject:arr[_index]];
+        }
+        _index++;
+        return res;
+    }
+    return [JSNil new];
 }
 
 - (BOOL)hasNext {
-    return _position < _length;
+    return _index < _length;
 }
 
-//- (void)addFunction:(id<JSDataProtocol> (^)(NSMutableArray *))fn {
-//    [_fns addObject:fn];
-//}
-
-- (void)addLazyFunction:(JSFunction *)lazyFunction {
+- (void)addLazyFunction:(JSLazyFunction *)lazyFunction {
     return [self addLazyFunction:lazyFunction fn:nil];
 }
 
-- (void)addLazyFunction:(JSFunction *)lazyFunction fn:(JSFunction * _Nullable)fn {
-    [_fns addObject:[[JSLazyFunction alloc] initWithLazyFunction:lazyFunction fn:fn]];
+- (void)addLazyFunction:(JSLazyFunction *)lazyFunction fn:(JSFunction * _Nullable)fn {
+    [_fns addObject:[[JSLazySequenceFn alloc] initWithLazyFunction:lazyFunction fn:fn]];
 }
 
-//- (id<JSDataProtocol>)apply {
-//    id<JSDataProtocol> (^fn)(NSMutableArray *) = nil;
-//    id<JSDataProtocol> res = nil;
-//    if (!_fns) return [self next];
-//    for (fn in _fns) {
-//        if (_sequenceType == SequenceTypeList) {
-//            res = fn([@[[[JSList alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]);
-//        } else if (_sequenceType == SequenceTypeVector || _sequenceType == SequenceTypeString) {
-//            res = fn([@[[[JSVector alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]);
-//        }
-//    }
-//    return res ? res : [JSNil new];
-//}
-
-- (id<JSDataProtocol>)apply {
-    JSLazyFunction *lfn = nil;
-    id<JSDataProtocol> res = nil;
-    if (!_fns) return [self next];
+- (void)apply {
+    JSLazySequenceFn *lfn = nil;
+    if (!_fns) [_acc addObject:[self next]];
     for (lfn in _fns) {
-        if (_sequenceType == SequenceTypeList) {
-            if ([lfn fn]) {
-                res = [[lfn lazyFn] apply:[@[[lfn fn], [[JSList alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]];
+        if ([lfn fn]) {
+            if (_isNative) {
+                // Calls lazy function block which returns void, with the lazy sequence, user supplied function and params
+                [[lfn lazyFn] apply:[@[[lfn fn], [self next]] mutableCopy] forLazySequence:self];
             } else {
-                res = [[lfn lazyFn] apply:[@[[[JSList alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]];
+                // The user supplied function takes more than one argument
+                NSMutableArray *args = [NSMutableArray new];
+                [args addObject:[lfn fn]];
+                [args addObjectsFromArray:[self next]];
+                [[lfn lazyFn] apply:args forLazySequence:self];
             }
-        } else if (_sequenceType == SequenceTypeVector || _sequenceType == SequenceTypeString) {
-            if ([lfn fn]) {
-                res = [[lfn lazyFn] apply:[@[[lfn fn], [[JSVector alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]];
-            } else {
-                res = [[lfn lazyFn] apply:[@[[[JSVector alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]];
-            }
+        } else {
+            [[lfn lazyFn] apply:[@[[self next]] mutableCopy] forLazySequence:self];  // The lazy function does not take a function as argument
         }
     }
-    return res ? res : [JSNil new];
 }
 
 - (NSInteger)position {
@@ -195,6 +207,10 @@
 - (nonnull id<JSDataProtocol>)setPosition:(NSInteger)position {
     _position = position;
     return self;
+}
+
+- (NSString *)description {
+    return [_array description];
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
