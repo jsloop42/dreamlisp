@@ -68,6 +68,18 @@
                ReferencedContainer = "container:JSL.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES"
+            testExecutionOrdering = "random">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "9E7942D622C12A310086A47F"
+               BuildableName = "JSLTests.xctest"
+               BlueprintName = "JSLTests"
+               ReferencedContainer = "container:JSL.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference

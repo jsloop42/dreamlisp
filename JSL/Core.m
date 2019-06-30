@@ -573,6 +573,30 @@ double dmod(double a, double n) {
         }
         return isList ? [[JSList alloc] initWithArray:acc] : [[JSVector alloc] initWithArray:acc];
     };
+
+    #pragma mark lazy map
+//    id<JSDataProtocol>(^lazyMap)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+//        [TypeUtils checkArity:xs arity:1];
+//        id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
+//        JSLazySequence *seq = [JSLazySequence new];
+//        [seq addFunction:map];
+//        if ([JSLazySequence isLazySequence:first]) {
+//            seq = (JSLazySequence *)first;
+//            [seq addFunction:map];
+//        } else if ([JSList isList:first]) {
+//            [seq setValue:[(JSList *)first value]];
+//            [seq setSequenceType:SequenceTypeList];
+//        } else if ([JSVector isVector:first]) {
+//            [seq setValue:[(JSVector *)first value]];
+//            [seq setSequenceType:SequenceTypeVector];
+//        } else if ([JSHashMap isHashMap:first]) {
+//            return [[JSHashMap alloc] initWithMapTable:[self flattenHashMap:first acc:[NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
+//                                                                                                            valueOptions:NSMapTableStrongMemory]]];
+//        } else {
+//            [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"map/n", @"'collection'", [first dataTypeName]] throw];
+//        }
+//        return seq;
+//    };
     fn = [[JSFunction alloc] initWithFn:map argCount:-1 name:@"map/n"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"map" moduleName:[Const coreModuleName]]];
 
@@ -864,14 +888,15 @@ double dmod(double a, double n) {
         return nil;
     };
 
+    #pragma mark lazy flatten
     id<JSDataProtocol>(^lazyFlatten)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
         JSLazySequence *seq = [JSLazySequence new];
-        [seq addFunction:flatten];
+        [seq addLazyFunction:[[JSFunction alloc] initWithFn:flatten name:@""]];
         if ([JSLazySequence isLazySequence:first]) {
             seq = (JSLazySequence *)first;
-            [seq addFunction:flatten];
+            [seq addLazyFunction:[[JSFunction alloc] initWithFn:flatten name:@""]];
         } else if ([JSList isList:first]) {
             [seq setValue:[(JSList *)first value]];
             [seq setSequenceType:SequenceTypeList];

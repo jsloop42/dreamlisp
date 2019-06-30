@@ -8,6 +8,29 @@
 
 #import "JSLazySequence.h"
 
+@implementation JSLazyFunction {
+    JSFunction *_lazyFn;
+    JSFunction *_fn;
+}
+
+@synthesize lazyFn = _lazyFn;
+@synthesize fn = _fn;
+
+- (instancetype)initWithLazyFunction:(JSFunction *)lazyFunction {
+    return [self initWithLazyFunction:lazyFunction fn:nil];
+}
+
+- (instancetype)initWithLazyFunction:(JSFunction *)lazyFunction fn:(JSFunction *)fn {
+    self = [super init];
+    if (self) {
+        _lazyFn = lazyFunction;
+        _fn = fn;
+    }
+    return self;
+}
+
+@end
+
 @implementation JSLazySequence {
     NSMutableArray *_array;
     NSUInteger _position;
@@ -18,7 +41,7 @@
     id<JSDataProtocol> _meta;
     NSString *_moduleName;
     enum SequenceType _sequenceType;
-    NSMutableArray *_fns;
+    NSMutableArray<JSLazyFunction *> *_fns;
 }
 
 @synthesize isImported = _isImported;
@@ -99,19 +122,49 @@
     return _position < _length;
 }
 
-- (void)addFunction:(id<JSDataProtocol> (^)(NSMutableArray *))fn {
-    [_fns addObject:fn];
+//- (void)addFunction:(id<JSDataProtocol> (^)(NSMutableArray *))fn {
+//    [_fns addObject:fn];
+//}
+
+- (void)addLazyFunction:(JSFunction *)lazyFunction {
+    return [self addLazyFunction:lazyFunction fn:nil];
 }
 
+- (void)addLazyFunction:(JSFunction *)lazyFunction fn:(JSFunction * _Nullable)fn {
+    [_fns addObject:[[JSLazyFunction alloc] initWithLazyFunction:lazyFunction fn:fn]];
+}
+
+//- (id<JSDataProtocol>)apply {
+//    id<JSDataProtocol> (^fn)(NSMutableArray *) = nil;
+//    id<JSDataProtocol> res = nil;
+//    if (!_fns) return [self next];
+//    for (fn in _fns) {
+//        if (_sequenceType == SequenceTypeList) {
+//            res = fn([@[[[JSList alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]);
+//        } else if (_sequenceType == SequenceTypeVector || _sequenceType == SequenceTypeString) {
+//            res = fn([@[[[JSVector alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]);
+//        }
+//    }
+//    return res ? res : [JSNil new];
+//}
+
 - (id<JSDataProtocol>)apply {
-    id<JSDataProtocol> (^fn)(NSMutableArray *) = nil;
+    JSLazyFunction *lfn = nil;
     id<JSDataProtocol> res = nil;
     if (!_fns) return [self next];
-    for (fn in _fns) {
+    for (lfn in _fns) {
         if (_sequenceType == SequenceTypeList) {
-            res = fn([@[[[JSList alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]);
+            if ([lfn fn]) {
+                res = [[lfn lazyFn] apply:[@[[lfn fn], [[JSList alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]];
+            } else {
+                res = [[lfn lazyFn] apply:[@[[[JSList alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]];
+            }
         } else if (_sequenceType == SequenceTypeVector || _sequenceType == SequenceTypeString) {
-            res = fn([@[[[JSVector alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]);
+            if ([lfn fn]) {
+                res = [[lfn lazyFn] apply:[@[[lfn fn], [[JSVector alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]];
+            } else {
+                res = [[lfn lazyFn] apply:[@[[[JSVector alloc] initWithArray:[@[[self next]] mutableCopy]]] mutableCopy]];
+            }
         }
     }
     return res ? res : [JSNil new];
@@ -171,3 +224,4 @@
 }
 
 @end
+
