@@ -814,23 +814,54 @@ double dmod(double a, double n) {
     /**
      Takes a filter predicate function and a collection, applies the function to each element in the collection and returns the resulting filtered collection.
      */
-    id<JSDataProtocol>(^filter)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+    void (^filter)(JSLazySequence *seq, NSMutableArray *xs) = ^void(JSLazySequence *seq, NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:2];
+        JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"filter/2"];
+        NSMutableArray *rest = [xs rest];
+        id<JSDataProtocol> elem = [rest first];
+        JSBool *res = [fn apply:rest];
+        if ([res value]) {
+            if ([seq sequenceType] == SequenceTypeHashMap) {
+                JSHashMap *acc = [[seq acc] first];
+                if (acc) {
+                    JSHashMap *hm = (JSHashMap *)elem;
+                    NSArray *allKeys = [hm allKeys];
+                    id<JSDataProtocol> key = nil;
+                    for (key in allKeys) {
+                        [acc setObject:[hm objectForKey:key] forKey:key];
+                    }
+                } else {
+                    [[seq acc] addObject:elem];
+                }
+            } else {
+                [[seq acc] addObject:elem];
+            }
+        }
+    };
+
+    #pragma mark lazy filter
+    id<JSDataProtocol>(^lazyFilter)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:2];
         JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"filter/2"];
         id<JSDataProtocol> second = [xs second];
+        JSLazySequence *seq = [JSLazySequence new];
+        JSLazyFunction *lfn = [[JSLazyFunction alloc] initWithFn:filter name:@""];
+        [seq addLazyFunction:lfn fn:fn];
         if ([JSList isList:second]) {
-            return [[JSList alloc] initWithArray:[self filterArray:[(JSList *)second value] withPredicate:fn]];
+            [seq setSequenceType:SequenceTypeList];
+            [seq setValue:[(JSList *)second value]];
+        } else if ([JSVector isVector:second]) {
+            [seq setSequenceType:SequenceTypeVector];
+            [seq setValue:[(JSVector *)second value]];
+        } else if ([JSHashMap isHashMap:second]) {
+            [seq setSequenceType:SequenceTypeHashMap];
+            [seq setValue:[Utils hashMapToHashMapArray:second]];
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"filter/2", @"'collection'", 2, [first dataTypeName]] throw];
         }
-        if ([JSVector isVector:second]) {
-            return [[JSVector alloc] initWithArray:[self filterArray:[(JSVector *)second value] withPredicate:fn]];
-        }
-        if ([JSHashMap isHashMap:second]) {
-            return [[JSHashMap alloc] initWithMapTable:[self filterMapTable:[(JSHashMap *)second value] withPredicate:fn]];
-        }
-        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"filter/2", @"'collection'", 2, [first dataTypeName]] throw];
-        return nil;
+        return seq;
     };
-    fn = [[JSFunction alloc] initWithFn:filter argCount:2 name:@"filter/2"];
+    fn = [[JSFunction alloc] initWithFn:lazyFilter argCount:2 name:@"filter/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"filter" moduleName:[Const coreModuleName]]];
 
     #pragma mark partition
