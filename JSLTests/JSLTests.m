@@ -923,6 +923,7 @@
     XCTAssertEqualObjects([jsl rep:@"(seq \"abc\")"], @"(\"a\" \"b\" \"c\")");
     XCTAssertEqualObjects([jsl rep:@"(apply str (seq \"this is a test\"))"], @"\"this is a test\"");
     XCTAssertEqualObjects([jsl rep:@"(seq \"\")"], @"nil");
+    XCTAssertEqualObjects([jsl rep:@"(let (c (zip \"\nb\")) (= (first c) \"\n\"))"], @"true");
 }
 
 - (void)testStringCoreFunctions {

@@ -235,7 +235,7 @@
 - (BOOL)isEqual:(id)object {
     if (![JSString isString:object]) return NO;
     JSString *string = (JSString *)object;
-    return _string ? [_string isEqualToString:[string value]] : [_mstring isEqualToString:[string mutableValue]];
+    return [[self value] isEqual:[string value]];
 }
 
 - (NSUInteger)hash {
