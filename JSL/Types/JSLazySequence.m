@@ -35,7 +35,7 @@
     NSMutableArray *_array;
     NSMutableArray *_acc;
     NSUInteger _position;
-    NSUInteger _index;
+    NSInteger _index;
     NSUInteger _length;
     BOOL _isImported;
     BOOL _isMutable;
@@ -44,6 +44,7 @@
     enum SequenceType _sequenceType;
     NSMutableArray<JSLazySequenceFn *> *_fns;
     BOOL _isNative;
+    BOOL _isReverseEnumerate;
 }
 
 @synthesize acc = _acc;
@@ -57,6 +58,7 @@
 @synthesize sequenceType = _sequenceType;
 @synthesize fns = _fns;
 @synthesize isNative = _isNative;
+@synthesize isReverseEnumerate = _isReverseEnumerate;
 
 + (BOOL)isLazySequence:(id)object {
     return [[object className] isEqual:[self className]];
@@ -107,6 +109,7 @@
     _sequenceType = SequenceTypeVector;
     _fns = [NSMutableArray new];
     _isNative = YES;
+    _isReverseEnumerate = NO;
 }
 
 - (NSString *)dataType {
@@ -126,31 +129,35 @@
     _length = [_array count];
 }
 
-- (void)updateLength {
+- (void)updateEnumerator {
     if (_isNative) {
         _length = [_array count];
     } else {
         _length = [[_array first] count];
     }
+    if (_isReverseEnumerate) {
+        _index = _length - 1;
+    }
 }
 
 - (id)next {
+    if (_index < 0) [[[JSError alloc] initWithFormat:IndexOutOfBounds, _index, 0] throw];
     if (_index >= _length) [[[JSError alloc] initWithFormat:IndexOutOfBounds, _index, _length] throw];
-    if (_isNative) return _array[_index++];
+    if (_isNative) return _array[_isReverseEnumerate ? _index-- : _index++];
     if ([_array count] > 1) {
         NSMutableArray *res = [NSMutableArray new];
         NSMutableArray *arr = nil;
-        for (arr in _array) {
+        for (arr in _array) {  // in case of mutiple list arguments
             [res addObject:arr[_index]];
         }
-        _index++;
+        _isReverseEnumerate ? _index-- : _index++;
         return res;
     }
     return [JSNil new];
 }
 
 - (BOOL)hasNext {
-    return _index < _length;
+    return _isReverseEnumerate ? _index >= 0 : _index < _length;
 }
 
 - (void)addLazyFunction:(JSLazyFunction *)lazyFunction {
@@ -223,6 +230,8 @@
     [copy setLength:_length];
     [copy setIndex:_index];
     [copy setModuleName:_moduleName];
+    [copy setIsNative:_isNative];
+    [copy setIsReverseEnumerate:_isReverseEnumerate];
     return copy;
 }
 
@@ -236,8 +245,9 @@
     [copy setLength:_length];
     [copy setIndex:_index];
     [copy setModuleName:_moduleName];
+    [copy setIsNative:_isNative];
+    [copy setIsReverseEnumerate:_isReverseEnumerate];
     return copy;
 }
 
 @end
-

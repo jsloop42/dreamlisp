@@ -29,18 +29,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JSLazySequence : NSObject <JSDataProtocol>
 @property (nonatomic, readwrite) NSMutableArray *acc;
-@property (nonatomic, readwrite) NSUInteger index;
+@property (nonatomic, readwrite) NSInteger index;
 @property (nonatomic, readwrite) NSUInteger length;
 @property (nonatomic, readwrite) enum SequenceType sequenceType;
 @property (nonatomic, readwrite) NSMutableArray<JSLazySequenceFn *> *fns;
 @property (nonatomic, readwrite) BOOL isNative;
+@property (nonatomic, readwrite) BOOL isReverseEnumerate;
 + (BOOL)isLazySequence:(id)object;
 + (JSLazySequence *)dataToLazySequence:(id<JSDataProtocol>)data fnName:(NSString *)fnName;
 + (JSLazySequence *)dataToLazySequence:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)init;
 - (instancetype)initWithArray:(NSMutableArray *)array sequenceType:(enum SequenceType)sequenceType;
 - (NSMutableArray *)value;
-- (void)updateLength;
+- (void)updateEnumerator;
 - (id)next;
 - (BOOL)hasNext;
 - (void)addLazyFunction:(JSLazyFunction *)lazyFunction;

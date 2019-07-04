@@ -962,11 +962,12 @@
     XCTAssertEqualObjects([jsl rep:@"(drop 4 \"abc\")"], @"\"\"");
     XCTAssertEqualObjects([jsl rep:@"(drop -1 \"abc\")"], @"\"\"");
     // reverse
-    XCTAssertEqualObjects([jsl rep:@"(reverse \"abc\")"], @"\"cba\"");
-    XCTAssertEqualObjects([jsl rep:@"(reverse \"a\")"], @"\"a\"");
-    XCTAssertEqualObjects([jsl rep:@"(reverse \"\")"], @"\"\"");
-    XCTAssertEqualObjects([jsl rep:@"(reverse \"1234\")"], @"\"4321\"");
-    XCTAssertEqualObjects([jsl rep:@"(reverse \"[1 2 3 4]\")"], @"\"]4 3 2 1[\"");
+    XCTAssertEqualObjects([jsl rep:@"(lazy-seq? (reverse \"abc\"))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(doall (reverse \"abc\"))"], @"\"cba\"");
+    XCTAssertEqualObjects([jsl rep:@"(doall (reverse \"a\"))"], @"\"a\"");
+    XCTAssertEqualObjects([jsl rep:@"(doall (reverse \"\"))"], @"\"\"");
+    XCTAssertEqualObjects([jsl rep:@"(doall (reverse \"1234\"))"], @"\"4321\"");
+    XCTAssertEqualObjects([jsl rep:@"(doall (reverse \"[1 2 3 4]\"))"], @"\"]4 3 2 1[\"");
     // nth-tail
     XCTAssertEqualObjects([jsl rep:@"(nth-tail 0 0 \"abcd\")"], @"\"a\"");
     XCTAssertEqualObjects([jsl rep:@"(nth-tail 0 2 \"abcd\")"], @"\"abc\"");
@@ -1270,8 +1271,10 @@
     XCTAssertEqualObjects([jsl rep:@"(drop -1 '(1 2 3))"], @"(1 2)");
     XCTAssertEqualObjects([jsl rep:@"(drop 0 '(1 2 3))"], @"(1 2 3)");
     // reverse
-    XCTAssertEqualObjects([jsl rep:@"(reverse '())"], @"()");
-    XCTAssertEqualObjects([jsl rep:@"(reverse '(1 2 3))"], @"(3 2 1)");
+    XCTAssertEqualObjects([jsl rep:@"(lazy-seq? (reverse '()))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(doall (reverse '()))"], @"()");
+    XCTAssertEqualObjects([jsl rep:@"(doall (reverse '(1 2 3)))"], @"(3 2 1)");
+    XCTAssertThrows([jsl rep:@"(doall (reverse {:a 1 :b 2}))"]);
     // nth-tail
     XCTAssertEqualObjects([jsl rep:@"(nth-tail 0 0 '(0))"], @"(0)");
     XCTAssertEqualObjects([jsl rep:@"(nth-tail 2 4 '(0 1 2 3 4))"], @"(2 3 4)");
@@ -1338,19 +1341,20 @@
     XCTAssertEqualObjects([jsl rep:@"(drop -1 [1 2 3])"], @"[1 2]");
     XCTAssertEqualObjects([jsl rep:@"(drop 0 [1 2 3])"], @"[1 2 3]");
     // reverse
-    XCTAssertEqualObjects([jsl rep:@"(reverse [])"], @"[]");
-    XCTAssertEqualObjects([jsl rep:@"(reverse [1 2 3])"], @"[3 2 1]");
+    XCTAssertEqualObjects([jsl rep:@"(doall (reverse []))"], @"[]");
+    XCTAssertEqualObjects([jsl rep:@"(doall (reverse [1 2 3]))"], @"[3 2 1]");
     // nth-tail
     XCTAssertEqualObjects([jsl rep:@"(nth-tail 0 0 [0])"], @"[0]");
     XCTAssertEqualObjects([jsl rep:@"(nth-tail 2 4 [0 1 2 3 4])"], @"[2 3 4]");
     XCTAssertThrows([jsl rep:@"(nth-tail 5 10 [0 1 2])"]);
     // take
-    XCTAssertEqualObjects([jsl rep:@"(take 2 '[0 1 2 3])"], @"[0 1]");
-    XCTAssertEqualObjects([jsl rep:@"(take 0 '[0 1 2 3])"], @"[]");
-    XCTAssertThrows([jsl rep:@"(take -1 '[0])"]);
-    XCTAssertThrows([jsl rep:@"(take 2 '[0])"]);
+    XCTAssertEqualObjects([jsl rep:@"(take 2 [0 1 2 3])"], @"[0 1]");
+    XCTAssertEqualObjects([jsl rep:@"(take 0 [0 1 2 3])"], @"[]");
+    XCTAssertThrows([jsl rep:@"(take -1 [0])"]);
+    XCTAssertThrows([jsl rep:@"(take 2 [0])"]);
     XCTAssertThrows([jsl rep:@"(take 2 nil)"]);
     XCTAssertThrows([jsl rep:@"(take 2 \"\"))"]);
+    XCTAssertEqualObjects([jsl rep:@"(take 2 (reverse [0 1 2 3]))"], @"[3 2]");
     // append
     XCTAssertEqualObjects([jsl rep:@"(append 0 0 [1])"], @"[0 1]");
     XCTAssertEqualObjects([jsl rep:@"(append 0 1 [1])"], @"[1 0]");

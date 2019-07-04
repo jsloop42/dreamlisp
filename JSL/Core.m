@@ -593,7 +593,7 @@ double dmod(double a, double n) {
                     [seq setSequenceType:SequenceTypeString];
                 }
             }
-            [seq updateLength];
+            [seq updateEnumerator];
         }
         return seq;
     };
@@ -716,20 +716,29 @@ double dmod(double a, double n) {
 
     #pragma mark reverse
     /** Returns the reverse of the given list. */
-    id<JSDataProtocol>(^reverse)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+    void (^reverse)(JSLazySequence *seq, NSMutableArray *xs) = ^void(JSLazySequence *seq, NSMutableArray *xs) {
+        [[seq acc] addObject:[xs first]];
+    };
+
+    id<JSDataProtocol>(^lazyReverse)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         id<JSDataProtocol> first = [xs first];
-        if ([JSList isList:first]) {
-            return [(JSList *)first reverse];
-        } else if ([JSVector isVector:first]) {
-            return [(JSVector *)first reverse];
+        JSLazySequence *seq = [JSLazySequence new];
+        [seq setIsReverseEnumerate:YES];
+        [seq addLazyFunction:[[JSLazyFunction alloc] initWithFn:reverse name:@""]];
+        if ([JSList isKindOfList:first]) {
+            [seq setSequenceType:[JSVector isVector:first] ? SequenceTypeVector : SequenceTypeList];
+            [seq setValue:[(JSList *)first value]];
         } else if ([JSString isString:first]) {
-            return [[JSString alloc] initWithString:[(JSString *)first reverse]];
+            [seq setSequenceType:SequenceTypeString];
+            [seq setValue:[Utils toArray:first isNative:YES]];
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"reverse/1", @"'list' or 'vector'", 1, [first dataTypeName]] throw];
         }
-        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"reverse/1", @"'list' or 'vector'", 1, [first dataTypeName]] throw];
-        return nil;
+        [seq updateEnumerator];
+        return seq;
     };
-    fn = [[JSFunction alloc] initWithFn:reverse argCount:1 name:@"reverse/1"];
+    fn = [[JSFunction alloc] initWithFn:lazyReverse argCount:1 name:@"reverse/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"reverse" moduleName:[Const coreModuleName]]];
 
     #pragma mark sort
