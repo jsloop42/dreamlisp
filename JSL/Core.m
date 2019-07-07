@@ -715,7 +715,7 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"drop" moduleName:[Const coreModuleName]]];
 
     #pragma mark reverse
-    /** Returns the reverse of the given list. */
+    /** Returns the reverse of the given sequence. */
     void (^reverse)(JSLazySequence *seq, NSMutableArray *xs) = ^void(JSLazySequence *seq, NSMutableArray *xs) {
         [[seq acc] addObject:[xs first]];
     };
@@ -733,7 +733,7 @@ double dmod(double a, double n) {
             [seq setSequenceType:SequenceTypeString];
             [seq setValue:[Utils toArray:first isNative:YES]];
         } else {
-            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"reverse/1", @"'list' or 'vector'", 1, [first dataTypeName]] throw];
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"reverse/1", @"'sequence'", 1, [first dataTypeName]] throw];
         }
         [seq updateEnumerator];
         return seq;

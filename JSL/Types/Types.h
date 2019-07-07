@@ -22,6 +22,7 @@
 #import "JSVector.h"
 #import "JSFault.h"
 #import "JSLazySequence.h"
+#import "JSLazyFunction.h"
 // Categories
 #import "NSArray+JSDataProtocol.h"
 #import "NSDecimalNumber+JSDataProtocol.h"

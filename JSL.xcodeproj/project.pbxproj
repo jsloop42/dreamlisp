@@ -110,6 +110,9 @@
 		9E741EE422C150DA009680E8 /* ShellConst.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E741EE222C150DA009680E8 /* ShellConst.m */; };
 		9E7942D822C12A310086A47F /* JSL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E7942CF22C12A310086A47F /* JSL.framework */; };
 		9E7942DF22C12A320086A47F /* JSLLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E7942D122C12A310086A47F /* JSLLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9E8FEB5722D1223F00717127 /* AlgorithmTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8FEB5622D1223F00717127 /* AlgorithmTest.m */; };
+		9E8FEB5A22D243FD00717127 /* Algorithm.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E8FEB5822D243FD00717127 /* Algorithm.h */; };
+		9E8FEB5B22D243FD00717127 /* Algorithm.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8FEB5922D243FD00717127 /* Algorithm.m */; };
 		9E9B622B225BAA280060DA9A /* libedit.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E9B622A225BAA270060DA9A /* libedit.tbd */; };
 /* End PBXBuildFile section */
 
@@ -243,6 +246,9 @@
 		9E7942D222C12A310086A47F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9E7942D722C12A310086A47F /* JSLTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSLTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E7942DE22C12A320086A47F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9E8FEB5622D1223F00717127 /* AlgorithmTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AlgorithmTest.m; sourceTree = "<group>"; };
+		9E8FEB5822D243FD00717127 /* Algorithm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Algorithm.h; sourceTree = "<group>"; };
+		9E8FEB5922D243FD00717127 /* Algorithm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Algorithm.m; sourceTree = "<group>"; };
 		9E9458542274EB4400A3D449 /* NSMapTable+JSHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSMapTable+JSHashMap.h"; sourceTree = "<group>"; };
 		9E9458552274EB4400A3D449 /* NSMapTable+JSHashMap.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSMapTable+JSHashMap.m"; sourceTree = "<group>"; };
 		9E9458592274F04F00A3D449 /* JSHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSHashMap.h; sourceTree = "<group>"; };
@@ -416,6 +422,8 @@
 			children = (
 				9E70861722ACF1CB00ADD464 /* Libs */,
 				9E30554122612BA4001D4597 /* Types */,
+				9E8FEB5822D243FD00717127 /* Algorithm.h */,
+				9E8FEB5922D243FD00717127 /* Algorithm.m */,
 				9ED5348E22B67FCA004A2CB2 /* CacheTable.h */,
 				9ED5348F22B67FCA004A2CB2 /* CacheTable.m */,
 				9E281CEC225908480038A5AF /* Const.h */,
@@ -459,6 +467,7 @@
 			isa = PBXGroup;
 			children = (
 				9E741ECA22C1399C009680E8 /* jsl */,
+				9E8FEB5622D1223F00717127 /* AlgorithmTest.m */,
 				9ED5349222B6991A004A2CB2 /* CacheTableTests.m */,
 				9E36651E22BF6781003DC5EF /* JSLPerfTests.m */,
 				9E3A9D5A22568B1300348529 /* JSLTests.m */,
@@ -529,6 +538,7 @@
 				9E741EC022C12DCE009680E8 /* ModuleTable.h in Headers */,
 				9E741EA122C12D98009680E8 /* FileOps.h in Headers */,
 				9E1E697722C5377E00E52162 /* FileIOServiceDelegate.h in Headers */,
+				9E8FEB5A22D243FD00717127 /* Algorithm.h in Headers */,
 				9E741EAD22C12DBA009680E8 /* JSFunction.h in Headers */,
 				9E741EB022C12DBA009680E8 /* JSList.h in Headers */,
 				9E741EA422C12DAB009680E8 /* NSMapTable+JSHashMap.h in Headers */,
@@ -729,6 +739,7 @@
 				9E741E9922C12C38009680E8 /* Reader.m in Sources */,
 				9E741E9022C12C38009680E8 /* Const.m in Sources */,
 				9E741E8E22C12C23009680E8 /* TypeUtils.m in Sources */,
+				9E8FEB5B22D243FD00717127 /* Algorithm.m in Sources */,
 				9E741E8222C12C23009680E8 /* JSAtom.m in Sources */,
 				9E741E8522C12C23009680E8 /* JSFunction.m in Sources */,
 				9E741E9422C12C38009680E8 /* JSError.m in Sources */,
@@ -768,6 +779,7 @@
 				9E741E9D22C12C42009680E8 /* CacheTableTests.m in Sources */,
 				9E741EA022C12D17009680E8 /* JSLTests.m in Sources */,
 				9E326C8C22C7524900B456A2 /* MockStdIOService.m in Sources */,
+				9E8FEB5722D1223F00717127 /* AlgorithmTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
