@@ -923,7 +923,6 @@
     XCTAssertEqualObjects([jsl rep:@"(seq \"abc\")"], @"(\"a\" \"b\" \"c\")");
     XCTAssertEqualObjects([jsl rep:@"(apply str (seq \"this is a test\"))"], @"\"this is a test\"");
     XCTAssertEqualObjects([jsl rep:@"(seq \"\")"], @"nil");
-    XCTAssertEqualObjects([jsl rep:@"(let (c (zip \"\nb\")) (= (first c) \"\n\"))"], @"true");
 }
 
 - (void)testStringCoreFunctions {
@@ -2253,22 +2252,6 @@
     XCTAssertThrows([jsl rep:@"(join 0 1)"]);
 }
 
-- (void)testZip {
-    JSL *jsl = [[JSL alloc] initWithoutREPL];
-    XCTAssertEqualObjects([jsl rep:@"(zip '(1 2) '(4 2) [7 8])"], @"((1 4 7) (2 2 8))");
-    XCTAssertEqualObjects([jsl rep:@"(zip \"abc\" \"xyz\")"], @"[\"ax\" \"by\" \"cz\"]");
-    XCTAssertEqualObjects([jsl rep:@"(zip [1 3] [2 0] [1 -1])"], @"[[1 2 1] [3 0 -1]]");
-    XCTAssertEqualObjects([jsl rep:@"(zip [1 2 3 4] [5 6 7 8])"], @"[[1 5] [2 6] [3 7] [4 8]]");
-    XCTAssertEqualObjects([jsl rep:@"(zip [1 2] \"ab\")"], @"[[1 \"a\"] [2 \"b\"]]");
-    [jsl rep:@"(def hm {:a 1 :b 2})"];
-    [jsl rep:@"(def ret (zip {:a 1 :b 2} {:x 3 :y 4}))"];
-    XCTAssertEqualObjects([jsl rep:@"(count (first ret))"], @"2");
-    XCTAssertEqualObjects([jsl rep:@"(count (second ret))"], @"2");
-    XCTAssertEqualObjects([jsl rep:@"(zip '(3) [1])"], @"((3 1))");
-    XCTAssertEqualObjects([jsl rep:@"(zip {:a 1} [1])"], @"[[[:a 1] 1]]");
-    XCTAssertEqualObjects([jsl rep:@"(zip \"abc\" [1 2 3])"], @"[\"a1\" \"b2\" \"c3\"]");
-}
-
 - (void)testInto {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     // list
@@ -2336,6 +2319,7 @@
     XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a b) (+ a b)) '(1 2) [3 4]))"], @"(4 6)");
     XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a b) (str a b)) \"abc\" \"xyz\"))"], @"\"axbycz\"");
     XCTAssertEqualObjects([jsl rep:@"(doall (map (fn (a b) [a b]) {:a 1} {:x 3}))"], @"[{:a 1} {:x 3}]");
+    XCTAssertEqualObjects([jsl rep:@"(count (doall (flatten (doall (map (fn (a b) [a b]) {:a 1 :b 2} {:c 3 :d 4})))))"], @"4");
 }
 
 - (void)testFold {
@@ -2360,14 +2344,11 @@
     JSL *jsl = [[JSL alloc] initWithoutREPL];
     // thread first ->
     XCTAssertEqualObjects([jsl rep:@"(-> [1 2 3] (count))"], @"3");
-    XCTAssertEqualObjects([jsl rep:@"(-> \"abc\" (zip) (rest) (first))"], @"\"b\"");
     XCTAssertEqualObjects([jsl rep:@"(-> \"abc\" (concat \"xyz\"))"], @"\"abcxyz\"");
-    XCTAssertEqualObjects([jsl rep:@"(-> [1 4] (zip [2 3]))"], @"[[1 2] [4 3]]");
-    XCTAssertEqualObjects([jsl rep:@"(-> [1 4] (zip [2 3]) (flatten) (doall))"], @"[1 2 4 3]");
+    XCTAssertEqualObjects([jsl rep:@"(-> [1 4] (concat [2 3]))"], @"[1 4 2 3]");
     // thread last <-
     XCTAssertEqualObjects([jsl rep:@"(<- \"abc\" (concat \"xyz\"))"], @"\"xyzabc\"");
-    XCTAssertEqualObjects([jsl rep:@"(<- [1 4] (zip [2 3]))"], @"[[2 1] [3 4]]");
-    XCTAssertEqualObjects([jsl rep:@"(<- [1 4] (zip [2 3]) (flatten) (doall))"], @"[2 1 3 4]");
+    XCTAssertEqualObjects([jsl rep:@"(<- [1 4] (concat [2 3]))"], @"[2 3 1 4]");
 }
 
 - (void)testCoreLibFunctions {

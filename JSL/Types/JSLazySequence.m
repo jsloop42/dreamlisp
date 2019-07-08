@@ -43,6 +43,10 @@
     NSString *_moduleName;
     enum SequenceType _sequenceType;
     NSMutableArray<JSLazySequenceFn *> *_fns;
+    /**
+     If the element is a native data structure or if it is wrapped in an @a NSMutableArray, encountered in cases where there are multiple arguments
+     to a function.
+     */
     BOOL _isNative;
     BOOL _isReverseEnumerate;
 }
@@ -144,7 +148,7 @@
     if (_index < 0) [[[JSError alloc] initWithFormat:IndexOutOfBounds, _index, 0] throw];
     if (_index >= _length) [[[JSError alloc] initWithFormat:IndexOutOfBounds, _index, _length] throw];
     if (_isNative) return _array[_isReverseEnumerate ? _index-- : _index++];
-    if ([_array count] > 1) {
+    if ([_array count] > 1) {  // not native => array count will be always greater than 1
         NSMutableArray *res = [NSMutableArray new];
         NSMutableArray *arr = nil;
         for (arr in _array) {  // in case of mutiple list arguments

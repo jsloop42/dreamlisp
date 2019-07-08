@@ -183,6 +183,15 @@ static BOOL _isCacheEnabled;
     return hm;
 }
 
+/** Merge the given hash maps */
++ (void)appendObjectsToHashMap:(JSHashMap *)hashMap fromHashMap:(JSHashMap *)aHashMap {
+    NSArray *allKeys = [aHashMap allKeys];
+    id<JSDataProtocol> key = nil;
+    for (key in allKeys) {
+        [hashMap setObject:[aHashMap objectForKey:key] forKey:key];
+    }
+}
+
 /** Creates a list of key value pair lists from the given hash-map. */
 + (JSList *)hashMapToList:(JSHashMap *)hashMap {
     NSArray *allKeys = [hashMap allKeys];
