@@ -12,10 +12,10 @@
 #import "Reader.h"
 #import "Printer.h"
 #import "Logger.h"
-#import "Terminal.h"
 #import "ModuleTable.h"
 #import "Env.h"
 #import <objc/message.h>
+#import "Algorithm.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

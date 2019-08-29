@@ -24,6 +24,13 @@ typedef NS_ENUM(NSUInteger, ArityPredicate) {
     ArityPredicateOdd
 };
 
+typedef NS_ENUM(NSUInteger, SequenceType) {
+    SequenceTypeList,
+    SequenceTypeVector,
+    SequenceTypeString,
+    SequenceTypeHashMap
+};
+
 @interface TypeUtils: NSObject
 + (BOOL)matchString:(NSString *)string withExpression:(NSRegularExpression *)pattern;
 + (NSMutableArray *)mapOnArray:(NSMutableArray *)array withBlock:(id (^)(id arg))block;

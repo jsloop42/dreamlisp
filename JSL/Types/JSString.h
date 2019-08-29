@@ -23,9 +23,10 @@ NS_ASSUME_NONNULL_BEGIN
 + (JSString *)mutable;
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)str;
-- (instancetype)initWithFormat:(NSString *)format, ...;
+- (instancetype)initWithFormat:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2);
 - (instancetype)initWithMutableString;
 - (instancetype)initWithMutableString:(NSMutableString *)string;
+- (instancetype)initWithArray:(NSMutableArray<JSString *> *)array;
 - (instancetype)initWithContentsOfFile:(NSString *)filePath;
 - (instancetype)initWithCString:(const char *)string;
 - (instancetype)initWithMeta:(id<JSDataProtocol>)meta string:(JSString *)string;

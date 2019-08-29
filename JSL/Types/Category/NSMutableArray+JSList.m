@@ -95,4 +95,16 @@
     return first;
 }
 
+- (NSString *)description {
+    NSMutableString *str = [NSMutableString new];
+    NSUInteger len = [self count];
+    NSUInteger last = len - 1;
+    NSUInteger i = 0;
+    for (i = 0; i < len; i++) {
+        [str appendString:[self[i] description]];
+        if (i != last) [str appendString:@" "];
+    }
+    return [NSString stringWithFormat:@"[%@]", str];
+}
+
 @end

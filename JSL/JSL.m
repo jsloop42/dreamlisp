@@ -19,7 +19,7 @@ static NSString *langVersion;
     /** Current env */
     Env *_env;
     Core *_core;
-    FileOps *_fileOps;
+    IOService* _ioService;
     BOOL _isQuasiquoteMode;
     NSUInteger _quasiquoteDepth;
     NSUInteger _unquoteDepth;
@@ -37,18 +37,7 @@ static NSString *langVersion;
 
 + (void)initialize {
     hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
-    langVersion = [[NSString alloc] initWithFormat:@"JSL v%@ [%@]", JSLVersion, hostLangVersion];
-}
-
-- (instancetype)initWithREPL{
-    self = [super init];
-    if (self) {
-        _isREPL = YES;
-        [self bootstrap];
-        [self printVersion];
-        [self loadCoreLib];
-    }
-    return self;
+    langVersion = [[NSString alloc] initWithFormat:@"DreamLisp v%@ [%@]", [Const jslVersion], hostLangVersion];
 }
 
 - (instancetype)initWithoutREPL {
@@ -67,6 +56,9 @@ static NSString *langVersion;
 }
 
 - (void)bootstrap {
+    _ioService = [IOService new];
+    [_ioService setFileIODelegate:[FileOps new]];
+    [Logger setIOService:_ioService];
     _reader = [Reader new];
     _printer = [Printer new];
     _core = [Core new];
@@ -78,7 +70,6 @@ static NSString *langVersion;
     [self addModule:_env];  // default module
     [self addModule:[_core env]];  // core module
     _globalEnv = _env;
-    _fileOps = [FileOps new];
     _isQuasiquoteMode = NO;
     _quasiquoteDepth = 0;
     _queue = dispatch_queue_create("jsl-dispatch-queue", nil);
@@ -114,20 +105,14 @@ static NSString *langVersion;
     id<JSDataProtocol>(^loadFile)(NSMutableArray *arg) = ^id<JSDataProtocol>(NSMutableArray *arg) {
         JSL *this = weakSelf;
         NSString *path = [[JSString dataToString:arg[0] fnName:@"load-file/1"] value];
-        NSMutableArray<FileResult *> *files = [this->_fileOps loadFileFromPath:[@[path] mutableCopy] isConcurrent:NO isLookup:NO];
-        if ([files count] == 0) {
-            error(@"%@ %@", @"Error loading", path);
-            return nil;
+        NSString *content = [this->_ioService readFile:path];
+        BOOL hasError = NO;
+        @try {
+            [this rep:content];
+        } @catch (NSException *exception) {
+            hasError = YES;
+            [this printException:exception log:YES readably:YES];
         }
-        BOOL __block hasError = NO;
-        [files enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-             @try {
-                 [this rep:[obj content]];
-             } @catch (NSException *exception) {
-                 hasError = YES;
-                 [this printException:exception log:YES readably:YES];
-             }
-        }];
         [this changeModuleTo:[Const defaultModuleName]];
         return [[JSVector alloc] initWithArray:[@[[[JSKeyword alloc] initWithString: hasError ? @"fail" : @"ok"],
                                                   [[NSString alloc] initWithFormat:@"%@", [path lastPathComponent]]] mutableCopy]];
@@ -144,35 +129,27 @@ static NSString *langVersion;
     return [[NSString alloc] initWithFormat:@"%@/%@", path, coreLibFileName];
 }
 
-/** Load core lib @c core.jsl from the search path. This paths includes the current working directory and the bundle directory in order. */
+/** Load core lib @c core.jsl from the framework's resource path. */
 - (void)loadCoreLib {
-    NSMutableArray *paths = [NSMutableArray new];
-    [paths addObject:[self coreLibPath:[_fileOps currentDirectoryPath]]];
-    [paths addObject:[self coreLibPath:[_fileOps bundlePath]]];
-    NSMutableArray<FileResult *> *files = [_fileOps loadFileFromPath:paths isConcurrent:YES isLookup:YES];
+    NSString *path = [self coreLibPath:[_ioService resourcePath]];
     NSString *moduleName = [Const coreModuleName];
-    if ([files count] == 0) {
-        error(@"%@ %@", @"Error loading", coreLibFileName);
-    } else {
-        _env = [_core env];
-        [_reader setModuleName:moduleName];
-        [self updateModuleName:moduleName];
-        [files enumerateObjectsUsingBlock:^(FileResult * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            @try {
-                [self rep:[obj content]];
-            } @catch (NSException *exception) {
-                [self printException:exception log:YES readably:YES];
-            }
-        }];
-        _env = _globalEnv;
-        moduleName = [_env moduleName];
-        [self updateModuleName:moduleName];
-        [_reader setModuleName:moduleName];
+    _env = [_core env];
+    [_reader setModuleName:moduleName];
+    [self updateModuleName:moduleName];
+    NSString *content = [_ioService readFile:path];
+    @try {
+        [self rep:content];
+    } @catch (NSException *exception) {
+        [self printException:exception log:YES readably:YES];
     }
+    _env = _globalEnv;
+    moduleName = [_env moduleName];
+    [self updateModuleName:moduleName];
+    [_reader setModuleName:moduleName];
 }
 
 - (void)printVersion {
-    if (_isREPL) info(@"%@\n", langVersion);
+    if (_isREPL) [_ioService writeOutput:langVersion];
 }
 
 #pragma mark Read
@@ -675,20 +652,20 @@ static NSString *langVersion;
         NSDictionary *info = exception.userInfo;
         desc = [info valueForKey:@"description"];
         if (desc && log) {
-            error(@"%@", desc);
+            [Log error:desc];
         } else if ([[info allKeys] containsObject:@"jsdata"]) {
             id<JSDataProtocol> data = (id<JSDataProtocol>)[info valueForKey:@"jsdata"];
             if (data) {
                 desc = [[NSString alloc] initWithFormat:@"Error: %@", [_printer printStringFor:data readably:readably]];
-                if (desc && log) error(@"%@", desc);
+                if (desc && log) [Log error:desc];
             }
         } else if ([[info allKeys] containsObject:@"NSUnderlyingError"]) {
             NSError *err = [info valueForKey:@"NSUnderlyingError"];
-            error(@"%@", [err localizedDescription]);
+            [Log error:[err localizedDescription]];
         }
     } else {
         desc = exception.description;
-        if (desc && log) error(@"%@", desc);
+        if (desc && log) [Log error:desc];
     }
     return desc;
 }
@@ -697,6 +674,10 @@ static NSString *langVersion;
 
 - (nonnull id<JSDataProtocol>)eval:(nonnull id<JSDataProtocol>)ast {
     return [self eval:ast withEnv:[self env]];
+}
+
+- (IOService *)ioService {
+    return _ioService;
 }
 
 @end

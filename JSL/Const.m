@@ -8,7 +8,6 @@
 
 #import "Const.h"
 
-NSString * const JSLVersion = @"3.3";
 static NSArray *_keywords;
 static NSString *_emptyModuleName;
 static NSString *_defaultModuleName;
@@ -44,6 +43,13 @@ static NSString *_valueKeyword;
         _keyKeyword = @":key";
         _valueKeyword = @":value";
     }
+}
+
++ (NSString *)jslVersion {
+    NSDictionary *info = [[NSBundle bundleForClass:[self class]] infoDictionary];
+    NSString *version = [info valueForKey:@"CFBundleShortVersionString"];
+    NSString *build = [info valueForKey:@"CFBundleVersion"];
+    return [NSString stringWithFormat:@"%@ (%@)", version, build];
 }
 
 + (NSArray *)keyword {

@@ -183,6 +183,15 @@ static BOOL _isCacheEnabled;
     return hm;
 }
 
+/** Merge the given hash maps */
++ (void)appendObjectsToHashMap:(JSHashMap *)hashMap fromHashMap:(JSHashMap *)aHashMap {
+    NSArray *allKeys = [aHashMap allKeys];
+    id<JSDataProtocol> key = nil;
+    for (key in allKeys) {
+        [hashMap setObject:[aHashMap objectForKey:key] forKey:key];
+    }
+}
+
 /** Creates a list of key value pair lists from the given hash-map. */
 + (JSList *)hashMapToList:(JSHashMap *)hashMap {
     NSArray *allKeys = [hashMap allKeys];
@@ -205,7 +214,7 @@ static BOOL _isCacheEnabled;
     return xs;
 }
 
-/** Creates a vector of key value pair vectors from the given hash-map. */
+/** Creates an array of key value pair array from the given hash-map. */
 + (NSMutableArray *)hashMapToArray:(JSHashMap *)hashMap {
     NSArray *allKeys = [hashMap allKeys];
     NSMutableArray *res = [NSMutableArray new];
@@ -218,6 +227,16 @@ static BOOL _isCacheEnabled;
         [res addObject:kv];
     }
     return res;
+}
+
++ (NSMutableArray *)hashMapToHashMapArray:(JSHashMap *)hashMap {
+    NSArray *allKeys = [hashMap allKeys];
+    id<JSDataProtocol> key = nil;
+    NSMutableArray *ret = [NSMutableArray new];
+    for (key in allKeys) {
+        [ret addObject:[[JSHashMap alloc] initWithArray:[@[key, [hashMap objectForKey:key]] mutableCopy]]];
+    }
+    return ret;
 }
 
 #pragma mark - String

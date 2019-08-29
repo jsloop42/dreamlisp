@@ -139,8 +139,13 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 }
 
 /** Return the path from where the executable is placed. */
-- (NSString *)bundlePath {
-    return [[NSBundle mainBundle] bundlePath];
+- (NSBundle *)mainBundle {
+    return [NSBundle bundleForClass:[self class]];
+}
+
+/** Returns the main bundle resource path. */
+- (NSString *)resourcePath {
+    return [[self mainBundle] resourcePath];
 }
 
 /** Checks if the there are contents left for reading. */
@@ -193,8 +198,15 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 - (BOOL)delete:(NSString *)path {
     NSError *err = nil;
     BOOL ret = [_fm removeItemAtPath:path error:&err];
-    if (!ret && err) error(@"Error: %@", err.description);
+    if (!ret && err) [Log error:err.description];
     return ret;
+}
+
+#pragma mark - FileIOServiceDelegate
+
+- (NSString *)readFile:(NSString *)path {
+    FileResult *res = [[self loadFileFromPath:[@[path] mutableCopy] isConcurrent:NO isLookup:NO] first];
+    return [res content];
 }
 
 @end

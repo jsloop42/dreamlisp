@@ -7,7 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "JSL.h"
+#import <JSL/JSLLib.h>
 
 @interface JSLPerfTests : XCTestCase
 @end
@@ -34,6 +34,20 @@ static NSString *form = @"(defun collatz (n) (collatz n [])) (defun collatz (n a
     [jsl rep:form];
     [self measureBlock:^{
         [self->jsl rep:@"(collatz 93571393692802302)"];
+    }];
+}
+
+- (void)testJSListDropFirstPerformance {
+    NSMutableArray *arr = [NSMutableArray new];
+    for (int i = 0; i < 10000; i++) {
+        [arr addObject:@"1"];
+    }
+    JSList *xs = [[JSList alloc] initWithArray:arr];
+    [self measureBlock:^{
+        JSList *lst = (JSList *)[xs rest];
+        for (int i = 0; i < 9999; i++) {
+            lst = (JSList *)[lst rest];
+        }
     }];
 }
 

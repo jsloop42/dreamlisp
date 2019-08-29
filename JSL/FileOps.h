@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "Utils.h"
 #import "Logger.h"
+#import "FileIOServiceDelegate.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -26,11 +27,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)closeFile;
 - (NSMutableArray<FileResult *> *)loadFileFromPath:(NSMutableArray *)locations isConcurrent:(BOOL)isConcurrent isLookup:(BOOL)isLookup;
 - (NSString *)currentDirectoryPath;
-- (NSString *)bundlePath;
+- (NSBundle *)mainBundle;
+- (NSString *)resourcePath;
 - (BOOL)hasNext;
 - (NSString *)readLine;
 - (void)append:(NSString *)string completion:(void  (^ _Nullable)(void))callback;
 - (BOOL)delete:(NSString *)path;
+@end
+
+@interface FileOps () <FileIOServiceDelegate>
 @end
 
 NS_ASSUME_NONNULL_END

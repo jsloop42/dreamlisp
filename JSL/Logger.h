@@ -7,16 +7,26 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "IOService.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern void info3(NSString *terminator, NSString *format, ...) __attribute__((format(__NSString__, 2, 3)));
-extern void info(NSString *format, ...) __attribute__((format(__NSString__, 1, 2)));
-extern void debug(NSString *format, ...) __attribute__((format(__NSString__, 1, 2)));
-extern void verbose(NSString *format, ...) __attribute__((format(__NSString__, 1, 2)));
-extern void error(NSString *format, ...) __attribute__((format(__NSString__, 1, 2)));
+#define Log Logger
 
-extern void infoCallback(id param, int tag, void(*fn)(id param, int tag, int counter, const char *s));
-extern void freeInfoCallback(void);
+@interface Logger : NSObject
++ (BOOL)isDebug;
++ (BOOL)isVerbose;
++ (void)setIsDebug:(BOOL)flag;
++ (void)setIsVerbose:(BOOL)flag;
++ (void)setIOService:(IOService *)ioService;
++ (void)info:(NSString *)message;
++ (void)infoWithFormat:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2);
++ (void)debug:(NSString *)message;
++ (void)debugWithFormat:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2);
++ (void)error:(NSString *)message;
++ (void)errorWithFormat:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2);
++ (void)verbose:(NSString *)message;
++ (void)verboseWithFormat:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2);
+@end
 
 NS_ASSUME_NONNULL_END

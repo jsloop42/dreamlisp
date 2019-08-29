@@ -1,15 +1,15 @@
 //
-//  JSFunction.m
+//  JSLazyFunction.m
 //  JSL
 //
-//  Created by jsloop on 28/04/19.
+//  Created by jsloop on 30/06/19.
 //  Copyright © 2019 jsloop. All rights reserved.
 //
 
-#import "JSFunction.h"
+#import "JSLazyFunction.h"
 
-@implementation JSFunction {
-    id<JSDataProtocol> (^_fn)(NSMutableArray *);
+@implementation JSLazyFunction {
+    void (^_fn)(JSLazySequence *seq, NSMutableArray *xs);
     id<JSDataProtocol> _ast;
     NSMutableArray *_params;
     Env *_env;
@@ -37,42 +37,42 @@
 @synthesize isImported = _isImported;
 @synthesize isMutable = _isMutable;
 
-+ (BOOL)isFunction:(id)object {
++ (BOOL)isLazyFunction:(id)object {
     return [[object className] isEqual:[self className]];
 }
 
-+ (JSFunction *)dataToFunction:(id<JSDataProtocol>)data {
-    return [self dataToFunction:data position:-1];
++ (JSLazyFunction *)dataToLazyFunction:(id<JSDataProtocol>)data {
+    return [self dataToLazyFunction:data position:-1];
 }
 
-+ (JSFunction *)dataToFunction:(id<JSDataProtocol>)data position:(NSInteger)position {
-    if (![self isFunction:data]) {
++ (JSLazyFunction *)dataToLazyFunction:(id<JSDataProtocol>)data position:(NSInteger)position {
+    if (![self isLazyFunction:data]) {
         JSError *err = nil;
         if (position > 0) {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'function'", position, [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithArity, @"'lazy-function'", position, [data dataTypeName]];
         } else {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'function'", [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatch, @"'lazy-function'", [data dataTypeName]];
         }
         [err throw];
     }
-    return (JSFunction *)data;
+    return (JSLazyFunction *)data;
 }
 
-+ (JSFunction *)dataToFunction:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
-    if (![JSFunction isFunction:data]) {
++ (JSLazyFunction *)dataToLazyFunction:(id<JSDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
+    if (![JSLazyFunction isLazyFunction:data]) {
         JSError *err = nil;
         if (position > 0) {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'function'", position, [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'lazy-function'", position, [data dataTypeName]];
         } else {
-            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'function'", [data dataTypeName]];
+            err = [[JSError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'lazy-function'", [data dataTypeName]];
         }
         [err throw];
     }
-    return (JSFunction *)data;
+    return (JSLazyFunction *)data;
 }
 
 - (instancetype)initWithAst:(id<JSDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<JSDataProtocol> _Nullable)meta
-                         fn:(id<JSDataProtocol> (^)(NSMutableArray *))fn name:(NSString *)name {
+                         fn:(void (^)(JSLazySequence *seq, NSMutableArray *xs))fn name:(NSString *)name {
     self = [super init];
     if (self) {
         _fn = fn;
@@ -88,7 +88,7 @@
 }
 
 - (instancetype)initWithAst:(id<JSDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<JSDataProtocol> _Nullable)meta
-                         fn:(id<JSDataProtocol> (^)(NSMutableArray *))fn {
+                         fn:(void (^)(JSLazySequence *seq, NSMutableArray *xs))fn {
     self = [super init];
     if (self) {
         self = [self initWithAst:ast params:params env:env macro:isMacro meta:meta fn:fn name:@""];
@@ -97,7 +97,7 @@
     return self;
 }
 
-- (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn name:(NSString *)name {
+- (instancetype)initWithFn:(void (^)(JSLazySequence *seq, NSMutableArray *xs))fn name:(NSString *)name {
     self = [super init];
     if (self) {
         _fn = fn;
@@ -106,7 +106,7 @@
     return self;
 }
 
-- (instancetype)initWithFn:(id<JSDataProtocol> (^)(NSMutableArray *))fn argCount:(NSInteger)count name:(NSString *)name {
+- (instancetype)initWithFn:(void (^)(JSLazySequence *seq, NSMutableArray *xs))fn argCount:(NSInteger)count name:(NSString *)name {
     self = [super init];
     if (self) {
         _fn = fn;
@@ -116,7 +116,7 @@
     return self;
 }
 
-- (instancetype)initWithMacro:(JSFunction *)func {
+- (instancetype)initWithMacro:(JSLazyFunction *)func {
     self = [super init];
     if (self) {
         self = [self initWithAst:func.ast params:func.params env:func.env macro:YES meta:func.meta fn:func.fn name:func.name];
@@ -125,7 +125,7 @@
     return self;
 }
 
-- (instancetype)initWithMeta:(id<JSDataProtocol>)meta func:(JSFunction *)func {
+- (instancetype)initWithMeta:(id<JSDataProtocol>)meta func:(JSLazyFunction *)func {
     self = [super init];
     if (self) {
         self = [self initWithAst:func.ast params:func.params env:func.env macro:func.isMacro meta:meta fn:func.fn name:func.name];
@@ -135,7 +135,7 @@
     return self;
 }
 
-- (instancetype)initWithFunction:(JSFunction *)function {
+- (instancetype)initWithFunction:(JSLazyFunction *)function {
     self = [super init];
     if (self) {
         self = [self initWithAst:function.ast params:function.params env:function.env macro:function.isMacro meta:function.meta fn:function.fn
@@ -163,12 +163,12 @@
     return self;
 }
 
-- (id<JSDataProtocol>)apply {
-    return _fn([NSMutableArray new]);
+- (void)apply:(JSLazySequence *)seq {
+    _fn(seq, [NSMutableArray new]);
 }
 
-- (id<JSDataProtocol>)apply:(NSMutableArray *)args {
-    return _fn(args);
+- (void)apply:(NSMutableArray *)args forLazySequence:(JSLazySequence *)seq {
+    _fn(seq, args);
 }
 
 - (BOOL)isVariadic {
@@ -204,7 +204,7 @@
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    return [[JSFunction alloc] initWithFunction:self];
+    return [[JSLazyFunction alloc] initWithFunction:self];
 }
 
 - (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {

@@ -13,7 +13,8 @@
 #import "Reader.h"
 #import "Printer.h"
 #import "Core.h"
-#import "Terminal.h"
+#import "FileOps.h"
+#import "IOService.h"
 #import <objc/objc-api.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -25,7 +26,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) BOOL isREPL;
 @property (nonatomic, readwrite) NSString *prompt;
 - (instancetype)init;
-- (instancetype)initWithREPL;
 - (instancetype)initWithoutREPL;
 - (void)bootstrap;
 - (void)loadCoreLib;

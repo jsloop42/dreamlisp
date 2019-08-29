@@ -20,6 +20,48 @@
                ReferencedContainer = "container:JSL.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "9E7942D622C12A310086A47F"
+               BuildableName = "JSLTests.xctest"
+               BlueprintName = "JSLTests"
+               ReferencedContainer = "container:JSL.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "9E3A9D4922568AFC00348529"
+               BuildableName = "jslshell"
+               BlueprintName = "JSLShell"
+               ReferencedContainer = "container:JSL.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "9E3A9D5722568B1300348529"
+               BuildableName = "JSLShellTests.xctest"
+               BlueprintName = "JSLShellTests"
+               ReferencedContainer = "container:JSL.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -29,12 +71,26 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
          <TestableReference
-            skipped = "NO">
+            skipped = "NO"
+            parallelizable = "YES"
+            testExecutionOrdering = "random">
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9E7942D622C12A310086A47F"
                BuildableName = "JSLTests.xctest"
                BlueprintName = "JSLTests"
+               ReferencedContainer = "container:JSL.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES"
+            testExecutionOrdering = "random">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "9E3A9D5722568B1300348529"
+               BuildableName = "JSLShellTests.xctest"
+               BlueprintName = "JSLShellTests"
                ReferencedContainer = "container:JSL.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -70,13 +126,6 @@
             ReferencedContainer = "container:JSL.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "DYLD_PRINT_STATISTICS"
-            value = "1"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>

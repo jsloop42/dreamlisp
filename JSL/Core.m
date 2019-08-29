@@ -15,7 +15,6 @@ static NSString *_description = @"The core module.";
     Env *_env;
     Reader *_reader;
     Printer *_printer;
-    Terminal *_terminal;
     id<JSLDelegate> __weak _delegate;
     NSData *_allModuleSortHint;
 }
@@ -35,7 +34,6 @@ static NSString *_description = @"The core module.";
     [_env setIsUserDefined:NO];
     _reader = [Reader new];
     _printer = [Printer new];
-    _terminal = [Terminal new];
     [self addArithmeticFunctions];
     [self addComparisonFunctions];
     [self addPrintFunctions];
@@ -43,6 +41,7 @@ static NSString *_description = @"The core module.";
     [self addEvalFunctions];
     [self addAtomFunctions];
     [self addInvokeFunctions];
+    [self addLazyFunctions];
     [self addPredicateFunctions];
     [self addSymbolFunctions];
     [self addKeywordFunctions];
@@ -262,7 +261,7 @@ double dmod(double a, double n) {
         for (i = 0; i < len; i++) {
             [ret addObject:[this->_printer printStringFor:[xs nth:i] readably:false]];  // readably false means for viewing in REPL (println "a") -> a nil
         }
-        info(@"%@", [ret componentsJoinedByString:@" "]);
+        [[this->_delegate ioService] writeOutput:[ret componentsJoinedByString:@" "]];
         return [JSNil new];
     };
     fn = [[JSFunction alloc] initWithFn:println argCount:-1 name:@"println/n"];
@@ -277,7 +276,7 @@ double dmod(double a, double n) {
         for (i = 0; i < len; i++) {
             [ret addObject:[this->_printer printStringFor:[xs nth:i] readably:true]];  // prints strings as is with quotes (prn "a") -> "a" nil
         }
-        info(@"%@", [ret componentsJoinedByString:@" "]);
+        [[this->_delegate ioService] writeOutput:[ret componentsJoinedByString:@" "]];
         return [JSNil new];
     };
     fn = [[JSFunction alloc] initWithFn:prn argCount:-1 name:@"prn/n"];
@@ -292,7 +291,7 @@ double dmod(double a, double n) {
         for (i = 0; i < len; i++) {
             [ret addObject:[this->_printer printStringFor:[xs nth:i] readably:false]];
         }
-        info3(@"", @"%@", [ret componentsJoinedByString:@" "]);
+        [[this->_delegate ioService] writeOutput:[ret componentsJoinedByString:@" "] terminator:@""];
         return nil;
     };
     // prints to stdout without newline and  without returning nil
@@ -469,10 +468,22 @@ double dmod(double a, double n) {
         id<JSDataProtocol> first = [xs first];
         id<JSDataProtocol> second = [xs second];
         JSNumber *num = [JSNumber dataToNumber:first position:1 fnName:@"nth/2"];
-        NSMutableArray *seq = [Utils toArray:second isNative:YES];
         NSUInteger n = [num integerValue];
-        [TypeUtils checkIndexBounds:seq index:n];
-        return [seq nth:n];
+        id <JSDataProtocol> ret = nil;
+        if ([JSLazySequence isLazySequence:second]) {
+            JSLazySequence *seq = (JSLazySequence *)second;
+            NSUInteger index = [num integerValue];
+            if (index >= [seq length]) return [JSNil new];
+            seq.index = index;
+            [seq apply];
+            ret = [[seq acc] firstObject];
+
+        } else {
+            NSMutableArray *seq = [Utils toArray:second isNative:YES];
+            [TypeUtils checkIndexBounds:seq index:n];
+            ret = [seq nth:n];
+        }
+        return ret ? ret : [JSNil new];
     };
     fn = [[JSFunction alloc] initWithFn:nth argCount:2 name:@"nth/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"nth" moduleName:[Const coreModuleName]]];
@@ -486,11 +497,25 @@ double dmod(double a, double n) {
         NSString *fnName = @"nth-tail/3";
         NSInteger start = [[JSNumber dataToNumber:[xs first] position:1 fnName:fnName] integerValue];
         NSInteger end = [[JSNumber dataToNumber:[xs second] position:2 fnName:fnName] integerValue];;
-        if ([JSString isString:data]) {
+        NSUInteger count = 0;
+        if ([JSLazySequence isLazySequence:data]) {
+            JSLazySequence *seq = (JSLazySequence *)data;
+            if (end >= [seq length]) return [JSNil new];
+            seq.index = start;
+            NSUInteger idx = start;
+            while (idx <= end) {
+                [seq apply];
+                idx++;
+            }
+            NSMutableArray *ret = [seq acc];
+            if (!ret) return [JSNil new];
+            if ([seq sequenceType] == SequenceTypeList) return [[JSList alloc] initWithArray:ret];
+            if ([seq sequenceType] == SequenceTypeVector) return [[JSVector alloc] initWithArray:ret];
+            if ([seq sequenceType] == SequenceTypeString) return [[JSString alloc] initWithArray:ret];
+        } else if ([JSString isString:data]) {
             JSString *str = (JSString *)data;
             return [[JSString alloc] initWithString:[str substringFrom:start to:end]];
         }
-        NSUInteger count = 0;
         NSMutableArray *list = [[JSVector dataToList:data position:len fnName:fnName] value];
         count = [list count];
         [TypeUtils checkIndexBoundsCount:count startIndex:start endIndex:end];
@@ -517,6 +542,13 @@ double dmod(double a, double n) {
         } else if ([JSString isString:elem]) {
             JSString *str = (JSString *)elem;
             if (![str isEmpty]) first = [[JSString alloc] initWithString:[(JSString *)elem substringFrom:0 count:1]];
+        } else if ([JSLazySequence isLazySequence:elem]) {
+            JSLazySequence *seq = (JSLazySequence *)elem;
+            if ([seq hasNext]) {
+                [seq apply];
+            }
+            id <JSDataProtocol> ret = [[seq acc] first];
+            return ret ? ret : [JSNil new];
         } else {
             [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"first/1", @"'sequence'", 1, [elem dataTypeName]] throw];
         }
@@ -539,6 +571,22 @@ double dmod(double a, double n) {
             NSMutableArray *arr = [Utils stringToArray:(JSString *)data isNative:YES];
             if (![arr isEmpty]) [arr removeObjectAtIndex:0];
             return [[JSVector alloc] initWithArray:arr];
+        } else if ([JSLazySequence isLazySequence:data]) {
+            JSLazySequence *seq = (JSLazySequence *)data;
+            if ([seq length] == 0) return [JSNil new];
+            seq.index = 1;
+            while ([seq hasNext]) {
+                [seq apply];
+            }
+            id <JSDataProtocol> ret = nil;
+            if ([seq sequenceType] == SequenceTypeList) {
+                ret = [[JSList alloc] initWithArray:[seq acc]];
+            } else if ([seq sequenceType] == SequenceTypeVector) {
+                ret = [[JSVector alloc] initWithArray:[seq acc]];
+            } else if ([seq sequenceType] == SequenceTypeString) {
+                ret = [[JSString alloc] initWithArray:[seq acc]];
+            }
+            return ret ? ret : [JSNil new];
         }
         [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"rest/1", @"'sequence'", [data dataTypeName]] throw];
         return [JSList new];
@@ -547,34 +595,56 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"rest" moduleName:[Const coreModuleName]]];
 
     #pragma mark map
-    id<JSDataProtocol>(^map)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
-        NSUInteger innerLen = [xs count] - 1;
-        NSUInteger i = 0;
-        NSUInteger j = 0;
+    void(^map)(JSLazySequence *seq, NSMutableArray *xs) = ^void(JSLazySequence *seq, NSMutableArray *xs) {
         JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"map/n"];
-        id<JSDataProtocol> data = [xs second];
-        NSMutableArray *second = [Utils toArray:data];
-        NSUInteger outerLen = [second count];
-        NSMutableArray *acc = [NSMutableArray new];
-        NSMutableArray *res = [NSMutableArray new];
-        BOOL isList = [JSList isList:data];
-        NSMutableArray *elem = nil;
-        id<JSDataProtocol> ret = nil;
-        NSMutableArray *ast = [xs rest];
-        for (i = 0; i < outerLen; i++) { // xs: [[1 2 3] [4 5 6]] => [[1 4] [2 5] [3 6]]  => outerLen: 3, innerLen: 2
-            [res removeAllObjects];
-            for (j = 0; j < innerLen; j++) {
-                elem = [Utils toArray:ast[j] isNative:YES];
-                if (!isList) isList = [JSList isList:ast[j]];
-                if ([elem count] != outerLen) [[[JSError alloc] initWithFormat:ElementCountWithPositionError, outerLen, [elem count], j] throw];
-                [res addObject:[elem nth:i]];
-            }
-            ret = [fn apply:res];
-            [acc addObject:ret];
-        }
-        return isList ? [[JSList alloc] initWithArray:acc] : [[JSVector alloc] initWithArray:acc];
+        id<JSDataProtocol> res = [fn apply:[xs rest]];
+        [[seq acc] addObject:res];
     };
-    fn = [[JSFunction alloc] initWithFn:map argCount:-1 name:@"map/n"];
+
+    #pragma mark lazy map
+    id<JSDataProtocol>(^lazyMap)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
+        JSLazySequence *seq = [JSLazySequence new];
+        JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"map/n"];
+        [seq addLazyFunction:[[JSLazyFunction alloc] initWithFn:map name:@""] fn:fn];
+        if ([JSLazySequence isLazySequence:first]) {
+            seq = (JSLazySequence *)first;
+            [seq addLazyFunction:[[JSLazyFunction alloc] initWithFn:map name:@""] fn:fn];
+        } else {
+            id<JSDataProtocol> second = [xs second];
+            BOOL isList = [JSList isList:second];
+            if (isList) [seq setSequenceType:SequenceTypeList];
+            if ([xs count] > 2) {
+                NSMutableArray *rest = [xs rest];
+                [seq setIsNative:NO];
+                id<JSDataProtocol> elem = nil;
+                for (elem in rest) {
+                    if ([JSList isKindOfList:elem]) {
+                        [[seq value] addObject:[(JSList *)elem value]];
+                    } else if ([JSHashMap isHashMap:elem]) {
+                        [[seq value] addObject:[Utils hashMapToHashMapArray:elem]];
+                        [seq setSequenceType:SequenceTypeHashMap];
+                    } else if ([JSString isString:elem]) {
+                        [[seq value] addObject:[Utils toArray:elem isNative:YES]];
+                        [seq setSequenceType:SequenceTypeString];
+                    }
+                }
+            } else {
+                if ([JSList isKindOfList:second]) {
+                    [seq setValue:[(JSList *)second value]];
+                } else if ([JSHashMap isHashMap:second]) {
+                    [seq setValue:[Utils hashMapToHashMapArray:second]];
+                    [seq setSequenceType:SequenceTypeHashMap];
+                } else if ([JSString isString:second]) {
+                    [seq setValue:[Utils toArray:second isNative:YES]];
+                    [seq setSequenceType:SequenceTypeString];
+                }
+            }
+            [seq updateEnumerator];
+        }
+        return seq;
+    };
+    fn = [[JSFunction alloc] initWithFn:lazyMap argCount:-1 name:@"map/n"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"map" moduleName:[Const coreModuleName]]];
 
     #pragma mark conj
@@ -662,6 +732,15 @@ double dmod(double a, double n) {
             NSUInteger len = [str count];
             if (len == 0) return [JSNil new];
             last = [[JSString alloc] initWithString:[(JSString *)seq substringFrom:len - 1 count:1]];
+        } else if ([JSLazySequence isLazySequence:seq]) {
+            JSLazySequence *lseq = (JSLazySequence *)seq;
+            NSUInteger len = [lseq length];
+            if (len == 0) return [JSNil new];
+            lseq.index = len - 1;
+            if ([lseq hasNext]) {
+                id <JSDataProtocol> ret = [lseq next];
+                return ret ? ret : [JSNil new];
+            }
         } else {
             [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"last/1", @"'sequence'", 1, [list dataTypeName]] throw];
         }
@@ -684,6 +763,14 @@ double dmod(double a, double n) {
             return [(JSVector *)second drop:n];
         } else if ([JSString isString:second]) {
             return [[JSString alloc] initWithString:[(JSString *)second substringFrom:n]];
+        } else if ([JSLazySequence isLazySequence:second]) {
+            JSLazySequence *seq = (JSLazySequence *)second;
+            if (n < [seq length]) {
+                [[seq value] removeObjectsInRange:NSMakeRange(0, n)];
+                [seq updateEnumerator];
+                return seq;
+            }
+            return seq;
         }
         [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"drop/2", @"'sequence'", 2, [second dataTypeName]] throw];
         return nil;
@@ -692,21 +779,30 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"drop" moduleName:[Const coreModuleName]]];
 
     #pragma mark reverse
-    /** Returns the reverse of the given list. */
-    id<JSDataProtocol>(^reverse)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+    /** Returns the reverse of the given sequence. */
+    void (^reverse)(JSLazySequence *seq, NSMutableArray *xs) = ^void(JSLazySequence *seq, NSMutableArray *xs) {
+        [[seq acc] addObject:[xs first]];
+    };
+
+    id<JSDataProtocol>(^lazyReverse)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         id<JSDataProtocol> first = [xs first];
-        if ([JSList isList:first]) {
-            return [(JSList *)first reverse];
-        } else if ([JSVector isVector:first]) {
-            return [(JSVector *)first reverse];
+        JSLazySequence *seq = [JSLazySequence new];
+        [seq setIsReverseEnumerate:YES];
+        [seq addLazyFunction:[[JSLazyFunction alloc] initWithFn:reverse name:@""]];
+        if ([JSList isKindOfList:first]) {
+            [seq setSequenceType:[JSVector isVector:first] ? SequenceTypeVector : SequenceTypeList];
+            [seq setValue:[(JSList *)first value]];
         } else if ([JSString isString:first]) {
-            return [[JSString alloc] initWithString:[(JSString *)first reverse]];
+            [seq setSequenceType:SequenceTypeString];
+            [seq setValue:[Utils toArray:first isNative:YES]];
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"reverse/1", @"'sequence'", 1, [first dataTypeName]] throw];
         }
-        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"reverse/1", @"'list' or 'vector'", 1, [first dataTypeName]] throw];
-        return nil;
+        [seq updateEnumerator];
+        return seq;
     };
-    fn = [[JSFunction alloc] initWithFn:reverse argCount:1 name:@"reverse/1"];
+    fn = [[JSFunction alloc] initWithFn:lazyReverse argCount:1 name:@"reverse/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"reverse" moduleName:[Const coreModuleName]]];
 
     #pragma mark sort
@@ -791,23 +887,54 @@ double dmod(double a, double n) {
     /**
      Takes a filter predicate function and a collection, applies the function to each element in the collection and returns the resulting filtered collection.
      */
-    id<JSDataProtocol>(^filter)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+    void (^filter)(JSLazySequence *seq, NSMutableArray *xs) = ^void(JSLazySequence *seq, NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:2];
+        JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"filter/2"];
+        NSMutableArray *rest = [xs rest];
+        id<JSDataProtocol> elem = [rest first];
+        JSBool *res = [fn apply:rest];
+        if ([res value]) {
+            if ([seq sequenceType] == SequenceTypeHashMap) {
+                JSHashMap *acc = [[seq acc] first];
+                if (acc) {
+                    JSHashMap *hm = (JSHashMap *)elem;
+                    NSArray *allKeys = [hm allKeys];
+                    id<JSDataProtocol> key = nil;
+                    for (key in allKeys) {
+                        [acc setObject:[hm objectForKey:key] forKey:key];
+                    }
+                } else {
+                    [[seq acc] addObject:elem];
+                }
+            } else {
+                [[seq acc] addObject:elem];
+            }
+        }
+    };
+
+    #pragma mark lazy filter
+    id<JSDataProtocol>(^lazyFilter)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:2];
         JSFunction *fn = [JSFunction dataToFunction:[xs first] position:1 fnName:@"filter/2"];
         id<JSDataProtocol> second = [xs second];
+        JSLazySequence *seq = [JSLazySequence new];
+        JSLazyFunction *lfn = [[JSLazyFunction alloc] initWithFn:filter name:@""];
+        [seq addLazyFunction:lfn fn:fn];
         if ([JSList isList:second]) {
-            return [[JSList alloc] initWithArray:[self filterArray:[(JSList *)second value] withPredicate:fn]];
+            [seq setSequenceType:SequenceTypeList];
+            [seq setValue:[(JSList *)second value]];
+        } else if ([JSVector isVector:second]) {
+            [seq setSequenceType:SequenceTypeVector];
+            [seq setValue:[(JSVector *)second value]];
+        } else if ([JSHashMap isHashMap:second]) {
+            [seq setSequenceType:SequenceTypeHashMap];
+            [seq setValue:[Utils hashMapToHashMapArray:second]];
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"filter/2", @"'collection'", 2, [first dataTypeName]] throw];
         }
-        if ([JSVector isVector:second]) {
-            return [[JSVector alloc] initWithArray:[self filterArray:[(JSVector *)second value] withPredicate:fn]];
-        }
-        if ([JSHashMap isHashMap:second]) {
-            return [[JSHashMap alloc] initWithMapTable:[self filterMapTable:[(JSHashMap *)second value] withPredicate:fn]];
-        }
-        [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"filter/2", @"'collection'", 2, [first dataTypeName]] throw];
-        return nil;
+        return seq;
     };
-    fn = [[JSFunction alloc] initWithFn:filter argCount:2 name:@"filter/2"];
+    fn = [[JSFunction alloc] initWithFn:lazyFilter argCount:2 name:@"filter/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"filter" moduleName:[Const coreModuleName]]];
 
     #pragma mark partition
@@ -849,22 +976,45 @@ double dmod(double a, double n) {
 
     #pragma mark flatten
     /** Takes any nested collection and returns its contents as a single collection. */
-    id<JSDataProtocol>(^flatten)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+    void(^flatten)(JSLazySequence *seq, NSMutableArray *xs) = ^void(JSLazySequence *seq, NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
         NSMutableArray *acc = [NSMutableArray new];
-        if ([JSList isList:first]) {
-            return [[JSList alloc] initWithArray:[self flatten:(JSList *)first acc:acc]];
+        if ([JSList isKindOfList:first]) {
+            [self flatten:(JSList *)first acc:acc];
+            [[seq acc] addObjectsFromArray:acc];
+        } else if ([JSHashMap isHashMap:first]) {
+            [[seq acc] addObject:[self flattenHashMap:first acc:[NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
+                                                                                      valueOptions:NSMapTableStrongMemory]]];
+        } else {
+            [[seq acc] addObject:first];
+        }
+    };
+
+    #pragma mark lazy flatten
+    id<JSDataProtocol>(^lazyFlatten)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        id<JSDataProtocol> first = (id<JSDataProtocol>)[xs first];
+        JSLazySequence *seq = [JSLazySequence new];
+        [seq addLazyFunction:[[JSLazyFunction alloc] initWithFn:flatten name:@""]];
+        if ([JSLazySequence isLazySequence:first]) {
+            seq = (JSLazySequence *)first;
+            [seq addLazyFunction:[[JSLazyFunction alloc] initWithFn:flatten name:@""]];
+        } else if ([JSList isList:first]) {
+            [seq setValue:[(JSList *)first value]];
+            [seq setSequenceType:SequenceTypeList];
         } else if ([JSVector isVector:first]) {
-            return [[JSVector alloc] initWithArray:[self flatten:(JSVector *)first acc:acc]];
+            [seq setValue:[(JSVector *)first value]];
+            [seq setSequenceType:SequenceTypeVector];
         } else if ([JSHashMap isHashMap:first]) {
             return [[JSHashMap alloc] initWithMapTable:[self flattenHashMap:first acc:[NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
                                                                                                             valueOptions:NSMapTableStrongMemory]]];
+        } else {
+            [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"flatten/1", @"'collection'", [first dataTypeName]] throw];
         }
-        [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"flatten/1", @"'collection'", [first dataTypeName]] throw];
-        return nil;
+        return seq;
     };
-    fn = [[JSFunction alloc] initWithFn:flatten argCount:1 name:@"flatten/1"];
+    fn = [[JSFunction alloc] initWithFn:lazyFlatten argCount:1 name:@"flatten/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"flatten" moduleName:[Const coreModuleName]]];
 
     #pragma mark take
@@ -873,6 +1023,23 @@ double dmod(double a, double n) {
         id<JSDataProtocol> first = [xs first];
         id<JSDataProtocol> second = [xs second];
         JSNumber *num = [JSNumber dataToNumber:first position:1 fnName:@"take/2"];
+        if ([JSLazySequence isLazySequence:second]) {
+            JSLazySequence *seq = (JSLazySequence *)second;
+            NSUInteger i = 0;
+            NSUInteger len = [num integerValue];
+            for (i = 0; i < len; i++) {
+                if ([seq hasNext]) {
+                    [seq apply];
+                }
+            }
+            if ([seq sequenceType] == SequenceTypeList) {
+                return [[JSList alloc] initWithArray:[seq acc]];
+            }
+            if ([seq sequenceType] == SequenceTypeVector) {
+                return [[JSVector alloc] initWithArray:[seq acc]];
+            }
+            return [[JSString alloc] initWithArray:[seq acc]];
+        }
         if ([JSString isString:second]) return [[JSString alloc] initWithString:[(JSString *)second substringFrom:0 count:[num integerValue]]];
         NSMutableArray *list = [[JSVector dataToList:second position:2 fnName:@"take/2"] value];
         NSUInteger n = [num integerValue];
@@ -923,54 +1090,6 @@ double dmod(double a, double n) {
     };
     fn = [[JSFunction alloc] initWithFn:join argCount:2 name:@"join/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"join" moduleName:[Const coreModuleName]]];
-
-    #pragma mark zip
-    /**
-     Takes a list of sequence or collection with equal length and returns a new collection containing sequence with first list containing first elements from
-     each sequence, second list containing second elements from each sequence and so on. If a sequence is a list the result is a list as well as the sequence,
-     else a vector of sequences. Hash maps are converted to key value pair of vectors.
-
-     (zip '(1 2) [3 4] [5 6])  ; ((1 3 5) [2 4 6])
-     (zip [1 2 3] [4 5 6])  ; [[1 4] [2 5] [3 6]]
-     (zip "abc" "xyz")  ; ["ax" "by" "cz"]
-     (zip {:a 1} {:b 2})  ; [[[:a 1] [:b 2]]]
-     */
-    id<JSDataProtocol>(^zip)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
-        NSUInteger innerLen = [xs count];
-        NSUInteger i = 0;
-        NSUInteger j = 0;
-        id<JSDataProtocol> data = [xs first];
-        NSMutableArray *first = [Utils toArray:data];
-        NSUInteger outerLen = [first count];
-        NSMutableArray *res = [NSMutableArray new];
-        JSString *str = nil;
-        JSVector *sub = nil;
-        BOOL isString = [JSString isString:data];
-        BOOL isList = [JSList isList:data];
-        NSMutableArray *elem = nil;
-        for (i = 0; i < outerLen; i++) { // xs: [[1 2 3] [4 5 6]] => [[1 4] [2 5] [3 6]]  => outerLen: 3, innerLen: 2
-            isString ? (str = [[JSString alloc] initWithMutableString]) : (sub = [JSVector new]);
-            for (j = 0; j < innerLen; j++) {
-                elem = [Utils toArray:xs[j] isNative:YES];
-                if (!isList) isList = [JSList isList:xs[j]];
-                if ([elem count] != outerLen) [[[JSError alloc] initWithFormat:ElementCountWithPositionError, outerLen, [elem count], j] throw];
-                if (isString) {
-                    id<JSDataProtocol> obj = [elem nth:i];
-                    if ([JSNumber isNumber:obj]) {
-                        [str appendString:[NSString stringWithFormat:@"%ld", [(JSNumber *)obj integerValue]]];
-                    } else {
-                        [str appendString:[NSString stringWithFormat:@"%@", obj]];
-                    }
-                } else {
-                    [sub add:[elem nth:i]];
-                }
-            }
-            isString ? [res addObject:str] : isList ? [res addObject:[sub list]] : [res addObject:sub];
-        }
-        return isList ? [[JSList alloc] initWithArray:res] : [[JSVector alloc] initWithArray:res];
-    };
-    fn = [[JSFunction alloc] initWithFn:zip argCount:-1 name:@"zip/n"];
-    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"zip" moduleName:[Const coreModuleName]]];
 
     #pragma mark into
     id<JSDataProtocol>(^into)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
@@ -1174,7 +1293,7 @@ double dmod(double a, double n) {
     NSUInteger i = 0;
     id<JSDataProtocol> elem = nil;
     for (i = 0; i < len; i++) {
-        elem = [_delegate eval:[xs nth:i]];
+        elem = [xs nth:i];
         if ([JSList isKindOfList:elem]) {
             [self flatten:elem acc:acc];
         } else {
@@ -1512,12 +1631,97 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"keyword?" moduleName:[Const coreModuleName]]];
 }
 
+#pragma mark - Lazy
+
+- (void)addLazyFunctions {
+    JSFunction *fn = nil;
+
+    #pragma mark lazy-seq
+    /** Takes a sequence and returns a lazy-sequence object. */
+    id<JSDataProtocol>(^lazySeq)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        id<JSDataProtocol> first = [xs first];
+        if ([JSString isString:first]) {
+            return [[JSLazySequence alloc] initWithArray:[Utils toArray:first isNative:YES] sequenceType:SequenceTypeString];
+        } else if ([JSList isKindOfList:first]) {
+            return [[JSLazySequence alloc] initWithArray:[(JSList *)first value]
+                                            sequenceType:[JSVector isVector:first] ? SequenceTypeVector : SequenceTypeList];
+        }
+        [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"lazy-seq/1", @"sequence", [first dataTypeName]] throw];
+        return [JSNil new];
+    };
+    fn = [[JSFunction alloc] initWithFn:lazySeq argCount:1 name:@"lazy-seq/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"lazy-seq" moduleName:[Const coreModuleName]]];
+
+    #pragma mark lazy-seq?
+    /** Checks if the given element is a lazy sequence. */
+    id<JSDataProtocol>(^lazySeqp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        return [[JSBool alloc] initWithBool:[JSLazySequence isLazySequence:[xs first]]];
+    };
+    fn = [[JSFunction alloc] initWithFn:lazySeqp argCount:1 name:@"lazy-seq?/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"lazy-seq?" moduleName:[Const coreModuleName]]];
+
+    #pragma mark has-next?
+    /** Returns whether the lazy sequence has elements which are not realised. */
+    id<JSDataProtocol>(^hasNext)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        JSLazySequence *seq = [JSLazySequence dataToLazySequence:[xs first] fnName:@"has-next?/1"];
+        return [[JSBool alloc] initWithBool:[seq hasNext]];
+    };
+    fn = [[JSFunction alloc] initWithFn:hasNext argCount:1 name:@"has-next?/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"has-next?" moduleName:[Const coreModuleName]]];
+
+    #pragma mark next
+    /** Returns the next element in the lazy sequence if present, else throws an exception. */
+    id<JSDataProtocol>(^next)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        JSLazySequence *seq = [JSLazySequence dataToLazySequence:[xs first] fnName:@"next/1"];
+        if (![seq hasNext]) [[[JSError alloc] initWithFormat:IndexOutOfBounds, [seq index], [seq length]] throw];
+        return [seq next];
+    };
+    fn = [[JSFunction alloc] initWithFn:next argCount:1 name:@"next/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"next" moduleName:[Const coreModuleName]]];
+
+    #pragma mark dorun
+    /** Returns the next element in the lazy sequence if present, else throws an exception. */
+    id<JSDataProtocol>(^doRun)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        JSLazySequence *seq = [JSLazySequence dataToLazySequence:[xs first] fnName:@"dorun/1"];
+        while ([seq hasNext]) [seq apply];
+        return [JSNil new];
+    };
+    fn = [[JSFunction alloc] initWithFn:doRun argCount:1 name:@"dorun/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"dorun" moduleName:[Const coreModuleName]]];
+
+    #pragma mark doall
+    /** Returns the next element in the lazy sequence if present, else throws an exception. */
+    id<JSDataProtocol>(^doAll)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:1];
+        id<JSDataProtocol> first = [xs first];
+        if ([JSList isKindOfList:first] || [JSString isString:first]) return first;
+        JSLazySequence *seq = [JSLazySequence dataToLazySequence:first fnName:@"doall/1"];
+        while ([seq hasNext]) [seq apply];
+        if ([seq sequenceType] == SequenceTypeList) {
+            return [[JSList alloc] initWithArray:[seq acc]];
+        } else if ([seq sequenceType] == SequenceTypeVector) {
+            return [[JSVector alloc] initWithArray:[seq acc]];
+        } else if ([seq sequenceType] == SequenceTypeHashMap) {
+            if ([[seq acc] count] == 1) return [[seq acc] first];
+            return [[JSVector alloc] initWithArray:[seq acc]];
+        }
+        return [[JSString alloc] initWithArray:[seq acc]];
+    };
+    fn = [[JSFunction alloc] initWithFn:doAll argCount:1 name:@"doall/1"];
+    [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"doall" moduleName:[Const coreModuleName]]];
+}
+
 #pragma mark - Predicate
 
 - (void)addPredicateFunctions {
     JSFunction *fn = nil;
 
-#pragma mark nil?
+    #pragma mark nil?
     /** Checks if the given element is @c nil. */
     id<JSDataProtocol>(^nilp)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
@@ -1694,8 +1898,8 @@ double dmod(double a, double n) {
     id<JSDataProtocol>(^readline)(NSMutableArray *xs) = ^id<JSDataProtocol>(NSMutableArray *xs) {
         [TypeUtils checkArity:xs arity:1];
         Core *this = weakSelf;
-        return [[JSString alloc] initWithString:[this->_terminal
-                                                 readlineWithPrompt:[[[JSString dataToString:[xs first] fnName:@"readline/1"] value] UTF8String]]];
+        return [[JSString alloc] initWithString:[[this->_delegate ioService]
+                                                 readInputWithPrompt:[[JSString dataToString:[xs first] fnName:@"readline/1"] value]]];
     };
     fn = [[JSFunction alloc] initWithFn:readline argCount:1 name:@"readline/1"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"readline" moduleName:[Const coreModuleName]]];

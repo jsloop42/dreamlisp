@@ -18,4 +18,8 @@
     return @"NSNumber";
 }
 
+- (NSInteger)sortValue {
+    return [self integerValue];
+}
+
 @end
