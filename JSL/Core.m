@@ -557,6 +557,22 @@ double dmod(double a, double n) {
             NSMutableArray *arr = [Utils stringToArray:(JSString *)data isNative:YES];
             if (![arr isEmpty]) [arr removeObjectAtIndex:0];
             return [[JSVector alloc] initWithArray:arr];
+        } else if ([JSLazySequence isLazySequence:data]) {
+            JSLazySequence *seq = (JSLazySequence *)data;
+            if ([seq length] == 0) return [JSNil new];
+            seq.index = 1;
+            while ([seq hasNext]) {
+                [seq apply];
+            }
+            id <JSDataProtocol> ret = nil;
+            if ([seq sequenceType] == SequenceTypeList) {
+                ret = [[JSList alloc] initWithArray:[seq acc]];
+            } else if ([seq sequenceType] == SequenceTypeVector) {
+                ret = [[JSVector alloc] initWithArray:[seq acc]];
+            } else if ([seq sequenceType] == SequenceTypeString) {
+                ret = [[JSString alloc] initWithArray:[seq acc]];
+            }
+            return ret ? ret : [JSNil new];
         }
         [[[JSError alloc] initWithFormat:DataTypeMismatchWithName, @"rest/1", @"'sequence'", [data dataTypeName]] throw];
         return [JSList new];
