@@ -7,41 +7,11 @@ scheme="JSLAll"
 config="Release"
 #config="Debug"
 corelib="core.jsl"
-jslshell="jslshell"
+jslshell="dlisp"
 jslfrwrk="JSL.framework"
 jslfrwrkdsym="JSL.framework.dSYM"
-jslshelldsym="jslshell.dSYM"
 rpath="/Users/jsloop/Library/Frameworks"
 bin="/Users/jsloop/bin"
-
-function getFilename() {
-    if [[ "$1" == "0" ]]; then
-        out="step0_repl"
-    elif [[ "$1" == "1" ]]; then
-        out=step1_read_print
-    elif [[ "$1" == "2" ]]; then
-        out="step2_eval"
-    elif [[ "$1" == "3" ]]; then
-        out="step3_env"
-    elif [[ "$1" == "4" ]]; then
-        out="step4_if_fn_do"
-    elif [[ "$1" == "5" ]]; then
-        out="step5_tco"
-    elif [[ "$1" == "6" ]]; then
-        out="step6_file"
-    elif [[ "$1" == "7" ]]; then
-        out="step7_quote"
-    elif [[ "$1" == "8" ]]; then
-        out="step8_macros"
-    elif [[ "$1" == "9" ]]; then
-        out="step9_try"
-    elif [[ "$1" == "A" ]]; then
-        out="stepA_mal"
-    else
-        out="jsl"
-    fi
-    echo "$out"
-}
 
 function help() {
     echo "Build requires step as argument"
@@ -75,7 +45,6 @@ function clean() {
 
 function build() {
     clean
-    ret=$(getFilename "$1")
     buildproj
 	if [[ $(tail -6 build.log | head -1) == *"BUILD FAILED"* ]]; then
 		cat $buildlog
@@ -83,7 +52,6 @@ function build() {
 	fi
     dir=$( tail -4 $buildlog | head -1 | rev | cut -d " " -f1 | cut -d "/" -f2- | rev)
     cp $dir/$jslshell $bin
-    rsync -aq $dir/$jslshelldsym $rpath
     rsync -aq $dir/$jslfrwrk $rpath
     rsync -aq $dir/$jslfrwrkdsym $rpath
 }

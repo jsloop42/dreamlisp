@@ -37,7 +37,7 @@ static NSString *langVersion;
 
 + (void)initialize {
     hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
-    langVersion = [[NSString alloc] initWithFormat:@"JSL v%@ [%@]", [Const jslVersion], hostLangVersion];
+    langVersion = [[NSString alloc] initWithFormat:@"DreamLisp v%@ [%@]", [Const jslVersion], hostLangVersion];
 }
 
 - (instancetype)initWithoutREPL {

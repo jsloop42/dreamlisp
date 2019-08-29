@@ -210,7 +210,7 @@
 		9E36651E22BF6781003DC5EF /* JSLPerfTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSLPerfTests.m; sourceTree = "<group>"; };
 		9E38FC7F227F343800405BE5 /* State.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = State.h; sourceTree = "<group>"; };
 		9E38FC80227F343800405BE5 /* State.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = State.m; sourceTree = "<group>"; };
-		9E3A9D4A22568AFC00348529 /* jslshell */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = jslshell; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E3A9D4A22568AFC00348529 /* dlisp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dlisp; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E3A9D4D22568AFC00348529 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		9E3A9D5822568B1300348529 /* JSLShellTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSLShellTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E3A9D5A22568B1300348529 /* JSLTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSLTests.m; sourceTree = "<group>"; };
@@ -365,7 +365,7 @@
 		9E3A9D4B22568AFC00348529 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9E3A9D4A22568AFC00348529 /* jslshell */,
+				9E3A9D4A22568AFC00348529 /* dlisp */,
 				9E3A9D5822568B1300348529 /* JSLShellTests.xctest */,
 				9E7942CF22C12A310086A47F /* JSL.framework */,
 				9E7942D722C12A310086A47F /* JSLTests.xctest */,
@@ -571,7 +571,7 @@
 			);
 			name = JSLShell;
 			productName = JSL;
-			productReference = 9E3A9D4A22568AFC00348529 /* jslshell */;
+			productReference = 9E3A9D4A22568AFC00348529 /* dlisp */;
 			productType = "com.apple.product-type.tool";
 		};
 		9E3A9D5722568B1300348529 /* JSLShellTests */ = {
@@ -930,7 +930,7 @@
 					"@loader_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.JSLShell;
-				PRODUCT_NAME = jslshell;
+				PRODUCT_NAME = dlisp;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -951,7 +951,7 @@
 					"@loader_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.JSLShell;
-				PRODUCT_NAME = jslshell;
+				PRODUCT_NAME = dlisp;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
