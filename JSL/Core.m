@@ -497,11 +497,25 @@ double dmod(double a, double n) {
         NSString *fnName = @"nth-tail/3";
         NSInteger start = [[JSNumber dataToNumber:[xs first] position:1 fnName:fnName] integerValue];
         NSInteger end = [[JSNumber dataToNumber:[xs second] position:2 fnName:fnName] integerValue];;
-        if ([JSString isString:data]) {
+        NSUInteger count = 0;
+        if ([JSLazySequence isLazySequence:data]) {
+            JSLazySequence *seq = (JSLazySequence *)data;
+            if (end >= [seq length]) return [JSNil new];
+            seq.index = start;
+            NSUInteger idx = start;
+            while (idx <= end) {
+                [seq apply];
+                idx++;
+            }
+            NSMutableArray *ret = [seq acc];
+            if (!ret) return [JSNil new];
+            if ([seq sequenceType] == SequenceTypeList) return [[JSList alloc] initWithArray:ret];
+            if ([seq sequenceType] == SequenceTypeVector) return [[JSVector alloc] initWithArray:ret];
+            if ([seq sequenceType] == SequenceTypeString) return [[JSString alloc] initWithArray:ret];
+        } else if ([JSString isString:data]) {
             JSString *str = (JSString *)data;
             return [[JSString alloc] initWithString:[str substringFrom:start to:end]];
         }
-        NSUInteger count = 0;
         NSMutableArray *list = [[JSVector dataToList:data position:len fnName:fnName] value];
         count = [list count];
         [TypeUtils checkIndexBoundsCount:count startIndex:start endIndex:end];

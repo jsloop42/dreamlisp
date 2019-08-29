@@ -2398,13 +2398,16 @@
     // first
     XCTAssertEqualObjects([jsl rep:@"(first (map (fn (a) a) [1 2 3 4]))"], @"1");
     XCTAssertEqualObjects([jsl rep:@"(first (map (fn (a) a) \"abc\"))"], @"\"a\"");
-    // nth
-    XCTAssertEqualObjects([jsl rep:@"(nth 2 (map (fn (a) a) [1 2 3 4]))"], @"3");
-    XCTAssertEqualObjects([jsl rep:@"(nth 2 (map (fn (a) a) \"abc\"))"], @"\"c\"");
     // rest
     XCTAssertEqualObjects([jsl rep:@"(rest (map (fn (a) a) [1 2 3 4]))"], @"[2 3 4]");
     XCTAssertEqualObjects([jsl rep:@"(rest (map (fn (a) a) '(1 2 3 4)))"], @"(2 3 4)");
     XCTAssertEqualObjects([jsl rep:@"(rest (map (fn (a) a) \"abc\"))"], @"\"bc\"");
+    // nth
+    XCTAssertEqualObjects([jsl rep:@"(nth 2 (map (fn (a) a) [1 2 3 4]))"], @"3");
+    XCTAssertEqualObjects([jsl rep:@"(nth 2 (map (fn (a) a) \"abc\"))"], @"\"c\"");
+    // nth-tail
+    XCTAssertEqualObjects([jsl rep:@"(nth-tail 1 3 (map (fn (a) a) [1 2 3 4 5]))"], @"[2 3 4]");
+    XCTAssertEqualObjects([jsl rep:@"(nth-tail 1 3 (map (fn (a) a) \"abcdef\"))"], @"\"bcd\"");
 }
 
 @end
