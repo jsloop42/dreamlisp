@@ -732,6 +732,15 @@ double dmod(double a, double n) {
             NSUInteger len = [str count];
             if (len == 0) return [JSNil new];
             last = [[JSString alloc] initWithString:[(JSString *)seq substringFrom:len - 1 count:1]];
+        } else if ([JSLazySequence isLazySequence:seq]) {
+            JSLazySequence *lseq = (JSLazySequence *)seq;
+            NSUInteger len = [lseq length];
+            if (len == 0) return [JSNil new];
+            lseq.index = len - 1;
+            if ([lseq hasNext]) {
+                id <JSDataProtocol> ret = [lseq next];
+                return ret ? ret : [JSNil new];
+            }
         } else {
             [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"last/1", @"'sequence'", 1, [list dataTypeName]] throw];
         }
