@@ -516,6 +516,13 @@ double dmod(double a, double n) {
         } else if ([JSString isString:elem]) {
             JSString *str = (JSString *)elem;
             if (![str isEmpty]) first = [[JSString alloc] initWithString:[(JSString *)elem substringFrom:0 count:1]];
+        } else if ([JSLazySequence isLazySequence:elem]) {
+            JSLazySequence *seq = (JSLazySequence *)elem;
+            if ([seq hasNext]) {
+                [seq apply];
+            }
+            id <JSDataProtocol> ret = [[seq acc] first];
+            return ret ? ret : [JSNil new];
         } else {
             [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"first/1", @"'sequence'", 1, [elem dataTypeName]] throw];
         }

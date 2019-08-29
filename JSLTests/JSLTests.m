@@ -2390,4 +2390,12 @@
     XCTAssertEqualObjects([jsl rep:@"(doall [1 [2 4] 3])"], @"[1 [2 4] 3]");
 }
 
+- (void)testTestLazyFunctions {
+    JSL *jsl = [[JSL alloc] initWithoutREPL];
+    // take on a lazy sequence
+    XCTAssertEqualObjects([jsl rep:@"(take 2 (map (fn (a) a) [1 2 3 4]))"], @"[1 2]");
+    // first
+    XCTAssertEqualObjects([jsl rep:@"(first (map (fn (a) a) [1 2 3 4]))"], @"1");
+}
+
 @end
