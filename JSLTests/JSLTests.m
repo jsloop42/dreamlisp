@@ -1917,10 +1917,10 @@
 /** The expressions loaded and evaluated from file should be added to the env just like it is evaluated from REPL. */
 - (void)testScopeWithFile {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-    NSString *scopePath = [self pathForFile:@"scope.jsl"];
+    NSString *scopePath = [self pathForFile:@"scope.dlisp"];
     XCTAssertTrue([scopePath isNotEmpty]);
     NSString *ret = [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", scopePath]];
-    XCTAssertEqualObjects(ret, @"[:ok \"scope.jsl\"]");
+    XCTAssertEqualObjects(ret, @"[:ok \"scope.dlisp\"]");
     XCTAssertEqualObjects([jsl rep:@"(f1 4 6)"], @"30");
 }
 
@@ -2065,10 +2065,10 @@
 
 - (void)testCodeLoadedFromFile {
     JSL *jsl = [[JSL alloc] initWithoutREPL];
-    NSString *moduleTest = [self pathForFile:@"module-test.jsl"];
+    NSString *moduleTest = [self pathForFile:@"module-test.dlisp"];
     XCTAssertTrue([moduleTest isNotEmpty]);
     NSString *ret = [jsl rep:[[NSString alloc] initWithFormat:@"(load-file \"%@\")", moduleTest]];
-    XCTAssertEqualObjects(ret, @"[:ok \"module-test.jsl\"]");
+    XCTAssertEqualObjects(ret, @"[:ok \"module-test.dlisp\"]");
     XCTAssertEqualObjects([jsl rep:@"(bbar:bba 5)"], @"6");
     XCTAssertEqualObjects([jsl rep:@"(bbaz:zza 5)"], @"25");
     XCTAssertEqualObjects([jsl rep:@"(bbaz:zzb 5)"], @"30");

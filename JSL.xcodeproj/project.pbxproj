@@ -20,10 +20,10 @@
 		9E326C9722C8C5D300B456A2 /* JSLazyFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E326C9522C8C5D100B456A2 /* JSLazyFunction.h */; };
 		9E326C9822C8C5D300B456A2 /* JSLazyFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C9622C8C5D200B456A2 /* JSLazyFunction.m */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
-		9E3F324B227B694400B56B6A /* core.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
+		9E3F324B227B694400B56B6A /* core.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.dlisp */; };
 		9E5D7B4B225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
 		9E5D7B4C225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
-		9E70861A22ACF2A200ADD464 /* test.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E70861922ACF29600ADD464 /* test.jsl */; };
+		9E70861A22ACF2A200ADD464 /* test.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E70861922ACF29600ADD464 /* test.dlisp */; };
 		9E741E7B22C12C00009680E8 /* NSArray+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554F2261A10F001D4597 /* NSArray+JSDataProtocol.m */; };
 		9E741E7C22C12C07009680E8 /* NSDecimalNumber+JSDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554B2261A094001D4597 /* NSDecimalNumber+JSDataProtocol.m */; };
 		9E741E7D22C12C12009680E8 /* NSMapTable+JSHashMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9458552274EB4400A3D449 /* NSMapTable+JSHashMap.m */; };
@@ -97,12 +97,12 @@
 		9E741EC322C12DCE009680E8 /* State.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E38FC7F227F343800405BE5 /* State.h */; };
 		9E741EC422C12DCE009680E8 /* SymbolTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E43105322BE9C6C00512081 /* SymbolTable.h */; };
 		9E741EC522C12DCE009680E8 /* Utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E281CE8225890B10038A5AF /* Utils.h */; };
-		9E741EC822C13257009680E8 /* core.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.jsl */; };
-		9E741EC922C1325C009680E8 /* test.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E70861922ACF29600ADD464 /* test.jsl */; };
-		9E741ED022C13A13009680E8 /* collatz.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECB22C139AA009680E8 /* collatz.jsl */; };
-		9E741ED122C13A13009680E8 /* i.test.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECD22C139B1009680E8 /* i.test.jsl */; };
-		9E741ED222C13A13009680E8 /* module-test.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECE22C139B9009680E8 /* module-test.jsl */; };
-		9E741ED322C13A13009680E8 /* scope.jsl in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECF22C139BC009680E8 /* scope.jsl */; };
+		9E741EC822C13257009680E8 /* core.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.dlisp */; };
+		9E741EC922C1325C009680E8 /* test.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E70861922ACF29600ADD464 /* test.dlisp */; };
+		9E741ED022C13A13009680E8 /* collatz.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECB22C139AA009680E8 /* collatz.dlisp */; };
+		9E741ED122C13A13009680E8 /* i.test.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECD22C139B1009680E8 /* i.test.dlisp */; };
+		9E741ED222C13A13009680E8 /* module-test.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECE22C139B9009680E8 /* module-test.dlisp */; };
+		9E741ED322C13A13009680E8 /* scope.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECF22C139BC009680E8 /* scope.dlisp */; };
 		9E741ED422C140C0009680E8 /* JSL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E7942CF22C12A310086A47F /* JSL.framework */; };
 		9E741ED522C140CA009680E8 /* JSL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E7942CF22C12A310086A47F /* JSL.framework */; };
 		9E741EDC22C14556009680E8 /* JSLShellTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E741EDB22C14556009680E8 /* JSLShellTests.m */; };
@@ -224,7 +224,7 @@
 		9E3A9D7022568DB100348529 /* Printer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Printer.m; sourceTree = "<group>"; };
 		9E3A9D7322568DBD00348529 /* Reader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Reader.h; sourceTree = "<group>"; };
 		9E3A9D7422568DBD00348529 /* Reader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Reader.m; sourceTree = "<group>"; };
-		9E3F324A227B694300B56B6A /* core.jsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = core.jsl; sourceTree = "<group>"; };
+		9E3F324A227B694300B56B6A /* core.dlisp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = core.dlisp; sourceTree = "<group>"; };
 		9E43105322BE9C6C00512081 /* SymbolTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SymbolTable.h; sourceTree = "<group>"; };
 		9E43105422BE9C6C00512081 /* SymbolTable.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SymbolTable.m; sourceTree = "<group>"; };
 		9E4F02D52291A1E80064081F /* JSFault.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSFault.h; sourceTree = "<group>"; };
@@ -232,11 +232,11 @@
 		9E5D7B49225B947E00970453 /* Terminal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Terminal.h; sourceTree = "<group>"; };
 		9E5D7B4A225B947E00970453 /* Terminal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Terminal.m; sourceTree = "<group>"; };
 		9E6F444722578E5600777A24 /* JSL.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSL.m; sourceTree = "<group>"; };
-		9E70861922ACF29600ADD464 /* test.jsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = test.jsl; sourceTree = "<group>"; };
-		9E741ECB22C139AA009680E8 /* collatz.jsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = collatz.jsl; sourceTree = "<group>"; };
-		9E741ECD22C139B1009680E8 /* i.test.jsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = i.test.jsl; sourceTree = "<group>"; };
-		9E741ECE22C139B9009680E8 /* module-test.jsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = "module-test.jsl"; sourceTree = "<group>"; };
-		9E741ECF22C139BC009680E8 /* scope.jsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = scope.jsl; sourceTree = "<group>"; };
+		9E70861922ACF29600ADD464 /* test.dlisp */ = {isa = PBXFileReference; lastKnownFileType = text; path = test.dlisp; sourceTree = "<group>"; };
+		9E741ECB22C139AA009680E8 /* collatz.dlisp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = collatz.dlisp; sourceTree = "<group>"; };
+		9E741ECD22C139B1009680E8 /* i.test.dlisp */ = {isa = PBXFileReference; lastKnownFileType = text; path = i.test.dlisp; sourceTree = "<group>"; };
+		9E741ECE22C139B9009680E8 /* module-test.dlisp */ = {isa = PBXFileReference; lastKnownFileType = text; path = "module-test.dlisp"; sourceTree = "<group>"; };
+		9E741ECF22C139BC009680E8 /* scope.dlisp */ = {isa = PBXFileReference; lastKnownFileType = text; path = scope.dlisp; sourceTree = "<group>"; };
 		9E741ED622C141B2009680E8 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9E741EDB22C14556009680E8 /* JSLShellTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JSLShellTests.m; sourceTree = "<group>"; };
 		9E741EE122C150DA009680E8 /* ShellConst.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShellConst.h; sourceTree = "<group>"; };
@@ -400,8 +400,8 @@
 		9E70861722ACF1CB00ADD464 /* Libs */ = {
 			isa = PBXGroup;
 			children = (
-				9E3F324A227B694300B56B6A /* core.jsl */,
-				9E70861922ACF29600ADD464 /* test.jsl */,
+				9E3F324A227B694300B56B6A /* core.dlisp */,
+				9E70861922ACF29600ADD464 /* test.dlisp */,
 			);
 			path = Libs;
 			sourceTree = "<group>";
@@ -409,10 +409,10 @@
 		9E741ECA22C1399C009680E8 /* jsl */ = {
 			isa = PBXGroup;
 			children = (
-				9E741ECB22C139AA009680E8 /* collatz.jsl */,
-				9E741ECD22C139B1009680E8 /* i.test.jsl */,
-				9E741ECE22C139B9009680E8 /* module-test.jsl */,
-				9E741ECF22C139BC009680E8 /* scope.jsl */,
+				9E741ECB22C139AA009680E8 /* collatz.dlisp */,
+				9E741ECD22C139B1009680E8 /* i.test.dlisp */,
+				9E741ECE22C139B9009680E8 /* module-test.dlisp */,
+				9E741ECF22C139BC009680E8 /* scope.dlisp */,
 			);
 			path = jsl;
 			sourceTree = "<group>";
@@ -677,8 +677,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E3F324B227B694400B56B6A /* core.jsl in Resources */,
-				9E70861A22ACF2A200ADD464 /* test.jsl in Resources */,
+				9E3F324B227B694400B56B6A /* core.dlisp in Resources */,
+				9E70861A22ACF2A200ADD464 /* test.dlisp in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -686,8 +686,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E741EC922C1325C009680E8 /* test.jsl in Resources */,
-				9E741EC822C13257009680E8 /* core.jsl in Resources */,
+				9E741EC922C1325C009680E8 /* test.dlisp in Resources */,
+				9E741EC822C13257009680E8 /* core.dlisp in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -695,10 +695,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E741ED022C13A13009680E8 /* collatz.jsl in Resources */,
-				9E741ED122C13A13009680E8 /* i.test.jsl in Resources */,
-				9E741ED222C13A13009680E8 /* module-test.jsl in Resources */,
-				9E741ED322C13A13009680E8 /* scope.jsl in Resources */,
+				9E741ED022C13A13009680E8 /* collatz.dlisp in Resources */,
+				9E741ED122C13A13009680E8 /* i.test.dlisp in Resources */,
+				9E741ED222C13A13009680E8 /* module-test.dlisp in Resources */,
+				9E741ED322C13A13009680E8 /* scope.dlisp in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

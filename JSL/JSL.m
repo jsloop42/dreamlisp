@@ -8,7 +8,7 @@
 
 #import "JSL.h"
 
-static NSString *coreLibFileName = @"core.jsl";
+static NSString *coreLibFileName = @"core.dlisp";
 static NSString *hostLangVersion;
 static NSString *langVersion;
 
@@ -129,7 +129,7 @@ static NSString *langVersion;
     return [[NSString alloc] initWithFormat:@"%@/%@", path, coreLibFileName];
 }
 
-/** Load core lib @c core.jsl from the framework's resource path. */
+/** Load core lib @c core.dlisp from the framework's resource path. */
 - (void)loadCoreLib {
     NSString *path = [self coreLibPath:[_ioService resourcePath]];
     NSString *moduleName = [Const coreModuleName];

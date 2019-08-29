@@ -43,7 +43,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9E3A9D4922568AFC00348529"
-               BuildableName = "jslshell"
+               BuildableName = "dlisp"
                BlueprintName = "JSLShell"
                ReferencedContainer = "container:JSL.xcodeproj">
             </BuildableReference>

@@ -8,8 +8,8 @@
 
 #import "Terminal.h"
 
-static NSString *_appHome = @"/.jsl";
-static NSString *_historyFile = @"/jsl-history";
+static NSString *_appHome = @"/.dlisp";
+static NSString *_historyFile = @"/dlisp-history";
 
 @implementation Terminal {
     FileOps *_fops;
