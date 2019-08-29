@@ -2396,6 +2396,8 @@
     XCTAssertEqualObjects([jsl rep:@"(take 2 (map (fn (a) a) [1 2 3 4]))"], @"[1 2]");
     // first
     XCTAssertEqualObjects([jsl rep:@"(first (map (fn (a) a) [1 2 3 4]))"], @"1");
+    // nth
+    XCTAssertEqualObjects([jsl rep:@"(nth 2 (map (fn (a) a) [1 2 3 4]))"], @"3");
 }
 
 @end

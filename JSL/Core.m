@@ -468,10 +468,22 @@ double dmod(double a, double n) {
         id<JSDataProtocol> first = [xs first];
         id<JSDataProtocol> second = [xs second];
         JSNumber *num = [JSNumber dataToNumber:first position:1 fnName:@"nth/2"];
-        NSMutableArray *seq = [Utils toArray:second isNative:YES];
         NSUInteger n = [num integerValue];
-        [TypeUtils checkIndexBounds:seq index:n];
-        return [seq nth:n];
+        id <JSDataProtocol> ret = nil;
+        if ([JSLazySequence isLazySequence:second]) {
+            JSLazySequence *seq = (JSLazySequence *)second;
+            NSUInteger index = [num integerValue];
+            if (index >= [seq length]) return [JSNil new];
+            seq.index = index;
+            [seq apply];
+            ret = [[seq acc] firstObject];
+
+        } else {
+            NSMutableArray *seq = [Utils toArray:second isNative:YES];
+            [TypeUtils checkIndexBounds:seq index:n];
+            ret = [seq nth:n];
+        }
+        return ret ? ret : [JSNil new];
     };
     fn = [[JSFunction alloc] initWithFn:nth argCount:2 name:@"nth/2"];
     [_env setObject:fn forKey:[[JSSymbol alloc] initWithFunction:fn name:@"nth" moduleName:[Const coreModuleName]]];
