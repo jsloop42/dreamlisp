@@ -763,6 +763,14 @@ double dmod(double a, double n) {
             return [(JSVector *)second drop:n];
         } else if ([JSString isString:second]) {
             return [[JSString alloc] initWithString:[(JSString *)second substringFrom:n]];
+        } else if ([JSLazySequence isLazySequence:second]) {
+            JSLazySequence *seq = (JSLazySequence *)second;
+            if (n < [seq length]) {
+                [[seq value] removeObjectsInRange:NSMakeRange(0, n)];
+                [seq updateEnumerator];
+                return seq;
+            }
+            return seq;
         }
         [[[JSError alloc] initWithFormat:DataTypeMismatchWithNameArity, @"drop/2", @"'sequence'", 2, [second dataTypeName]] throw];
         return nil;

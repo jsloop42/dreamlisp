@@ -2411,6 +2411,10 @@
     // last
     XCTAssertEqualObjects([jsl rep:@"(last (map (fn (a) a) [1 2 3]))"], @"3");
     XCTAssertEqualObjects([jsl rep:@"(last (map (fn (a) a) \"abc\"))"], @"\"c\"");
+    // drop
+    XCTAssertEqualObjects([jsl rep:@"(lazy-seq? (drop 2 (map (fn (a) a) [1 2 3 4])))"], @"true");
+    XCTAssertEqualObjects([jsl rep:@"(doall (drop 2 (map (fn (a) a) [1 2 3 4])))"], @"[3 4]");
+    XCTAssertEqualObjects([jsl rep:@"(doall (drop 2 (map (fn (a) a) \"abcd\")))"], @"\"cd\"");
 }
 
 @end
