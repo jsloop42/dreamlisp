@@ -1,19 +1,9 @@
 #!/bin/bash
 
+testlog="test.log"
+
 function test() {
-    cd JSLTests
-    make "test^objc^step$1"
+    xcodebuild -scheme DreamLispAll test > $testlog 2>&1 | tee $testlog
 }
-
-function help() {
-    echo "Test requires step as argument"
-    echo "Usage: $0 step"
-    exit
-}
-
-# Check if the step argument is provided
-if [ $# -ne 1 ]; then
-  help
-fi
 
 test $@
