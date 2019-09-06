@@ -3,14 +3,14 @@
 bin="DreamLispTests/objc"
 buildlog="build.log"
 proj="DreamLisp.xcodeproj"
-scheme="DLAll"
+scheme="DreamLispAll"
 config="Release"
 #config="Debug"
 dlshell="dlisp"
 dlfrwrk="DreamLisp.framework"
 dlfrwrkdsym="DreamLisp.framework.dSYM"
-rpath="~/Library/Frameworks"
-bin="~/bin"
+rpath="$HOME/Library/Frameworks"
+bin="$HOME/bin"
 
 function help() {
     echo "Build requires step as argument"
@@ -45,10 +45,10 @@ function clean() {
 function build() {
     clean
     buildproj
-	if [[ $(tail -6 build.log | head -1) == *"BUILD FAILED"* ]]; then
-		cat $buildlog
-		exit -1
-	fi
+    if [[ $(tail -6 build.log | head -1) == *"BUILD FAILED"* ]]; then
+        cat $buildlog
+        exit -1
+    fi
     dir=$( tail -4 $buildlog | head -1 | rev | cut -d " " -f1 | cut -d "/" -f2- | rev)
     cp $dir/$dlshell $bin
     rsync -aq $dir/$dlfrwrk $rpath
