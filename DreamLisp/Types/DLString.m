@@ -251,7 +251,9 @@
     NSUInteger i = 0;
     NSUInteger len = [_string count];
     for (i = 0; i < len; i++) {
-        [arr addObject:[_string substringWithRange:NSMakeRange(i, 1)]];
+        @autoreleasepool {
+            [arr addObject:[_string substringWithRange:NSMakeRange(i, 1)]];
+        }
     }
     return [[DLString alloc] initWithString:[[arr sortedArrayUsingFunction:sorter context:nil] componentsJoinedByString:@""]];
 }
@@ -261,7 +263,9 @@
     NSUInteger i = 0;
     NSUInteger len = [_string count];
     for (i = 0; i < len; i++) {
-        [arr addObject:[[DLString alloc] initWithString:[_string substringWithRange:NSMakeRange(i, 1)]]];
+        @autoreleasepool {
+            [arr addObject:[[DLString alloc] initWithString:[_string substringWithRange:NSMakeRange(i, 1)]]];
+        }
     }
     return [self joined:[arr sortedArrayUsingComparator:comparator] with:@""];
 }

@@ -103,11 +103,9 @@
 }
 
 - (DLVector *)addObject:(id<DLDataProtocol>)object {
-    @autoreleasepool {
-        DLVector *vec = [self copy];
-        [(NSMutableArray *)[vec value] addObject:object];
-        return vec;
-    }
+    DLVector *vec = [self copy];
+    [(NSMutableArray *)[vec value] addObject:object];
+    return vec;
 }
 
 - (DLList *)list {

@@ -100,11 +100,9 @@
 }
 
 - (DLList *)addObject:(id<DLDataProtocol>)object {
-    @autoreleasepool {
-        DLList *xs = [self copy];
-        [(NSMutableArray *)[xs value] addObject:object];
-        return xs;
-    }
+    DLList *xs = [self copy];
+    [(NSMutableArray *)[xs value] addObject:object];
+    return xs;
 }
 
 - (void)addObjectsFromArray:(NSMutableArray *)array {
@@ -140,11 +138,9 @@
 }
 
 - (id<DLDataProtocol>)rest {
-    @autoreleasepool {
-        NSMutableArray *arr = [_array mutableCopy];
-        [arr removeObjectAtIndex:0];
-        return [[DLList alloc] initWithArray:arr];
-    }
+    NSMutableArray *arr = [_array mutableCopy];
+    [arr removeObjectAtIndex:0];
+    return [[DLList alloc] initWithArray:arr];
 }
 
 - (id<DLDataProtocol> _Nullable)last {
@@ -154,11 +150,9 @@
 }
 
 - (id<DLDataProtocol>)dropLast {
-    @autoreleasepool {
-        NSMutableArray *arr = [_array mutableCopy];
-        [arr removeLastObject];
-        return [[DLList alloc] initWithArray:arr];
-    }
+    NSMutableArray *arr = [_array mutableCopy];
+    [arr removeLastObject];
+    return [[DLList alloc] initWithArray:arr];
 }
 
 - (id<DLDataProtocol>)nth:(NSInteger)n {
@@ -218,11 +212,9 @@
 }
 
 - (NSMutableArray *)subArrayWithStartIndex:(NSInteger)start endIndex:(NSInteger)end {
-    @autoreleasepool {
-        if (start > end) return [NSMutableArray new];
-        if (end > [self count]) return _array;
-        return [[_array subarrayWithRange:NSMakeRange(start, end - start + 1)] mutableCopy];
-    }
+    if (start > end) return [NSMutableArray new];
+    if (end > [self count]) return _array;
+    return [[_array subarrayWithRange:NSMakeRange(start, end - start + 1)] mutableCopy];
 }
 
 - (BOOL)hasMeta {

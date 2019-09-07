@@ -217,61 +217,55 @@ static BOOL _isCacheEnabled;
 
 /** Creates a vector of key value pair vectors from the given hash-map. */
 + (DLVector *)hashMapToVector:(DLHashMap *)hashMap {
-    @autoreleasepool {
-        NSArray *allKeys = [hashMap allKeys];
-        DLVector *xs = [DLVector new];
-        id<DLDataProtocol> key = nil;
-        for (key in allKeys) {
-            [xs addObject:[[DLVector alloc] initWithArray:[@[key, [hashMap objectForKey:key]] mutableCopy]]];
-        }
-        return xs;
+    NSArray *allKeys = [hashMap allKeys];
+    DLVector *xs = [DLVector new];
+    id<DLDataProtocol> key = nil;
+    for (key in allKeys) {
+        [xs addObject:[[DLVector alloc] initWithArray:[@[key, [hashMap objectForKey:key]] mutableCopy]]];
     }
+    return xs;
 }
 
 /** Creates an array of key value pair array from the given hash-map. */
 + (NSMutableArray *)hashMapToArray:(DLHashMap *)hashMap {
-    @autoreleasepool {
-        NSArray *allKeys = [hashMap allKeys];
-        NSMutableArray *res = [NSMutableArray new];
-        NSMutableArray *kv = nil;
-        id<DLDataProtocol> key = nil;
-        for (key in allKeys) {
-            kv = [NSMutableArray new];
-            [kv addObject:key];
-            [kv addObject:[hashMap objectForKey:key]];
-            [res addObject:kv];
-        }
-        return res;
+    NSArray *allKeys = [hashMap allKeys];
+    NSMutableArray *res = [NSMutableArray new];
+    NSMutableArray *kv = [NSMutableArray new];
+    id<DLDataProtocol> key = nil;
+    for (key in allKeys) {
+        [kv removeAllObjects];
+        [kv addObject:key];
+        [kv addObject:[hashMap objectForKey:key]];
+        [res addObject:kv];
     }
+    return res;
 }
 
 + (NSMutableArray *)hashMapToHashMapArray:(DLHashMap *)hashMap {
-    @autoreleasepool {
-        NSArray *allKeys = [hashMap allKeys];
-        id<DLDataProtocol> key = nil;
-        NSMutableArray *ret = [NSMutableArray new];
-        for (key in allKeys) {
-            [ret addObject:[[DLHashMap alloc] initWithArray:[@[key, [hashMap objectForKey:key]] mutableCopy]]];
-        }
-        return ret;
+    NSArray *allKeys = [hashMap allKeys];
+    id<DLDataProtocol> key = nil;
+    NSMutableArray *ret = [NSMutableArray new];
+    for (key in allKeys) {
+        [ret addObject:[[DLHashMap alloc] initWithArray:[@[key, [hashMap objectForKey:key]] mutableCopy]]];
     }
+    return ret;
 }
 
 #pragma mark - String
 
 + (NSMutableArray *)stringToArray:(DLString *)string isNative:(BOOL)isNative {
-    @autoreleasepool {
-        NSMutableArray *res = [NSMutableArray new];
-        NSString *str = [string value];
-        NSString *subStr = nil;
-        NSUInteger len = [str count];
-        NSUInteger i = 0;
-        for (i = 0; i < len; i++) {
+    NSMutableArray *res = [NSMutableArray new];
+    NSString *str = [string value];
+    NSString *subStr = nil;
+    NSUInteger len = [str count];
+    NSUInteger i = 0;
+    for (i = 0; i < len; i++) {
+        @autoreleasepool {
             subStr = [str substringWithRange:NSMakeRange(i, 1)];
             [res addObject:(isNative ? [[DLString alloc] initWithString:subStr] : subStr)];
         }
-        return res;
     }
+    return res;
 }
 
 + (void)appendStringFromArray:(NSMutableArray *)array string:(DLString *)string {

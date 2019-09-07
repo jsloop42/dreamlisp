@@ -135,44 +135,50 @@
         if ([token isEqual:@"("] || [token isEqual:@"["] || [token isEqual:@"{"]) {
             return [self readListStartingWith:token];
         } else if ([token isEqual:@"'"] || [token isEqual:@"`"] || [token isEqual:@"~"] || [token isEqual:@"~@"] || [token isEqual:@"@"]) {
-            [self pass];
-            NSArray *ret = @[[[DLSymbol alloc] initWithArity:1 position:0 string:_readerMacros[token]], [[self readForm] setPosition:1]];
-            return [[DLList alloc] initWithArray:ret];
+            @autoreleasepool {
+                [self pass];
+                NSArray *ret = @[[[DLSymbol alloc] initWithArity:1 position:0 string:_readerMacros[token]], [[self readForm] setPosition:1]];
+                return [[DLList alloc] initWithArray:ret];
+            }
         } else if ([token isEqual:@"^"]) {
-            [self pass];
-            id<DLDataProtocol> meta = [self readForm];
-            return [[DLList alloc] initWithArray: @[[[DLSymbol alloc] initWithArity:2 position:0 string:@"with-meta" moduleName:[Const coreModuleName]],
-                                                    [[self readForm] setPosition:1], [meta setPosition:2]]];
+            @autoreleasepool {
+                [self pass];
+                id<DLDataProtocol> meta = [self readForm];
+                return [[DLList alloc] initWithArray: @[[[DLSymbol alloc] initWithArity:2 position:0 string:@"with-meta" moduleName:[Const coreModuleName]],
+                                                        [[self readForm] setPosition:1], [meta setPosition:2]]];
+            }
         }
         return [self readAtom];
     }
 }
 
 - (nullable id<DLDataProtocol>)readListStartingWith:(NSString *)leftParens {
-    NSMutableArray *list = [NSMutableArray new];
-    [self pass];
-    NSUInteger count = 0;
-    while (![_rightParens containsObject:[self peek]]) {
-        @autoreleasepool {
-            if ([self peek] != nil) {
-                [list addObject:[[self readForm] setPosition:count++]];
-            } else {
-                @throw [[NSException alloc] initWithName:DL_PARENS_MISMATCH reason:DL_PARENS_MISMATCH_MSG userInfo:nil];
+    @autoreleasepool {
+        NSMutableArray *list = [NSMutableArray new];
+        [self pass];
+        NSUInteger count = 0;
+        while (![_rightParens containsObject:[self peek]]) {
+            @autoreleasepool {
+                if ([self peek] != nil) {
+                    [list addObject:[[self readForm] setPosition:count++]];
+                } else {
+                    @throw [[NSException alloc] initWithName:DL_PARENS_MISMATCH reason:DL_PARENS_MISMATCH_MSG userInfo:nil];
+                }
             }
         }
-    }
-    if ([leftParens isEqual:@"("] && [[self peek] isEqual:@")"]) {
+        if ([leftParens isEqual:@"("] && [[self peek] isEqual:@")"]) {
+            [self pass];
+            return [[[DLList alloc] initWithArray:list] setPosition:0];
+        } else if ([leftParens isEqual:@"["] && [[self peek] isEqual:@"]"]) {
+            [self pass];
+            return [[[DLVector alloc] initWithArray:list] setPosition:0];
+        } else if ([leftParens isEqual:@"{"] && [[self peek] isEqual:@"}"]) {
+            [self pass];
+            return [[[DLHashMap alloc] initWithArray:list] setPosition:0];
+        }
         [self pass];
         return [[[DLList alloc] initWithArray:list] setPosition:0];
-    } else if ([leftParens isEqual:@"["] && [[self peek] isEqual:@"]"]) {
-        [self pass];
-        return [[[DLVector alloc] initWithArray:list] setPosition:0];
-    } else if ([leftParens isEqual:@"{"] && [[self peek] isEqual:@"}"]) {
-        [self pass];
-        return [[[DLHashMap alloc] initWithArray:list] setPosition:0];
     }
-    [self pass];
-    return [[[DLList alloc] initWithArray:list] setPosition:0];
 }
 
 - (void)symbolParseError:(NSString *)token {
@@ -222,12 +228,15 @@
 
 - (NSMutableArray *)tokenize:(NSString *)string {
     NSMutableArray *tokenArr = [NSMutableArray array];
-    NSArray *matches = [_tokenExp matchesInString:string options:0 range:NSMakeRange(0, [string length])];
-    NSString * mstr = nil;
-    for (NSTextCheckingResult *match in matches) {
-        mstr = [string substringWithRange:[match rangeAtIndex:1]];
-        if ([mstr characterAtIndex:0] == ';') continue;
-        [tokenArr addObject:mstr];
+    @autoreleasepool {
+        NSArray *matches = [_tokenExp matchesInString:string options:0 range:NSMakeRange(0, [string length])];
+        NSString * mstr = nil;
+        NSTextCheckingResult *match = nil;
+        for (match in matches) {
+            mstr = [string substringWithRange:[match rangeAtIndex:1]];
+            if ([mstr characterAtIndex:0] == ';') continue;
+            [tokenArr addObject:mstr];
+        }
     }
     return tokenArr;
 }

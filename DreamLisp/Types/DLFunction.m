@@ -164,15 +164,11 @@
 }
 
 - (id<DLDataProtocol>)apply {
-    @autoreleasepool {
-        return _fn([NSMutableArray new]);
-    }
+    return _fn([NSMutableArray new]);
 }
 
 - (id<DLDataProtocol>)apply:(NSMutableArray *)args {
-    @autoreleasepool {
-        return _fn(args);
-    }
+    return _fn(args);
 }
 
 - (BOOL)isVariadic {
