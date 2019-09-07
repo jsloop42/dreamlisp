@@ -11,10 +11,12 @@
 @implementation Printer
 
 - (NSString *)readableStringFor:(NSString *)string {
-    NSString *readable = [[[string stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"]
-                           stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""]
-                           stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"];
-    return [NSString stringWithFormat:@"\"%@\"", readable];
+    @autoreleasepool {
+        NSString *readable = [[[string stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"]
+                               stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""]
+                               stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"];
+        return [NSString stringWithFormat:@"\"%@\"", readable];
+    }
 }
 
 - (nullable NSString *)printStringFor:(id<DLDataProtocol>)data readably:(BOOL)readably {

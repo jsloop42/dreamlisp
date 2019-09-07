@@ -19,7 +19,9 @@
 + (NSMutableArray *)mapOnArray:(NSMutableArray *)array withBlock:(id (^)(id arg))block {
     NSMutableArray *acc = [NSMutableArray new];
     [array enumerateObjectsUsingBlock:^(id arg, NSUInteger idx, BOOL *stop) {
-        [acc addObject:block(arg)];
+        @autoreleasepool {
+            [acc addObject:block(arg)];
+        }
     }];
     return acc;
 }

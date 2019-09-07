@@ -100,9 +100,11 @@
 }
 
 - (DLList *)addObject:(id<DLDataProtocol>)object {
-    DLList *xs = [self copy];
-    [(NSMutableArray *)[xs value] addObject:object];
-    return xs;
+    @autoreleasepool {
+        DLList *xs = [self copy];
+        [(NSMutableArray *)[xs value] addObject:object];
+        return xs;
+    }
 }
 
 - (void)addObjectsFromArray:(NSMutableArray *)array {
@@ -138,9 +140,11 @@
 }
 
 - (id<DLDataProtocol>)rest {
-    NSMutableArray *arr = [_array mutableCopy];
-    [arr removeObjectAtIndex:0];
-    return [[DLList alloc] initWithArray:arr];
+    @autoreleasepool {
+        NSMutableArray *arr = [_array mutableCopy];
+        [arr removeObjectAtIndex:0];
+        return [[DLList alloc] initWithArray:arr];
+    }
 }
 
 - (id<DLDataProtocol> _Nullable)last {
@@ -150,9 +154,11 @@
 }
 
 - (id<DLDataProtocol>)dropLast {
-    NSMutableArray *arr = [_array mutableCopy];
-    [arr removeLastObject];
-    return [[DLList alloc] initWithArray:arr];
+    @autoreleasepool {
+        NSMutableArray *arr = [_array mutableCopy];
+        [arr removeLastObject];
+        return [[DLList alloc] initWithArray:arr];
+    }
 }
 
 - (id<DLDataProtocol>)nth:(NSInteger)n {
@@ -160,7 +166,9 @@
 }
 
 - (NSMutableArray *)map:(id (^)(id arg))block {
-    return [TypeUtils mapOnArray:_array withBlock:block];
+    @autoreleasepool {
+        return [TypeUtils mapOnArray:_array withBlock:block];
+    }
 }
 
 - (void)enumerateConcurrent:(void (^)(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop))block; {
@@ -210,9 +218,11 @@
 }
 
 - (NSMutableArray *)subArrayWithStartIndex:(NSInteger)start endIndex:(NSInteger)end {
-    if (start > end) return [NSMutableArray new];
-    if (end > [self count]) return _array;
-    return [[_array subarrayWithRange:NSMakeRange(start, end - start + 1)] mutableCopy];
+    @autoreleasepool {
+        if (start > end) return [NSMutableArray new];
+        if (end > [self count]) return _array;
+        return [[_array subarrayWithRange:NSMakeRange(start, end - start + 1)] mutableCopy];
+    }
 }
 
 - (BOOL)hasMeta {

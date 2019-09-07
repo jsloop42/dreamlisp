@@ -53,6 +53,8 @@ int main(int argc, const char * argv[]) {
                     if (ret) {
                         [[dl ioService] writeOutput:ret];
                     }
+                    ret = nil;
+                    inp = nil;
                 }
             } @catch (NSException *exception) {
                 [dl printException:exception log:YES readably:YES];
