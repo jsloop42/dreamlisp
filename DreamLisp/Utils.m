@@ -230,10 +230,10 @@ static BOOL _isCacheEnabled;
 + (NSMutableArray *)hashMapToArray:(DLHashMap *)hashMap {
     NSArray *allKeys = [hashMap allKeys];
     NSMutableArray *res = [NSMutableArray new];
-    NSMutableArray *kv = [NSMutableArray new];
+    NSMutableArray *kv = nil;
     id<DLDataProtocol> key = nil;
     for (key in allKeys) {
-        [kv removeAllObjects];
+        kv = [NSMutableArray new];
         [kv addObject:key];
         [kv addObject:[hashMap objectForKey:key]];
         [res addObject:kv];

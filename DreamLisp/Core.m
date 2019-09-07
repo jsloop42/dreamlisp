@@ -1295,24 +1295,26 @@ double dmod(double a, double n) {
 }
 
 - (id<DLDataProtocol>)fold:(NSMutableArray *)xs isRight:(BOOL)isRight {
-    @autoreleasepool {
-        [TypeUtils checkArity:xs arity:3];
-        DLFunction *fn = [DLFunction dataToFunction:[xs first] position:1 fnName: isRight ? @"foldr/3" : @"foldl/3"];
-        id<DLDataProtocol> acc = [xs second];
-        NSMutableArray *arr = [Utils toArray:[xs nth:2]];
-        id<DLDataProtocol> elem = nil;
-        NSEnumerator *itr = isRight ? [arr reverseObjectEnumerator] : [arr objectEnumerator];
-        for (elem in itr) {
-            if ([NSMutableArray isMutableArray:elem]) {
-                NSMutableArray *params = (NSMutableArray *)elem;
-                [params addObject:acc];
-                acc = [fn apply:(NSMutableArray *)elem];
-            } else {
-                acc = [fn apply:[@[[[self delegate] eval:elem], acc] mutableCopy]];
-            }
+    [TypeUtils checkArity:xs arity:3];
+    DLFunction *fn = [DLFunction dataToFunction:[xs first] position:1 fnName: isRight ? @"foldr/3" : @"foldl/3"];
+    id<DLDataProtocol> acc = [xs second];
+    NSMutableArray *arr = [Utils toArray:[xs nth:2]];
+    id<DLDataProtocol> elem = nil;
+    NSEnumerator *itr = isRight ? [arr reverseObjectEnumerator] : [arr objectEnumerator];
+    NSMutableArray *params = nil;
+    NSUInteger *idx = 0;
+    for (elem in itr) {
+        if ([NSMutableArray isMutableArray:elem]) {
+            params = (NSMutableArray *)elem;
+            [params addObject:acc];
+            acc = [fn apply:params];
+        } else {
+            acc = [fn apply:[@[[[self delegate] eval:elem], acc] mutableCopy]];
         }
-        return acc;
+        [params update:acc atIndex:[params count] - 1];
+        ++idx;
     }
+    return acc;
 }
 
 - (NSMutableArray *)filterArray:(NSMutableArray *)array withPredicate:(DLFunction *)predicate {
