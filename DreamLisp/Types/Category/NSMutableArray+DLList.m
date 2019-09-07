@@ -40,9 +40,11 @@
 
 /** Returns a new mutable array without the first element. The original array remains unchanged. */
 - (NSMutableArray *)rest {
-    NSMutableArray *arr = [self mutableCopy];
-    if (![arr isEmpty]) [arr removeObjectAtIndex:0];
-    return arr;
+    @autoreleasepool {
+        NSMutableArray *arr = [self mutableCopy];
+        if (![arr isEmpty]) [arr removeObjectAtIndex:0];
+        return arr;
+    }
 }
 
 - (id)last {
@@ -50,9 +52,11 @@
 }
 
 - (id)dropLast {
-    NSMutableArray *arr = [self mutableCopy];
-    [arr removeLastObject];
-    return arr;
+    @autoreleasepool {
+        NSMutableArray *arr = [self mutableCopy];
+        [arr removeLastObject];
+        return arr;
+    }
 }
 
 - (id)nth:(NSInteger)n {

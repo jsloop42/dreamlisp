@@ -105,10 +105,12 @@
 
 /** Returns the symbol with -2 arity if present. */
 - (DLSymbol * _Nullable)dataSymbolForKey:(DLSymbol *)key symbolArray:(NSMutableArray *)array {
-    DLSymbol *sym = [key copy];
-    [sym setArity:-2];
-    if ([array containsObject:sym]) return sym;
-    return nil;
+    @autoreleasepool {
+        DLSymbol *sym = [key copy];
+        [sym setArity:-2];
+        if ([array containsObject:sym]) return sym;
+        return nil;
+    }
 }
 
 /** Returns the symbol with largest function arity if present. */

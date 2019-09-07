@@ -16,6 +16,8 @@
     NSString *_numPattern;
     NSString *_keywordPattern;
     NSString *_tokenPattern;
+    NSDictionary *_readerMacros;
+    NSArray *_rightParens;
     NSRegularExpression *_stringExp;
     NSRegularExpression *_stringUnclosedExp;
     NSRegularExpression *_numExp;
@@ -59,6 +61,8 @@
     _stringUnclosedExp = [NSRegularExpression regularExpressionWithPattern:_stringUnclosedPattern options:0 error:nil];
     _numExp = [NSRegularExpression regularExpressionWithPattern:_numPattern options:0 error:nil];
     _keywordExp = [NSRegularExpression regularExpressionWithPattern:_keywordPattern options:0 error:nil];
+    _readerMacros = @{@"'": @"quote", @"`": @"quasiquote", @"~": @"unquote", @"~@": @"splice-unquote", @"@": @"deref"};
+    _rightParens = @[@")", @"]", @"}"];
     /**
       [\s,]* Matches any number of white spaces or commas. This is not captured, so it will be ignored and not tokenized.
       ~@ Captures the special two-characters ~@ (splice-unquote) and tokenized.
@@ -109,48 +113,52 @@
     NSMutableArray *exprs = [NSMutableArray new];
     // Evaluate more than one expressions if encountered
     while ([reader position] < [tokens count]) {
-        [exprs addObject:[reader readForm]];
+        @autoreleasepool {
+            [exprs addObject:[reader readForm]];
+        }
     }
     _moduleName = [reader moduleName];
     return exprs;
 }
 
 - (nullable id<DLDataProtocol>)readForm {
-    NSString *token = [self peek];
-    if (token == nil) {
-        NSUInteger count = [_tokens count];
-        while (_position < count) {
-            token = [self peek];
-            if (token) break;
+    @autoreleasepool {
+        NSString *token = [self peek];
+        if (token == nil) {
+            NSUInteger count = [_tokens count];
+            while (_position < count) {
+                token = [self peek];
+                if (token) break;
+            }
+            if (_position == count) @throw [[NSException alloc] initWithName:DL_TOKEN_EMPTY reason:DL_TOKEN_EMPTY_MSG userInfo:nil];
         }
-        if (_position == count) @throw [[NSException alloc] initWithName:DL_TOKEN_EMPTY reason:DL_TOKEN_EMPTY_MSG userInfo:nil];
+        if ([token isEqual:@"("] || [token isEqual:@"["] || [token isEqual:@"{"]) {
+            return [self readListStartingWith:token];
+        } else if ([token isEqual:@"'"] || [token isEqual:@"`"] || [token isEqual:@"~"] || [token isEqual:@"~@"] || [token isEqual:@"@"]) {
+            [self pass];
+            NSArray *ret = @[[[DLSymbol alloc] initWithArity:1 position:0 string:_readerMacros[token]], [[self readForm] setPosition:1]];
+            return [[DLList alloc] initWithArray:ret];
+        } else if ([token isEqual:@"^"]) {
+            [self pass];
+            id<DLDataProtocol> meta = [self readForm];
+            return [[DLList alloc] initWithArray: @[[[DLSymbol alloc] initWithArity:2 position:0 string:@"with-meta" moduleName:[Const coreModuleName]],
+                                                    [[self readForm] setPosition:1], [meta setPosition:2]]];
+        }
+        return [self readAtom];
     }
-    if ([token isEqual:@"("] || [token isEqual:@"["] || [token isEqual:@"{"]) {
-        return [self readListStartingWith:token];
-    } else if ([token isEqual:@"'"] || [token isEqual:@"`"] || [token isEqual:@"~"] || [token isEqual:@"~@"] || [token isEqual:@"@"]) {
-        NSDictionary *readerMacros = @{@"'": @"quote", @"`": @"quasiquote", @"~": @"unquote", @"~@": @"splice-unquote", @"@": @"deref"};
-        [self pass];
-        NSArray *ret =  @[[[DLSymbol alloc] initWithArity:1 position:0 string:readerMacros[token]], [[self readForm] setPosition:1]];
-        return [[DLList alloc] initWithArray:ret];
-    } else if ([token isEqual:@"^"]) {
-        [self pass];
-        id<DLDataProtocol> meta = [self readForm];
-        return [[DLList alloc] initWithArray: @[[[DLSymbol alloc] initWithArity:2 position:0 string:@"with-meta" moduleName:[Const coreModuleName]],
-                                                [[self readForm] setPosition:1], [meta setPosition:2]]];
-    }
-    return [self readAtom];
 }
 
 - (nullable id<DLDataProtocol>)readListStartingWith:(NSString *)leftParens {
     NSMutableArray *list = [NSMutableArray new];
-    NSArray *rightParens = @[@")", @"]", @"}"];
     [self pass];
     NSUInteger count = 0;
-    while (![rightParens containsObject:[self peek]]) {
-        if ([self peek] != nil) {
-            [list addObject:[[self readForm] setPosition:count++]];
-        } else {
-            @throw [[NSException alloc] initWithName:DL_PARENS_MISMATCH reason:DL_PARENS_MISMATCH_MSG userInfo:nil];
+    while (![_rightParens containsObject:[self peek]]) {
+        @autoreleasepool {
+            if ([self peek] != nil) {
+                [list addObject:[[self readForm] setPosition:count++]];
+            } else {
+                @throw [[NSException alloc] initWithName:DL_PARENS_MISMATCH reason:DL_PARENS_MISMATCH_MSG userInfo:nil];
+            }
         }
     }
     if ([leftParens isEqual:@"("] && [[self peek] isEqual:@")"]) {
@@ -196,8 +204,8 @@
     } else if ([Utils matchString:token withExpression:_stringExp]) {
         NSString *stripped = [token substringWithRange:NSMakeRange(1, [token length] - 2)];
         NSString* ret = [[[[stripped stringByReplacingOccurrencesOfString:@"\\\\" withString:@"\u029e"]
-                         stringByReplacingOccurrencesOfString:@"\\\"" withString:@"\""]
-                         stringByReplacingOccurrencesOfString:@"\\n" withString:@"\n"]
+                           stringByReplacingOccurrencesOfString:@"\\\"" withString:@"\""]
+                          stringByReplacingOccurrencesOfString:@"\\n" withString:@"\n"]
                          stringByReplacingOccurrencesOfString:@"\u029e" withString:@"\\"];
         return  [[DLString alloc] initWithString:ret];
     } else if ([Utils matchString:token withExpression:_stringUnclosedExp]) {
@@ -213,10 +221,11 @@
 }
 
 - (NSMutableArray *)tokenize:(NSString *)string {
-    NSArray *matches = [_tokenExp matchesInString:string options:0 range:NSMakeRange(0, [string length])];
     NSMutableArray *tokenArr = [NSMutableArray array];
+    NSArray *matches = [_tokenExp matchesInString:string options:0 range:NSMakeRange(0, [string length])];
+    NSString * mstr = nil;
     for (NSTextCheckingResult *match in matches) {
-        NSString * mstr = [string substringWithRange:[match rangeAtIndex:1]];
+        mstr = [string substringWithRange:[match rangeAtIndex:1]];
         if ([mstr characterAtIndex:0] == ';') continue;
         [tokenArr addObject:mstr];
     }

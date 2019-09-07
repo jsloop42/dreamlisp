@@ -50,8 +50,10 @@ static NSString *_historyFile = @"/dlisp-history";
     @try {
         [_fops openFile:path];
         while([_fops hasNext]) {
-            NSString *line = [_fops readLine];
-            if ([line length] > 0) add_history([line cStringUsingEncoding:NSUTF8StringEncoding]);
+            @autoreleasepool {
+                NSString *line = [_fops readLine];
+                if ([line length] > 0) add_history([line cStringUsingEncoding:NSUTF8StringEncoding]);
+            }
         }
     } @catch (NSException *exception) {
         [self writeOutput:exception.description];
@@ -67,15 +69,17 @@ static NSString *_historyFile = @"/dlisp-history";
 }
 
 - (NSString * _Nullable)readlineWithPrompt:(const char *)prompt {
-    char *input = readline(prompt);
-    NSString *exp = nil;
-    if (input) {
-        if (_isHistoryEnabled) add_history(input);
-        exp = [[NSString alloc] initWithUTF8String:input];
-        [_fops append:[exp stringByAppendingString:@"\n"] completion:nil];
-        free(input);
+    @autoreleasepool {
+        char *input = readline(prompt);
+        NSString *exp = nil;
+        if (input) {
+            if (_isHistoryEnabled) add_history(input);
+            exp = [[NSString alloc] initWithUTF8String:input];
+            [_fops append:[exp stringByAppendingString:@"\n"] completion:nil];
+            free(input);
+        }
+        return exp;
     }
-    return exp;
 }
 
 #pragma mark - StdIOServiceDelegate

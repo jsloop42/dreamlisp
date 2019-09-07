@@ -174,21 +174,26 @@
 
 - (void)apply {
     DLLazySequenceFn *lfn = nil;
+    NSMutableArray *args = [NSMutableArray new];
     if (!_fns) [_acc addObject:[self next]];
     for (lfn in _fns) {
         if ([lfn fn]) {
             if (_isNative) {
                 // Calls lazy function block which returns void, with the lazy sequence, user supplied function and params
-                [[lfn lazyFn] apply:[@[[lfn fn], [self next]] mutableCopy] forLazySequence:self];
+                @autoreleasepool {
+                    [[lfn lazyFn] apply:[@[[lfn fn], [self next]] mutableCopy] forLazySequence:self];
+                }
             } else {
                 // The user supplied function takes more than one argument
-                NSMutableArray *args = [NSMutableArray new];
+                [args removeAllObjects];
                 [args addObject:[lfn fn]];
                 [args addObjectsFromArray:[self next]];
                 [[lfn lazyFn] apply:args forLazySequence:self];
             }
         } else {
-            [[lfn lazyFn] apply:[@[[self next]] mutableCopy] forLazySequence:self];  // The lazy function does not take a function as argument
+            @autoreleasepool {
+                [[lfn lazyFn] apply:[@[[self next]] mutableCopy] forLazySequence:self];  // The lazy function does not take a function as argument
+            }
         }
     }
 }

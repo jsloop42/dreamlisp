@@ -114,20 +114,22 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     NSEnumerationOptions opt = isConcurrent ? NSEnumerationConcurrent : 0;
     FileOps * __weak weakSelf = self;
     [locations enumerateObjectsWithOptions:opt usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        FileOps *this = weakSelf;
-        NSString *path = locations[idx];
-        if ([this->_fm fileExistsAtPath:path]) {
-            FileResult *result = [FileResult new];
-            [result setIndex:idx];
-            [result setContent:[NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil]];
-            if (isConcurrent) [lock lock];
-            if (isLookup && [contents count] == 0) {
-                [contents addObject:result];
-                *stop = YES;
-            } else if (!isLookup) {
-                [contents addObject:result];
+        @autoreleasepool {
+            FileOps *this = weakSelf;
+            NSString *path = locations[idx];
+            if ([this->_fm fileExistsAtPath:path]) {
+                FileResult *result = [FileResult new];
+                [result setIndex:idx];
+                [result setContent:[NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil]];
+                if (isConcurrent) [lock lock];
+                if (isLookup && [contents count] == 0) {
+                    [contents addObject:result];
+                    *stop = YES;
+                } else if (!isLookup) {
+                    [contents addObject:result];
+                }
+                if (isConcurrent) [lock unlock];
             }
-            if (isConcurrent) [lock unlock];
         }
     }];
     return contents;
@@ -175,21 +177,23 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 - (void)append:(NSString *)string completion:(void  (^ _Nullable)(void))callback {
     FileOps * __weak weakSelf = self;
     dispatch_async(self->_serialQueue, ^{
-        FileOps *this = weakSelf;
-        if (this) {
-            if (!this->_appendHandle && this->_path) {
-                this->_appendHandle = [NSFileHandle fileHandleForUpdatingAtPath:this->_path];
-            }
-            if (this->_appendHandle) {
-                [this->_appendHandle seekToEndOfFile];
-                NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
-                if (data) {
-                    [this->_appendHandle writeData:data];
+        @autoreleasepool {
+            FileOps *this = weakSelf;
+            if (this) {
+                if (!this->_appendHandle && this->_path) {
+                    this->_appendHandle = [NSFileHandle fileHandleForUpdatingAtPath:this->_path];
                 }
-            } else {
-                @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
+                if (this->_appendHandle) {
+                    [this->_appendHandle seekToEndOfFile];
+                    NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
+                    if (data) {
+                        [this->_appendHandle writeData:data];
+                    }
+                } else {
+                    @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
+                }
+                if (callback) callback();
             }
-            if (callback) callback();
         }
     });
 }
