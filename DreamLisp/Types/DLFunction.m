@@ -146,6 +146,53 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _fn = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFunction_fn"];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFunction_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFunction_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFunction_position"] integerValue];
+        NSValue *isMacroValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFunction_isMacro"];
+        [isMacroValue getValue:&_isMacro];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFunction_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFunction_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+        _ast = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFunction_ast"];
+        _name = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFunction_name"];
+        _env = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFunction_env"];
+        _params = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFunction_params"];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_fn forKey:@"DLFunction_fn"];
+    [coder encodeObject:_meta forKey:@"DLFunction_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLFunction_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLFunction_position"];
+    NSValue *isMacroValue = [[NSValue alloc] initWithBytes:&_isMacro objCType:@encode(BOOL)];
+    [coder encodeObject:isMacroValue forKey:@"DLFunction_isMacro"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLFunction_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLFunction_isMutable"];
+    [coder encodeObject:_ast forKey:@"DLFunction_ast"];
+    [coder encodeObject:_name forKey:@"DLFunction_name"];
+    [coder encodeObject:_env forKey:@"DLFunction_env"];
+    [coder encodeObject:_params forKey:@"DLFunction_params"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
+
 - (NSString *)dataType {
     return [self className];
 }

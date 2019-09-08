@@ -16,14 +16,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface DLHashMap : NSObject <DLDataProtocol>
+@interface DLHashMap : NSObject <DLDataProtocol, NSSecureCoding>
 + (BOOL)isHashMap:(id)object;
 + (DLHashMap *)dataToHashMap:(id<DLDataProtocol>)data fnName:(NSString *)fnName;
 + (DLHashMap *)dataToHashMap:(id<DLDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)init;
 - (instancetype)initWithMapTable:(NSMapTable *)table;
+- (instancetype)initWithDictionary:(NSMutableDictionary *)dictionary;
 - (instancetype)initWithArray:(NSArray *)array;
 - (instancetype)initWithMeta:(id<DLDataProtocol>)meta hashmap:(DLHashMap *)hashmap;
++ (DLHashMap *)hashMapWithDictionary:(NSMutableDictionary *)dictionary;
 - (void)fromArray:(NSArray *)array;
 - (id<DLDataProtocol>)objectForKey:(id)key;
 - (void)setObject:(id<DLDataProtocol>)object forKey:(id)key;

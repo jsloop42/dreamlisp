@@ -63,7 +63,7 @@ static NSString *langVersion;
     _printer = [Printer new];
     _core = [Core new];
     [_core setDelegate:self];
-    _env = [[Env alloc] initWithModuleName:[Const defaultModuleName] isUserDefined:NO];
+    _env = [[Env alloc] initWithModuleName:Const.defaultModuleName isUserDefined:NO];
     [_env setModuleDescription:[Const defaultModuleDescription]];
     [State setCurrentModuleName:[_env moduleName]];
     // Add modules to module table
@@ -116,7 +116,7 @@ static NSString *langVersion;
                 hasError = YES;
                 [this printException:exception log:YES readably:YES];
             }
-            [this changeModuleTo:[Const defaultModuleName]];
+            [this changeModuleTo:Const.defaultModuleName];
             return [[DLVector alloc] initWithArray:[@[[[DLKeyword alloc] initWithString: hasError ? @"fail" : @"ok"],
                                                       [[NSString alloc] initWithFormat:@"%@", [path lastPathComponent]]] mutableCopy]];
         }
@@ -610,7 +610,7 @@ static NSString *langVersion;
 - (DLString *)changeModule:(id<DLDataProtocol>)ast {
     DLString *modStr = [self moduleNameFromAST:ast];
     NSString *modName = (NSString *)[modStr value];
-    if ([modName isEqual:[Const defaultModuleName]]) {
+    if ([modName isEqual:Const.defaultModuleName]) {
         _env = _globalEnv;
     } else {
         // check modules table

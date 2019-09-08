@@ -31,6 +31,27 @@
     return [object isKindOfClass:[NSString class]] && [[object substringToIndex:1] isEqual:@"\u029e"];
 }
 
++ (DLKeyword *)dataToKeyword:(id<DLDataProtocol>)data fnName:(NSString *)fnName {
+    return [self dataToKeyword:data position:-1 fnName:fnName];
+}
+
++ (DLKeyword *)dataToKeyword:(id<DLDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
+    if (![DLKeyword isKeyword:data]) {
+        DLError *err = nil;
+        if (position > 0) {
+            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'keyword'", position, [data dataTypeName]];
+        } else {
+            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'keyword'", [data dataTypeName]];
+        }
+        [err throw];
+    }
+    return (DLKeyword *)data;
+}
+
++ (DLKeyword *)keywordWithString:(NSString *)string {
+    return [[DLKeyword alloc] initWithString:string];
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -76,6 +97,40 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _string = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLKeyword_value"];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLKeyword_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLKeyword_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLKeyword_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLKeyword_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLKeyword_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_string forKey:@"DLKeyword_value"];
+    [coder encodeObject:_meta forKey:@"DLKeyword_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLKeyword_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLKeyword_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLKeyword_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLKeyword_isMutable"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (NSString *)dataType {
     return [self className];
 }
@@ -109,6 +164,11 @@
         return [_string substringFromIndex:1];
     }
     return _string;
+}
+
+/** Checks if the given string is same as the keyword's underlying keyword string. */
+- (BOOL)isEqualToString:(id)string {
+    return [[self string] isEqual:string];
 }
 
 - (BOOL)isEqual:(id)object {

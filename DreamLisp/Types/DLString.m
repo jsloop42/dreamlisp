@@ -54,6 +54,10 @@
     return [[DLString alloc] initWithMutableString];
 }
 
++ (DLString *)stringWithString:(NSString *)string {
+    return [[DLString alloc] initWithString:string];
+}
+
 - (instancetype)init {
     self = [super init];
     return self;
@@ -137,6 +141,42 @@
         _meta = meta;
     }
     return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _string = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_value"];
+        _mstring = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_mstring"];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_string forKey:@"DLString_value"];
+    [coder encodeObject:_mstring forKey:@"DLString_mstring"];
+    [coder encodeObject:_meta forKey:@"DLString_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLString_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLString_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLString_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLString_isMutable"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
 }
 
 - (void)bootstrap {

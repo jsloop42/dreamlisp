@@ -34,7 +34,7 @@ static NSString *_historyFile = @"/dlisp-history";
     _homeDir = NSHomeDirectory();
     _appHomeDir = [_homeDir stringByAppendingString:_appHome];
     _historyPath = [_appHomeDir stringByAppendingString:_historyFile];
-    _prompt = [[Const defaultModuleName] stringByAppendingString:@"> "];
+    _prompt = [Const.defaultModuleName stringByAppendingString:@"> "];
     [self checkPath];
     [self loadHistoryFile:_historyPath];
 }

@@ -29,6 +29,28 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _table = [coder decodeObjectOfClass:[self classForCoder] forKey:@"ModuleTable_table"];
+        _name = [coder decodeObjectOfClass:[self classForCoder] forKey:@"ModuleTable_name"];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_table forKey:@"ModuleTable_table"];
+    [coder encodeObject:_name forKey:@"ModuleTable_name"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (void)bootstrap {
     _table = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
 }

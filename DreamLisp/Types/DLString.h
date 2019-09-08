@@ -14,13 +14,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface DLString : NSObject <DLDataProtocol>
+@interface DLString : NSObject <DLDataProtocol, NSSecureCoding>
 @property (nonatomic, readwrite) NSMutableString *mutableValue;
 + (BOOL)isString:(id)object;
 + (BOOL)isString:(id)object withValue:(NSString *)name;
 + (DLString *)dataToString:(id<DLDataProtocol>)data fnName:(NSString *)fnName;
 + (DLString *)dataToString:(id<DLDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 + (DLString *)mutable;
++ (DLString *)stringWithString:(NSString *)string;
 - (instancetype)init;
 - (instancetype)initWithString:(NSString *)str;
 - (instancetype)initWithFormat:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2);

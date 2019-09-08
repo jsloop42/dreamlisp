@@ -35,6 +35,7 @@ extern NSString *FunctionArityError;
 extern NSString *IsImmutableError;
 extern NSString *IndexOutOfBounds;
 extern NSString *InvalidDataType;
+extern NSString *JSONParseError;
 extern NSString *MacroSymbolNotFound;
 extern NSString *ModuleArityDefinitionError;
 extern NSString *ModuleEmpty;

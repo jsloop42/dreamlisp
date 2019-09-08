@@ -31,6 +31,28 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _name = [coder decodeObjectOfClass:[self classForCoder] forKey:@"SymbolTable_name"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"SymbolTable_moduleName"];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_name forKey:@"SymbolTable_name"];
+    [coder encodeObject:_moduleName forKey:@"SymbolTable_moduleName"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (BOOL)isEqual:(id)object {
     if (![object isKindOfClass:[self class]]) return NO;
     SymbolKey *key = (SymbolKey *)object;

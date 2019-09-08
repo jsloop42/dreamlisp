@@ -261,6 +261,72 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _name = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_value"];
+        _arity = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_arity"] integerValue];
+        _initialArity = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_initialArity"] integerValue];
+        NSValue *isFunction = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isFunction"];
+        [isFunction getValue:&_isFunction];
+        NSValue *hasNArityValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_hasNArity"];
+        [hasNArityValue getValue:&_hasNArity];
+        NSValue *isQualifiedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isQualified"];
+        [isQualifiedValue getValue:&_isQualified];
+        NSValue *isModuleValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isModule"];
+        [isModuleValue getValue:&_isModule];
+        NSValue *isFaultValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isFault"];
+        [isFaultValue getValue:&_isFault];
+        NSValue *isCoreValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isCore"];
+        [isCoreValue getValue:&_isCore];
+        _fnName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_fnName"];
+        _initialModuleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_initialModuleName"];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_name forKey:@"DLSymbol_value"];
+    [coder encodeObject:@(_arity) forKey:@"DLSymbol_arity"];
+    [coder encodeObject:@(_initialArity) forKey:@"DLSymbol_initialArity"];
+    [coder encodeObject:_fnName forKey:@"DLSymbol_fnName"];
+    [coder encodeObject:_initialModuleName forKey:@"DLSymbol_initialModuleName"];
+    NSValue *isFunctionValue = [[NSValue alloc] initWithBytes:&_isFunction objCType:@encode(BOOL)];
+    [coder encodeObject:isFunctionValue forKey:@"DLSymbol_isFunction"];
+    NSValue *hasNArityValue = [[NSValue alloc] initWithBytes:&_hasNArity objCType:@encode(BOOL)];
+    [coder encodeObject:hasNArityValue forKey:@"DLSymbol_hasNArity"];
+    NSValue *isQualifiedValue = [[NSValue alloc] initWithBytes:&_isQualified objCType:@encode(BOOL)];
+    [coder encodeObject:isQualifiedValue forKey:@"DLSymbol_isQualified"];
+    NSValue *isModule = [[NSValue alloc] initWithBytes:&_isModule objCType:@encode(BOOL)];
+    [coder encodeObject:isModule forKey:@"DLSymbol_isModule"];
+    NSValue *isFault = [[NSValue alloc] initWithBytes:&_isFault objCType:@encode(BOOL)];
+    [coder encodeObject:isFault forKey:@"DLSymbol_isFault"];
+    NSValue *isCore = [[NSValue alloc] initWithBytes:&_isCore objCType:@encode(BOOL)];
+    [coder encodeObject:isCore forKey:@"DLSymbol_isCore"];
+    [coder encodeObject:_meta forKey:@"DLSymbol_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLSymbol_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLSymbol_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLSymbol_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLSymbol_isMutable"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (void)bootstrap {
     _position = -1;
     _moduleName = [State currentModuleName];

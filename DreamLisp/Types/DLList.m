@@ -74,6 +74,40 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _array = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLList_value"];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLList_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLList_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLList_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLList_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLList_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_array forKey:@"DLList_value"];
+    [coder encodeObject:_meta forKey:@"DLList_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLList_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLList_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLList_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLList_isMutable"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (NSString *)dataType {
     return [self className];
 }

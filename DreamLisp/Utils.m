@@ -251,6 +251,183 @@ static BOOL _isCacheEnabled;
     return ret;
 }
 
++ (DLHashMap *)convertKeywordKeysToString:(DLHashMap *)hashmap {
+    @autoreleasepool {
+        DLHashMap *hm = [DLHashMap new];
+        NSArray *allKeys = [hashmap allKeys];
+        NSUInteger len = [allKeys count];
+        NSUInteger i = 0;
+        DLKeyword *key = nil;
+        for (i = 0; i < len; i++) {
+            key = [allKeys objectAtIndex:i];
+            [hm setObject:[hashmap objectForKey:key] forKey:[key string]];
+        }
+        return hm;
+    }
+}
+
++ (DLHashMap *)errorToHashMap:(NSError *)error {
+    DLHashMap *hm = [DLHashMap new];
+    [hm setObject:[DLString stringWithString:error.description] forKey:[DLKeyword keywordWithString:@"desc"]];
+    [hm setObject:[[DLNumber alloc] initWithInteger:error.code] forKey:[DLKeyword keywordWithString:@"code"]];
+    return hm;
+}
+
+/** Converts a hash map to @c NSMutableDictionary */
++ (NSMutableDictionary *)dictionaryFromHashMap:(DLHashMap *)hashMap {
+    NSMutableDictionary *dict = [NSMutableDictionary new];
+    id<DLDataProtocol> key = nil;
+    NSMapTable *table = [hashMap value];
+    NSArray *allKeys = [hashMap allKeys];
+    for (key in allKeys) {
+        [dict setObject:[table objectForKey:key] forKey:key];
+    }
+    return dict;
+}
+
++ (id)convertFromDLTypeToFoundationType:(id<DLDataProtocol>)value {
+    Protocol *dlDataProtocol = objc_getProtocol("DLDataProtocol");
+    id val = @"";
+    if ([DLNil isNil:value]) {
+        val = @"";
+    } else if ([DLKeyword isKeyword:value]) {
+        val = [(DLKeyword *)value string];
+    } else if ([DLHashMap isHashMap:value]) {
+        val = [self hashMapToFoundationType:value];
+    } else if ([DLList isKindOfList:value]) {
+        NSMutableArray *xs = [(DLList *)value value];
+        id<DLDataProtocol> elem = nil;
+        NSMutableArray *list = [NSMutableArray new];
+        for (elem in xs) {
+            [list addObject:[self convertFromDLTypeToFoundationType:elem]];
+        }
+        val = list;
+    } else if ([DLAtom isAtom:value]) {
+        val = [self convertFromDLTypeToFoundationType:[(DLAtom *)value value]];
+    } else if ([DLNumber isNumber:value]) {
+        DLNumber *num = (DLNumber *)value;
+        val = [num value];
+    } else if ([DLBool isBool:value]) {
+        BOOL flag = (BOOL)[value value];
+        val = flag ? @YES : @NO;
+    } else if ([DLString isString:value]) {
+        val = [value value];
+    } else if ([value conformsToProtocol:dlDataProtocol]) {
+        val = [value value];
+    } else {
+        val = value;
+    }
+    return val;
+}
+
+/** Converts the given hash map to Foundation data type, useful for JSON encoding. */
++ (NSMutableDictionary *)hashMapToFoundationType:(DLHashMap *)hashMap {
+    NSMutableDictionary *dict = [NSMutableDictionary new];
+    NSArray *allKeys = [hashMap allKeys];
+    NSUInteger len = [allKeys count];
+    NSUInteger i = 0;
+    id<DLDataProtocol> aKey = nil;
+    id<DLDataProtocol> aVal = nil;
+    id key = nil;
+    id val = nil;
+    for (i = 0; i < len; i++) {
+        aKey = [allKeys objectAtIndex:i];
+        key = [[self convertFromDLTypeToFoundationType:aKey] description];
+        aVal = [hashMap objectForKey:aKey];
+        val = [self convertFromDLTypeToFoundationType:aVal];
+        [dict setObject:val forKey:key];
+    }
+    return dict;
+}
+
+/** Check if the given number is represents a BOOL value. */
++ (BOOL)isBoolNumber:(NSNumber *)num {
+    CFTypeID boolID = CFBooleanGetTypeID();
+    CFTypeID numID = CFGetTypeID((__bridge CFTypeRef)(num));
+    return numID == boolID;
+}
+
+/** Converts the given Foundation type to DL type. Used mainly in JSON de-serialization. */
++ (id<DLDataProtocol>)convertFromFoundationTypeToDLType:(id)value {
+    id<DLDataProtocol> val = [DLNil new];
+    if ([value isKindOfClass:[NSNull class]]) {
+        val = [DLNil new];
+    } else if ([value isKindOfClass:[NSMutableDictionary class]]) {
+        val = [self dictionaryToDLType:value];
+    } else if ([value isKindOfClass:[NSMutableArray class]] || [value isKindOfClass:[NSArray class]]) {
+        NSArray *xs = (NSArray *)value;
+        id elem = nil;
+        DLVector *vec = [DLVector new];  /* It's better to use a vector instead of a list so that any potential code evaluation does not happen. */
+        for (elem in xs) {
+            [vec appendObject:[self convertFromFoundationTypeToDLType:elem]];
+        }
+        val = vec;
+    } else if ([value isKindOfClass:[NSNumber class]]) {
+        NSNumber *n = (NSNumber *)value;
+        BOOL doesRepresentBool = [self isBoolNumber:n];
+        if (doesRepresentBool) {
+            CFBooleanRef boolRef = (__bridge CFBooleanRef)n;
+            Boolean flag = CFBooleanGetValue(boolRef);
+            val = [[DLBool alloc] initWithBool:flag];
+        } else {
+            val = [[DLNumber alloc] initWithString:[n stringValue]];
+        }
+    } else if ([value isKindOfClass:[NSString class]]) {
+        val = [DLString stringWithString:value];
+    } else {
+        val = [DLString stringWithString:[value description]];
+    }
+    return val;
+}
+
++ (DLHashMap *)dictionaryToDLType:(NSMutableDictionary *)dict {
+    DLHashMap *hm = [DLHashMap new];
+    NSArray *allKeys = [dict allKeys];
+    NSUInteger len = [allKeys count];
+    NSUInteger i = 0;
+    id aKey = nil;
+    id aVal = nil;
+    id<DLDataProtocol> key = nil;
+    id<DLDataProtocol> val = nil;
+    for (i = 0; i < len; i++) {
+        aKey = [allKeys objectAtIndex:i];
+        key = [self convertFromFoundationTypeToDLType:aKey];
+        aVal = [dict objectForKey:aKey];
+        val = [self convertFromFoundationTypeToDLType:aVal];
+        [hm setObject:val forKey:key];
+    }
+    return hm;
+}
+
+/** Serializes the given JSON string into a @c DLHashMap. */
++ (DLHashMap *)decodeJSON:(DLString *)string {
+    NSString *str = [string value];
+    NSData *data = [str dataUsingEncoding:NSUTF8StringEncoding];
+    return [self decodeJSONFromData:data];
+}
+
++ (DLHashMap *)decodeJSONFromData:(NSData *)data {
+    NSError *err = nil;
+    NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&err];
+    if (err) [[[DLError alloc] initWithFormat:JSONParseError, err.description] throw];
+    return [self dictionaryToDLType:dict];
+}
+
+/** Serializes an @c DLHashMap to JSON string. */
++ (DLString *)encodeJSON:(DLHashMap *)hashMap {
+    NSMutableDictionary *fdict = [self hashMapToFoundationType:hashMap];
+    NSData *jsonData = [self encodeDictionaryToJSONData:fdict];
+    NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    return [[DLString alloc] initWithString:jsonString];
+}
+
++ (NSData *)encodeDictionaryToJSONData:(NSMutableDictionary *)dict {
+    NSError *err = nil;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingSortedKeys error:&err];
+    if (err) [[[DLError alloc] initWithFormat:JSONParseError, err.description] throw];
+    return jsonData;
+}
+
 #pragma mark - String
 
 + (NSMutableArray *)stringToArray:(DLString *)string isNative:(BOOL)isNative {
@@ -286,6 +463,15 @@ static BOOL _isCacheEnabled;
             [string appendString:[elem description]];
         }
     }
+}
+
++ (NSString *)httpMethodTypeToString:(DLKeyword *)methodType {
+    NSString *type = [methodType string];
+    if ([type isEqualToString:@"get"]) return @"GET";
+    if ([type isEqualToString:@"post"]) return @"POST";
+    if ([type isEqualToString:@"put"]) return @"PUT";
+    if ([type isEqualToString:@"patch"]) return @"PATCH";
+    return @"DELETE";
 }
 
 + (CacheTable *)cache {

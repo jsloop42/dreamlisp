@@ -17,6 +17,7 @@ static NSString *_description = @"The core module.";
     Printer *_printer;
     id<DLDelegate> __weak _delegate;
     NSData *_allModuleSortHint;
+    NotificationTable *_notifTable;
 }
 
 @synthesize delegate = _delegate;
@@ -34,6 +35,7 @@ static NSString *_description = @"The core module.";
     [_env setIsUserDefined:NO];
     _reader = [Reader new];
     _printer = [Printer new];
+    _notifTable = NotificationTable.shared;
     [self addArithmeticFunctions];
     [self addComparisonFunctions];
     [self addPrintFunctions];
@@ -42,12 +44,15 @@ static NSString *_description = @"The core module.";
     [self addAtomFunctions];
     [self addInvokeFunctions];
     [self addLazyFunctions];
+    [self addStringFunctions];
     [self addPredicateFunctions];
     [self addSymbolFunctions];
     [self addKeywordFunctions];
     [self addVectorFunctions];
     [self addHashMapFunctions];
     [self addIOFunctions];
+    [self addNotificationFunctions];
+    [self addJSONFunctions];
     [self addMetaFunctions];
     [self addMiscFunctions];
     [self addModuleFunctions];
@@ -529,7 +534,7 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"nth" moduleName:[Const coreModuleName]]];
 
     #pragma mark nth-tail
-    /** Takes a start, end index, a sequence and returs a sub-sequence within the given indices inclusive. */
+    /** Takes a start, end index, a sequence and returns a sub-sequence within the given indices inclusive. */
     id<DLDataProtocol>(^nthTail)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
             [TypeUtils checkArity:xs arity:3 predicate:ArityPredicateLessThanOrEq];
@@ -765,7 +770,7 @@ double dmod(double a, double n) {
                 NSUInteger len = [string count];
                 if (len == 0) return [DLNil new];
                 for(i = 0; i < len; i++) {
-                    [arr addObject:[[NSString alloc] initWithFormat:@"%c", [string characterAtIndex:i]]];
+                    [arr addObject:[[DLString alloc] initWithFormat:@"%c", [string characterAtIndex:i]]];
                 }
                 return [[DLList alloc] initWithArray:arr];
             }
@@ -1591,6 +1596,34 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:values argCount:1 name:@"values/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"values" moduleName:[Const coreModuleName]]];
+
+    #pragma mark keywordize
+    /** Keywordize the given hash-map keys which are not a keyword already. */
+    id<DLDataProtocol>(^keywordize)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [TypeUtils checkArity:xs arity:1];
+            NSString *fnName = @"keywordize/1";
+            DLHashMap *hm = [DLHashMap dataToHashMap:[xs first] fnName:fnName];
+            NSArray *allKeys = [hm allKeys];
+            NSUInteger i = 0;
+            NSUInteger len = [allKeys count];
+            id<DLDataProtocol> key = nil;
+            id<DLDataProtocol> val = nil;
+            DLKeyword *kwd = nil;
+            DLHashMap *ret = [DLHashMap new];
+            for (i = 0; i < len; i++) {
+                key = [allKeys objectAtIndex:i];
+                val = [hm objectForKey:key];
+                if (![DLKeyword isKeyword:key]) {
+                    kwd = [[DLKeyword alloc] initWithString:[key description]];
+                }
+                [ret setObject:val forKey:kwd];
+            }
+            return ret;
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:keywordize argCount:1 name:@"keywordize/1"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"keywordize" moduleName:[Const coreModuleName]]];
 }
 
 #pragma mark - Atom
@@ -1884,6 +1917,153 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"doall" moduleName:[Const coreModuleName]]];
 }
 
+#pragma mark - String
+
+- (void)addStringFunctions {
+    DLFunction *fn = nil;
+
+    #pragma mark uppercase
+    /** Returns the given string in uppercase */
+    id<DLDataProtocol>(^uppercase)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [TypeUtils checkArity:xs arity:1];
+            DLString *str = [DLString dataToString:[xs first] fnName:@"uppercase/1"];
+            return [[DLString alloc] initWithString:[(NSString *)[str value] uppercaseString]];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:uppercase argCount:1 name:@"uppercase/1"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"uppercase" moduleName:[Const coreModuleName]]];
+
+    #pragma mark lowercase
+    /** Returns the given string in lowercase */
+    id<DLDataProtocol>(^lowercase)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [TypeUtils checkArity:xs arity:1];
+            DLString *str = [DLString dataToString:[xs first] fnName:@"lowercase/1"];
+            return [[DLString alloc] initWithString:[(NSString *)[str value] lowercaseString]];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:lowercase argCount:1 name:@"lowercase/1"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"lowercase" moduleName:[Const coreModuleName]]];
+
+    #pragma mark substring
+    /** Returns the substring from the given string */
+    id<DLDataProtocol>(^substring)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [TypeUtils checkArity:xs arity:3];
+            NSString *fnName = @"substring/3";
+            DLNumber *start = [DLNumber dataToNumber:[xs first] position:0 fnName:fnName];
+            DLNumber *end = [DLNumber dataToNumber:[xs second] position:1 fnName:fnName];
+            DLString *str = [DLString dataToString:[xs nth:2] fnName:fnName];  /* Third arg */
+            return [[DLString alloc] initWithString:[str substringFrom:[start integerValue] to:[end integerValue]]];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:substring argCount:3 name:@"substring/3"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"substring" moduleName:[Const coreModuleName]]];
+
+    #pragma mark regex
+    /** Define a compiled regex */
+    id<DLDataProtocol>(^regex)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [TypeUtils checkArity:xs arity:1];
+            NSString *fnName = @"regex/1";
+            DLString *pattern = [DLString dataToString:[xs first] fnName:fnName];
+            return [[DLRegex alloc] initWithString:[pattern value]];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:regex argCount:1 name:@"regex/1"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"regex" moduleName:[Const coreModuleName]]];
+
+    #pragma mark match
+    /**
+     Searches whether the given string matches with the given pattern and returns the matches if found or nil.
+     (match "Emily Bronte" "[a-zA-Z]+")
+     */
+    id<DLDataProtocol>(^match)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [TypeUtils checkArity:xs arity:2];
+            NSString *fnName = @"match/2";
+            DLString *aStr = [DLString dataToString:[xs first] fnName:fnName];
+            NSString *string = [aStr value];
+            id<DLDataProtocol> pattn = [xs second];
+            DLRegex *regex = nil;
+            if ([DLString isString:pattn]) {
+                regex = [[DLRegex alloc] initWithString:[(DLString *)pattn value]];
+            } else if ([DLRegex isRegex:pattn]) {
+                regex = (DLRegex *)pattn;
+            } else {
+                [[[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'string' or 'regex'", 1, [pattn dataTypeName]] throw];
+            }
+            NSArray *matches = [Utils matchesInString:string withExpression:[regex value]];
+            NSTextCheckingResult *match = nil;
+            NSUInteger numRanges = 0;
+            NSUInteger num = 0;
+            DLVector *ret = [DLVector new];
+            for (match in matches) {
+                @autoreleasepool {
+                    numRanges = [match numberOfRanges];
+                    DLVector *vec = [DLVector new];
+                    for (num = 0; num < numRanges; num++) {
+                        [vec appendObject:[[DLString alloc] initWithString:[string substringWithRange:[match rangeAtIndex:num]]]];
+                    }
+                    [ret appendObject:vec];
+                }
+            }
+            return ret;
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:match argCount:2 name:@"match/2"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"match" moduleName:[Const coreModuleName]]];
+
+    #pragma mark split
+    /** Split the given string by the path component */
+    id<DLDataProtocol>(^split)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [TypeUtils checkArity:xs arity:2];
+            NSString *fnName = @"split/2";
+            DLString *aString = [DLString dataToString:[xs first] fnName:fnName];
+            DLString *pathComp = [DLString dataToString:[xs second] fnName:fnName];
+            NSString *string = [aString value];
+            NSArray *arr = [string componentsSeparatedByString:[pathComp value]];
+            return [Utils convertFromFoundationTypeToDLType:arr];  /* DLVector */
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:split argCount:2 name:@"split/2"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"split" moduleName:[Const coreModuleName]]];
+
+    #pragma mark trim
+    /** Removes spaces from start and end of the given string */
+    id<DLDataProtocol>(^trim)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [TypeUtils checkArity:xs arity:1];
+            NSString *fnName = @"trim/1";
+            DLString *aString = [DLString dataToString:[xs first] fnName:fnName];
+            return [[DLString alloc] initWithString:[(NSString *)[aString value] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:trim argCount:1 name:@"trim/1"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"trim" moduleName:[Const coreModuleName]]];
+
+    #pragma mark trim
+    /**
+     Replaces all occurrences of the search string with the target string in the given string and returns the newly obtained string.
+     (replace "123" "+" "he123llo wo123rld")
+     */
+    id<DLDataProtocol>(^replace)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [TypeUtils checkArity:xs arity:3];
+            NSString *fnName = @"replace/3";
+            DLString *matchString = [DLString dataToString:[xs first] position:0 fnName:fnName];
+            DLString *replaceString = [DLString dataToString:[xs second] position:1 fnName:fnName];
+            DLString *aString = [DLString dataToString:[xs nth:2] position:2 fnName:fnName];
+            NSString *string = [aString value];
+            return [[DLString alloc] initWithString:[string stringByReplacingOccurrencesOfString:[matchString value] withString:[replaceString value]]];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:replace argCount:3 name:@"replace/3"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"replace" moduleName:[Const coreModuleName]]];
+}
+
 #pragma mark - Predicate
 
 - (void)addPredicateFunctions {
@@ -2101,7 +2281,175 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:readline argCount:1 name:@"readline/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"readline" moduleName:[Const coreModuleName]]];
+
+    #pragma mark write-to-file
+    /**
+     Writes the given string to the given file. If the file does not exists, a new file will be created. If the file exists, its contents will be overwritten.
+     (write "string data" "/tmp/mytext.txt")
+     */
+    id<DLDataProtocol>(^writeToFile)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [TypeUtils checkArity:xs arity:2];
+            FileOps *fops = [FileOps new];
+            NSString *fnName = @"write-to-file/2";
+            DLString *aString = [DLString dataToString:[xs first] position:0 fnName:fnName];
+            DLString *filePath = [DLString dataToString:[xs second] position:1 fnName:fnName];
+            [fops write:[aString value] toFile:[filePath value] completion:nil];
+            return [[DLBool alloc] initWithBool:YES];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:writeToFile argCount:2 name:@"write-to-file/2"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"write-to-file" moduleName:[Const coreModuleName]]];
+
+    #pragma mark cwd
+    /** Get the current working directory. */
+    id<DLDataProtocol>(^currentWorkingDirectory)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [TypeUtils checkArity:xs arity:0];
+            FileOps *fops = [FileOps new];
+            return [[DLString alloc] initWithString:[fops currentDirectoryPath]];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:currentWorkingDirectory argCount:1 name:@"cwd/0"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"cwd" moduleName:[Const coreModuleName]]];
 }
+
+#pragma mark - Notification
+
+- (void)addNotificationFunctions {
+    Core * __weak weakSelf = self;
+    DLFunction *fn = nil;
+
+    #pragma mark add-notification
+    /**
+     Subscribe to a notification.
+     (defun data-did-download (data) ..)
+     (add-notification :data-did-download data-did-download/1)
+     */
+    id<DLDataProtocol>(^addNotification)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            Core *this = weakSelf;
+            [TypeUtils checkArity:xs arity:2];
+            NSString *fnName = @"add-notification/2";
+            DLKeyword *aNotifKey = [DLKeyword dataToKeyword:[xs first] position:0 fnName:fnName];
+            DLFunction *notifFn = [DLFunction dataToFunction:[xs second] position:1 fnName:fnName];
+            NotificationData *notifData = [NotificationData new];
+            notifData.notificationKey = aNotifKey;
+            notifData.notificationHandler = notifFn;
+            [this->_notifTable setNotification:notifData];
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notificationDidReceive:) name:(NSString *)[aNotifKey value] object:nil];
+            return [[DLBool alloc] initWithBool:YES];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:addNotification argCount:2 name:@"add-notification/2"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"add-notification" moduleName:[Const coreModuleName]]];
+
+    #pragma mark post-notification
+    /**
+     Send a notification with the given notification key and optional data.
+     (post-notification :data-did-download {:status true :data [..]})
+     */
+    id<DLDataProtocol>(^postNotification)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            NSString *fnName = @"post-notification/2";
+            DLKeyword *aNotifKey = [DLKeyword dataToKeyword:[xs first] position:0 fnName:fnName];
+            NSUInteger len = [xs count];
+            id<DLDataProtocol> data = nil;
+            if (len == 2) {
+                data = [xs second];
+            } else if (len > 2) {
+                [[[DLError alloc] initWithFormat:ArityLessThanOrEqualError, 2, len] throw];
+            }
+            NSMutableArray *args = [NSMutableArray new];
+            if (data) {
+                [args addObject:data];
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:[aNotifKey value] object:self
+                                                              userInfo:@{@"notifKey": aNotifKey, @"args": args}];
+            return [[DLBool alloc] initWithBool:YES];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:postNotification argCount:2 name:@"post-notification/2"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"post-notification" moduleName:[Const coreModuleName]]];
+
+    #pragma mark remove-notification
+    /**
+     Remove a notification subscription if present.
+     (remove-notification :data-did-download)
+     */
+    id<DLDataProtocol>(^removeNotification)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            Core *this = weakSelf;
+            [TypeUtils checkArity:xs arity:1];
+            NSString *fnName = @"remove-notification/1";
+            DLKeyword *aNotifKey = [DLKeyword dataToKeyword:[xs first] position:0 fnName:fnName];
+            NotificationData *notifData = [this->_notifTable notification:aNotifKey];
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:(NSString *)[notifData.notificationKey value] object:nil];
+            return [[DLBool alloc] initWithBool:YES];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:removeNotification argCount:1 name:@"remove-notification/1"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"remove-notification" moduleName:[Const coreModuleName]]];
+}
+
+- (void)notificationDidReceive:(NSNotification *)notif {
+    NSDictionary *userInfo = [notif userInfo];
+    DLKeyword *notifKey = [userInfo objectForKey:@"notifKey"];
+    /*
+     For user defined functions, this reflect the fn args array. For in-built function, we could specify the method signature (for eg: in data-did-download,
+     it is kind of like delegates)
+     */
+    NSMutableArray *args = [userInfo objectForKey:@"args"];
+    NotificationData *notifData = [_notifTable notification:notifKey];
+    DLFunction *fn = notifData.notificationHandler;
+    if (fn) {
+        [fn apply:args];
+    }
+}
+
+#pragma mark - JSON
+
+- (void)addJSONFunctions {
+    DLFunction *fn = nil;
+
+    #pragma mark decode-json
+    /**
+     Decodes the JSON string to a hash-map.
+     (decode-json "..")
+     */
+    id<DLDataProtocol>(^decodeJSON)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [TypeUtils checkArity:xs arity:1];
+            NSString *fnName = @"decode-json/1";
+            id<DLDataProtocol> elem = [xs first];
+            if ([DLString isString:elem]) {
+                return [Utils decodeJSON:elem];
+            }
+            DLData *data = [DLData dataToData:elem fnName:fnName];
+            return [Utils decodeJSONFromData:[data value]];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:decodeJSON argCount:1 name:@"decode-json/1"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"decode-json" moduleName:[Const coreModuleName]]];
+
+    #pragma mark encode-json
+    /**
+     Encodes the given hash-map to json string.
+     (encode-json {:first-name "Jane" :last-name "Doe"})
+     */
+    id<DLDataProtocol>(^encodeJSON)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [TypeUtils checkArity:xs arity:1];
+            NSString *fnName = @"encode-json/1";
+            DLHashMap *hm = [DLHashMap dataToHashMap:[xs first] fnName:fnName];
+            return [Utils encodeJSON:hm];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:encodeJSON argCount:1 name:@"encode-json/1"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"encode-json" moduleName:[Const coreModuleName]]];
+}
+
+// TODO: DLData related ops
 
 #pragma mark - Meta
 
@@ -2352,3 +2700,5 @@ double dmod(double a, double n) {
 }
 
 @end
+
+

@@ -44,6 +44,10 @@
     return (DLHashMap *)data;
 }
 
++ (DLHashMap *)hashMapWithDictionary:(NSMutableDictionary *)dictionary {
+    return [[DLHashMap alloc] initWithDictionary:dictionary];
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -56,6 +60,18 @@
     self = [super init];
     if (self) {
         _table = table;
+    }
+    return self;
+}
+
+- (instancetype)initWithDictionary:(NSMutableDictionary *)dictionary {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+        id<DLDataProtocol> key = nil;
+        for (key in dictionary) {
+            [_table setObject:[dictionary objectForKey:key] forKey:key];
+        }
     }
     return self;
 }
@@ -76,6 +92,41 @@
         _meta = meta;
     }
     return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+        _table = [coder decodeObjectOfClass:[self class] forKey:@"DLHashMap_table"];
+        _moduleName = [coder decodeObjectOfClass:[self class] forKey:@"DLHashMap_moduleName"];
+        _meta = [coder decodeObjectOfClass:[self class] forKey:@"DLHashMap_meta"];
+        _position = [[coder decodeObjectOfClass:[self class] forKey:@"DLHashMap_position"] integerValue];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self class] forKey:@"DLHashMap_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self class] forKey:@"DLHashMap_isImported"];
+        [isImportedValue getValue:&_isImported];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_table forKey:@"DLHashMap_table"];
+    [coder encodeObject:_moduleName forKey:@"DLHashMap_moduleName"];
+    [coder encodeObject:_meta forKey:@"DLHashMap_meta"];
+    [coder encodeObject:@(_position) forKey:@"DLHashMap_position"];
+    NSValue *isMutableValue = [NSValue valueWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLHashMap_isMutable"];
+    NSValue *isImportedValue = [NSValue valueWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLHashMap_isImported"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
 }
 
 - (void)bootstrap {
@@ -138,7 +189,7 @@
     if (![DLHashMap isHashMap:object]) return NO;
     DLHashMap *hashmap = (DLHashMap *)object;
     if ([self count] != [hashmap count]) return NO;
-    NSObject<DLDataProtocol> *lval = nil;
+    id<DLDataProtocol> lval = nil;
     id<DLDataProtocol> rval = nil;
     NSArray *keys = [self allKeys];
     NSUInteger i = 0;
@@ -146,7 +197,7 @@
     for (i = 0; i < len; i++) {
         lval = [_table objectForKey:keys[i]];
         rval = [hashmap objectForKey:keys[i]];
-        if (!lval || !rval || [lval isNotEqualTo:rval]) return NO;
+        if (!lval || !rval || ![lval isEqual:rval]) return NO;
     }
     return YES;
 }

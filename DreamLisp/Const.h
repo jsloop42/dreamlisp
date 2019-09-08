@@ -10,25 +10,23 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSString * const DLVersion;
-extern NSArray * keywords;
-
 @interface Const : NSObject
+@property (class) NSArray *keywords;
+@property (class) NSString *emptyModuleName;
+@property (class) NSString *defaultModuleName;
+@property (class) NSString *defaultModuleDescription;
+@property (class) NSString *coreModuleName;
+@property (class) NSString *networkModuleName;
+@property (class) NSString *exports;
+@property (class) NSString *imports;
+@property (class) NSString *internal;
+@property (class) NSString *name;
+@property (class) NSString *description;
+@property (class) NSString *ascendingKeyword;
+@property (class) NSString *descendingKeyword;
+@property (class) NSString *keyKeyword;
+@property (class) NSString *valueKeyword;
 + (NSString *)dlVersion;
-+ (NSArray *)keyword;
-+ (NSString *)emptyModuleName;
-+ (NSString *)defaultModuleName;
-+ (NSString *)defaultModuleDescription;
-+ (NSString *)coreModuleName;
-+ (NSString *)exports;
-+ (NSString *)imports;
-+ (NSString *)internal;
-+ (NSString *)name;
-+ (NSString *)description;
-+ (NSString *)ascendingKeyword;
-+ (NSString *)descendingKeyword;
-+ (NSString *)keyKeyword;
-+ (NSString *)valueKeyword;
 @end
 
 // Error constants

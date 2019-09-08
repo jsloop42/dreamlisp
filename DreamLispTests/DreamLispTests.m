@@ -151,7 +151,7 @@
     DLSymbol *sym = [[DLSymbol alloc] initWithName:@"count" moduleName:[Const coreModuleName]]; // `(core:count a [1])
     [sym setArity:-2];
     [sym resetArity];
-    [sym setModuleName:[Const defaultModuleName]];
+    [sym setModuleName:Const.defaultModuleName];
     [sym setPosition:0];
     [sym setIsQualified:YES];
     XCTAssertEqualObjects([sym string], @"core:count");
@@ -176,7 +176,7 @@
 }
 
 - (void)testJSSymbolProcess {
-    [State setCurrentModuleName:[Const defaultModuleName]];
+    [State setCurrentModuleName:Const.defaultModuleName];
     DLSymbol *sym = [DLSymbol processName:@"mod:func/1"];
     XCTAssertEqualObjects([sym moduleName], [State currentModuleName]);
     XCTAssertEqualObjects([sym initialModuleName], @"mod");
@@ -229,9 +229,9 @@
     Reader *reader = [dl reader];
     NSMutableArray<id<DLDataProtocol>> *ast = [reader readString:@"(def a 1)"];
     DLList *xs = (DLList *)ast[0];
-    XCTAssertEqualObjects([(DLSymbol *)[xs first] moduleName], [Const defaultModuleName]);
-    XCTAssertEqualObjects([(DLSymbol *)[xs second] moduleName], [Const defaultModuleName]);
-    XCTAssertEqualObjects([reader moduleName], [Const defaultModuleName]);
+    XCTAssertEqualObjects([(DLSymbol *)[xs first] moduleName], Const.defaultModuleName);
+    XCTAssertEqualObjects([(DLSymbol *)[xs second] moduleName], Const.defaultModuleName);
+    XCTAssertEqualObjects([reader moduleName], Const.defaultModuleName);
     ast = [reader readString:@"(defmodule foo (export all))"];
     XCTAssertEqualObjects([reader moduleName], @"foo");
     ast = [reader readString:@"(def a (fn (n) (+ n 1)))"];
@@ -244,15 +244,15 @@
     ast = [reader readString:@"(in-module \"user\")"];
     XCTAssertEqualObjects([reader moduleName], @"foo");
     [dl rep:@"(in-module \"user\")"];
-    XCTAssertEqualObjects([reader moduleName], [Const defaultModuleName]);
+    XCTAssertEqualObjects([reader moduleName], Const.defaultModuleName);
     ast = [reader readString:@"(def b 2)"];
     xs = (DLList *)ast[0];
-    XCTAssertEqualObjects([(DLSymbol *)[xs second] moduleName], [Const defaultModuleName]);
+    XCTAssertEqualObjects([(DLSymbol *)[xs second] moduleName], Const.defaultModuleName);
     ast = [reader readString:@"(core:empty? [1])"];
     xs = (DLList *)ast[0];
     DLSymbol *sym = (DLSymbol *)[xs first];
-    XCTAssertEqualObjects([sym moduleName], [Const defaultModuleName]);
-    XCTAssertEqualObjects([sym initialModuleName], [Const coreModuleName]);
+    XCTAssertEqualObjects([sym moduleName], Const.defaultModuleName);
+    XCTAssertEqualObjects([sym initialModuleName], Const.coreModuleName);
     XCTAssertTrue([sym isQualified]);
 }
 
@@ -264,7 +264,7 @@
     XCTAssertEqualObjects([prn printStringFor:fn readably:true], @"nil-fn/0");
     // Symbol
     DLSymbol *sym = [[DLSymbol alloc] initWithName:@"greet"];
-    [sym setModuleName:[Const defaultModuleName]];
+    [sym setModuleName:Const.defaultModuleName];
     XCTAssertEqualObjects([prn printStringFor:sym readably:true], @"user:greet");
     // Integer
     DLNumber *num = [[DLNumber alloc] initWithString:@"42"];
@@ -698,16 +698,16 @@
 
 - (void)testEnv {
     Env *env = [Env new];
-    [env setModuleName:[Const defaultModuleName]];
+    [env setModuleName:Const.defaultModuleName];
     DLString *obj = [[DLString alloc] initWithString:@"123"];
     DLSymbol *key = [[DLSymbol alloc] initWithName:@"key"];
-    [key setModuleName:[Const defaultModuleName]];
+    [key setModuleName:Const.defaultModuleName];
     [env setObject:obj forKey:key];
     XCTAssertEqualObjects([env objectForKey:key], obj);
     Env *aEnv = [[Env alloc] initWithEnv:env];  // Nested env
     DLSymbol *aKey = [[DLSymbol alloc] initWithName:@"aKey"];
     DLString *aObj = [[DLString alloc] initWithString:@"987"];
-    [aKey setModuleName:[Const defaultModuleName]];
+    [aKey setModuleName:Const.defaultModuleName];
     [aEnv setObject:aObj forKey:aKey];
     XCTAssertEqualObjects([aEnv objectForKey:aKey], aObj);
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
@@ -715,7 +715,7 @@
     XCTAssertEqualObjects([dl rep:@"*ARGV*"], @"()");
     // Test with reader
     Reader *reader = [Reader new];  // In default module, user
-    Env *denv = [[Env alloc] initWithModuleName:[Const defaultModuleName] isUserDefined:NO];
+    Env *denv = [[Env alloc] initWithModuleName:Const.defaultModuleName isUserDefined:NO];
     NSMutableArray *xs = [reader readString:@"(def a 1)"];
     DLList *list = (DLList *)[xs first];
     key = [list nth:1];
@@ -925,12 +925,13 @@
     XCTAssertEqualObjects([dl rep:@"(seq \"\")"], @"nil");
 }
 
-- (void)testStringCoreFunctions {
+- (void)testCoreFunctionsOnString {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
     // first
     XCTAssertEqualObjects([dl rep:@"(first \"\")"], @"nil");
     XCTAssertEqualObjects([dl rep:@"(first \"abc\")"], @"\"a\"");
     XCTAssertEqualObjects([dl rep:@"(first \"12abc\")"], @"\"1\"");
+    XCTAssertEqualObjects([dl rep:@"(type (first \"abc\"))"], @"\"string\"");
     // rest
     XCTAssertEqualObjects([dl rep:@"(rest \"\")"], @"[]");
     XCTAssertEqualObjects([dl rep:@"(rest \"a\")"], @"[]");
@@ -939,6 +940,7 @@
     // nth
     XCTAssertEqualObjects([dl rep:@"(nth 0 \"abc\")"], @"\"a\"");
     XCTAssertEqualObjects([dl rep:@"(nth 1 \"abc\")"], @"\"b\"");
+    XCTAssertEqualObjects([dl rep:@"(type (nth 0 \"abc\"))"], @"\"string\"");
     XCTAssertThrows([dl rep:@"(nth -1 \"abc\")"]);
     XCTAssertThrows([dl rep:@"(nth 3 \"abc\")"]);
     XCTAssertThrows([dl rep:@"(nth 0 \"\")"]);
@@ -946,6 +948,7 @@
     XCTAssertEqualObjects([dl rep:@"(take 1 \"abc\")"], @"\"a\"");
     XCTAssertEqualObjects([dl rep:@"(take 2 \"abc\")"], @"\"ab\"");
     XCTAssertEqualObjects([dl rep:@"(take 0 \"\")"], @"\"\"");
+    XCTAssertEqualObjects([dl rep:@"(type (take 1 \"abc\"))"], @"\"string\"");
     XCTAssertEqualObjects([dl rep:@"(try (take 1 \"\") (catch ex ex))"], @"\"Index 1 is out of bound for length 0\"");
     XCTAssertEqualObjects([dl rep:@"(try (take -1 \"abcd\") (catch ex ex))"], @"\"Index -1 is out of bound for length 0\"");
     XCTAssertEqualObjects([dl rep:@"(try (take 10 \"abcd\") (catch ex ex))"], @"\"Index 10 is out of bound for length 4\"");
@@ -953,6 +956,7 @@
     XCTAssertEqualObjects([dl rep:@"(last \"abc\")"], @"\"c\"");
     XCTAssertEqualObjects([dl rep:@"(last \"\")"], @"nil");
     XCTAssertEqualObjects([dl rep:@"(last \"a\")"], @"\"a\"");
+    XCTAssertEqualObjects([dl rep:@"(type (last \"abc\"))"], @"\"string\"");
     // drop
     XCTAssertEqualObjects([dl rep:@"(drop 0 \"abc\")"], @"\"abc\"");
     XCTAssertEqualObjects([dl rep:@"(drop 1 \"abc\")"], @"\"bc\"");
@@ -960,6 +964,7 @@
     XCTAssertEqualObjects([dl rep:@"(drop 3 \"abc\")"], @"\"\"");
     XCTAssertEqualObjects([dl rep:@"(drop 4 \"abc\")"], @"\"\"");
     XCTAssertEqualObjects([dl rep:@"(drop -1 \"abc\")"], @"\"\"");
+    XCTAssertEqualObjects([dl rep:@"(type (drop 2 \"abc\"))"], @"\"string\"");
     // reverse
     XCTAssertEqualObjects([dl rep:@"(lazy-seq? (reverse \"abc\"))"], @"true");
     XCTAssertEqualObjects([dl rep:@"(doall (reverse \"abc\"))"], @"\"cba\"");
@@ -967,11 +972,13 @@
     XCTAssertEqualObjects([dl rep:@"(doall (reverse \"\"))"], @"\"\"");
     XCTAssertEqualObjects([dl rep:@"(doall (reverse \"1234\"))"], @"\"4321\"");
     XCTAssertEqualObjects([dl rep:@"(doall (reverse \"[1 2 3 4]\"))"], @"\"]4 3 2 1[\"");
+    XCTAssertEqualObjects([dl rep:@"(type (doall (reverse \"abc\")))"], @"\"string\"");
     // nth-tail
     XCTAssertEqualObjects([dl rep:@"(nth-tail 0 0 \"abcd\")"], @"\"a\"");
     XCTAssertEqualObjects([dl rep:@"(nth-tail 0 2 \"abcd\")"], @"\"abc\"");
     XCTAssertEqualObjects([dl rep:@"(nth-tail 1 2 \"abcd\")"], @"\"bc\"");
     XCTAssertEqualObjects([dl rep:@"(nth-tail 3 3 \"abcd\")"], @"\"d\"");
+    XCTAssertEqualObjects([dl rep:@"(type (nth-tail 3 3 \"abcd\"))"], @"\"string\"");
     XCTAssertThrows([dl rep:@"(nth-tail -1 3 \"abcd\")"]);
     XCTAssertThrows([dl rep:@"(nth-tail 1 4 \"abcd\")"]);
     XCTAssertThrows([dl rep:@"(nth-tail 1 0 \"abcd\")"]);
@@ -984,7 +991,11 @@
     XCTAssertEqualObjects([dl rep:@"(append '(1 2 3) 0 \"bcd\")"], @"\"(1 2 3)bcd\"");
     XCTAssertEqualObjects([dl rep:@"(append [1 2 3] 0 \"bcd\")"], @"\"[1 2 3]bcd\"");
     XCTAssertEqualObjects([dl rep:@"(append {:a 1} 0 \"bcd\")"], @"\"{:a 1}bcd\"");
+    XCTAssertEqualObjects([dl rep:@"(type (append \"a\" 0 \"bcd\"))"], @"\"string\"");
     XCTAssertThrows([dl rep:@"(append 0 4 '(1 2))"]);
+    // seq
+    XCTAssertEqualObjects([dl rep:@"(seq \"hello\")"], @"(\"h\" \"e\" \"l\" \"l\" \"o\")");
+    XCTAssertEqualObjects([dl rep:@"(type (first (seq \"hello\")))"], @"\"string\"");
 }
 
 - (void)testPrint {
@@ -2415,6 +2426,64 @@
     XCTAssertEqualObjects([dl rep:@"(lazy-seq? (drop 2 (map (fn (a) a) [1 2 3 4])))"], @"true");
     XCTAssertEqualObjects([dl rep:@"(doall (drop 2 (map (fn (a) a) [1 2 3 4])))"], @"[3 4]");
     XCTAssertEqualObjects([dl rep:@"(doall (drop 2 (map (fn (a) a) \"abcd\")))"], @"\"cd\"");
+}
+
+- (void)testHashMapToFoundation {
+    DLHashMap *hm = [DLHashMap new];
+    [hm setObject:[DLString stringWithString:@"111"] forKey:[DLKeyword keywordWithString:@"a1"]];
+    [hm setObject:[DLString stringWithString:@"222"] forKey:[DLKeyword keywordWithString:@"b2"]];
+    [hm setObject:[DLString stringWithString:@"333"] forKey:[DLKeyword keywordWithString:@"c3"]];
+    DLHashMap *hm1 = [DLHashMap new];
+    [hm1 setObject:[[DLList alloc] initWithArray:[@[@(1), @(2), @(3)] mutableCopy]] forKey:[DLString stringWithString:@"d4"]];
+    [hm1 setObject:[[DLNumber alloc] initWithDouble:3.1415] forKey:[DLString stringWithString:@"e5"]];
+    [hm1 setObject:[[DLBool alloc] initWithBool:YES] forKey:[[DLNumber alloc] initWithInt:6]];
+    [hm setObject:hm1 forKey:[DLKeyword keywordWithString:@"f7"]];
+    NSMutableDictionary *dict = [Utils hashMapToFoundationType:hm];
+    NSError *err = nil;
+    NSData *json = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingSortedKeys error:&err];
+    XCTAssertNil(err);
+    NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
+    XCTAssertNotNil(jsonString);
+    XCTAssertGreaterThanOrEqual([jsonString count], 70);
+}
+
+- (void)testJSONSerialization {
+    DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
+    [dl rep:@"(def person {:first-name \"Jane\" :last-name \"Doe\" :awesome? true :age 42 :kids [\"Olive\" \"Patterson\"]})"];
+    [dl rep:@"(def person-json (encode-json person))"];
+    [dl rep:@"(def decoded-person (decode-json person-json))"];
+    [dl rep:@"(def keywordized-person (keywordize decoded-person))"];
+    XCTAssertEqualObjects([dl rep:@"(= keywordized-person person)"], @"true");
+}
+
+- (void)testKeywordize {
+    DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
+    XCTAssertEqualObjects([dl rep:@"(:first-name (keywordize (decode-json \"{\\\"first-name\\\":\\\"Jane\\\",\\\"last-name\\\":\\\"Doe\\\"}\")))"], @"\"Jane\"");
+}
+
+- (void)testStringCoreFunctions {
+    DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
+    // uppercase
+    XCTAssertEqualObjects([dl rep:@"(uppercase \"I am a teapot\")"], @"\"I AM A TEAPOT\"");
+    // lowercase
+    XCTAssertEqualObjects([dl rep:@"(lowercase \"LISP IS AWESOME\")"], @"\"lisp is awesome\"");
+    // substring
+    XCTAssertEqualObjects([dl rep:@"(substring 0 7 \"Run free and dive into the sky\")"], @"\"Run free\"");
+    XCTAssertEqualObjects([dl rep:@"(substring 13 29 \"Run free and dive into the sky\")"], @"\"dive into the sky\"");
+    // regex match
+    XCTAssertEqualObjects([dl rep:@"(def url-regex \"(https|http)(:\\/\\/)(\\D+)(\\.)([a-z]{0,3})(\\/?)\")"],
+                          @"\"(https|http)(:\\\\/\\\\/)(\\\\D+)(\\\\.)([a-z]{0,3})(\\\\/?)\"");
+    XCTAssertEqualObjects([dl rep:@"(match \"https://dreamlisp.com/\" url-regex)"],
+                          @"[[\"https://dreamlisp.com/\" \"https\" \"://\" \"dreamlisp\" \".\" \"com\" \"/\"]]");
+    XCTAssertEqualObjects([dl rep:@"(match \"Emily Bronte\" \"[a-zA-Z]+\")"], @"[[\"Emily\"] [\"Bronte\"]]");
+    // split
+    NSString *toCaps = @"(let [str-xs (split \"init-with-name\" \"-\") s1 (first str-xs) capitalize (fn (s) (let [xs (seq s)] (apply str/1 (cons \
+    (uppercase (first xs)) (rest xs)))))] (apply str/1 (cons (capitalize (first str-xs)) (doall (map capitalize/1 (rest str-xs))))))";
+    XCTAssertEqualObjects([dl rep:toCaps], @"\"InitWithName\"");
+    // trim
+    XCTAssertEqualObjects([dl rep:@"(trim \"  nanana batman  \")"], @"\"nanana batman\"");
+    // replace
+    XCTAssertEqualObjects([dl rep:@"(replace \"123\" \"+\" \"he123llo wo123rld\")"], @"\"he+llo wo+rld\"");
 }
 
 @end

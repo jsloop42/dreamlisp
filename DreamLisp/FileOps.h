@@ -19,6 +19,8 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface FileOps : NSObject
+@property (nonatomic, readwrite) NSFileManager *fileManager;
+@property (nonatomic, readwrite) NSFileHandle *fileHandle;
 - (instancetype)init;
 - (BOOL)isDirectoryExists:(NSString *)path;
 - (void)createDirectoryWithIntermediate:(NSString *)path;
@@ -32,6 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)hasNext;
 - (NSString *)readLine;
 - (void)append:(NSString *)string completion:(void  (^ _Nullable)(void))callback;
+- (void)write:(NSString *)string toFile:(NSString *)filePath completion:(void  (^ _Nullable)(void))callback;
 - (BOOL)delete:(NSString *)path;
 @end
 

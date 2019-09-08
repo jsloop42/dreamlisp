@@ -135,6 +135,44 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _n = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLNumber_value"];
+        NSValue *isDoubleValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLNumber_isDouble"];
+        [isDoubleValue getValue:&_isDouble];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLNumber_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLNumber_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLNumber_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLNumber_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLNumber_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_n forKey:@"DLNumber_value"];
+    NSValue *isDoubleValue = [[NSValue alloc] initWithBytes:&_isDouble objCType:@encode(BOOL)];
+    [coder encodeObject:isDoubleValue forKey:@"DLNumber_isDouble"];
+    [coder encodeObject:_meta forKey:@"DLNumber_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLNumber_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLNumber_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLNumber_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLNumber_isMutable"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (void)bootstrap {
     _decimalPattern = @"\\d+(\\.\\d+)";
     _decimalExp = [NSRegularExpression regularExpressionWithPattern:_decimalPattern options:0 error:nil];
@@ -215,7 +253,7 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"%ld", [_n integerValue]];
+    return [self string];
 }
 
 - (NSString *)debugDescription {

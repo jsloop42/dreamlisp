@@ -32,6 +32,7 @@ NSString *FunctionArityError = @"Expected function but obtained a symbol";
 NSString *IsImmutableError = @"%@ is immutable";
 NSString *IndexOutOfBounds = @"Index %ld is out of bound for length %ld";
 NSString *InvalidDataType = @"Invalid datatype %@: %@";
+NSString *JSONParseError = @"Error parsing JSON %@";
 NSString *MacroSymbolNotFound = @"'%@' not found, used outside quasiquote";
 NSString *ModuleArityDefinitionError = @"Module arity definition error";
 NSString *ModuleEmpty = @"'%@' module is empty";

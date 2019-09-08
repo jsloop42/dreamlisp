@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol DLDataProtocol <NSObject, NSCopying, NSMutableCopying>
+@protocol DLDataProtocol <NSObject, NSCopying, NSMutableCopying, NSSecureCoding>
 @property (nonatomic, readonly) NSString *dataType;
 @property (nonatomic, readonly) NSString *dataTypeName;
 @property (nonatomic, readonly) NSUInteger hash;

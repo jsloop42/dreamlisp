@@ -43,6 +43,9 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     dispatch_queue_t _serialQueue;
 }
 
+@synthesize fileManager = _fileManager;
+@synthesize fileHandle = _fileHandle;
+
 - (instancetype)init {
     self = [super init];
     if (self) [self bootstrap];
@@ -197,6 +200,21 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
         }
     });
 }
+
+/** Writes the given string to the given file asynchronously and invokes the given callback function when done. */
+- (void)write:(NSString *)string toFile:(NSString *)filePath completion:(void  (^ _Nullable)(void))callback {
+    dispatch_async(self->_serialQueue, ^{
+        @autoreleasepool {
+            FileOps *fops = [FileOps new];
+            [fops createFileIfNotExist:filePath];
+            [fops openFile:filePath];
+            [fops.fileHandle writeData:[NSData dataWithBytes:[string UTF8String] length:[string length]]];
+            [fops closeFile];
+            if (callback) callback();
+        }
+    });
+}
+
 
 /** Deletes the file at the given path. */
 - (BOOL)delete:(NSString *)path {

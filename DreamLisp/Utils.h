@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "Types.h"
 #import "CacheTable.h"
+#import <objc/objc-runtime.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -37,9 +38,22 @@ NS_ASSUME_NONNULL_BEGIN
 + (DLList *)hashMapToList:(DLHashMap *)hashMap;
 + (DLVector *)hashMapToVector:(DLHashMap *)hashMap;
 + (NSMutableArray *)hashMapToHashMapArray:(DLHashMap *)hashMap;
++ (DLHashMap *)convertKeywordKeysToString:(DLHashMap *)hashmap;
++ (DLHashMap *)errorToHashMap:(NSError *)error;
++ (NSMutableDictionary *)dictionaryFromHashMap:(DLHashMap *)hashMap;
++ (id)convertFromDLTypeToFoundationType:(id<DLDataProtocol>)value;
++ (NSMutableDictionary *)hashMapToFoundationType:(DLHashMap *)hashMap;
++ (BOOL)isBoolNumber:(NSNumber *)num;
++ (id<DLDataProtocol>)convertFromFoundationTypeToDLType:(id)value;
++ (DLHashMap *)dictionaryToDLType:(NSMutableDictionary *)dict;
++ (DLHashMap *)decodeJSON:(DLString *)string;
++ (DLHashMap *)decodeJSONFromData:(NSData *)data;
++ (DLString *)encodeJSON:(DLHashMap *)hashMap;
++ (NSData *)encodeDictionaryToJSONData:(NSMutableDictionary *)dict;
 #pragma mark String
 + (NSMutableArray *)stringToArray:(DLString *)string isNative:(BOOL)isNative;
 + (void)appendStringFromArray:(NSMutableArray *)array string:(DLString *)string;
++ (NSString *)httpMethodTypeToString:(DLKeyword *)methodType;
 - (instancetype)init NS_UNAVAILABLE;
 @end
 

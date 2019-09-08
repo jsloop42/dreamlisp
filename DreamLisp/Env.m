@@ -98,6 +98,44 @@ static NSMapTable<NSString *, Env *> *_modules;
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _outer = [coder decodeObjectOfClass:[self classForCoder] forKey:@"Env_outer"];
+        _exportTable = [coder decodeObjectOfClass:[self classForCoder] forKey:@"Env_exportTable"];
+        _importTable = [coder decodeObjectOfClass:[self classForCoder] forKey:@"Env_importTable"];
+        _internalTable = [coder decodeObjectOfClass:[self classForCoder] forKey:@"Env_internalTable"];
+        _symbolTable = [coder decodeObjectOfClass:[self classForCoder] forKey:@"Env_symbolTable"];
+        NSValue *isUserDefinedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"Env_isUserDefined"];
+        [isUserDefinedValue getValue:&_isUserDefined];
+        NSValue *isExportAllValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"Env_isExportAll"];
+        [isExportAllValue getValue:&_isExportAll];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_outer forKey:@"Env_outer"];
+    [coder encodeObject:_exportTable forKey:@"Env_exportTable"];
+    [coder encodeObject:_importTable forKey:@"Env_importTable"];
+    [coder encodeObject:_internalTable forKey:@"Env_internalTable"];
+    [coder encodeObject:_symbolTable forKey:@"Env_symbolTable"];
+    [coder encodeObject:_moduleName forKey:@"Env_moduleName"];
+    [coder encodeObject:_moduleDescription forKey:@"Env_moduleDescription"];
+    NSValue *isUserDefinedValue = [[NSValue alloc] initWithBytes:&_isUserDefined objCType:@encode(BOOL)];
+    [coder encodeObject:isUserDefinedValue forKey:@"Env_isUserDefined"];
+    NSValue *isExportAllValue = [[NSValue alloc] initWithBytes:&_isExportAll objCType:@encode(BOOL)];
+    [coder encodeObject:isExportAllValue forKey:@"Env_isExportAll"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 /** If the symbol is associated with a function, update the symbol with function details. */
 - (void)setFunctionInfo:(id<DLDataProtocol>)object symbol:(DLSymbol *)symbol {
     if ([DLFunction isFunction:object]) {
@@ -153,7 +191,7 @@ static NSMapTable<NSString *, Env *> *_modules;
     if (!_importTable) _importTable = [ModuleTable new];
     if (!_internalTable) _internalTable = [ModuleTable new];
     if (!_symbolTable) _symbolTable = [SymbolTable new];
-    _moduleName = [Const defaultModuleName];
+    _moduleName = Const.defaultModuleName;
     _moduleDescription = @"";
     _isExportAll = NO;
     _isUserDefined = YES;
@@ -237,7 +275,7 @@ static NSMapTable<NSString *, Env *> *_modules;
     NSString *moduleName = [key moduleName];
     id<DLDataProtocol> elem = nil;
     if ([moduleName isEqual:_moduleName]) {
-        if (_isExportAll || [moduleName isEqual:[Const defaultModuleName]] || [moduleName isEqual:[Const coreModuleName]]) {
+        if (_isExportAll || [moduleName isEqual:Const.defaultModuleName] || [moduleName isEqual:Const.coreModuleName]) {
             elem = [self objectForKeyFromExportTable:key];
             if (elem) return elem;
         } else {
@@ -292,7 +330,7 @@ static NSMapTable<NSString *, Env *> *_modules;
     if ([key isQualified]) {
         [sym setModuleName:[key initialModuleName]];
     }
-    if ([env isExportAll] || [modName isEqual:[Const defaultModuleName]] || [modName isEqual:[Const coreModuleName]]) {
+    if ([env isExportAll] || [modName isEqual:Const.defaultModuleName] || [modName isEqual:Const.coreModuleName]) {
         elem = [[env exportTable] objectForSymbol:sym];
         if (elem) return elem;
     } else {
@@ -332,7 +370,7 @@ static NSMapTable<NSString *, Env *> *_modules;
 
 - (void)setObject:(id<DLDataProtocol>)obj forKey:(DLSymbol *)key {
     [obj setModuleName:[State currentModuleName]];
-    if (_isExportAll || [_moduleName isEqual:[Const defaultModuleName]] || [_moduleName isEqual:[Const coreModuleName]]) {
+    if (_isExportAll || [_moduleName isEqual:Const.defaultModuleName] || [_moduleName isEqual:Const.coreModuleName]) {
         [_exportTable setObject:obj forKey:key];
     } else {
         [_internalTable setObject:obj forKey:key];
@@ -342,7 +380,7 @@ static NSMapTable<NSString *, Env *> *_modules;
 
 /** Update an existing key value pair with new properties for an imported symbol. Used only for resolving import fault. */
 - (void)updateImportedObject:(id<DLDataProtocol>)obj forKey:(DLSymbol *)key {
-    if (_isExportAll || [_moduleName isEqual:[Const defaultModuleName]] || [_moduleName isEqual:[Const coreModuleName]]) {
+    if (_isExportAll || [_moduleName isEqual:Const.defaultModuleName] || [_moduleName isEqual:Const.coreModuleName]) {
         [_exportTable updateObject:obj forKey:key];
     } else {
         [_internalTable updateObject:obj forKey:key];

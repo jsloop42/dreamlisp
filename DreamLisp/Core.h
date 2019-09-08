@@ -16,6 +16,8 @@
 #import "Env.h"
 #import <objc/message.h>
 #import "Algorithm.h"
+#import "FileOps.h"
+#import "NotificationTable.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

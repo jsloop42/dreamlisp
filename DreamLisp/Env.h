@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class SymbolTable;
 @class ModuleTable;
 
-@interface Env : NSObject
+@interface Env : NSObject<NSSecureCoding>
 @property (nonatomic, readwrite) Env *outer;
 @property (nonatomic, readwrite) ModuleTable *exportTable;
 @property (nonatomic, readwrite) ModuleTable *importTable;

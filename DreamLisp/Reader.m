@@ -75,7 +75,7 @@
      */
     _tokenPattern = @"[\\s,]*(~@|[\\[\\]{}()'`~^@]|\"(?:[\\\\].|[^\\\\\"])*\"?|;.*|[^\\s\\[\\]{}()\"`,;]+)";
     _tokenExp = [NSRegularExpression regularExpressionWithPattern:_tokenPattern options:0 error:nil];
-    _moduleName = [Const defaultModuleName];
+    _moduleName = Const.defaultModuleName;
     _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*", @"defmodule", @"in-module"];
 }
 

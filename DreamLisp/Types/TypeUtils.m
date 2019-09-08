@@ -8,6 +8,10 @@
 
 #import "TypeUtils.h"
 
+/**
+ Util functions which are used by DL type classes. This class does not include any DL types so that the DL type can call these as common methods with circular
+ dependency.
+ */
 @implementation TypeUtils
 
 /** Checks if the given string matches the compiled regex pattern. */

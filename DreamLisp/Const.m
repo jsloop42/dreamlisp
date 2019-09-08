@@ -8,22 +8,39 @@
 
 #import "Const.h"
 
-static NSArray *_keywords;
-static NSString *_emptyModuleName;
-static NSString *_defaultModuleName;
-static NSString *_defaultModuleDescription;
-static NSString *_coreModuleName;
-static NSString *_exports;
-static NSString *_imports;
-static NSString *_internal;
-static NSString *_name;
-static NSString *_description;
-static NSString *_ascendingKeyword;
-static NSString *_descendingKeyword;
-static NSString *_keyKeyword;
-static NSString *_valueKeyword;
+NSArray *_keywords;
+NSString *_emptyModuleName;
+NSString *_defaultModuleName;
+NSString *_defaultModuleDescription;
+NSString *_coreModuleName;
+NSString *_networkModuleName;
+NSString *_exports;
+NSString *_imports;
+NSString *_internal;
+NSString *_name;
+NSString *_description;
+NSString *_ascendingKeyword;
+NSString *_descendingKeyword;
+NSString *_keyKeyword;
+NSString *_valueKeyword;
 
 @implementation Const
+
+@dynamic keywords;
+@dynamic emptyModuleName;
+@dynamic defaultModuleName;
+@dynamic defaultModuleDescription;
+@dynamic coreModuleName;
+@dynamic networkModuleName;
+@dynamic exports;
+@dynamic imports;
+@dynamic internal;
+@dynamic name;
+@dynamic description;
+@dynamic ascendingKeyword;
+@dynamic descendingKeyword;
+@dynamic keyKeyword;
+@dynamic valueKeyword;
 
 + (void)initialize {
     if (self == [self class]) {
@@ -33,6 +50,7 @@ static NSString *_valueKeyword;
         _defaultModuleName = @"user";
         _defaultModuleDescription = @"The default module.";
         _coreModuleName = @"core";
+        _networkModuleName = @"network";
         _exports = @"exports";
         _imports = @"imports";
         _internal = @"internal";
@@ -52,7 +70,7 @@ static NSString *_valueKeyword;
     return [NSString stringWithFormat:@"%@ (%@)", version, build];
 }
 
-+ (NSArray *)keyword {
++(NSArray *)keyword {
     return _keywords;
 }
 
@@ -70,6 +88,10 @@ static NSString *_valueKeyword;
 
 + (NSString *)coreModuleName {
     return _coreModuleName;
+}
+
++ (NSString *)networkModuleName {
+    return _networkModuleName;
 }
 
 + (NSString *)exports {
@@ -109,7 +131,6 @@ static NSString *_valueKeyword;
 }
 
 @end
-
 
 #pragma mark Error constant
 
