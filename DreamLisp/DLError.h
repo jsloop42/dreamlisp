@@ -31,6 +31,7 @@ extern NSString *DLException;
 extern NSString *DLUnderlyingException;
 extern NSString *ElementCountError;
 extern NSString *ElementCountWithPositionError;
+extern NSString *FileNotFoundError;
 extern NSString *FunctionArityError;
 extern NSString *IsImmutableError;
 extern NSString *IndexOutOfBounds;

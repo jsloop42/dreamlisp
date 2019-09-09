@@ -17,6 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (class) NSString *defaultModuleDescription;
 @property (class) NSString *coreModuleName;
 @property (class) NSString *networkModuleName;
+@property (class) NSString *testModuleName;
+@property (class) NSMutableArray *dlModuleLibs;
 @property (class) NSString *exports;
 @property (class) NSString *imports;
 @property (class) NSString *internal;
@@ -26,6 +28,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (class) NSString *descendingKeyword;
 @property (class) NSString *keyKeyword;
 @property (class) NSString *valueKeyword;
+@property (class) NSString *keyForNotificationKey;
+@property (class) NSString *keyForNotificationValue;
 + (NSString *)dlVersion;
 @end
 

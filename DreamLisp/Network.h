@@ -12,12 +12,15 @@
 #import "NotificationTable.h"
 #import "NotificationData.h"
 #import "NetworkSessionTable.h"
+#import "Env.h"
+#import "Utils.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class NetworkSessionTable;
 
 @interface Network : NSObject<NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate>
+@property (nonatomic, readwrite) Env *env;
 @property (nonatomic, readwrite) NetworkSessionTable *networkSessionTable;
 @property (nonatomic, readwrite) NSURLSession *urlSession;
 @end

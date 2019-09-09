@@ -18,7 +18,7 @@ int main(int argc, const char * argv[]) {
             @try {
                 [dl setIsREPL:NO];
                 [dl bootstrap];
-                [dl loadCoreLib];
+                [dl loadDLModuleLibs];
                 NSString *dlFile = [[NSString alloc] initWithCString:argv[1] encoding:NSUTF8StringEncoding];
                 NSMutableArray *arr = [NSMutableArray new];
                 NSUInteger i = 0;
@@ -41,7 +41,7 @@ int main(int argc, const char * argv[]) {
         [dl bootstrap];
         [[dl ioService] setStdIODelegate:term];
         [dl printVersion];
-        [dl loadCoreLib];
+        [dl loadDLModuleLibs];
         [[dl ioService] writeOutput:[ShellConst shellVersion]];
         NSString *inp;
         NSString *ret;

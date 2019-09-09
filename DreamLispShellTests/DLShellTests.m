@@ -38,7 +38,7 @@
     [[dl ioService] setStdIODelegate:stdIOService];
     [dl printVersion];
     XCTAssertTrue([[stdIOService output] isNotEmpty]);
-    [dl loadCoreLib];
+    [dl loadDLModuleLibs];
     // Test write output
     NSString *inp = @"(+ 1 2)";
     NSString *ret = nil;

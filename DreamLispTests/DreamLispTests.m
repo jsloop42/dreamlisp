@@ -381,11 +381,12 @@
     XCTAssertEqualObjects([list last], [xs second]);
 }
 
-- (void)testLoadingCoreLib {
+- (void)testLoadingDLModules {
     DreamLisp *dl = [[DreamLisp alloc] init];
     [dl bootstrap];
-    [dl loadCoreLib];
+    [dl loadDLModuleLibs];
     XCTAssertTrue([[Env modules] containsKey:[Const coreModuleName]]);
+    XCTAssertTrue([[Env modules] containsKey:[Const testModuleName]]);
 }
 
 - (void)testSymbol {

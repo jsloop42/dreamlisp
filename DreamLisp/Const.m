@@ -14,6 +14,8 @@ NSString *_defaultModuleName;
 NSString *_defaultModuleDescription;
 NSString *_coreModuleName;
 NSString *_networkModuleName;
+NSString *_testModuleName;
+NSMutableArray *_dlModuleLibs;
 NSString *_exports;
 NSString *_imports;
 NSString *_internal;
@@ -23,6 +25,8 @@ NSString *_ascendingKeyword;
 NSString *_descendingKeyword;
 NSString *_keyKeyword;
 NSString *_valueKeyword;
+NSString *_keyForNotificationKey;
+NSString *_keyForNotificationValue;
 
 @implementation Const
 
@@ -30,8 +34,10 @@ NSString *_valueKeyword;
 @dynamic emptyModuleName;
 @dynamic defaultModuleName;
 @dynamic defaultModuleDescription;
+@dynamic dlModuleLibs;
 @dynamic coreModuleName;
 @dynamic networkModuleName;
+@dynamic testModuleName;
 @dynamic exports;
 @dynamic imports;
 @dynamic internal;
@@ -41,6 +47,10 @@ NSString *_valueKeyword;
 @dynamic descendingKeyword;
 @dynamic keyKeyword;
 @dynamic valueKeyword;
+/*! The key associated with a DL notification key. */
+@dynamic keyForNotificationKey;
+/*! The key associated with a DL notification value (the function param). */
+@dynamic keyForNotificationValue;
 
 + (void)initialize {
     if (self == [self class]) {
@@ -51,6 +61,8 @@ NSString *_valueKeyword;
         _defaultModuleDescription = @"The default module.";
         _coreModuleName = @"core";
         _networkModuleName = @"network";
+        _testModuleName = @"test";
+        _dlModuleLibs = [@[_coreModuleName, _testModuleName] mutableCopy];
         _exports = @"exports";
         _imports = @"imports";
         _internal = @"internal";
@@ -60,6 +72,8 @@ NSString *_valueKeyword;
         _descendingKeyword = @":desc";
         _keyKeyword = @":key";
         _valueKeyword = @":value";
+        _keyForNotificationKey = @"notifKey";
+        _keyForNotificationValue = @"args";
     }
 }
 
@@ -92,6 +106,15 @@ NSString *_valueKeyword;
 
 + (NSString *)networkModuleName {
     return _networkModuleName;
+}
+
++ (NSString *)testModuleName {
+    return _testModuleName;
+}
+
+/*! Returns an array containing all DreamLisp module library names, which are written in dlisp itself. We use this to load them at startup from the bundle. */
++ (NSMutableArray *)dlModuleLibs {
+    return _dlModuleLibs;
 }
 
 + (NSString *)exports {
@@ -128,6 +151,14 @@ NSString *_valueKeyword;
 
 + (NSString *)valueKeyword {
     return _valueKeyword;
+}
+
++ (NSString *)keyForNotificationKey {
+    return _keyForNotificationKey;
+}
+
++ (NSString *)keyForNotificationValue {
+    return _keyForNotificationValue;
 }
 
 @end

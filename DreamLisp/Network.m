@@ -31,6 +31,7 @@ static NSString *_description = @"The network module.";
     [_env setModuleName:[Const networkModuleName]];
     [_env setModuleDescription:_description];
     [_env setIsUserDefined:NO];
+    [_env setIsExportAll:YES];
     _queue = [[NSOperationQueue alloc] init];
     [_queue setName:@"network ops queue"];
     [_queue setQualityOfService:NSQualityOfServiceUserInitiated];
@@ -38,6 +39,7 @@ static NSString *_description = @"The network module.";
     _urlSession = [NSURLSession sessionWithConfiguration:sessionConfig delegate:self delegateQueue:_queue];
     _networkSessionTable = NetworkSessionTable.shared;
     _notifTable = NotificationTable.shared;
+    [self addURLSessionFunctions];
 }
 
 #pragma mark - URLSession
@@ -46,7 +48,7 @@ static NSString *_description = @"The network module.";
     Network __weak *weakSelf = self;
     DLFunction *fn = nil;
 
-#pragma mark - http-request
+    #pragma mark - http-request
     /**
      Make an HTTP request with the given method type, delegate notification handler function, url and parameters and optional headers.
 
@@ -105,8 +107,8 @@ static NSString *_description = @"The network module.";
             return [[DLBool alloc] initWithBool:YES];
         }
     };
-    fn = [[DLFunction alloc] initWithFn:httpRequest argCount:1 name:@"http-request/1"];
-    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"http-request" moduleName:[Const coreModuleName]]];
+    fn = [[DLFunction alloc] initWithFn:httpRequest argCount:5 name:@"http-request/5"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"http-request" moduleName:[_env moduleName]]];
 }
 
 #pragma mark - Delegates
@@ -117,26 +119,24 @@ static NSString *_description = @"The network module.";
 }
 
 - (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data {
-    NSLog(@"Data did receive: %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
-    NSMutableDictionary *hm = [NSMutableDictionary new];
+    DLHashMap *hm = [DLHashMap new];
     DLData *dlData = nil;
     if (data) dlData = [[DLData alloc] initWithData:data];
     [hm setObject:dlData ? dlData : [DLNil new] forKey:[[DLKeyword alloc] initWithString:@"data"]];
-    DLHashMap *respHM = [[DLHashMap alloc] initWithDictionary:[[(NSHTTPURLResponse *)dataTask.response allHeaderFields] mutableCopy]];
-    NSLog(@"response data string: %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
-    [hm setObject:respHM forKey:[[DLKeyword alloc] initWithString:@"response"]];
-    [hm setObject:[Utils errorToHashMap:dataTask.error] forKey:[DLKeyword keywordWithString:@"error"]];
+    DLHashMap *respHeaders = [Utils convertFromFoundationTypeToDLType:[[(NSHTTPURLResponse *)dataTask.response allHeaderFields] mutableCopy]];
+    [hm setObject:respHeaders forKey:[[DLKeyword alloc] initWithString:@"response-headers"]];
+    NSError *err = dataTask.error;
+    [hm setObject:err ? [Utils errorToHashMap:err] : [DLNil new] forKey:[DLKeyword keywordWithString:@"error"]];
     NotificationData *notifData = [_networkSessionTable notification:[[NSNumber alloc] initWithInteger:dataTask.taskIdentifier]];
     [[NSNotificationCenter defaultCenter] postNotificationName:[notifData.notificationKey value] object:self
-                                                      userInfo:@{@"notifKey": notifData.notificationKey, @"params": [@[hm] mutableCopy]}];
+                                                      userInfo:@{Const.keyForNotificationKey: notifData.notificationKey,
+                                                                 Const.keyForNotificationValue: [@[hm] mutableCopy]}];
 
 }
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
     if (error) {
-        NSLog(@"Data error: %@", error.description);
-    } else {
-        NSLog(@"Data download success: %@", error.description);
+        [[[DLError alloc] initWithDescription:error.description] throw];
     }
 }
 

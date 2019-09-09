@@ -1,15 +1,16 @@
-(defmodule i.test (export all) (import (from test (deftest n) (testing n) (is 2) (is 3) (run 1))))
+(defmodule i.test
+  "A module which is used check the test module functionality."
+  (export all) 
+  (import (from test (deftest n) (testing n) (is 2) (is 3) (run 1))))
 
-(defun z (n) n) 
-
-(deftest b
-  "Testing b test case"
-  (testing "test b case 1"
+(deftest test-1
+  "Testing test-1 test case"
+  (testing "test-1 case 1"
     (is (= 1 1) true)
     (is (= 5 4) true)
     (is (= "a" "b") true "Wrong string")))
 
-(deftest c
+(deftest test-groups
   "Testing groups"
   (testing "test c - case 1"
     (is (= 21 31) true)
@@ -17,7 +18,7 @@
       (is (= 33 33) true)
       (is (= 41 51) true))))
 
-(deftest d
+(deftest test-a-success
   "Testing a success case"
    (testing "success"
      (is (= :a :a) true)))

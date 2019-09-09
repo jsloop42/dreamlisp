@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init;
 - (instancetype)initWithoutREPL;
 - (void)bootstrap;
-- (void)loadCoreLib;
+- (void)loadDLModuleLibs;
 - (void)printVersion;
 - (NSString * _Nullable)rep:(NSString *)string;
 - (NSString * _Nullable)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably;

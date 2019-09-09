@@ -2394,12 +2394,12 @@ double dmod(double a, double n) {
 
 - (void)notificationDidReceive:(NSNotification *)notif {
     NSDictionary *userInfo = [notif userInfo];
-    DLKeyword *notifKey = [userInfo objectForKey:@"notifKey"];
+    DLKeyword *notifKey = [userInfo objectForKey:Const.keyForNotificationKey];
     /*
      For user defined functions, this reflect the fn args array. For in-built function, we could specify the method signature (for eg: in data-did-download,
      it is kind of like delegates)
      */
-    NSMutableArray *args = [userInfo objectForKey:@"args"];
+    NSMutableArray *args = [userInfo objectForKey:Const.keyForNotificationValue];
     NotificationData *notifData = [_notifTable notification:notifKey];
     DLFunction *fn = notifData.notificationHandler;
     if (fn) {

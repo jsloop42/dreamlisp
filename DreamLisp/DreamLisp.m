@@ -19,6 +19,7 @@ static NSString *langVersion;
     /** Current env */
     Env *_env;
     Core *_core;
+    Network *_network;
     IOService* _ioService;
     BOOL _isQuasiquoteMode;
     NSUInteger _quasiquoteDepth;
@@ -45,7 +46,7 @@ static NSString *langVersion;
     if (self) {
         _isREPL = NO;
         [self bootstrap];
-        [self loadCoreLib];
+        [self loadDLModuleLibs];
     }
     return self;
 }
@@ -63,12 +64,14 @@ static NSString *langVersion;
     _printer = [Printer new];
     _core = [Core new];
     [_core setDelegate:self];
+    _network = [Network new];
     _env = [[Env alloc] initWithModuleName:Const.defaultModuleName isUserDefined:NO];
     [_env setModuleDescription:[Const defaultModuleDescription]];
     [State setCurrentModuleName:[_env moduleName]];
     // Add modules to module table
     [self addModule:_env];  // default module
     [self addModule:[_core env]];  // core module
+    [self addModule:[_network env]];
     _globalEnv = _env;
     _isQuasiquoteMode = NO;
     _quasiquoteDepth = 0;
@@ -109,6 +112,7 @@ static NSString *langVersion;
             DreamLisp *this = weakSelf;
             NSString *path = [[DLString dataToString:arg[0] fnName:@"load-file/1"] value];
             NSString *content = [this->_ioService readFile:path];
+            if (!content) [[[DLError alloc] initWithFormat:FileNotFoundError, path] throw];
             BOOL hasError = NO;
             @try {
                 [this rep:content];
@@ -128,28 +132,35 @@ static NSString *langVersion;
     [[coreEnv exportTable] setObject:fn forKey:sym];
 }
 
-/** Construct core lib file path. */
-- (NSString *)coreLibPath:(NSString *)path {
-    return [[NSString alloc] initWithFormat:@"%@/%@", path, coreLibFileName];
+/** Construct built-in module file path. */
+- (NSString *)moduleLibPath:(NSString *)path forModule:(NSString *)moduleName {
+    return [[NSString alloc] initWithFormat:@"%@/%@.dlisp", path, moduleName];
 }
 
-/** Load core lib @c core.dlisp from the framework's resource path. */
-- (void)loadCoreLib {
-    NSString *path = [self coreLibPath:[_ioService resourcePath]];
-    NSString *moduleName = [Const coreModuleName];
-    _env = [_core env];
-    [_reader setModuleName:moduleName];
-    [self updateModuleName:moduleName];
-    NSString *content = [_ioService readFile:path];
-    @try {
-        [self rep:content];
-    } @catch (NSException *exception) {
-        [self printException:exception log:YES readably:YES];
+/*! Load all DreamLisp modules libraries (which are written in dlisp itself). */
+- (void)loadDLModuleLibs {
+    NSString *moduleName;
+    NSString *path;
+    NSString *content;
+    for (moduleName in Const.dlModuleLibs) {
+        path = [self moduleLibPath:[_ioService resourcePath] forModule:moduleName];
+        /* If the module is core, then we need to add the functions to the built-in code module. So we set the env to @c core. Else, we use the default @c user env. */
+        _env = [moduleName isEqual:Const.coreModuleName] ? [_core env] : _globalEnv;
+        [_reader setModuleName:moduleName];  /* set module name to the obtained module name */
+        [self updateModuleName:moduleName];
+        content = [_ioService readFile:path];
+        if (!content) [[[DLError alloc] initWithFormat:ModuleNotFound, moduleName] throw];
+        @try {
+            [self rep:content];
+        } @catch (NSException *exception) {
+            [self printException:exception log:YES readably:YES];
+        }
+        /* reset env and module name back to default */
+        _env = _globalEnv;
+        moduleName = [_env moduleName];
+        [self updateModuleName:moduleName];
+        [_reader setModuleName:moduleName];
     }
-    _env = _globalEnv;
-    moduleName = [_env moduleName];
-    [self updateModuleName:moduleName];
-    [_reader setModuleName:moduleName];
 }
 
 - (void)printVersion {
