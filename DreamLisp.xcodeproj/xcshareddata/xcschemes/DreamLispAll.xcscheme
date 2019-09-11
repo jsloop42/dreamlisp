@@ -38,7 +38,7 @@
             buildForTesting = "YES"
             buildForRunning = "NO"
             buildForProfiling = "NO"
-            buildForArchiving = "NO"
+            buildForArchiving = "YES"
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
@@ -52,7 +52,7 @@
             buildForTesting = "YES"
             buildForRunning = "NO"
             buildForProfiling = "NO"
-            buildForArchiving = "NO"
+            buildForArchiving = "YES"
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
@@ -98,10 +98,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9E7942CE22C12A310086A47F"
-            BuildableName = "DreamLisp.framework"
-            BlueprintName = "DreamLisp"
-            ReferencedContainer = "container:JSL.xcodeproj">
+            BlueprintIdentifier = "9E3A9D4922568AFC00348529"
+            BuildableName = "dlisp"
+            BlueprintName = "DreamLispShell"
+            ReferencedContainer = "container:DreamLisp.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
