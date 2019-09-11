@@ -41,9 +41,9 @@
     if (![DLString isString:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'string'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'string'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'string'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'string'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -228,9 +228,9 @@
     NSString *str = [self value];
     if (!str) return @"";
     NSUInteger len = [str count];
-    if (start < 0) [[[DLError alloc] initWithFormat:IndexOutOfBounds, start, 0] throw];
-    if (end >= len) [[[DLError alloc] initWithFormat:IndexOutOfBounds, end, len] throw];
-    if (end < start) [[[DLError alloc] initWithFormat:IndexOutOfBounds, end, start] throw];
+    if (start < 0) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, start, 0] throw];
+    if (end >= len) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, end, len] throw];
+    if (end < start) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, end, start] throw];
     return [str substringWithRange:NSMakeRange(start, end - start + 1)];
 }
 
@@ -238,8 +238,8 @@
     NSString *str = [self value];
     if (!str) return @"";
     NSUInteger len = [str count];
-    if (start < 0) [[[DLError alloc] initWithFormat:IndexOutOfBounds, start, 0] throw];
-    if (count > len) [[[DLError alloc] initWithFormat:IndexOutOfBounds, count, count < 0 ? 0 : len] throw];
+    if (start < 0) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, start, 0] throw];
+    if (count > len) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, count, count < 0 ? 0 : len] throw];
     return [str substringWithRange:NSMakeRange(start, count)];
 }
 
@@ -318,17 +318,17 @@
 #pragma mark - Mutable
 
 - (void)append:(DLString *)string {
-    if (!_isMutable) [[[DLError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
+    if (!_isMutable) [[[DLError alloc] initWithFormat:DLIsImmutableError, [self dataTypeName]] throw];
     [_mstring appendString: [string isMutable] ? [string mutableValue] : [string value]];
 }
 
 - (void)appendString:(NSString *)string {
-    if (!_isMutable) [[[DLError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
+    if (!_isMutable) [[[DLError alloc] initWithFormat:DLIsImmutableError, [self dataTypeName]] throw];
     [_mstring appendString:string];
 }
 
 - (void)append:(id)object atIndex:(NSInteger)index {
-    if (!_isMutable) [[[DLError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
+    if (!_isMutable) [[[DLError alloc] initWithFormat:DLIsImmutableError, [self dataTypeName]] throw];
     [_mstring insertString:[object description] atIndex:index];
 }
 

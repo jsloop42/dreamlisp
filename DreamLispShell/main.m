@@ -7,8 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "Terminal.h"
-#import "ShellConst.h"
+#import "DLTerminal.h"
+#import "DLShellConst.h"
 
 /** The main entry point. */
 int main(int argc, const char * argv[]) {
@@ -36,13 +36,13 @@ int main(int argc, const char * argv[]) {
             exit(-1);
         }
     }
-    Terminal *term = [Terminal new];
+    DLTerminal *term = [DLTerminal new];
     [dl setIsREPL:YES];
     [dl bootstrap];
     [[dl ioService] setStdIODelegate:term];
     [dl printVersion];
     [dl loadDLModuleLibs];
-    [[dl ioService] writeOutput:[ShellConst shellVersion]];
+    [[dl ioService] writeOutput:[DLShellConst shellVersion]];
     NSString *inp;
     NSString *ret;
     const char *prompt = [[dl prompt] UTF8String];

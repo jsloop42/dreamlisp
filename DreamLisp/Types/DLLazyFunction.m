@@ -12,7 +12,7 @@
     void (^_fn)(DLLazySequence *seq, NSMutableArray *xs);
     id<DLDataProtocol> _ast;
     NSMutableArray *_params;
-    Env *_env;
+    DLEnv *_env;
     BOOL _isMacro;
     id<DLDataProtocol> _meta;
     NSInteger _argsCount;
@@ -49,9 +49,9 @@
     if (![self isLazyFunction:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithArity, @"'lazy-function'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithArity, @"'lazy-function'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatch, @"'lazy-function'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatch, @"'lazy-function'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -62,16 +62,16 @@
     if (![DLLazyFunction isLazyFunction:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'lazy-function'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'lazy-function'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'lazy-function'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'lazy-function'", [data dataTypeName]];
         }
         [err throw];
     }
     return (DLLazyFunction *)data;
 }
 
-- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
+- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(DLEnv *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
                          fn:(void (^)(DLLazySequence *seq, NSMutableArray *xs))fn name:(NSString *)name {
     self = [super init];
     if (self) {
@@ -87,7 +87,7 @@
     return self;
 }
 
-- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
+- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(DLEnv *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
                          fn:(void (^)(DLLazySequence *seq, NSMutableArray *xs))fn {
     self = [super init];
     if (self) {

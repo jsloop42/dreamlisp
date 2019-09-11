@@ -12,7 +12,7 @@
     id<DLDataProtocol> (^_fn)(NSMutableArray *);
     id<DLDataProtocol> _ast;
     NSMutableArray *_params;
-    Env *_env;
+    DLEnv *_env;
     BOOL _isMacro;
     id<DLDataProtocol> _meta;
     NSInteger _argsCount;
@@ -49,9 +49,9 @@
     if (![self isFunction:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithArity, @"'function'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithArity, @"'function'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatch, @"'function'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatch, @"'function'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -62,16 +62,16 @@
     if (![DLFunction isFunction:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'function'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'function'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'function'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'function'", [data dataTypeName]];
         }
         [err throw];
     }
     return (DLFunction *)data;
 }
 
-- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
+- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(DLEnv *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
                          fn:(id<DLDataProtocol> (^)(NSMutableArray *))fn name:(NSString *)name {
     self = [super init];
     if (self) {
@@ -87,7 +87,7 @@
     return self;
 }
 
-- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
+- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(DLEnv *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
                          fn:(id<DLDataProtocol> (^)(NSMutableArray *))fn {
     self = [super init];
     if (self) {

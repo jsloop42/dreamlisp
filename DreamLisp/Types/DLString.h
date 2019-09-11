@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "Const.h"
+#import "DLConst.h"
 #import "DLDataProtocol.h"
 #import "NSString+DLDataProtocol.h"
 #import "DLError.h"

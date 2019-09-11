@@ -8,14 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import "DLDataProtocol.h"
-#import "IOService.h"
+#import "DLIOService.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /** A DL delegate which can be used to invoke the methods defined in @c DreamLisp.h. */
 @protocol DLDelegate <NSObject>
 - (id<DLDataProtocol>)eval:(id<DLDataProtocol>)ast;
-- (IOService *)ioService;
+- (DLIOService *)ioService;
 @end
 
 NS_ASSUME_NONNULL_END

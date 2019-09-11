@@ -1,5 +1,5 @@
 //
-//  DLTable.h
+//  DLTableProtocol.h
 //  DreamLisp
 //
 //  Created by jsloop on 08/09/19.

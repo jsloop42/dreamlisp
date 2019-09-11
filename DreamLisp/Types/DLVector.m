@@ -41,9 +41,9 @@
     if (![DLList isList:data] && ![DLVector isVector:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'list' or 'vector'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'list' or 'vector'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'list' or 'vector'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'list' or 'vector'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -127,7 +127,7 @@
 }
 
 - (NSMutableArray *)map:(id (^)(id arg))block {
-    return [TypeUtils mapOnArray:_array withBlock:block];
+    return [DLTypeUtils mapOnArray:_array withBlock:block];
 }
 
 - (void)enumerateConcurrent:(void (^)(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop))block {

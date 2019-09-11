@@ -7,22 +7,22 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "Const.h"
-#import "Types.h"
+#import "DLConst.h"
+#import "DLTypes.h"
 #import "DLDelegate.h"
-#import "Reader.h"
-#import "Printer.h"
-#import "Core.h"
-#import "FileOps.h"
-#import "IOService.h"
+#import "DLReader.h"
+#import "DLPrinter.h"
+#import "DLCore.h"
+#import "DLFileOps.h"
+#import "DLIOService.h"
 #import <objc/objc-api.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DreamLisp: NSObject <DLDelegate>
-@property (nonatomic, readwrite, retain) Reader *reader;
-@property (nonatomic, readwrite, retain) Env *globalEnv;
-@property (nonatomic, readwrite, retain) Env *env;
+@property (nonatomic, readwrite, retain) DLReader *reader;
+@property (nonatomic, readwrite, retain) DLEnv *globalEnv;
+@property (nonatomic, readwrite, retain) DLEnv *env;
 @property (nonatomic, readwrite) BOOL isREPL;
 @property (nonatomic, readwrite, retain) NSString *prompt;
 - (instancetype)init;

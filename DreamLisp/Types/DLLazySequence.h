@@ -13,7 +13,7 @@
 #import "DLFunction.h"
 #import "DLLazyFunction.h"
 #import "DLError.h"
-#import "TypeUtils.h"
+#import "DLTypeUtils.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -31,7 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, retain) NSMutableArray *acc;
 @property (nonatomic, readwrite) NSInteger index;
 @property (nonatomic, readwrite) NSUInteger length;
-@property (nonatomic, readwrite) enum SequenceType sequenceType;
+@property (nonatomic, readwrite) enum DLSequenceType sequenceType;
 @property (nonatomic, readwrite, retain) NSMutableArray<DLLazySequenceFn *> *fns;
 @property (nonatomic, readwrite) BOOL isNative;
 @property (nonatomic, readwrite) BOOL isReverseEnumerate;
@@ -39,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (DLLazySequence *)dataToLazySequence:(id<DLDataProtocol>)data fnName:(NSString *)fnName;
 + (DLLazySequence *)dataToLazySequence:(id<DLDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)init;
-- (instancetype)initWithArray:(NSMutableArray *)array sequenceType:(enum SequenceType)sequenceType;
+- (instancetype)initWithArray:(NSMutableArray *)array sequenceType:(enum DLSequenceType)sequenceType;
 - (NSMutableArray *)value;
 - (void)updateEnumerator;
 - (id)next;

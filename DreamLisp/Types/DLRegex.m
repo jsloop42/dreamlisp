@@ -35,9 +35,9 @@
     if (![DLRegex isRegex:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'regex' or a 'string' pattern", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'regex' or a 'string' pattern", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'regex' or a 'string' pattern", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'regex' or a 'string' pattern", [data dataTypeName]];
         }
         [err throw];
     }
@@ -97,7 +97,7 @@
 }
 
 - (void)bootstrap {
-    _moduleName = [State currentModuleName];
+    _moduleName = [DLState currentModuleName];
     _isImported = NO;
     _isMutable = NO;
 }

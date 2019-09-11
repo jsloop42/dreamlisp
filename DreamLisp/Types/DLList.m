@@ -40,9 +40,9 @@
     if (![DLList isKindOfList:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'list'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'list'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'list'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'list'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -195,7 +195,7 @@
 
 - (NSMutableArray *)map:(id (^)(id arg))block {
     @autoreleasepool {
-        return [TypeUtils mapOnArray:_array withBlock:block];
+        return [DLTypeUtils mapOnArray:_array withBlock:block];
     }
 }
 

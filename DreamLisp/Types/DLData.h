@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "DLDataProtocol.h"
-#import "State.h"
+#import "DLState.h"
 #import "DLError.h"
 
 NS_ASSUME_NONNULL_BEGIN

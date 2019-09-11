@@ -35,9 +35,9 @@
     if (![DLData isData:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'data'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'data'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'data'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'data'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -100,7 +100,7 @@
 }
 
 - (void)bootstrap {
-    _moduleName = [State currentModuleName];
+    _moduleName = [DLState currentModuleName];
     _isImported = NO;
     _isMutable = NO;
 }

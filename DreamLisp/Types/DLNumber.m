@@ -38,9 +38,9 @@
     if (![DLNumber isNumber:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'number'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'number'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'number'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'number'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -55,9 +55,9 @@
     if (![self isNumber:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithArity, @"'number'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithArity, @"'number'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatch, @"'number'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatch, @"'number'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -208,7 +208,7 @@
 }
 
 - (BOOL)checkDouble:(NSString *)string {
-    if ([TypeUtils matchString:string withExpression:_decimalExp]) {
+    if ([DLTypeUtils matchString:string withExpression:_decimalExp]) {
         return YES;
     }
     return NO;

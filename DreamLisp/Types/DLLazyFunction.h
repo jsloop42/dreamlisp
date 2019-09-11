@@ -8,12 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import "DLDataProtocol.h"
-#import "Env.h"
+#import "DLEnv.h"
 #import "DLLazySequence.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class Env;
+@class DLEnv;
 @class DLLazySequence;
 
 @interface DLLazyFunction: NSObject <DLDataProtocol>
@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, retain, nullable) id<DLDataProtocol> ast;
 // [Symbols]
 @property (nonatomic, readwrite, retain, nullable) NSMutableArray *params;
-@property (nonatomic, readwrite, retain, nullable) Env *env;
+@property (nonatomic, readwrite, retain, nullable) DLEnv *env;
 @property (nonatomic, readwrite, assign, getter=isMacro) BOOL macro;
 /**
   The arity count of the function. For variadic functions it returns @c n and @c n+m where @c m is the non-variadic arguments if present.
@@ -40,9 +40,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (DLLazyFunction *)dataToLazyFunction:(id<DLDataProtocol>)data position:(NSInteger)position;
 + (DLLazyFunction *)dataToLazyFunction:(id<DLDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
+- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(DLEnv *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
                          fn:(void (^)(DLLazySequence *seq, NSMutableArray *xs))fn;
-- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
+- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(DLEnv *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
                          fn:(void (^)(DLLazySequence *seq, NSMutableArray *xs))fn name:(NSString *)name;
 - (instancetype)initWithFn:(void (^)(DLLazySequence *seq, NSMutableArray *xs))fn name:(NSString *)name;
 - (instancetype)initWithFn:(void (^)(DLLazySequence *seq, NSMutableArray *xs))fn argCount:(NSInteger)count name:(NSString *)name;

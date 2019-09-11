@@ -41,7 +41,7 @@
     BOOL _isMutable;
     id<DLDataProtocol> _meta;
     NSString *_moduleName;
-    enum SequenceType _sequenceType;
+    enum DLSequenceType _sequenceType;
     NSMutableArray<DLLazySequenceFn *> *_fns;
     /**
      If the element is a native data structure or if it is wrapped in an @a NSMutableArray, encountered in cases where there are multiple arguments
@@ -76,9 +76,9 @@
     if (![DLLazySequence isLazySequence:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'lazy-sequence'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'lazy-sequence'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'lazy-sequence'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'lazy-sequence'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -93,7 +93,7 @@
     return self;
 }
 
-- (instancetype)initWithArray:(NSMutableArray *)array sequenceType:(enum SequenceType)sequenceType {
+- (instancetype)initWithArray:(NSMutableArray *)array sequenceType:(enum DLSequenceType)sequenceType {
     self = [super init];
     if (self) {
         [self bootstrap];
@@ -134,7 +134,7 @@
     [coder encodeObject:_acc forKey:@"DLLazySequence_acc"];
     [coder encodeObject:@(_index) forKey:@"DLLazySequence_index"];
     [coder encodeObject:@(_length) forKey:@"DLLazySequence_length"];
-    NSValue *sequenceTypeValue = [[NSValue alloc] initWithBytes:&_sequenceType objCType:@encode(SequenceType)];
+    NSValue *sequenceTypeValue = [[NSValue alloc] initWithBytes:&_sequenceType objCType:@encode(DLSequenceType)];
     [coder encodeObject:sequenceTypeValue forKey:@"DLLazySequence_sequenceType"];
     [coder encodeObject:_fns forKey:@"DLLazySequence_fns"];
     NSValue *isNativeValue = [[NSValue alloc] initWithBytes:&_isNative objCType:@encode(BOOL)];
@@ -199,8 +199,8 @@
 }
 
 - (id)next {
-    if (_index < 0) [[[DLError alloc] initWithFormat:IndexOutOfBounds, _index, 0] throw];
-    if (_index >= _length) [[[DLError alloc] initWithFormat:IndexOutOfBounds, _index, _length] throw];
+    if (_index < 0) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, _index, 0] throw];
+    if (_index >= _length) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, _index, _length] throw];
     if (_isNative) return _array[_isReverseEnumerate ? _index-- : _index++];
     if ([_array count] > 1) {  // not native => array count will be always greater than 1
         NSMutableArray *res = [NSMutableArray new];

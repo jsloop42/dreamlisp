@@ -35,9 +35,9 @@
     if (![DLHashMap isHashMap:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'hash-map'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'hash-map'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'hash-map'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'hash-map'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -153,7 +153,7 @@
 - (void)fromArray:(NSArray *)array {
     NSUInteger i = 0;
     NSUInteger len = [array count];
-    if (len % 2 != 0) [[[DLError alloc] initWithFormat:ArityOddError, len] throw];
+    if (len % 2 != 0) [[[DLError alloc] initWithFormat:DLArityOddError, len] throw];
     for (i = 0; i < len; i = i + 2) {
         [_table setObject:(id<DLDataProtocol>)array[i + 1] forKey:array[i]];
     }
