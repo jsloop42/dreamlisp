@@ -25,18 +25,18 @@ NS_ASSUME_NONNULL_BEGIN
 @class ModuleTable;
 
 @interface Env : NSObject<NSSecureCoding>
-@property (nonatomic, readwrite) Env *outer;
-@property (nonatomic, readwrite) ModuleTable *exportTable;
-@property (nonatomic, readwrite) ModuleTable *importTable;
-@property (nonatomic, readwrite) ModuleTable *internalTable;
-@property (nonatomic, readwrite) SymbolTable *symbolTable;
-@property (nonatomic, readwrite) NSString *moduleName;
-@property (nonatomic, readwrite) NSString *moduleDescription;
+@property (nonatomic, readwrite, retain) Env *outer;
+@property (nonatomic, readwrite, retain) ModuleTable *exportTable;
+@property (nonatomic, readwrite, retain) ModuleTable *importTable;
+@property (nonatomic, readwrite, retain) ModuleTable *internalTable;
+@property (nonatomic, readwrite, retain) SymbolTable *symbolTable;
+@property (nonatomic, readwrite, retain) NSString *moduleName;
+@property (nonatomic, readwrite, retain) NSString *moduleDescription;
 @property (nonatomic, readwrite) BOOL isUserDefined;
 @property (nonatomic, readwrite) BOOL isExportAll;
 + (void)initialize;
 + (void)setEnv:(Env *)env forModuleName:(NSString *)moduleName;
-+ (Env *)forModuleName:(NSString *)moduleName;
++ (Env *)envForModuleName:(NSString *)moduleName;
 + (void)removeModule:(NSString *)moduleName;
 + (NSMapTable<NSString *, Env *> *)modules;
 - (instancetype)init;

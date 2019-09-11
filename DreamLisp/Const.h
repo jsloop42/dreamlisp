@@ -11,25 +11,25 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Const : NSObject
-@property (class) NSArray *keywords;
-@property (class) NSString *emptyModuleName;
-@property (class) NSString *defaultModuleName;
-@property (class) NSString *defaultModuleDescription;
-@property (class) NSString *coreModuleName;
-@property (class) NSString *networkModuleName;
-@property (class) NSString *testModuleName;
-@property (class) NSMutableArray *dlModuleLibs;
-@property (class) NSString *exports;
-@property (class) NSString *imports;
-@property (class) NSString *internal;
-@property (class) NSString *name;
-@property (class) NSString *description;
-@property (class) NSString *ascendingKeyword;
-@property (class) NSString *descendingKeyword;
-@property (class) NSString *keyKeyword;
-@property (class) NSString *valueKeyword;
-@property (class) NSString *keyForNotificationKey;
-@property (class) NSString *keyForNotificationValue;
+@property (class, retain) NSArray *keywords;
+@property (class, retain) NSString *emptyModuleName;
+@property (class, retain) NSString *defaultModuleName;
+@property (class, retain) NSString *defaultModuleDescription;
+@property (class, retain) NSString *coreModuleName;
+@property (class, retain) NSString *networkModuleName;
+@property (class, retain) NSString *testModuleName;
+@property (class, retain) NSMutableArray *dlModuleLibs;
+@property (class, retain) NSString *exports;
+@property (class, retain) NSString *imports;
+@property (class, retain) NSString *internal;
+@property (class, retain) NSString *name;
+@property (class, retain) NSString *description;
+@property (class, retain) NSString *ascendingKeyword;
+@property (class, retain) NSString *descendingKeyword;
+@property (class, retain) NSString *keyKeyword;
+@property (class, retain) NSString *valueKeyword;
+@property (class, retain) NSString *keyForNotificationKey;
+@property (class, retain) NSString *keyForNotificationValue;
 + (NSString *)dlVersion;
 @end
 

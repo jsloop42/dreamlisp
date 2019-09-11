@@ -13,19 +13,26 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSUInteger, DLFileMode) {
+    DLFileModeRead,
+    DLFileModeWrite,
+    DLFileModeAppend
+};
+
 @interface FileResult : NSObject
 @property (nonatomic, readonly) NSUInteger index;
-@property (nonatomic, readonly) NSString *content;
+@property (nonatomic, readonly, assign) NSString *content;
 @end
 
 @interface FileOps : NSObject
-@property (nonatomic, readwrite) NSFileManager *fileManager;
-@property (nonatomic, readwrite) NSFileHandle *fileHandle;
 - (instancetype)init;
 - (BOOL)isDirectoryExists:(NSString *)path;
+- (BOOL)isFileExists:(NSString *)path;
 - (void)createDirectoryWithIntermediate:(NSString *)path;
 - (void)createFileIfNotExist:(NSString *)path;
-- (void)openFile:(NSString *)path;
+- (void)openFileForReading:(NSString *)path;
+- (void)openFileForAppending:(NSString *)path;
+- (void)openFileForWriting:(NSString *)path;
 - (void)closeFile;
 - (NSMutableArray<FileResult *> *)loadFileFromPath:(NSMutableArray *)locations isConcurrent:(BOOL)isConcurrent isLookup:(BOOL)isLookup;
 - (NSString *)currentDirectoryPath;
@@ -33,8 +40,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)resourcePath;
 - (BOOL)hasNext;
 - (NSString *)readLine;
-- (void)append:(NSString *)string completion:(void  (^ _Nullable)(void))callback;
-- (void)write:(NSString *)string toFile:(NSString *)filePath completion:(void  (^ _Nullable)(void))callback;
+- (void)append:(NSString *)string;
+- (void)write:(NSString *)string;
 - (BOOL)delete:(NSString *)path;
 @end
 

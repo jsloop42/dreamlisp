@@ -25,8 +25,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) NSInteger initialArity;
 @property (nonatomic, readwrite) BOOL isFunction;
 @property (nonatomic, readonly) BOOL hasNArity;
-@property (nonatomic, readwrite) NSString *fnName;
-@property (nonatomic, readwrite) NSString *initialModuleName;
+@property (nonatomic, readwrite, retain) NSString *fnName;
+@property (nonatomic, readwrite, retain) NSString *initialModuleName;
 @property (nonatomic, readwrite) BOOL isQualified;
 @property (nonatomic, readwrite) BOOL isModule;
 @property (nonatomic, readwrite) BOOL isFault;

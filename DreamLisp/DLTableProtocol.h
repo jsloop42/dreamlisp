@@ -12,7 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol DLTableProtocol <NSObject>
-@property (nonatomic, readwrite) NSMapTable *table;
+@property (nonatomic, readwrite, retain) NSMapTable *table;
 - (NSArray *)allKeys;
 - (NSArray *)allObjects;
 - (NSUInteger)count;

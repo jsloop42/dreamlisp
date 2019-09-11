@@ -48,7 +48,7 @@ extern NSString *SymbolParseError;
 extern NSString *SymbolTableTimeout;
 
 @interface DLError : NSObject
-@property (nonatomic, readwrite) NSString *description;
+@property (nonatomic, readwrite, retain) NSString *description;
 - (instancetype)initWithDescription:(NSString *)description;
 - (instancetype)initWithFormat:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2);
 - (instancetype)initWithData:(id<DLDataProtocol>)data;

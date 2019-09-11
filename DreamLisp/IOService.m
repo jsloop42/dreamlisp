@@ -9,8 +9,8 @@
 #import "IOService.h"
 
 @implementation IOService {
-    id<FileIOServiceDelegate> _fileIODelegate;
-    id<StdIOServiceDelegate> _stdIODelegate;
+    id<FileIOServiceDelegate> __weak _fileIODelegate;
+    id<StdIOServiceDelegate> __weak _stdIODelegate;
 }
 
 @synthesize fileIODelegate = _fileIODelegate;
@@ -48,7 +48,6 @@
 - (void)writeOutput:(nonnull NSString *)string terminator:(nonnull NSString *)terminator {
     [_stdIODelegate writeOutput:string terminator:terminator];
 }
-
 
 #pragma mark - Bundle
 

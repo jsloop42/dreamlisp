@@ -44,6 +44,7 @@ static IOService *_ioService;
     NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
     va_end(args);
     [_ioService writeOutput:[NSString stringWithFormat:@"[info] %@", message]];
+    [message release];
 }
 
 + (void)debug:(NSString *)message {
@@ -57,6 +58,7 @@ static IOService *_ioService;
         NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
         va_end(args);
         [_ioService writeOutput:[NSString stringWithFormat:@"[debug] %@", message]];
+        [message release];
     }
 }
 
@@ -70,6 +72,7 @@ static IOService *_ioService;
     NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
     va_end(args);
     [_ioService writeOutput:[NSString stringWithFormat:@"[error] %@", message]];
+    [message release];
 }
 
 + (void)verbose:(NSString *)message {
@@ -83,6 +86,7 @@ static IOService *_ioService;
         NSString *message = [[NSString alloc] initWithFormat: format arguments: args];
         va_end(args);
         [_ioService writeOutput:[NSString stringWithFormat:@"[verbose] %@", message]];
+        [message release];
     }
 }
 

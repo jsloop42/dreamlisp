@@ -20,9 +20,9 @@ NS_ASSUME_NONNULL_BEGIN
 @class NetworkSessionTable;
 
 @interface Network : NSObject<NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDataDelegate>
-@property (nonatomic, readwrite) Env *env;
-@property (nonatomic, readwrite) NetworkSessionTable *networkSessionTable;
-@property (nonatomic, readwrite) NSURLSession *urlSession;
+@property (nonatomic, readwrite, retain) Env *env;
+@property (nonatomic, readwrite, retain) NetworkSessionTable *networkSessionTable;
+@property (nonatomic, readwrite, retain) NSURLSession *urlSession;
 @end
 
 NS_ASSUME_NONNULL_END

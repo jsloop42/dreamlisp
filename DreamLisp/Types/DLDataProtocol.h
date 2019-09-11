@@ -15,9 +15,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSString *dataTypeName;
 @property (nonatomic, readonly) NSUInteger hash;
 @property (nonatomic, readonly) NSInteger sortValue;
-@property (nonatomic, readwrite) id value;
-@property (nonatomic, readwrite) id<DLDataProtocol> meta;
-@property (nonatomic, readwrite) NSString *moduleName;
+@property (nonatomic, readwrite, retain) id value;
+@property (nonatomic, readwrite, retain) id<DLDataProtocol> meta;
+@property (nonatomic, readwrite, retain) NSString *moduleName;
 @property (nonatomic, readwrite) BOOL isImported;
 @property (nonatomic, readwrite) BOOL isMutable;
 - (BOOL)hasMeta;

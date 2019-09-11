@@ -27,10 +27,10 @@
 		9E326C9322C7891800B456A2 /* DLLazySequence.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C9122C7891800B456A2 /* DLLazySequence.m */; };
 		9E326C9722C8C5D300B456A2 /* DLLazyFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E326C9522C8C5D100B456A2 /* DLLazyFunction.h */; };
 		9E326C9822C8C5D300B456A2 /* DLLazyFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C9622C8C5D200B456A2 /* DLLazyFunction.m */; };
-		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
+		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E3F324B227B694400B56B6A /* core.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.dlisp */; };
-		9E5D7B4B225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
-		9E5D7B4C225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; };
+		9E5D7B4B225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		9E5D7B4C225B947E00970453 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* Terminal.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E69232223255DFF00B12A65 /* Network.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E69232023255DFD00B12A65 /* Network.m */; };
 		9E69232323255DFF00B12A65 /* Network.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E69232123255DFE00B12A65 /* Network.h */; };
 		9E69232623255FA900B12A65 /* NetworkSessionTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E69232423255FA900B12A65 /* NetworkSessionTable.h */; };
@@ -63,10 +63,10 @@
 		9E741E9022C12C38009680E8 /* Const.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E281CED225908480038A5AF /* Const.m */; };
 		9E741E9122C12C38009680E8 /* Core.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6422568D4B00348529 /* Core.m */; };
 		9E741E9222C12C38009680E8 /* Env.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D6C22568D8D00348529 /* Env.m */; };
-		9E741E9322C12C38009680E8 /* FileOps.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9B6227225B9FC20060DA9A /* FileOps.m */; };
+		9E741E9322C12C38009680E8 /* FileOps.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9B6227225B9FC20060DA9A /* FileOps.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E741E9422C12C38009680E8 /* DLError.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30555F2262633E001D4597 /* DLError.m */; };
 		9E741E9522C12C38009680E8 /* DreamLisp.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F444722578E5600777A24 /* DreamLisp.m */; };
-		9E741E9622C12C38009680E8 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553A2260FA8F001D4597 /* Logger.m */; };
+		9E741E9622C12C38009680E8 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553A2260FA8F001D4597 /* Logger.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E741E9722C12C38009680E8 /* ModuleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E250CEB22886ED500EDADEF /* ModuleTable.m */; };
 		9E741E9822C12C38009680E8 /* Printer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7022568DB100348529 /* Printer.m */; };
 		9E741E9922C12C38009680E8 /* Reader.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7422568DBD00348529 /* Reader.m */; };

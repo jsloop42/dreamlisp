@@ -17,7 +17,7 @@ static NSString *_historyFile = @"/dlisp-history";
     NSString *_historyPath;
     NSString *_homeDir;
     NSString *_appHomeDir;
-    NSString *_prompt;
+    const char *_prompt;
 }
 
 @synthesize prompt = _prompt;
@@ -34,12 +34,16 @@ static NSString *_historyFile = @"/dlisp-history";
     _homeDir = NSHomeDirectory();
     _appHomeDir = [_homeDir stringByAppendingString:_appHome];
     _historyPath = [_appHomeDir stringByAppendingString:_historyFile];
-    _prompt = [Const.defaultModuleName stringByAppendingString:@"> "];
+    _prompt = [self promptWithModule:Const.defaultModuleName];
     [self checkPath];
     [self loadHistoryFile:_historyPath];
 }
 
--(void)checkPath {
+- (const char *)promptWithModule:(NSString *)moduleName {
+    return [[NSString stringWithFormat:@"λ %@> ", moduleName] cStringUsingEncoding:NSUTF8StringEncoding];
+}
+
+- (void)checkPath {
     if (![_fops isDirectoryExists:_appHomeDir]) {
         [_fops createDirectoryWithIntermediate:_appHomeDir];
     }
@@ -48,12 +52,11 @@ static NSString *_historyFile = @"/dlisp-history";
 
 - (void)loadHistoryFile:(NSString *)path {
     @try {
-        [_fops openFile:path];
+        [_fops openFileForAppending:path];
         while([_fops hasNext]) {
-            @autoreleasepool {
-                NSString *line = [_fops readLine];
-                if ([line length] > 0) add_history([line cStringUsingEncoding:NSUTF8StringEncoding]);
-            }
+            NSString *line = [_fops readLine];
+            if ([line length] > 0) add_history([line cStringUsingEncoding:NSUTF8StringEncoding]);
+            [line release];
         }
     } @catch (NSException *exception) {
         [self writeOutput:exception.description];
@@ -65,21 +68,19 @@ static NSString *_historyFile = @"/dlisp-history";
 }
 
 - (NSString *)readline {
-    return [self readlineWithPrompt:[_prompt UTF8String]];
+    return [self readlineWithPrompt:_prompt];
 }
 
 - (NSString * _Nullable)readlineWithPrompt:(const char *)prompt {
-    @autoreleasepool {
-        char *input = readline(prompt);
-        NSString *exp = nil;
-        if (input) {
-            if (_isHistoryEnabled) add_history(input);
-            exp = [[NSString alloc] initWithUTF8String:input];
-            [_fops append:[exp stringByAppendingString:@"\n"] completion:nil];
-            free(input);
-        }
-        return exp;
+    NSString *exp = nil;
+    char *input = readline(prompt);
+    if (input) {
+        if (_isHistoryEnabled) add_history(input);
+        exp = [NSString stringWithFormat:@"%s\n", input];
+        free(input);
+        [_fops append:exp];
     }
+    return exp;
 }
 
 #pragma mark - StdIOServiceDelegate

@@ -16,8 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 @class DLSymbol;
 
 @interface SymbolKey : NSObject
-@property (nonatomic, readwrite) NSString *name;
-@property (nonatomic, readwrite) NSString *moduleName;
+@property (nonatomic, readwrite, retain) NSString *name;
+@property (nonatomic, readwrite, retain) NSString *moduleName;
 + (SymbolKey *)fromSymbol:(DLSymbol *)symbol;
 - (instancetype)initWithName:(NSString *)name moduleName:(NSString *)moduleName;
 - (BOOL)isEqual:(id)object;
@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface SymbolTable : NSObject
-@property (nonatomic, readwrite) NSMapTable <SymbolKey *, NSMutableArray<DLSymbol *> *> *table;
+@property (nonatomic, readwrite, retain) NSMapTable <SymbolKey *, NSMutableArray<DLSymbol *> *> *table;
 - (instancetype)init;
 - (NSMutableArray * _Nullable)arrayForKey:(SymbolKey *)key;
 - (void)setKey:(DLSymbol *)key;

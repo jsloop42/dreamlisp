@@ -13,12 +13,13 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Terminal : NSObject <StdIOServiceDelegate>
-@property (nonatomic, readwrite) NSString *prompt;
+@property (nonatomic, readwrite, assign) const char *prompt;
 - (instancetype)init;
 - (NSString *)readline;
 - (NSString * _Nullable)readlineWithPrompt:(const char *)prompt;
 - (void)loadHistoryFile:(NSString *)path;
 - (void)disableHistory:(BOOL)flag;
+- (const char *)promptWithModule:(NSString *)moduleName;
 @end
 
 NS_ASSUME_NONNULL_END

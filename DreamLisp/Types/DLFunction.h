@@ -31,7 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
  @endcode
  */
 @property (nonatomic, readwrite) NSInteger argsCount;
-@property (nonatomic, readwrite) NSString *name;
+@property (nonatomic, readwrite, retain) NSString *name;
 + (instancetype)new NS_UNAVAILABLE;
 + (BOOL)isFunction:(id)object;
 + (DLFunction *)dataToFunction:(id<DLDataProtocol>)data;

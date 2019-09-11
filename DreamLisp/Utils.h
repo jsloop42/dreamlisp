@@ -54,6 +54,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSMutableArray *)stringToArray:(DLString *)string isNative:(BOOL)isNative;
 + (void)appendStringFromArray:(NSMutableArray *)array string:(DLString *)string;
 + (NSString *)httpMethodTypeToString:(DLKeyword *)methodType;
++ (NSString *)promptWithModule:(NSString *)moduleName;
 - (instancetype)init NS_UNAVAILABLE;
 @end
 

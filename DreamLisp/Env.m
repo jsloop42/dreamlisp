@@ -53,7 +53,7 @@ static NSMapTable<NSString *, Env *> *_modules;
 }
 
 /** Returns env for the given module name. */
-+ (Env *)forModuleName:(NSString *)moduleName {
++ (Env *)envForModuleName:(NSString *)moduleName {
     return [_modules objectForKey:moduleName];
 }
 
@@ -163,15 +163,18 @@ static NSMapTable<NSString *, Env *> *_modules;
         _moduleName = [env moduleName];
         _isExportAll = [env isExportAll];
         _outer = env;
+        DLSymbol *sym = nil;
+        DLSymbol *key = nil;
+        DLList *list = nil;
         for (i = 0; i < len; i++) {
-            DLSymbol *sym = (DLSymbol *)binds[i];
+            sym = (DLSymbol *)binds[i];
             if ([[sym value] isEqual:@"&"]) {
-                DLSymbol *key = (DLSymbol *)binds[i + 1];
+                key = (DLSymbol *)binds[i + 1];
                 if ([exprs count] > i) {
                     [self setObject:[[DLList alloc] initWithArray:[exprs subarrayWithRange:NSMakeRange(i, [exprs count] - i)]] forKey:key];
                     [_symbolTable setKey:key];
                 } else {
-                    DLList *list = [[DLList alloc] initWithArray:@[]];
+                    list = [[DLList alloc] initWithArray:@[]];
                     [self setFunctionInfo:list symbol:key];
                     [self setObject:list forKey:key];
                     [_symbolTable setKey:key];
@@ -199,7 +202,7 @@ static NSMapTable<NSString *, Env *> *_modules;
 
 - (id<DLDataProtocol>)resolveImportFault:(DLFault *)fault forKey:(DLSymbol *)key inEnv:(Env *)env {
     id<DLDataProtocol> val = nil;
-    Env *modEnv = [Env forModuleName:[fault moduleName]];
+    Env *modEnv = [Env envForModuleName:[fault moduleName]];
     DLSymbol *sym = [key copy];
     if (modEnv) {
         [sym setModuleName:[fault moduleName]];  // update module name so that the key can be retrieved from the original module
@@ -238,10 +241,10 @@ static NSMapTable<NSString *, Env *> *_modules;
     if ([DLFault isFault:object]) {
         DLFault *fault = (DLFault *)object;
         if ([fault isImported]) {
-            [self resolveExportFault:fault forKey:key inEnv:[Env forModuleName:[fault moduleName]]];
+            [self resolveExportFault:fault forKey:key inEnv:[Env envForModuleName:[fault moduleName]]];
             object = [self resolveImportFault:fault forKey:key inEnv:env];
         } else {  // Exported symbol
-            object = [self resolveExportFault:fault forKey:key inEnv:[Env forModuleName:[fault moduleName]]];
+            object = [self resolveExportFault:fault forKey:key inEnv:[Env envForModuleName:[fault moduleName]]];
         }
     }
     return object;
@@ -271,7 +274,7 @@ static NSMapTable<NSString *, Env *> *_modules;
 - (id<DLDataProtocol>)objectForSymbol:(DLSymbol *)key isThrow:(BOOL)isThrow isFromSymbolTable:(BOOL)isFromSymbolTable {
     DLSymbol *sym = [self symbolForKeyFromSymbolTable:key];  // Check the symbol table first to find any local scope bindings for the given symbol.
     if (sym) key = sym;
-    if ([key isQualified]) return [self objectForSymbol:key inModule:[Env forModuleName:[key initialModuleName]]];
+    if ([key isQualified]) return [self objectForSymbol:key inModule:[Env envForModuleName:[key initialModuleName]]];
     NSString *moduleName = [key moduleName];
     id<DLDataProtocol> elem = nil;
     if ([moduleName isEqual:_moduleName]) {
@@ -286,12 +289,12 @@ static NSMapTable<NSString *, Env *> *_modules;
         if (elem) return elem;
     } else {
         // Symbol belongs to another module
-        elem = [self objectForSymbol:key inModule:[Env forModuleName:[key moduleName]]];
+        elem = [self objectForSymbol:key inModule:[Env envForModuleName:[key moduleName]]];
         if (elem) return elem;
     }
     // Symbol may belong to core
     [key setModuleName:[Const coreModuleName]];
-    elem = [self objectForSymbol:key inModule:[Env forModuleName:[Const coreModuleName]]];
+    elem = [self objectForSymbol:key inModule:[Env envForModuleName:[Const coreModuleName]]];
     if (elem) return elem;
     [key resetModuleName];
     if (isThrow) [[[DLError alloc] initWithFormat:SymbolNotFound, [key string]] throw];
@@ -351,7 +354,7 @@ static NSMapTable<NSString *, Env *> *_modules;
 
 /** Get object for exported symbol from the module. Used only for resolving export fault. */
 - (id<DLDataProtocol> _Nullable)objectForExportedSymbol:(DLSymbol *)key module:(NSString *)name {
-    Env *env = [Env forModuleName:name];
+    Env *env = [Env envForModuleName:name];
     DLSymbol *sym = [key copy];
     if (env) {
         [sym setModuleName:[key initialModuleName]];

@@ -2282,24 +2282,26 @@ double dmod(double a, double n) {
     fn = [[DLFunction alloc] initWithFn:readline argCount:1 name:@"readline/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"readline" moduleName:[Const coreModuleName]]];
 
-    #pragma mark write-to-file
+    #pragma mark write-file
     /**
      Writes the given string to the given file. If the file does not exists, a new file will be created. If the file exists, its contents will be overwritten.
-     (write "string data" "/tmp/mytext.txt")
+     (write-file "string data" "/tmp/mytext.txt")
      */
-    id<DLDataProtocol>(^writeToFile)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            [TypeUtils checkArity:xs arity:2];
-            FileOps *fops = [FileOps new];
-            NSString *fnName = @"write-to-file/2";
-            DLString *aString = [DLString dataToString:[xs first] position:0 fnName:fnName];
-            DLString *filePath = [DLString dataToString:[xs second] position:1 fnName:fnName];
-            [fops write:[aString value] toFile:[filePath value] completion:nil];
-            return [[DLBool alloc] initWithBool:YES];
-        }
+    id<DLDataProtocol>(^writeFile)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        [TypeUtils checkArity:xs arity:2];
+        FileOps *fops = [FileOps new];
+        NSString *fnName = @"write-file/2";
+        DLString *aString = [DLString dataToString:[xs first] position:0 fnName:fnName];
+        DLString *filePath = [DLString dataToString:[xs second] position:1 fnName:fnName];
+        NSString *path = [filePath value];
+        [fops createFileIfNotExist:path];
+        [fops openFileForWriting:path];
+        [fops write:[aString value]];
+        [fops closeFile];
+        return [[DLBool alloc] initWithBool:YES];
     };
-    fn = [[DLFunction alloc] initWithFn:writeToFile argCount:2 name:@"write-to-file/2"];
-    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"write-to-file" moduleName:[Const coreModuleName]]];
+    fn = [[DLFunction alloc] initWithFn:writeFile argCount:2 name:@"write-file/2"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"write-file" moduleName:[Const coreModuleName]]];
 
     #pragma mark cwd
     /** Get the current working directory. */
@@ -2608,7 +2610,7 @@ double dmod(double a, double n) {
 
 - (NSMapTable * _Nullable)moduleInfo:(NSString *)moduleName {
     @autoreleasepool {
-        Env *env = [Env forModuleName:moduleName];
+        Env *env = [Env envForModuleName:moduleName];
         if (!env) {
             [[[DLError alloc] initWithFormat:ModuleNotFound, moduleName] throw];
             return nil;
@@ -2661,7 +2663,7 @@ double dmod(double a, double n) {
         @autoreleasepool {
             DLString *mod = [DLString dataToString:[xs first] fnName:@"module-exist?/1"];
             NSString* moduleName = (NSString *)[mod value];
-            Env *env = [Env forModuleName:moduleName];
+            Env *env = [Env envForModuleName:moduleName];
             return [[DLBool alloc] initWithBool:(env != nil)];
         }
     };

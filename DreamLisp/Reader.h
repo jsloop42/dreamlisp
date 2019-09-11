@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface Reader : NSObject
 @property (nonatomic, readonly) NSUInteger position;
-@property (nonatomic, readwrite) NSString *moduleName;
+@property (nonatomic, readwrite, retain) NSString *moduleName;
 - (instancetype)initWithTokens:(NSMutableArray *)array moduleName:(NSString *)name;
 - (nullable NSString *)next;
 - (nullable NSString *)peek;

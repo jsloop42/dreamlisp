@@ -19,6 +19,10 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 @synthesize index = _index;
 @synthesize content = _content;
 
+- (void)dealloc {
+    [super dealloc];
+}
+
 -(void)setIndex:(NSUInteger)index {
     _index = index;
 }
@@ -29,22 +33,27 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 
 @end
 
+/*!
+ A class to work with file IO. Use an instance for working with a file in a specific mode, for example, only for reading, and another only for appending.
+ */
 @implementation FileOps {
     NSString *_path;
     NSURL *_filePath;
+    /*! Holds the file content which is used for files which are opened for reading line by line or in appending mode. This is an autoreleased object. */
     NSData *_fileData;
     NSFileHandle *_fileHandle;
-    NSFileHandle *_appendHandle;
     NSData *_delim;
     NSUInteger _start;
     NSUInteger _offset;
     NSUInteger _buff;
     NSFileManager *_fm;
+    NSFileHandle *_readFileHandle;
+    NSFileHandle *_writeFileHandle;
+    NSFileHandle *_appendFileHandle;
     dispatch_queue_t _serialQueue;
+    enum DLFileMode _fileMode;
+    BOOL _isFileClosed;
 }
-
-@synthesize fileManager = _fileManager;
-@synthesize fileHandle = _fileHandle;
 
 - (instancetype)init {
     self = [super init];
@@ -53,15 +62,12 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 }
 
 - (void)dealloc {
-    [self closeFile];
-    _appendHandle = nil;
-    _fileHandle = nil;
+    if (!_isFileClosed) [self closeFile];
+    [super dealloc];
 }
 
 - (void)bootstrap {
     _filePath = [NSURL fileURLWithPath:@""];
-    _fileData = [NSData new];
-    _fileHandle = [NSFileHandle new];
     _delim = [@"\n" dataUsingEncoding:NSUTF8StringEncoding];
     _start = 0;
     _offset = 0;
@@ -70,9 +76,13 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     _serialQueue = dispatch_queue_create("dl-fileops-queue", DISPATCH_QUEUE_SERIAL);
 }
 
+- (BOOL)isFileExists:(NSString *)path {
+    return [_fm fileExistsAtPath:path];
+}
+
 - (void)createFileIfNotExist:(NSString *)path {
     _path = path;
-    if (![_fm fileExistsAtPath:_path]) [_fm createFileAtPath:_path contents:nil attributes:nil];
+    if (![self isFileExists:_path]) [_fm createFileAtPath:_path contents:nil attributes:nil];
 }
 
 - (BOOL)isDirectoryExists:(NSString *)path {
@@ -84,24 +94,67 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     NSError *err = nil;
     BOOL ret = NO;
     ret = [_fm createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&err];
-    if (!ret || err) [[[DLError alloc] initWithUserInfo:[err userInfo]] throw];
+    if (!ret || err) [[[[DLError alloc] initWithUserInfo:[err userInfo]] autorelease] throw];
 }
 
-/** Opens the given file setting handlers for reading the file. */
-- (void)openFile:(NSString *)path {
+/*!
+ Opens the given file for reading.
+ @throws NSException If the file is not found or if read fails, an exception is thrown.
+ */
+- (void)openFileForReading:(NSString *)path {
+    _fileMode = DLFileModeRead;
     _path = path;
     _filePath = [NSURL fileURLWithPath:_path];
     _fileData = [NSData dataWithContentsOfURL:_filePath];
-    if (!_fileData) @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
+    if (!_fileData) @throw [[[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil] autorelease];
     NSError *err = nil;
-    _fileHandle = [NSFileHandle fileHandleForReadingFromURL:_filePath error:&err];
-    if (!_fileHandle && err) @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
+    _readFileHandle = [NSFileHandle fileHandleForReadingFromURL:_filePath error:&err];
+    if (!_readFileHandle && err) {
+        @throw [[[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil] autorelease];
+    }
+    _isFileClosed = NO;
     _buff = [_fileData length];
 }
 
+- (void)openFileForAppending:(NSString *)path {
+    _fileMode = DLFileModeAppend;
+    _path = path;
+    _filePath = [NSURL fileURLWithPath:_path];
+    _fileData = [NSData dataWithContentsOfURL:_filePath];
+    if (!_fileData) @throw [[[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil] autorelease];
+    NSError *err = nil;
+    _appendFileHandle = [NSFileHandle fileHandleForUpdatingURL:_filePath error:&err];
+    if (!_appendFileHandle && err) {
+        @throw [[[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil] autorelease];
+    }
+    _isFileClosed = NO;
+    _buff = [_fileData length];
+}
+
+- (void)openFileForWriting:(NSString *)path {
+    _fileMode = DLFileModeWrite;
+    NSURL *fileURL = [NSURL fileURLWithPath:path];
+    NSError *err = nil;
+    _writeFileHandle = [NSFileHandle fileHandleForWritingToURL:fileURL error:&err];
+    if (!_writeFileHandle && err) {
+        @throw [[[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil] autorelease];
+    }
+    _isFileClosed = NO;
+}
+
 - (void)closeFile {
-    if (_fileHandle) [_fileHandle closeFile];
-    if (_appendHandle) [_appendHandle closeFile];
+    if (_readFileHandle && _isFileClosed) {
+        [_readFileHandle closeFile];
+        _isFileClosed = YES;
+    }
+    if (_appendFileHandle && _isFileClosed) {
+        [_appendFileHandle closeFile];
+        _isFileClosed = YES;
+    }
+    if (_writeFileHandle && _isFileClosed) {
+        [_writeFileHandle closeFile];
+        _isFileClosed = YES;
+    }
 }
 
 /**
@@ -112,29 +165,24 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
   @return contents An array containing @c FileResult objects.
  */
 - (NSMutableArray<FileResult *> *)loadFileFromPath:(NSMutableArray *)locations isConcurrent:(BOOL)isConcurrent isLookup:(BOOL)isLookup {
-    NSMutableArray<FileResult *> *contents = [NSMutableArray new];
-    NSLock *lock = [NSLock new];
-    NSEnumerationOptions opt = isConcurrent ? NSEnumerationConcurrent : 0;
-    FileOps * __weak weakSelf = self;
-    [locations enumerateObjectsWithOptions:opt usingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        @autoreleasepool {
-            FileOps *this = weakSelf;
-            NSString *path = locations[idx];
-            if ([this->_fm fileExistsAtPath:path]) {
-                FileResult *result = [FileResult new];
-                [result setIndex:idx];
-                [result setContent:[NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil]];
-                if (isConcurrent) [lock lock];
-                if (isLookup && [contents count] == 0) {
-                    [contents addObject:result];
-                    *stop = YES;
-                } else if (!isLookup) {
-                    [contents addObject:result];
-                }
-                if (isConcurrent) [lock unlock];
+    NSMutableArray<FileResult *> *contents = [[NSMutableArray new] autorelease];
+    NSUInteger len = [locations count];
+    NSUInteger i = 0;
+    NSString *path = nil;
+    for (i = 0; i < len; i++) {
+        path = locations[i];
+        if ([_fm fileExistsAtPath:path]) {
+            FileResult *result = [[FileResult new] autorelease];
+            [result setIndex:i];
+            [result setContent:[NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil]];
+            if (isLookup && [contents count] == 0) {
+                [contents addObject:result];
+                break;
+            } else if (!isLookup) {
+                [contents addObject:result];
             }
         }
-    }];
+    }
     return contents;
 }
 
@@ -161,60 +209,40 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 /** Reads a line of string. */
 - (NSString *)readLine {
     NSData *line = nil;
+    NSFileHandle *fileHandle = _fileMode == DLFileModeRead ? _readFileHandle : _appendFileHandle;
     NSRange range = [_fileData rangeOfData:_delim options:0 range:NSMakeRange(_start, _buff - _start)];
     if (range.location != NSNotFound) {
         _offset = range.location - _start;
-        line = [_fileHandle readDataOfLength:_offset];
+        line = [fileHandle readDataOfLength:_offset];
         _start += _offset + range.length;
-        [_fileHandle seekToFileOffset:_start];
+        [fileHandle seekToFileOffset:_start];
     } else {
         _offset = _buff - _start;
-        line = [_fileHandle readDataOfLength:_offset];
-        [_fileHandle seekToFileOffset:_buff];
+        line = [fileHandle readDataOfLength:_offset];
+        [fileHandle seekToFileOffset:_buff];
         _start = _buff;
     }
-    return [[NSString alloc] initWithData:line encoding:NSUTF8StringEncoding];
+    return [[[NSString alloc] initWithData:line encoding:NSUTF8StringEncoding] autorelease];
 }
 
-/** Appends the given string to currently opened file asynchronously and invokes the given callback function when done. */
-- (void)append:(NSString *)string completion:(void  (^ _Nullable)(void))callback {
-    FileOps * __weak weakSelf = self;
-    dispatch_async(self->_serialQueue, ^{
-        @autoreleasepool {
-            FileOps *this = weakSelf;
-            if (this) {
-                if (!this->_appendHandle && this->_path) {
-                    this->_appendHandle = [NSFileHandle fileHandleForUpdatingAtPath:this->_path];
-                }
-                if (this->_appendHandle) {
-                    [this->_appendHandle seekToEndOfFile];
-                    NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
-                    if (data) {
-                        [this->_appendHandle writeData:data];
-                    }
-                } else {
-                    @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
-                }
-                if (callback) callback();
-            }
+- (void)append:(NSString *)string {
+    if (_appendFileHandle) {
+        [_appendFileHandle seekToEndOfFile];
+        NSData *data = [[NSData alloc] initWithBytes:[string cStringUsingEncoding:NSUTF8StringEncoding] length:[string count]];
+        if (data) {
+            [_appendFileHandle writeData:data];
+            [data release];
+            data = nil;
         }
-    });
+    } else {
+        @throw [[[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil] autorelease];
+    }
 }
 
-/** Writes the given string to the given file asynchronously and invokes the given callback function when done. */
-- (void)write:(NSString *)string toFile:(NSString *)filePath completion:(void  (^ _Nullable)(void))callback {
-    dispatch_async(self->_serialQueue, ^{
-        @autoreleasepool {
-            FileOps *fops = [FileOps new];
-            [fops createFileIfNotExist:filePath];
-            [fops openFile:filePath];
-            [fops.fileHandle writeData:[NSData dataWithBytes:[string UTF8String] length:[string length]]];
-            [fops closeFile];
-            if (callback) callback();
-        }
-    });
+/** Writes the given string to the file. */
+- (void)write:(NSString *)string {
+    [_writeFileHandle writeData:[NSData dataWithBytes:[string UTF8String] length:[string length]]];
 }
-
 
 /** Deletes the file at the given path. */
 - (BOOL)delete:(NSString *)path {
@@ -227,7 +255,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 #pragma mark - FileIOServiceDelegate
 
 - (NSString *)readFile:(NSString *)path {
-    FileResult *res = [[self loadFileFromPath:[@[path] mutableCopy] isConcurrent:NO isLookup:NO] first];
+    FileResult *res = [[self loadFileFromPath:[[@[path] mutableCopy] autorelease] isConcurrent:NO isLookup:NO] first];
     return [res content];
 }
 

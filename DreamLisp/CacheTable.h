@@ -14,8 +14,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CacheTable : NSObject
-@property (nonatomic, readwrite) NSMapTable *table;
-@property (nonatomic, readwrite) NSMutableArray *mru;
+@property (nonatomic, readwrite, retain) NSMapTable *table;
+@property (nonatomic, readwrite, retain) NSMutableArray *mru;
 @property (nonatomic, readwrite) NSUInteger mruSize;
 - (instancetype)init;
 - (instancetype)initWithSize:(NSUInteger)size;

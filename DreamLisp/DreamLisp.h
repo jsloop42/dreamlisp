@@ -20,11 +20,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DreamLisp: NSObject <DLDelegate>
-@property (nonatomic, readwrite) Reader *reader;
-@property (nonatomic, readwrite) Env *globalEnv;
-@property (nonatomic, readwrite) Env *env;
+@property (nonatomic, readwrite, retain) Reader *reader;
+@property (nonatomic, readwrite, retain) Env *globalEnv;
+@property (nonatomic, readwrite, retain) Env *env;
 @property (nonatomic, readwrite) BOOL isREPL;
-@property (nonatomic, readwrite) NSString *prompt;
+@property (nonatomic, readwrite, retain) NSString *prompt;
 - (instancetype)init;
 - (instancetype)initWithoutREPL;
 - (void)bootstrap;

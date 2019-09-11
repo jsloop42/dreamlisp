@@ -9,7 +9,8 @@ config="Release"
 dlshell="dlisp"
 dlfrwrk="DreamLisp.framework"
 dlfrwrkdsym="DreamLisp.framework.dSYM"
-rpath="$HOME/Library/Frameworks"
+#rpath="$HOME/Library/Frameworks"
+rpath="$HOME/bin"
 bin="$HOME/bin"
 
 function help() {

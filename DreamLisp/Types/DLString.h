@@ -15,7 +15,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DLString : NSObject <DLDataProtocol, NSSecureCoding>
-@property (nonatomic, readwrite) NSMutableString *mutableValue;
+@property (nonatomic, readwrite, retain) NSMutableString *mutableValue;
 + (BOOL)isString:(id)object;
 + (BOOL)isString:(id)object withValue:(NSString *)name;
 + (DLString *)dataToString:(id<DLDataProtocol>)data fnName:(NSString *)fnName;

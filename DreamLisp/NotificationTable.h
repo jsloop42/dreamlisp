@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class NotificationData;
 
 @interface NotificationTable : DLTable
-@property (nonatomic, readwrite) NSMapTable *table;
+@property (nonatomic, readwrite, retain) NSMapTable *table;
 + (NotificationTable *)shared;
 - (void)setNotification:(NotificationData *)data;
 - (NotificationData * _Nullable)notification:(DLKeyword *)notificationKey;

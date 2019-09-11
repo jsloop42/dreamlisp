@@ -15,8 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 @class DLSymbol;
 
 @interface ModuleTable : NSObject
-@property (nonatomic, readwrite) NSMapTable<DLSymbol *, id<DLDataProtocol>> *table;
-@property (nonatomic, readwrite) NSString *name;
+@property (nonatomic, readwrite, retain) NSMapTable<DLSymbol *, id<DLDataProtocol>> *table;
+@property (nonatomic, readwrite, retain) NSString *name;
 - (instancetype)init;
 - (instancetype)initWithModuleTable:(ModuleTable *)table;
 - (void)setObject:(id<DLDataProtocol>)obj forKey:(DLSymbol *)key;

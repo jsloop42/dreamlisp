@@ -20,6 +20,7 @@ static NSString *langVersion;
     Env *_env;
     Core *_core;
     Network *_network;
+    FileOps *_fileOps;
     IOService* _ioService;
     BOOL _isQuasiquoteMode;
     NSUInteger _quasiquoteDepth;
@@ -58,7 +59,8 @@ static NSString *langVersion;
 
 - (void)bootstrap {
     _ioService = [IOService new];
-    [_ioService setFileIODelegate:[FileOps new]];
+    _fileOps = [FileOps new];
+    [_ioService setFileIODelegate:_fileOps];
     [Logger setIOService:_ioService];
     _reader = [Reader new];
     _printer = [Printer new];
@@ -79,7 +81,7 @@ static NSString *langVersion;
     _repQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     [self setLoadFileToREPL];
     [self setEvalToREPL];
-    if (_isREPL) _prompt = [[State currentModuleName] stringByAppendingString:@"> "];
+    if (_isREPL) _prompt = [Utils promptWithModule:[State currentModuleName]];
 }
 
 #pragma mark Env setup
@@ -94,7 +96,7 @@ static NSString *langVersion;
         }
     };
     NSString *coreModuleName = [Const coreModuleName];
-    Env *coreEnv = [Env forModuleName:coreModuleName];
+    Env *coreEnv = [Env envForModuleName:coreModuleName];
     [coreEnv setObject:[[DLFunction alloc] initWithFn:fn argCount:1 name:@"eval/1"]
                 forKey:[[DLSymbol alloc] initWithArity:1 string:@"eval" moduleName:coreModuleName]];
     [coreEnv setObject:[DLList new] forKey:[[DLSymbol alloc] initWithName:@"*ARGV*" moduleName:coreModuleName]];
@@ -125,7 +127,7 @@ static NSString *langVersion;
                                                       [[NSString alloc] initWithFormat:@"%@", [path lastPathComponent]]] mutableCopy]];
         }
     };
-    Env *coreEnv = [Env forModuleName:[Const coreModuleName]];
+    Env *coreEnv = [Env envForModuleName:[Const coreModuleName]];
     DLSymbol *sym = [[DLSymbol alloc] initWithArity:1 string:@"load-file" moduleName:[Const coreModuleName]];
     DLFunction *fn = [[DLFunction alloc] initWithFn:loadFile argCount:1 name:@"load-file/1"];
     [fn setModuleName:[Const coreModuleName]];
@@ -497,7 +499,7 @@ static NSString *langVersion;
     [self updateModuleName:modName];
     // The third element onwards are imports and exports
     [self processModuleDirectives:[xs drop:2] module:_env];
-    if (_isREPL) _prompt = [modName stringByAppendingString:@"> "];
+    if (_isREPL) _prompt = [Utils promptWithModule:modName];
     return modSym;
 }
 
@@ -559,11 +561,10 @@ static NSString *langVersion;
         imp = (DLList *)impArr[i];
         if ([DLSymbol isSymbol:[imp first] withName:@"from"]) {
             modName = [(DLSymbol *)[imp second] value];
-            impEnv = [Env forModuleName:modName];
+            impEnv = [Env envForModuleName:modName];
             if (impEnv) {
                 impFns = (NSMutableArray *)[(DLList *)[imp drop:2] value];
                 fnLen = [impFns count];
-                j = 0;
                 for (j = 0; j < fnLen; j++) {
                     aExp = (DLList *)impFns[j];
                     sym = (DLSymbol *)[aExp first];
@@ -625,7 +626,7 @@ static NSString *langVersion;
         _env = _globalEnv;
     } else {
         // check modules table
-        Env *modEnv = [Env forModuleName:modName];
+        Env *modEnv = [Env envForModuleName:modName];
         if (modEnv) {
             _env = modEnv;
         } else {
@@ -639,13 +640,13 @@ static NSString *langVersion;
 
 /** Changes the prompt if in REPL and updates the @c currentModuleName */
 - (void)updateModuleName:(NSString *)moduleName {
-    if (_isREPL) _prompt = [moduleName stringByAppendingString:@"> "];
+    if (_isREPL) _prompt = [Utils promptWithModule:moduleName];
     [State setCurrentModuleName:moduleName];
     [[self reader] setModuleName:moduleName];
 }
 
 - (void)changeModuleTo:(NSString *)moduleName {
-    Env *env = [Env forModuleName:moduleName];
+    Env *env = [Env envForModuleName:moduleName];
     if (!env) {
         [[[DLError alloc] initWithFormat:ModuleNotFound, moduleName] throw];
         return;
@@ -653,7 +654,7 @@ static NSString *langVersion;
     [self setEnv:env];
     [State setCurrentModuleName:moduleName];
     [[self reader] setModuleName:moduleName];
-    if (_isREPL) _prompt = [moduleName stringByAppendingString:@"> "];
+    if (_isREPL) _prompt = [Utils promptWithModule:moduleName];
 }
 
 #pragma mark Print

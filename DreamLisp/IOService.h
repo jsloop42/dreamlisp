@@ -13,8 +13,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface IOService : NSObject <FileIOServiceDelegate, StdIOServiceDelegate>
-@property (nonatomic, readwrite) id<FileIOServiceDelegate> fileIODelegate;
-@property (nonatomic, readwrite) id<StdIOServiceDelegate> stdIODelegate;
+@property (nonatomic, readwrite, weak) id<FileIOServiceDelegate> fileIODelegate;
+@property (nonatomic, readwrite, weak) id<StdIOServiceDelegate> stdIODelegate;
 - (instancetype)initWithFileIODelegate:(id<FileIOServiceDelegate>)aFileIODelegate stdIODelegate:(id<StdIOServiceDelegate>)aStdIODelegate;
 - (NSBundle *)mainBundle;
 - (NSString *)resourcePath;

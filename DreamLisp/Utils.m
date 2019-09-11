@@ -349,7 +349,7 @@ static BOOL _isCacheEnabled;
 
 /** Converts the given Foundation type to DL type. Used mainly in JSON de-serialization. */
 + (id<DLDataProtocol>)convertFromFoundationTypeToDLType:(id)value {
-    id<DLDataProtocol> val = [DLNil new];
+    id<DLDataProtocol> val = nil;
     if ([value isKindOfClass:[NSNull class]]) {
         val = [DLNil new];
     } else if ([value isKindOfClass:[NSMutableDictionary class]]) {
@@ -472,6 +472,10 @@ static BOOL _isCacheEnabled;
     if ([type isEqualToString:@"put"]) return @"PUT";
     if ([type isEqualToString:@"patch"]) return @"PATCH";
     return @"DELETE";
+}
+
++ (NSString *)promptWithModule:(NSString *)moduleName {
+    return [[NSString alloc] initWithFormat:@"λ %@> ", moduleName];
 }
 
 + (CacheTable *)cache {
