@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (DLList *)dataToList:(id<DLDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)initWithArray:(NSArray *)list;
 - (instancetype)initWithMeta:(id<DLDataProtocol>)meta vector:(DLVector *)vector;
+- (void)appendObject:(id<DLDataProtocol>)object;
 - (NSMutableArray *)map:(id (^)(id arg))block;
 - (void)enumerateConcurrent:(void (^)(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop))block;
 - (DLList *)list;

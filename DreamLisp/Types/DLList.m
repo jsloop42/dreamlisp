@@ -40,9 +40,9 @@
     if (![DLList isKindOfList:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'list'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'list'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'list'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'list'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -72,6 +72,40 @@
         _meta = meta;
     }
     return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _array = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLList_value"];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLList_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLList_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLList_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLList_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLList_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_array forKey:@"DLList_value"];
+    [coder encodeObject:_meta forKey:@"DLList_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLList_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLList_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLList_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLList_isMutable"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
 }
 
 - (NSString *)dataType {
@@ -161,7 +195,7 @@
 
 - (NSMutableArray *)map:(id (^)(id arg))block {
     @autoreleasepool {
-        return [TypeUtils mapOnArray:_array withBlock:block];
+        return [DLTypeUtils mapOnArray:_array withBlock:block];
     }
 }
 

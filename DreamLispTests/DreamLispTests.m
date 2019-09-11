@@ -10,7 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 #import <DreamLisp/DreamLispLib.h>
-#import "MockStdIOService.h"
+#import "DLMockStdIOService.h"
 
 @interface DLTests : XCTestCase
 @end
@@ -148,23 +148,23 @@
 }
 
 - (void)testJSSymbol {
-    DLSymbol *sym = [[DLSymbol alloc] initWithName:@"count" moduleName:[Const coreModuleName]]; // `(core:count a [1])
+    DLSymbol *sym = [[DLSymbol alloc] initWithName:@"count" moduleName:[DLConst coreModuleName]]; // `(core:count a [1])
     [sym setArity:-2];
     [sym resetArity];
-    [sym setModuleName:[Const defaultModuleName]];
+    [sym setModuleName:DLConst.defaultModuleName];
     [sym setPosition:0];
     [sym setIsQualified:YES];
     XCTAssertEqualObjects([sym string], @"core:count");
 }
 
 - (void)testJSSymbolComparison {
-    DLSymbol *sym1 = [[DLSymbol alloc] initWithName:@"a" moduleName:[State currentModuleName]];
+    DLSymbol *sym1 = [[DLSymbol alloc] initWithName:@"a" moduleName:[DLState currentModuleName]];
     [sym1 setArity:-2];
-    DLSymbol *sym2 = [[DLSymbol alloc] initWithName:@"b" moduleName:[State currentModuleName]];
+    DLSymbol *sym2 = [[DLSymbol alloc] initWithName:@"b" moduleName:[DLState currentModuleName]];
     [sym2 setArity:-1];
-    DLSymbol *sym3 = [[DLSymbol alloc] initWithName:@"c" moduleName:[State currentModuleName]];
+    DLSymbol *sym3 = [[DLSymbol alloc] initWithName:@"c" moduleName:[DLState currentModuleName]];
     [sym3 setArity:0];
-    DLSymbol *sym4 = [[DLSymbol alloc] initWithName:@"d" moduleName:[State currentModuleName]];
+    DLSymbol *sym4 = [[DLSymbol alloc] initWithName:@"d" moduleName:[DLState currentModuleName]];
     [sym4 setArity:1];
     NSMutableArray *arr = [@[sym3, sym4, sym2, sym1] mutableCopy];
     [arr sortUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
@@ -176,24 +176,24 @@
 }
 
 - (void)testJSSymbolProcess {
-    [State setCurrentModuleName:[Const defaultModuleName]];
+    [DLState setCurrentModuleName:DLConst.defaultModuleName];
     DLSymbol *sym = [DLSymbol processName:@"mod:func/1"];
-    XCTAssertEqualObjects([sym moduleName], [State currentModuleName]);
+    XCTAssertEqualObjects([sym moduleName], [DLState currentModuleName]);
     XCTAssertEqualObjects([sym initialModuleName], @"mod");
     XCTAssertEqual([sym arity], 1);
     XCTAssertEqual([sym initialArity], 1);
     XCTAssertTrue([sym isQualified]);
     XCTAssertTrue([sym isFunction]);
     sym = [DLSymbol processName:@"func/1"];
-    XCTAssertEqualObjects([sym moduleName], [State currentModuleName]);
-    XCTAssertEqualObjects([sym initialModuleName], [State currentModuleName]);
+    XCTAssertEqualObjects([sym moduleName], [DLState currentModuleName]);
+    XCTAssertEqualObjects([sym initialModuleName], [DLState currentModuleName]);
     XCTAssertEqual([sym arity], 1);
     XCTAssertEqual([sym initialArity], 1);
     XCTAssertFalse([sym isQualified]);
     XCTAssertTrue([sym isFunction]);
     sym = [DLSymbol processName:@"var"];
-    XCTAssertEqualObjects([sym moduleName], [State currentModuleName]);
-    XCTAssertEqualObjects([sym initialModuleName], [State currentModuleName]);
+    XCTAssertEqualObjects([sym moduleName], [DLState currentModuleName]);
+    XCTAssertEqualObjects([sym initialModuleName], [DLState currentModuleName]);
     XCTAssertEqual([sym arity], -2);
     XCTAssertEqual([sym initialArity], -2);
     XCTAssertFalse([sym isQualified]);
@@ -201,7 +201,7 @@
 }
 
 - (void)testTokenize {
-    Reader *reader = [Reader new];
+    DLReader *reader = [DLReader new];
     NSString *exp = @"(+ 1 2)";
     NSArray *tokens = [reader tokenize:exp];
     NSMutableArray *tokensArr = [[NSMutableArray alloc] initWithObjects: @"(", @"+", @"1", @"2", @")", nil];
@@ -226,12 +226,12 @@
 
 - (void)testReader {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
-    Reader *reader = [dl reader];
+    DLReader *reader = [dl reader];
     NSMutableArray<id<DLDataProtocol>> *ast = [reader readString:@"(def a 1)"];
     DLList *xs = (DLList *)ast[0];
-    XCTAssertEqualObjects([(DLSymbol *)[xs first] moduleName], [Const defaultModuleName]);
-    XCTAssertEqualObjects([(DLSymbol *)[xs second] moduleName], [Const defaultModuleName]);
-    XCTAssertEqualObjects([reader moduleName], [Const defaultModuleName]);
+    XCTAssertEqualObjects([(DLSymbol *)[xs first] moduleName], DLConst.defaultModuleName);
+    XCTAssertEqualObjects([(DLSymbol *)[xs second] moduleName], DLConst.defaultModuleName);
+    XCTAssertEqualObjects([reader moduleName], DLConst.defaultModuleName);
     ast = [reader readString:@"(defmodule foo (export all))"];
     XCTAssertEqualObjects([reader moduleName], @"foo");
     ast = [reader readString:@"(def a (fn (n) (+ n 1)))"];
@@ -244,27 +244,27 @@
     ast = [reader readString:@"(in-module \"user\")"];
     XCTAssertEqualObjects([reader moduleName], @"foo");
     [dl rep:@"(in-module \"user\")"];
-    XCTAssertEqualObjects([reader moduleName], [Const defaultModuleName]);
+    XCTAssertEqualObjects([reader moduleName], DLConst.defaultModuleName);
     ast = [reader readString:@"(def b 2)"];
     xs = (DLList *)ast[0];
-    XCTAssertEqualObjects([(DLSymbol *)[xs second] moduleName], [Const defaultModuleName]);
+    XCTAssertEqualObjects([(DLSymbol *)[xs second] moduleName], DLConst.defaultModuleName);
     ast = [reader readString:@"(core:empty? [1])"];
     xs = (DLList *)ast[0];
     DLSymbol *sym = (DLSymbol *)[xs first];
-    XCTAssertEqualObjects([sym moduleName], [Const defaultModuleName]);
-    XCTAssertEqualObjects([sym initialModuleName], [Const coreModuleName]);
+    XCTAssertEqualObjects([sym moduleName], DLConst.defaultModuleName);
+    XCTAssertEqualObjects([sym initialModuleName], DLConst.coreModuleName);
     XCTAssertTrue([sym isQualified]);
 }
 
 - (void)testPrintString {
-    Printer *prn = [Printer new];
+    DLPrinter *prn = [DLPrinter new];
     // Function
     DLFunction *fn = [[DLFunction alloc] initWithAst:[DLNil new] params:[NSMutableArray new]
-                      env:[Env new] macro:false meta:[DLNil new] fn:^id(id arg) { return nil; } name:@"nil-fn/0"];
+                      env:[DLEnv new] macro:false meta:[DLNil new] fn:^id(id arg) { return nil; } name:@"nil-fn/0"];
     XCTAssertEqualObjects([prn printStringFor:fn readably:true], @"nil-fn/0");
     // Symbol
     DLSymbol *sym = [[DLSymbol alloc] initWithName:@"greet"];
-    [sym setModuleName:[Const defaultModuleName]];
+    [sym setModuleName:DLConst.defaultModuleName];
     XCTAssertEqualObjects([prn printStringFor:sym readably:true], @"user:greet");
     // Integer
     DLNumber *num = [[DLNumber alloc] initWithString:@"42"];
@@ -293,8 +293,8 @@
 }
 
 - (void)testReadPrint {
-    Reader *reader = [Reader new];
-    Printer *printer = [Printer new];
+    DLReader *reader = [DLReader new];
+    DLPrinter *printer = [DLPrinter new];
     NSString *(^print)(NSString *) = ^NSString *(NSString *exp) {
         return [printer printStringFor:[reader readString:exp][0] readably:true];
     };
@@ -304,29 +304,34 @@
 }
 
 - (void)testFileOps {
-    XCTestExpectation *exp = [[XCTestExpectation alloc] initWithDescription:@"Appending and reading file content."];
-    FileOps *fops = [[FileOps alloc] init];
-    NSString *file = @"/tmp/fopstest.txt";
-    NSString *content = @"foo\nbar";
-    [fops createFileIfNotExist:file];
-    XCTAssertNoThrow([fops append:content completion:^ {
-        XCTAssertNoThrow([fops openFile:file]);
-        XCTAssertTrue([fops hasNext]);
-        NSString *text = @"";
-        while ([fops hasNext]) {
-            text = [text stringByAppendingString:[fops readLine]];
-        }
-        XCTAssertEqualObjects(text, @"foobar");
-        [fops closeFile];
-        XCTAssertTrue([fops delete:file]);
-        [exp fulfill];
-    }]);
-    [self waitForExpectations:@[exp] timeout:10.0];
+    NSString *filePath = @"/tmp/dl-fileops-test.txt";
+    NSString *content = @"You are my dream come true.\n";
+    NSString *appendContent = @"Take my hand and let's fly\n";
+    DLFileOps *readIO = [DLFileOps new];
+    DLFileOps *writeIO = [DLFileOps new];
+    DLFileOps *appendIO = [DLFileOps new];
+    XCTAssertFalse([writeIO isFileExists:filePath]);
+    XCTAssertNoThrow([writeIO createFileIfNotExist:filePath]);
+    XCTAssertNoThrow([writeIO openFileForWriting:filePath]);
+    [writeIO write:content];
+    [writeIO closeFile];
+    XCTAssertNoThrow([readIO openFileForReading:filePath]);
+    XCTAssertTrue([readIO hasNext]);
+    XCTAssertEqualObjects([readIO readLine], [content substringToIndex:[content length] - 1]);
+    XCTAssertNoThrow([appendIO openFileForAppending:filePath]);
+    [appendIO append:appendContent];
+    [appendIO closeFile];
+    // TODO: update this
+    //XCTAssertTrue([readIO hasNext]);
+    //XCTAssertEqualObjects([readIO readLine], [appendContent substringToIndex:[appendContent length] - 1]);
+    [readIO closeFile];
+    [readIO delete:filePath];
+    XCTAssertFalse([writeIO isFileExists:filePath]);
 }
 
 - (void)testDLHashMap {
-    Reader *reader = [Reader new];
-    Printer *printer = [Printer new];
+    DLReader *reader = [DLReader new];
+    DLPrinter *printer = [DLPrinter new];
     NSString *exp = @"{\"a\" \"abc\" \"b\" \"bcd\" \"c\" \"cde\"}";
     NSArray *inp = @[@"a", @"abc", @"b", @"bcd", @"c", @"cde"];
     id<DLDataProtocol> data = [reader readString:exp][0];
@@ -381,11 +386,12 @@
     XCTAssertEqualObjects([list last], [xs second]);
 }
 
-- (void)testLoadingCoreLib {
+- (void)testLoadingDLModules {
     DreamLisp *dl = [[DreamLisp alloc] init];
     [dl bootstrap];
-    [dl loadCoreLib];
-    XCTAssertTrue([[Env modules] containsKey:[Const coreModuleName]]);
+    [dl loadDLModuleLibs];
+    XCTAssertTrue([[DLEnv modules] containsKey:[DLConst coreModuleName]]);
+    XCTAssertTrue([[DLEnv modules] containsKey:[DLConst testModuleName]]);
 }
 
 - (void)testSymbol {
@@ -509,7 +515,7 @@
 
 - (void)testPrintFunctions {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
-    MockStdIOService *stdIOService = [MockStdIOService new];
+    DLMockStdIOService *stdIOService = [DLMockStdIOService new];
     [[dl ioService] setStdIODelegate:stdIOService];
     XCTAssertEqualObjects([dl rep:@"(println [33 2 3])"], @"nil");
     XCTAssertEqualObjects([stdIOService output], @"[33 2 3]");
@@ -697,25 +703,25 @@
 }
 
 - (void)testEnv {
-    Env *env = [Env new];
-    [env setModuleName:[Const defaultModuleName]];
+    DLEnv *env = [DLEnv new];
+    [env setModuleName:DLConst.defaultModuleName];
     DLString *obj = [[DLString alloc] initWithString:@"123"];
     DLSymbol *key = [[DLSymbol alloc] initWithName:@"key"];
-    [key setModuleName:[Const defaultModuleName]];
+    [key setModuleName:DLConst.defaultModuleName];
     [env setObject:obj forKey:key];
     XCTAssertEqualObjects([env objectForKey:key], obj);
-    Env *aEnv = [[Env alloc] initWithEnv:env];  // Nested env
+    DLEnv *aEnv = [[DLEnv alloc] initWithEnv:env];  // Nested env
     DLSymbol *aKey = [[DLSymbol alloc] initWithName:@"aKey"];
     DLString *aObj = [[DLString alloc] initWithString:@"987"];
-    [aKey setModuleName:[Const defaultModuleName]];
+    [aKey setModuleName:DLConst.defaultModuleName];
     [aEnv setObject:aObj forKey:aKey];
     XCTAssertEqualObjects([aEnv objectForKey:aKey], aObj);
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
     XCTAssertEqualObjects([dl rep:@"(list? *ARGV*)"], @"true");
     XCTAssertEqualObjects([dl rep:@"*ARGV*"], @"()");
     // Test with reader
-    Reader *reader = [Reader new];  // In default module, user
-    Env *denv = [[Env alloc] initWithModuleName:[Const defaultModuleName] isUserDefined:NO];
+    DLReader *reader = [DLReader new];  // In default module, user
+    DLEnv *denv = [[DLEnv alloc] initWithModuleName:DLConst.defaultModuleName isUserDefined:NO];
     NSMutableArray *xs = [reader readString:@"(def a 1)"];
     DLList *list = (DLList *)[xs first];
     key = [list nth:1];
@@ -728,7 +734,7 @@
     list = (DLList *)[xs first];
     key = [list nth:1];
     elem = [list nth:2];
-    Env *fooEnv = [[Env alloc] initWithModuleName:@"foo" isUserDefined:YES];
+    DLEnv *fooEnv = [[DLEnv alloc] initWithModuleName:@"foo" isUserDefined:YES];
     [fooEnv setObject:elem forKey:key];
     XCTAssertEqual([[fooEnv exportTable] count], 0);
     XCTAssertEqual([[fooEnv internalTable] count], 1);
@@ -925,12 +931,13 @@
     XCTAssertEqualObjects([dl rep:@"(seq \"\")"], @"nil");
 }
 
-- (void)testStringCoreFunctions {
+- (void)testCoreFunctionsOnString {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
     // first
     XCTAssertEqualObjects([dl rep:@"(first \"\")"], @"nil");
     XCTAssertEqualObjects([dl rep:@"(first \"abc\")"], @"\"a\"");
     XCTAssertEqualObjects([dl rep:@"(first \"12abc\")"], @"\"1\"");
+    XCTAssertEqualObjects([dl rep:@"(type (first \"abc\"))"], @"\"string\"");
     // rest
     XCTAssertEqualObjects([dl rep:@"(rest \"\")"], @"[]");
     XCTAssertEqualObjects([dl rep:@"(rest \"a\")"], @"[]");
@@ -939,6 +946,7 @@
     // nth
     XCTAssertEqualObjects([dl rep:@"(nth 0 \"abc\")"], @"\"a\"");
     XCTAssertEqualObjects([dl rep:@"(nth 1 \"abc\")"], @"\"b\"");
+    XCTAssertEqualObjects([dl rep:@"(type (nth 0 \"abc\"))"], @"\"string\"");
     XCTAssertThrows([dl rep:@"(nth -1 \"abc\")"]);
     XCTAssertThrows([dl rep:@"(nth 3 \"abc\")"]);
     XCTAssertThrows([dl rep:@"(nth 0 \"\")"]);
@@ -946,6 +954,7 @@
     XCTAssertEqualObjects([dl rep:@"(take 1 \"abc\")"], @"\"a\"");
     XCTAssertEqualObjects([dl rep:@"(take 2 \"abc\")"], @"\"ab\"");
     XCTAssertEqualObjects([dl rep:@"(take 0 \"\")"], @"\"\"");
+    XCTAssertEqualObjects([dl rep:@"(type (take 1 \"abc\"))"], @"\"string\"");
     XCTAssertEqualObjects([dl rep:@"(try (take 1 \"\") (catch ex ex))"], @"\"Index 1 is out of bound for length 0\"");
     XCTAssertEqualObjects([dl rep:@"(try (take -1 \"abcd\") (catch ex ex))"], @"\"Index -1 is out of bound for length 0\"");
     XCTAssertEqualObjects([dl rep:@"(try (take 10 \"abcd\") (catch ex ex))"], @"\"Index 10 is out of bound for length 4\"");
@@ -953,6 +962,7 @@
     XCTAssertEqualObjects([dl rep:@"(last \"abc\")"], @"\"c\"");
     XCTAssertEqualObjects([dl rep:@"(last \"\")"], @"nil");
     XCTAssertEqualObjects([dl rep:@"(last \"a\")"], @"\"a\"");
+    XCTAssertEqualObjects([dl rep:@"(type (last \"abc\"))"], @"\"string\"");
     // drop
     XCTAssertEqualObjects([dl rep:@"(drop 0 \"abc\")"], @"\"abc\"");
     XCTAssertEqualObjects([dl rep:@"(drop 1 \"abc\")"], @"\"bc\"");
@@ -960,6 +970,7 @@
     XCTAssertEqualObjects([dl rep:@"(drop 3 \"abc\")"], @"\"\"");
     XCTAssertEqualObjects([dl rep:@"(drop 4 \"abc\")"], @"\"\"");
     XCTAssertEqualObjects([dl rep:@"(drop -1 \"abc\")"], @"\"\"");
+    XCTAssertEqualObjects([dl rep:@"(type (drop 2 \"abc\"))"], @"\"string\"");
     // reverse
     XCTAssertEqualObjects([dl rep:@"(lazy-seq? (reverse \"abc\"))"], @"true");
     XCTAssertEqualObjects([dl rep:@"(doall (reverse \"abc\"))"], @"\"cba\"");
@@ -967,11 +978,13 @@
     XCTAssertEqualObjects([dl rep:@"(doall (reverse \"\"))"], @"\"\"");
     XCTAssertEqualObjects([dl rep:@"(doall (reverse \"1234\"))"], @"\"4321\"");
     XCTAssertEqualObjects([dl rep:@"(doall (reverse \"[1 2 3 4]\"))"], @"\"]4 3 2 1[\"");
+    XCTAssertEqualObjects([dl rep:@"(type (doall (reverse \"abc\")))"], @"\"string\"");
     // nth-tail
     XCTAssertEqualObjects([dl rep:@"(nth-tail 0 0 \"abcd\")"], @"\"a\"");
     XCTAssertEqualObjects([dl rep:@"(nth-tail 0 2 \"abcd\")"], @"\"abc\"");
     XCTAssertEqualObjects([dl rep:@"(nth-tail 1 2 \"abcd\")"], @"\"bc\"");
     XCTAssertEqualObjects([dl rep:@"(nth-tail 3 3 \"abcd\")"], @"\"d\"");
+    XCTAssertEqualObjects([dl rep:@"(type (nth-tail 3 3 \"abcd\"))"], @"\"string\"");
     XCTAssertThrows([dl rep:@"(nth-tail -1 3 \"abcd\")"]);
     XCTAssertThrows([dl rep:@"(nth-tail 1 4 \"abcd\")"]);
     XCTAssertThrows([dl rep:@"(nth-tail 1 0 \"abcd\")"]);
@@ -984,7 +997,11 @@
     XCTAssertEqualObjects([dl rep:@"(append '(1 2 3) 0 \"bcd\")"], @"\"(1 2 3)bcd\"");
     XCTAssertEqualObjects([dl rep:@"(append [1 2 3] 0 \"bcd\")"], @"\"[1 2 3]bcd\"");
     XCTAssertEqualObjects([dl rep:@"(append {:a 1} 0 \"bcd\")"], @"\"{:a 1}bcd\"");
+    XCTAssertEqualObjects([dl rep:@"(type (append \"a\" 0 \"bcd\"))"], @"\"string\"");
     XCTAssertThrows([dl rep:@"(append 0 4 '(1 2))"]);
+    // seq
+    XCTAssertEqualObjects([dl rep:@"(seq \"hello\")"], @"(\"h\" \"e\" \"l\" \"l\" \"o\")");
+    XCTAssertEqualObjects([dl rep:@"(type (first (seq \"hello\")))"], @"\"string\"");
 }
 
 - (void)testPrint {
@@ -1037,7 +1054,7 @@
 
 - (void)testdoForm {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
-    MockStdIOService *stdIOService = [MockStdIOService new];
+    DLMockStdIOService *stdIOService = [DLMockStdIOService new];
     [[dl ioService] setStdIODelegate:stdIOService];
     XCTAssertEqualObjects([dl rep:@"(do (def a 6) 7 (+ a 8))"], @"14");
     XCTAssertEqualObjects([dl rep:@"a"], @"6");
@@ -1515,7 +1532,7 @@
 
 - (void)testErrorHandling {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
-    MockStdIOService *stdIOService = [MockStdIOService new];
+    DLMockStdIOService *stdIOService = [DLMockStdIOService new];
     [[dl ioService] setStdIODelegate:stdIOService];
     XCTAssertThrows([dl rep:@"(throw \"err1\")"], @"Error: err1");
     XCTAssertThrows([dl rep:@"(throw {:msg \"err2\"})"], @"Error: {:msg \"err2\"}");
@@ -1637,7 +1654,7 @@
 
 - (void)testReadString {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
-    FileOps *fops = [FileOps new];
+    DLFileOps *fops = [DLFileOps new];
     XCTAssertEqualObjects([dl rep:@"(read-string \"(1 2 (3 4) nil)\")"], @"(1 2 (3 4) nil)");
     // Internally qualifies with current module name if not qualified. Eval will check core functions in core module if not in user module unless they are
     // explicitly qualified.
@@ -1645,18 +1662,19 @@
     XCTAssertEqualObjects([dl rep:@"(read-string \"7 ;; comment\")"], @"7");
     XCTAssertEqualObjects([dl rep:@"(read-string \";; comment\")"], @"nil");
     XCTAssertEqualObjects([dl rep:@"(eval (read-string \"(+ 2 3)\"))"], @"5");
-    [fops createFileIfNotExist:@"/tmp/dl-test.txt"];
-    [fops append:@"A line of text\n" completion: ^{
-        XCTAssertEqualObjects([dl rep:@"(slurp \"/tmp/dl-test.txt\")"], @"\"A line of text\\n\"");
-        [fops closeFile];
-        [fops delete:@"/tmp/dl-test.txt"];
-    }];
+    NSString *path = @"/tmp/dl-test.txt";
+    [fops createFileIfNotExist:path];
+    [fops openFileForAppending:path];
+    [fops append:@"A line of text\n"];
+    [fops closeFile];
+    XCTAssertEqualObjects([dl rep:@"(slurp \"/tmp/dl-test.txt\")"], @"\"A line of text\\n\"");
+    [fops delete:@"/tmp/dl-test.txt"];
     XCTAssertEqualObjects([dl rep:@"(read-string \";\")"], @"nil");
     // File read exception
     @try {
         [dl rep:@"(slurp \"foo\")"];
     } @catch (NSException *excep) {
-        XCTAssertTrue([Utils matchString:[dl printException:excep log:YES readably:YES] withPattern:@".*No such file or directory.*"]);
+        XCTAssertTrue([DLUtils matchString:[dl printException:excep log:YES readably:YES] withPattern:@".*No such file or directory.*"]);
     }
 }
 
@@ -1710,7 +1728,7 @@
 
 - (void)testPredicate {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
-    MockStdIOService *stdIOService = [MockStdIOService new];
+    DLMockStdIOService *stdIOService = [DLMockStdIOService new];
     [[dl ioService] setStdIODelegate:stdIOService];
     // nil?
     XCTAssertEqualObjects([dl rep:@"(nil? nil)"], @"true");
@@ -2022,16 +2040,16 @@
 - (void)testExportSymbolResolveFault {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
     [dl rep:@"(defmodule foo (export all))"];
-    XCTAssertEqualObjects([State currentModuleName], @"foo");
-    Env *fooEnv = [Env forModuleName:@"foo"];
+    XCTAssertEqualObjects([DLState currentModuleName], @"foo");
+    DLEnv *fooEnv = [DLEnv envForModuleName:@"foo"];
     XCTAssertNotNil(fooEnv);
     XCTAssertEqualObjects([dl rep:@"(defun fa (n) n)"], @"foo:fa/1");
     XCTAssertEqualObjects([dl rep:@"(fa 21)"], @"21");
     [dl rep:@"(in-module \"user\")"];
     XCTAssertEqualObjects([dl rep:@"(foo:fa 21)"], @"21");
     [dl rep:@"(defmodule bar (export (ba 1) (bb 1)))"];
-    XCTAssertEqualObjects([State currentModuleName], @"bar");
-    Env *barEnv = [Env forModuleName:@"bar"];
+    XCTAssertEqualObjects([DLState currentModuleName], @"bar");
+    DLEnv *barEnv = [DLEnv envForModuleName:@"bar"];
     XCTAssertNotNil(barEnv);
     NSArray *barKeys = [[barEnv exportTable] allKeys];
     XCTAssertEqual([barKeys count], 2);
@@ -2112,7 +2130,7 @@
 - (void)testModuleDescription {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
     XCTAssertEqualObjects([dl rep:@"(defmodule mdesc \"A test module.\" (export all))"], @"mdesc");
-    Env *mdescEnv = [Env forModuleName:@"mdesc"];
+    DLEnv *mdescEnv = [DLEnv envForModuleName:@"mdesc"];
     XCTAssertEqualObjects([mdescEnv moduleDescription], @"A test module.");
     [dl rep:@"(def info (module-info \"mdesc\"))"];
     XCTAssertEqualObjects([dl rep:@"(get :description info)"], @"\"A test module.\"");
@@ -2415,6 +2433,64 @@
     XCTAssertEqualObjects([dl rep:@"(lazy-seq? (drop 2 (map (fn (a) a) [1 2 3 4])))"], @"true");
     XCTAssertEqualObjects([dl rep:@"(doall (drop 2 (map (fn (a) a) [1 2 3 4])))"], @"[3 4]");
     XCTAssertEqualObjects([dl rep:@"(doall (drop 2 (map (fn (a) a) \"abcd\")))"], @"\"cd\"");
+}
+
+- (void)testHashMapToFoundation {
+    DLHashMap *hm = [DLHashMap new];
+    [hm setObject:[DLString stringWithString:@"111"] forKey:[DLKeyword keywordWithString:@"a1"]];
+    [hm setObject:[DLString stringWithString:@"222"] forKey:[DLKeyword keywordWithString:@"b2"]];
+    [hm setObject:[DLString stringWithString:@"333"] forKey:[DLKeyword keywordWithString:@"c3"]];
+    DLHashMap *hm1 = [DLHashMap new];
+    [hm1 setObject:[[DLList alloc] initWithArray:[@[@(1), @(2), @(3)] mutableCopy]] forKey:[DLString stringWithString:@"d4"]];
+    [hm1 setObject:[[DLNumber alloc] initWithDouble:3.1415] forKey:[DLString stringWithString:@"e5"]];
+    [hm1 setObject:[[DLBool alloc] initWithBool:YES] forKey:[[DLNumber alloc] initWithInt:6]];
+    [hm setObject:hm1 forKey:[DLKeyword keywordWithString:@"f7"]];
+    NSMutableDictionary *dict = [DLUtils hashMapToFoundationType:hm];
+    NSError *err = nil;
+    NSData *json = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingSortedKeys error:&err];
+    XCTAssertNil(err);
+    NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
+    XCTAssertNotNil(jsonString);
+    XCTAssertGreaterThanOrEqual([jsonString count], 70);
+}
+
+- (void)testJSONSerialization {
+    DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
+    [dl rep:@"(def person {:first-name \"Jane\" :last-name \"Doe\" :awesome? true :age 42 :kids [\"Olive\" \"Patterson\"]})"];
+    [dl rep:@"(def person-json (encode-json person))"];
+    [dl rep:@"(def decoded-person (decode-json person-json))"];
+    [dl rep:@"(def keywordized-person (keywordize decoded-person))"];
+    XCTAssertEqualObjects([dl rep:@"(= keywordized-person person)"], @"true");
+}
+
+- (void)testKeywordize {
+    DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
+    XCTAssertEqualObjects([dl rep:@"(:first-name (keywordize (decode-json \"{\\\"first-name\\\":\\\"Jane\\\",\\\"last-name\\\":\\\"Doe\\\"}\")))"], @"\"Jane\"");
+}
+
+- (void)testStringCoreFunctions {
+    DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
+    // uppercase
+    XCTAssertEqualObjects([dl rep:@"(uppercase \"I am a teapot\")"], @"\"I AM A TEAPOT\"");
+    // lowercase
+    XCTAssertEqualObjects([dl rep:@"(lowercase \"LISP IS AWESOME\")"], @"\"lisp is awesome\"");
+    // substring
+    XCTAssertEqualObjects([dl rep:@"(substring 0 7 \"Run free and dive into the sky\")"], @"\"Run free\"");
+    XCTAssertEqualObjects([dl rep:@"(substring 13 29 \"Run free and dive into the sky\")"], @"\"dive into the sky\"");
+    // regex match
+    XCTAssertEqualObjects([dl rep:@"(def url-regex \"(https|http)(:\\/\\/)(\\D+)(\\.)([a-z]{0,3})(\\/?)\")"],
+                          @"\"(https|http)(:\\\\/\\\\/)(\\\\D+)(\\\\.)([a-z]{0,3})(\\\\/?)\"");
+    XCTAssertEqualObjects([dl rep:@"(match \"https://dreamlisp.com/\" url-regex)"],
+                          @"[[\"https://dreamlisp.com/\" \"https\" \"://\" \"dreamlisp\" \".\" \"com\" \"/\"]]");
+    XCTAssertEqualObjects([dl rep:@"(match \"Emily Bronte\" \"[a-zA-Z]+\")"], @"[[\"Emily\"] [\"Bronte\"]]");
+    // split
+    NSString *toCaps = @"(let [str-xs (split \"init-with-name\" \"-\") s1 (first str-xs) capitalize (fn (s) (let [xs (seq s)] (apply str/1 (cons \
+    (uppercase (first xs)) (rest xs)))))] (apply str/1 (cons (capitalize (first str-xs)) (doall (map capitalize/1 (rest str-xs))))))";
+    XCTAssertEqualObjects([dl rep:toCaps], @"\"InitWithName\"");
+    // trim
+    XCTAssertEqualObjects([dl rep:@"(trim \"  nanana batman  \")"], @"\"nanana batman\"");
+    // replace
+    XCTAssertEqualObjects([dl rep:@"(replace \"123\" \"+\" \"he123llo wo123rld\")"], @"\"he+llo wo+rld\"");
 }
 
 @end

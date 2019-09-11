@@ -46,6 +46,40 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _value = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFault_value"];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFault_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFault_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFault_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFault_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLFault_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_value forKey:@"DLFault_value"];
+    [coder encodeObject:_meta forKey:@"DLFault_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLFault_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLFault_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLFault_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLFault_isMutable"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (void)bootstrap {
     _value = [[[NSUUID UUID] UUIDString] lowercaseString];
 }

@@ -41,9 +41,9 @@
     if (![DLList isList:data] && ![DLVector isVector:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'list' or 'vector'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'list' or 'vector'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'list' or 'vector'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'list' or 'vector'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -72,9 +72,41 @@
     self = [super init];
     if (self) {
         _array = [vector value];
+        [super setValue:_array];
         _meta = meta;
     }
     return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _array = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLVector_value"];
+        [super setValue:_array];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLVector_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLVector_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLVector_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLVector_isImported"];
+        [isImportedValue getValue:&_isImported];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:[self value] forKey:@"DLVector_value"];
+    [coder encodeObject:_meta forKey:@"DLVector_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLVector_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLVector_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLVector_isImported"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
 }
 
 - (NSString *)dataType {
@@ -95,7 +127,7 @@
 }
 
 - (NSMutableArray *)map:(id (^)(id arg))block {
-    return [TypeUtils mapOnArray:_array withBlock:block];
+    return [DLTypeUtils mapOnArray:_array withBlock:block];
 }
 
 - (void)enumerateConcurrent:(void (^)(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop))block {
@@ -106,6 +138,10 @@
     DLVector *vec = [self copy];
     [(NSMutableArray *)[vec value] addObject:object];
     return vec;
+}
+
+- (void)appendObject:(id<DLDataProtocol>)object {
+    [_array addObject:object];
 }
 
 - (DLList *)list {

@@ -41,7 +41,7 @@
     BOOL _isMutable;
     id<DLDataProtocol> _meta;
     NSString *_moduleName;
-    enum SequenceType _sequenceType;
+    enum DLSequenceType _sequenceType;
     NSMutableArray<DLLazySequenceFn *> *_fns;
     /**
      If the element is a native data structure or if it is wrapped in an @a NSMutableArray, encountered in cases where there are multiple arguments
@@ -76,9 +76,9 @@
     if (![DLLazySequence isLazySequence:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'lazy-sequence'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'lazy-sequence'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'lazy-sequence'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'lazy-sequence'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -93,7 +93,7 @@
     return self;
 }
 
-- (instancetype)initWithArray:(NSMutableArray *)array sequenceType:(enum SequenceType)sequenceType {
+- (instancetype)initWithArray:(NSMutableArray *)array sequenceType:(enum DLSequenceType)sequenceType {
     self = [super init];
     if (self) {
         [self bootstrap];
@@ -102,6 +102,60 @@
         _sequenceType = sequenceType;
     }
     return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _acc = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazySequence_acc"];
+        NSValue *indexValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazySequence_index"];
+        [indexValue getValue:&_index];
+        NSValue *lengthValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazySequence_length"];
+        [lengthValue getValue:&_length];
+        NSValue *sequenceTypeValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazySequence_sequenceType"];
+        [sequenceTypeValue getValue:&_sequenceType];
+        _fns = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazySequence_fns"];
+        NSValue *isNativeValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazySequence_isNative"];
+        [isNativeValue getValue:&_isNative];
+        NSValue *isReverseEnumerateValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazySequence_isReverseEnumerate"];
+        [isReverseEnumerateValue getValue:&_isReverseEnumerate];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLData_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLData_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLData_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLData_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLData_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_acc forKey:@"DLLazySequence_acc"];
+    [coder encodeObject:@(_index) forKey:@"DLLazySequence_index"];
+    [coder encodeObject:@(_length) forKey:@"DLLazySequence_length"];
+    NSValue *sequenceTypeValue = [[NSValue alloc] initWithBytes:&_sequenceType objCType:@encode(DLSequenceType)];
+    [coder encodeObject:sequenceTypeValue forKey:@"DLLazySequence_sequenceType"];
+    [coder encodeObject:_fns forKey:@"DLLazySequence_fns"];
+    NSValue *isNativeValue = [[NSValue alloc] initWithBytes:&_isNative objCType:@encode(BOOL)];
+    [coder encodeObject:isNativeValue forKey:@"DLLazySequence_isNative"];
+    NSValue *isReverseEnumerateValue = [[NSValue alloc] initWithBytes:&_isReverseEnumerate objCType:@encode(BOOL)];
+    [coder encodeObject:isReverseEnumerateValue forKey:@"DLLazySequence_isReverseEnumerate"];
+    [coder encodeObject:_meta forKey:@"DLLazySequence_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLLazySequence_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLLazySequence_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLLazySequence_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLLazySequence_isMutable"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
 }
 
 - (void)bootstrap {
@@ -145,8 +199,8 @@
 }
 
 - (id)next {
-    if (_index < 0) [[[DLError alloc] initWithFormat:IndexOutOfBounds, _index, 0] throw];
-    if (_index >= _length) [[[DLError alloc] initWithFormat:IndexOutOfBounds, _index, _length] throw];
+    if (_index < 0) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, _index, 0] throw];
+    if (_index >= _length) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, _index, _length] throw];
     if (_isNative) return _array[_isReverseEnumerate ? _index-- : _index++];
     if ([_array count] > 1) {  // not native => array count will be always greater than 1
         NSMutableArray *res = [NSMutableArray new];

@@ -60,9 +60,9 @@
     if (![DLSymbol isSymbol:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'symbol'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'symbol'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'symbol'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'symbol'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -77,7 +77,7 @@
     NSArray *modArr = [name componentsSeparatedByString:@":"];
     NSUInteger modCount = [modArr count];
     NSString *symName = name;
-    if (modCount > 2) [[[DLError alloc] initWithFormat:SymbolParseError, name] throw];
+    if (modCount > 2) [[[DLError alloc] initWithFormat:DLSymbolParseError, name] throw];
     if (modCount == 2) symName = modArr[1];  // the function part
     NSArray *symArr = [symName componentsSeparatedByString:@"/"];
     NSUInteger count = [symArr count];
@@ -87,7 +87,7 @@
         arityStr = symArr[2];
         symName = @"/";
     } else if (count > 2) {
-        [[[DLError alloc] initWithFormat:SymbolParseError, name] throw];
+        [[[DLError alloc] initWithFormat:DLSymbolParseError, name] throw];
     } else if (count == 2) {
         symName = symArr[0];
         arityStr = symArr[1];
@@ -95,7 +95,7 @@
     if ([arityStr isNotEmpty]) {
         arity = [arityStr isEqual:@"n"] ? -1 : [arityStr integerValue];
     }
-    sym = [[DLSymbol alloc] initWithName:symName moduleName:[State currentModuleName]];
+    sym = [[DLSymbol alloc] initWithName:symName moduleName:[DLState currentModuleName]];
     [sym setInitialArity:arity];
     [sym resetArity];
     // Fully qualified symbol with module name included
@@ -141,7 +141,7 @@
 
 - (instancetype)initWithName:(NSString *)name {
     self = [self initWithName:name moduleName:_moduleName];
-    _moduleName = [State currentModuleName];
+    _moduleName = [DLState currentModuleName];
     _initialModuleName = _moduleName;
     return self;
 }
@@ -181,7 +181,7 @@
 }
 
 - (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position symbol:(DLSymbol *)symbol {
-    if (arity < -1) [[[DLError alloc] initWithDescription:FunctionArityError] throw];
+    if (arity < -1) [[[DLError alloc] initWithDescription:DLFunctionArityError] throw];
     self = [super init];
     if (self) {
         _name = [symbol name];
@@ -190,7 +190,7 @@
         _arity = arity;
         _position = position;
         _hasNArity = [symbol hasNArity];
-        _moduleName = [symbol moduleName] ? [symbol moduleName] : [State currentModuleName];
+        _moduleName = [symbol moduleName] ? [symbol moduleName] : [DLState currentModuleName];
         _initialModuleName = [symbol initialModuleName];
         _isQualified = [symbol isQualified];
         _isImported = [symbol isImported];
@@ -211,11 +211,11 @@
 }
 
 - (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position string:(NSString *)string {
-    return [self initWithArity:arity position:position string:string moduleName:[State currentModuleName]];
+    return [self initWithArity:arity position:position string:string moduleName:[DLState currentModuleName]];
 }
 
 - (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position string:(NSString *)string moduleName:(NSString *)moduleName {
-    if (arity < -1) [[[DLError alloc] initWithDescription:FunctionArityError] throw];
+    if (arity < -1) [[[DLError alloc] initWithDescription:DLFunctionArityError] throw];
     self = [super init];
     if (self) {
         [self bootstrap];
@@ -239,7 +239,7 @@
         _hasNArity = [symbol hasNArity];
         _position = [symbol position];
         _meta = meta;
-        _moduleName = [symbol moduleName] ? [symbol moduleName] : [State currentModuleName];
+        _moduleName = [symbol moduleName] ? [symbol moduleName] : [DLState currentModuleName];
         _initialModuleName = [symbol initialModuleName];
         _isQualified = [symbol isQualified];
         _isImported = [symbol isImported];
@@ -253,7 +253,7 @@
         [self bootstrap];
         _name = name;
         _meta = meta;
-        _moduleName = [State currentModuleName];
+        _moduleName = [DLState currentModuleName];
         _initialModuleName = _moduleName;
         _isQualified = NO;
         [self updateArity];
@@ -261,9 +261,75 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _name = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_value"];
+        _arity = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_arity"] integerValue];
+        _initialArity = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_initialArity"] integerValue];
+        NSValue *isFunction = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isFunction"];
+        [isFunction getValue:&_isFunction];
+        NSValue *hasNArityValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_hasNArity"];
+        [hasNArityValue getValue:&_hasNArity];
+        NSValue *isQualifiedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isQualified"];
+        [isQualifiedValue getValue:&_isQualified];
+        NSValue *isModuleValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isModule"];
+        [isModuleValue getValue:&_isModule];
+        NSValue *isFaultValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isFault"];
+        [isFaultValue getValue:&_isFault];
+        NSValue *isCoreValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isCore"];
+        [isCoreValue getValue:&_isCore];
+        _fnName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_fnName"];
+        _initialModuleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_initialModuleName"];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLSymbol_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_name forKey:@"DLSymbol_value"];
+    [coder encodeObject:@(_arity) forKey:@"DLSymbol_arity"];
+    [coder encodeObject:@(_initialArity) forKey:@"DLSymbol_initialArity"];
+    [coder encodeObject:_fnName forKey:@"DLSymbol_fnName"];
+    [coder encodeObject:_initialModuleName forKey:@"DLSymbol_initialModuleName"];
+    NSValue *isFunctionValue = [[NSValue alloc] initWithBytes:&_isFunction objCType:@encode(BOOL)];
+    [coder encodeObject:isFunctionValue forKey:@"DLSymbol_isFunction"];
+    NSValue *hasNArityValue = [[NSValue alloc] initWithBytes:&_hasNArity objCType:@encode(BOOL)];
+    [coder encodeObject:hasNArityValue forKey:@"DLSymbol_hasNArity"];
+    NSValue *isQualifiedValue = [[NSValue alloc] initWithBytes:&_isQualified objCType:@encode(BOOL)];
+    [coder encodeObject:isQualifiedValue forKey:@"DLSymbol_isQualified"];
+    NSValue *isModule = [[NSValue alloc] initWithBytes:&_isModule objCType:@encode(BOOL)];
+    [coder encodeObject:isModule forKey:@"DLSymbol_isModule"];
+    NSValue *isFault = [[NSValue alloc] initWithBytes:&_isFault objCType:@encode(BOOL)];
+    [coder encodeObject:isFault forKey:@"DLSymbol_isFault"];
+    NSValue *isCore = [[NSValue alloc] initWithBytes:&_isCore objCType:@encode(BOOL)];
+    [coder encodeObject:isCore forKey:@"DLSymbol_isCore"];
+    [coder encodeObject:_meta forKey:@"DLSymbol_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLSymbol_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLSymbol_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLSymbol_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLSymbol_isMutable"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (void)bootstrap {
     _position = -1;
-    _moduleName = [State currentModuleName];
+    _moduleName = [DLState currentModuleName];
     _initialModuleName = _moduleName;
     _isQualified = NO;
     _fnName = @"";

@@ -13,13 +13,15 @@ static NSString *hostLangVersion;
 static NSString *langVersion;
 
 @implementation DreamLisp {
-    Reader *_reader;
-    Printer *_printer;
-    Env *_globalEnv;
+    DLReader *_reader;
+    DLPrinter *_printer;
+    DLEnv *_globalEnv;
     /** Current env */
-    Env *_env;
-    Core *_core;
-    IOService* _ioService;
+    DLEnv *_env;
+    DLCore *_core;
+    DLNetwork *_network;
+    DLFileOps *_fileOps;
+    DLIOService* _ioService;
     BOOL _isQuasiquoteMode;
     NSUInteger _quasiquoteDepth;
     NSUInteger _unquoteDepth;
@@ -37,7 +39,7 @@ static NSString *langVersion;
 
 + (void)initialize {
     hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
-    langVersion = [[NSString alloc] initWithFormat:@"DreamLisp v%@ [%@]", [Const dlVersion], hostLangVersion];
+    langVersion = [[NSString alloc] initWithFormat:@"DreamLisp v%@ [%@]", [DLConst dlVersion], hostLangVersion];
 }
 
 - (instancetype)initWithoutREPL {
@@ -45,7 +47,7 @@ static NSString *langVersion;
     if (self) {
         _isREPL = NO;
         [self bootstrap];
-        [self loadCoreLib];
+        [self loadDLModuleLibs];
     }
     return self;
 }
@@ -56,19 +58,22 @@ static NSString *langVersion;
 }
 
 - (void)bootstrap {
-    _ioService = [IOService new];
-    [_ioService setFileIODelegate:[FileOps new]];
-    [Logger setIOService:_ioService];
-    _reader = [Reader new];
-    _printer = [Printer new];
-    _core = [Core new];
+    _ioService = [DLIOService new];
+    _fileOps = [DLFileOps new];
+    [_ioService setFileIODelegate:_fileOps];
+    [DLLogger setIOService:_ioService];
+    _reader = [DLReader new];
+    _printer = [DLPrinter new];
+    _core = [DLCore new];
     [_core setDelegate:self];
-    _env = [[Env alloc] initWithModuleName:[Const defaultModuleName] isUserDefined:NO];
-    [_env setModuleDescription:[Const defaultModuleDescription]];
-    [State setCurrentModuleName:[_env moduleName]];
+    _network = [DLNetwork new];
+    _env = [[DLEnv alloc] initWithModuleName:DLConst.defaultModuleName isUserDefined:NO];
+    [_env setModuleDescription:[DLConst defaultModuleDescription]];
+    [DLState setCurrentModuleName:[_env moduleName]];
     // Add modules to module table
     [self addModule:_env];  // default module
     [self addModule:[_core env]];  // core module
+    [self addModule:[_network env]];
     _globalEnv = _env;
     _isQuasiquoteMode = NO;
     _quasiquoteDepth = 0;
@@ -76,7 +81,7 @@ static NSString *langVersion;
     _repQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     [self setLoadFileToREPL];
     [self setEvalToREPL];
-    if (_isREPL) _prompt = [[State currentModuleName] stringByAppendingString:@"> "];
+    if (_isREPL) _prompt = [DLUtils promptWithModule:[DLState currentModuleName]];
 }
 
 #pragma mark Env setup
@@ -90,8 +95,8 @@ static NSString *langVersion;
             return [self eval:[arg first] withEnv:[this env]];
         }
     };
-    NSString *coreModuleName = [Const coreModuleName];
-    Env *coreEnv = [Env forModuleName:coreModuleName];
+    NSString *coreModuleName = [DLConst coreModuleName];
+    DLEnv *coreEnv = [DLEnv envForModuleName:coreModuleName];
     [coreEnv setObject:[[DLFunction alloc] initWithFn:fn argCount:1 name:@"eval/1"]
                 forKey:[[DLSymbol alloc] initWithArity:1 string:@"eval" moduleName:coreModuleName]];
     [coreEnv setObject:[DLList new] forKey:[[DLSymbol alloc] initWithName:@"*ARGV*" moduleName:coreModuleName]];
@@ -109,6 +114,7 @@ static NSString *langVersion;
             DreamLisp *this = weakSelf;
             NSString *path = [[DLString dataToString:arg[0] fnName:@"load-file/1"] value];
             NSString *content = [this->_ioService readFile:path];
+            if (!content) [[[DLError alloc] initWithFormat:DLFileNotFoundError, path] throw];
             BOOL hasError = NO;
             @try {
                 [this rep:content];
@@ -116,40 +122,47 @@ static NSString *langVersion;
                 hasError = YES;
                 [this printException:exception log:YES readably:YES];
             }
-            [this changeModuleTo:[Const defaultModuleName]];
+            [this changeModuleTo:DLConst.defaultModuleName];
             return [[DLVector alloc] initWithArray:[@[[[DLKeyword alloc] initWithString: hasError ? @"fail" : @"ok"],
                                                       [[NSString alloc] initWithFormat:@"%@", [path lastPathComponent]]] mutableCopy]];
         }
     };
-    Env *coreEnv = [Env forModuleName:[Const coreModuleName]];
-    DLSymbol *sym = [[DLSymbol alloc] initWithArity:1 string:@"load-file" moduleName:[Const coreModuleName]];
+    DLEnv *coreEnv = [DLEnv envForModuleName:[DLConst coreModuleName]];
+    DLSymbol *sym = [[DLSymbol alloc] initWithArity:1 string:@"load-file" moduleName:[DLConst coreModuleName]];
     DLFunction *fn = [[DLFunction alloc] initWithFn:loadFile argCount:1 name:@"load-file/1"];
-    [fn setModuleName:[Const coreModuleName]];
+    [fn setModuleName:[DLConst coreModuleName]];
     [[coreEnv exportTable] setObject:fn forKey:sym];
 }
 
-/** Construct core lib file path. */
-- (NSString *)coreLibPath:(NSString *)path {
-    return [[NSString alloc] initWithFormat:@"%@/%@", path, coreLibFileName];
+/** Construct built-in module file path. */
+- (NSString *)moduleLibPath:(NSString *)path forModule:(NSString *)moduleName {
+    return [[NSString alloc] initWithFormat:@"%@/%@.dlisp", path, moduleName];
 }
 
-/** Load core lib @c core.dlisp from the framework's resource path. */
-- (void)loadCoreLib {
-    NSString *path = [self coreLibPath:[_ioService resourcePath]];
-    NSString *moduleName = [Const coreModuleName];
-    _env = [_core env];
-    [_reader setModuleName:moduleName];
-    [self updateModuleName:moduleName];
-    NSString *content = [_ioService readFile:path];
-    @try {
-        [self rep:content];
-    } @catch (NSException *exception) {
-        [self printException:exception log:YES readably:YES];
+/*! Load all DreamLisp modules libraries (which are written in dlisp itself). */
+- (void)loadDLModuleLibs {
+    NSString *moduleName;
+    NSString *path;
+    NSString *content;
+    for (moduleName in DLConst.dlModuleLibs) {
+        path = [self moduleLibPath:[_ioService resourcePath] forModule:moduleName];
+        /* If the module is core, then we need to add the functions to the built-in code module. So we set the env to @c core. Else, we use the default @c user env. */
+        _env = [moduleName isEqual:DLConst.coreModuleName] ? [_core env] : _globalEnv;
+        [_reader setModuleName:moduleName];  /* set module name to the obtained module name */
+        [self updateModuleName:moduleName];
+        content = [_ioService readFile:path];
+        if (!content) [[[DLError alloc] initWithFormat:DLModuleNotFound, moduleName] throw];
+        @try {
+            [self rep:content];
+        } @catch (NSException *exception) {
+            [self printException:exception log:YES readably:YES];
+        }
+        /* reset env and module name back to default */
+        _env = _globalEnv;
+        moduleName = [_env moduleName];
+        [self updateModuleName:moduleName];
+        [_reader setModuleName:moduleName];
     }
-    _env = _globalEnv;
-    moduleName = [_env moduleName];
-    [self updateModuleName:moduleName];
-    [_reader setModuleName:moduleName];
 }
 
 - (void)printVersion {
@@ -166,7 +179,7 @@ static NSString *langVersion;
 #pragma mark Eval
 
 /** Evaluate the AST with the given environment. */
-- (id<DLDataProtocol>)evalAST:(id<DLDataProtocol>)ast withEnv:(Env *)env {
+- (id<DLDataProtocol>)evalAST:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env {
     @autoreleasepool {
         if ([DLSymbol isSymbol:ast]) {
             return [env objectForKey:(DLSymbol *)ast];
@@ -239,7 +252,7 @@ static NSString *langVersion;
 }
 
 /** Checks if the given ast is list with macro at function position. */
-- (BOOL)isMacroCall:(id<DLDataProtocol>)ast env:(Env *)env {
+- (BOOL)isMacroCall:(id<DLDataProtocol>)ast env:(DLEnv *)env {
     //@autoreleasepool {
         if ([DLList isList:ast]) {
             NSMutableArray *xs = [(DLList *)ast value];
@@ -255,7 +268,7 @@ static NSString *langVersion;
 }
 
 /** Expands a macro call. */
-- (id<DLDataProtocol>)macroExpand:(id<DLDataProtocol>)ast withEnv:(Env *)env {
+- (id<DLDataProtocol>)macroExpand:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env {
     NSMutableArray *xs = nil;
     DLFunction *fn;
     while ([self isMacroCall:ast env:env]) {
@@ -272,7 +285,7 @@ static NSString *langVersion;
 }
 
 /** Evaluate the expression with the given environment. */
-- (id<DLDataProtocol>)eval:(id<DLDataProtocol>)ast withEnv:(Env *)env {
+- (id<DLDataProtocol>)eval:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env {
     while (true) {
         @autoreleasepool {
             if ([DLVector isVector:ast]) {
@@ -341,7 +354,7 @@ static NSString *langVersion;
                                 if ([DLSymbol isSymbol:[catchxs first]] && [[(DLSymbol *)[catchxs first] value] isNotEqualTo:@"catch"]) {
                                     [[[DLError alloc] initWithData:[catchxs first]] throw];
                                 }
-                                Env *catchEnv = [[Env alloc] initWithEnv:env binds:[@[(DLSymbol *)[catchxs second]] mutableCopy]
+                                DLEnv *catchEnv = [[DLEnv alloc] initWithEnv:env binds:[@[(DLSymbol *)[catchxs second]] mutableCopy]
                                                                    exprs:[@[[self exceptionInfo:exception]] mutableCopy]];
                                 return [self eval:[self toDoForm:[[catchxs drop:2] value]] withEnv:catchEnv];
                              }
@@ -368,14 +381,14 @@ static NSString *langVersion;
                         DLList *form = (DLList *)[self toDoForm:[xs drop:2]];
                         id<DLDataProtocol>(^fn)(NSMutableArray *) = ^id<DLDataProtocol>(NSMutableArray * arg) {
                             @autoreleasepool {
-                                Env *fnEnv = [[Env alloc] initWithEnv:env binds:[(DLList *)[xs second] value] exprs:arg];
+                                DLEnv *fnEnv = [[DLEnv alloc] initWithEnv:env binds:[(DLList *)[xs second] value] exprs:arg];
                                 return [self eval:form withEnv:fnEnv];
                             }
                         };
                         return [[DLFunction alloc] initWithAst:form params:[(DLList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
                     } else if ([[sym value] isEqual:@"let"]) {
                         @autoreleasepool {
-                            Env *letEnv = [[Env alloc] initWithEnv:env];
+                            DLEnv *letEnv = [[DLEnv alloc] initWithEnv:env];
                             NSMutableArray *bindings = [DLVector isVector:[xs second]] ? [(DLVector *)[xs second] value] : [(DLList *)[xs second] value];
                             NSUInteger len = [bindings count];
                             NSUInteger i = 0;
@@ -405,7 +418,7 @@ static NSString *langVersion;
                         return [DLNil new];
                     }
                 } else if ([xs count] == 2 && [DLKeyword isKeyword:[xs first]]) {
-                    ast = [[DLList alloc] initWithArray:[@[[[DLSymbol alloc] initWithArity:2 string:@"get" moduleName:[Const coreModuleName]],
+                    ast = [[DLList alloc] initWithArray:[@[[[DLSymbol alloc] initWithArity:2 string:@"get" moduleName:[DLConst coreModuleName]],
                                                            [xs first], [xs second]] mutableCopy]];
                     continue;
                 }
@@ -427,7 +440,7 @@ static NSString *langVersion;
                 NSMutableArray *rest = [list rest];  // The arguments to the function
                 if ([fn ast]) {
                     ast = [fn ast];
-                    env = [[Env alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest];
+                    env = [[DLEnv alloc] initWithEnv:[fn env] binds:[fn params] exprs:rest];
                 } else {
                     return [fn apply:rest];
                 }
@@ -458,13 +471,13 @@ static NSString *langVersion;
 #pragma mark Module
 
 /** Add given env to the modules table. */
-- (void)addModule:(Env *)env {
-    [Env setEnv:env forModuleName:[env moduleName]];
+- (void)addModule:(DLEnv *)env {
+    [DLEnv setEnv:env forModuleName:[env moduleName]];
 }
 
 - (void)removeModule:(id<DLDataProtocol>)ast {
     NSString *modName = (NSString *)[[self moduleNameFromAST:ast] value];
-    [Env removeModule:modName];
+    [DLEnv removeModule:modName];
     _env = _globalEnv;
     [self updateModuleName:[_env moduleName]];
 }
@@ -479,14 +492,14 @@ static NSString *langVersion;
     DLSymbol *modSym = [DLSymbol dataToSymbol:[xs second] position:1 fnName:@"defmodule/3"];
     [modSym setIsModule:YES];
     NSString *modName = [modSym value];
-    Env *modEnv = [[Env alloc] initWithModuleName:modName isUserDefined:YES];
+    DLEnv *modEnv = [[DLEnv alloc] initWithModuleName:modName isUserDefined:YES];
     [self addModule:modEnv];
-    [State setCurrentModuleName:[modEnv moduleName]];
+    [DLState setCurrentModuleName:[modEnv moduleName]];
     _env = modEnv; // change env to current module
     [self updateModuleName:modName];
     // The third element onwards are imports and exports
     [self processModuleDirectives:[xs drop:2] module:_env];
-    if (_isREPL) _prompt = [modName stringByAppendingString:@"> "];
+    if (_isREPL) _prompt = [DLUtils promptWithModule:modName];
     return modSym;
 }
 
@@ -501,7 +514,7 @@ static NSString *langVersion;
     return arity;
 }
 
-- (void)processExportDirective:(DLList *)ast module:(Env *)env {
+- (void)processExportDirective:(DLList *)ast module:(DLEnv *)env {
     DLList *elem = [ast rest];
     if ([elem count] == 1 && [DLSymbol isSymbol:[elem first] withName:@"all"]) {
         [env setIsExportAll:YES];
@@ -518,7 +531,7 @@ static NSString *langVersion;
             aExp = (NSMutableArray *)[(DLList *)fnList[i] value];
             sym = (DLSymbol *)[aExp first];
             arity = [self arityFromObject:[aExp second]];
-            if (arity == -2) [[[DLError alloc] initWithDescription:ModuleArityDefinitionError] throw];
+            if (arity == -2) [[[DLError alloc] initWithDescription:DLModuleArityDefinitionError] throw];
             [sym setArity:arity];
             [sym setInitialArity:arity];
             [sym updateArity];
@@ -530,14 +543,14 @@ static NSString *langVersion;
     }
 }
 
-- (void)processImportDirective:(DLList *)ast module:(Env *)env {
+- (void)processImportDirective:(DLList *)ast module:(DLEnv *)env {
     DLList *imports = [ast rest];
     NSMutableArray *impArr = (NSMutableArray *)[imports value];
     NSUInteger len = [impArr count];
     NSUInteger i = 0;
     DLList *imp = nil;
     NSString *modName = nil;
-    Env *impEnv = nil;
+    DLEnv *impEnv = nil;
     NSMutableArray *impFns;
     NSUInteger fnLen;
     NSUInteger j = 0;
@@ -548,16 +561,15 @@ static NSString *langVersion;
         imp = (DLList *)impArr[i];
         if ([DLSymbol isSymbol:[imp first] withName:@"from"]) {
             modName = [(DLSymbol *)[imp second] value];
-            impEnv = [Env forModuleName:modName];
+            impEnv = [DLEnv envForModuleName:modName];
             if (impEnv) {
                 impFns = (NSMutableArray *)[(DLList *)[imp drop:2] value];
                 fnLen = [impFns count];
-                j = 0;
                 for (j = 0; j < fnLen; j++) {
                     aExp = (DLList *)impFns[j];
                     sym = (DLSymbol *)[aExp first];
                     arity = [self arityFromObject:[aExp second]];
-                    if (arity == -2) [[[DLError alloc] initWithDescription:ModuleArityDefinitionError] throw];
+                    if (arity == -2) [[[DLError alloc] initWithDescription:DLModuleArityDefinitionError] throw];
                     [sym setArity:arity];
                     [sym setInitialArity:arity];
                     [sym updateArity];
@@ -573,7 +585,7 @@ static NSString *langVersion;
 }
 
 /** Process module import exports. The ast can be of the form (export (a 1) (b 0)) (export (c 2) (d 1)) (import (from list (all 2)) (from io (read 1))) .. */
-- (void)processModuleDirectives:(DLList *)ast module:(Env *)env {
+- (void)processModuleDirectives:(DLList *)ast module:(DLEnv *)env {
     NSMutableArray *arr = [ast value];
     NSUInteger len = [arr count];
     NSUInteger i = 0;
@@ -596,7 +608,7 @@ static NSString *langVersion;
 
 - (DLString *)moduleNameFromAST:(id<DLDataProtocol>)ast {
     DLList *xs = (DLList *)ast;
-    if ([xs count] > 2) [[[DLError alloc] initWithFormat:ArityError, 1, [xs count]] throw];
+    if ([xs count] > 2) [[[DLError alloc] initWithFormat:DLArityError, 1, [xs count]] throw];
     DLString *modName = nil;
     if ([DLString isString:[xs second]]) {
         modName = (DLString *)[xs second];
@@ -610,16 +622,16 @@ static NSString *langVersion;
 - (DLString *)changeModule:(id<DLDataProtocol>)ast {
     DLString *modStr = [self moduleNameFromAST:ast];
     NSString *modName = (NSString *)[modStr value];
-    if ([modName isEqual:[Const defaultModuleName]]) {
+    if ([modName isEqual:DLConst.defaultModuleName]) {
         _env = _globalEnv;
     } else {
         // check modules table
-        Env *modEnv = [Env forModuleName:modName];
+        DLEnv *modEnv = [DLEnv envForModuleName:modName];
         if (modEnv) {
             _env = modEnv;
         } else {
-            [[self reader] setModuleName:[State currentModuleName]];
-            [[[DLError alloc] initWithFormat:ModuleNotFound, modName] throw];
+            [[self reader] setModuleName:[DLState currentModuleName]];
+            [[[DLError alloc] initWithFormat:DLModuleNotFound, modName] throw];
         }
     }
     [self updateModuleName:modName];
@@ -628,21 +640,21 @@ static NSString *langVersion;
 
 /** Changes the prompt if in REPL and updates the @c currentModuleName */
 - (void)updateModuleName:(NSString *)moduleName {
-    if (_isREPL) _prompt = [moduleName stringByAppendingString:@"> "];
-    [State setCurrentModuleName:moduleName];
+    if (_isREPL) _prompt = [DLUtils promptWithModule:moduleName];
+    [DLState setCurrentModuleName:moduleName];
     [[self reader] setModuleName:moduleName];
 }
 
 - (void)changeModuleTo:(NSString *)moduleName {
-    Env *env = [Env forModuleName:moduleName];
+    DLEnv *env = [DLEnv envForModuleName:moduleName];
     if (!env) {
-        [[[DLError alloc] initWithFormat:ModuleNotFound, moduleName] throw];
+        [[[DLError alloc] initWithFormat:DLModuleNotFound, moduleName] throw];
         return;
     }
     [self setEnv:env];
-    [State setCurrentModuleName:moduleName];
+    [DLState setCurrentModuleName:moduleName];
     [[self reader] setModuleName:moduleName];
-    if (_isREPL) _prompt = [moduleName stringByAppendingString:@"> "];
+    if (_isREPL) _prompt = [DLUtils promptWithModule:moduleName];
 }
 
 #pragma mark Print
@@ -688,20 +700,20 @@ static NSString *langVersion;
         NSDictionary *info = exception.userInfo;
         desc = [info valueForKey:@"description"];
         if (desc && log) {
-            [Log error:desc];
+            [DLLog error:desc];
         } else if ([[info allKeys] containsObject:@"dldata"]) {
             id<DLDataProtocol> data = (id<DLDataProtocol>)[info valueForKey:@"dldata"];
             if (data) {
                 desc = [[NSString alloc] initWithFormat:@"Error: %@", [_printer printStringFor:data readably:readably]];
-                if (desc && log) [Log error:desc];
+                if (desc && log) [DLLog error:desc];
             }
         } else if ([[info allKeys] containsObject:@"NSUnderlyingError"]) {
             NSError *err = [info valueForKey:@"NSUnderlyingError"];
-            [Log error:[err localizedDescription]];
+            [DLLog error:[err localizedDescription]];
         }
     } else {
         desc = exception.description;
-        if (desc && log) [Log error:desc];
+        if (desc && log) [DLLog error:desc];
     }
     return desc;
 }
@@ -714,7 +726,7 @@ static NSString *langVersion;
     }
 }
 
-- (IOService *)ioService {
+- (DLIOService *)ioService {
     return _ioService;
 }
 

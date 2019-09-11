@@ -35,9 +35,9 @@
     if (![DLAtom isAtom:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'atom'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'atom'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'atom'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'atom'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -57,6 +57,40 @@
         _meta = meta;
     }
     return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _data = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLAtom_value"];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLAtom_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLAtom_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLAtom_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLAtom_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLAtom_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_data forKey:@"DLAtom_value"];
+    [coder encodeObject:_meta forKey:@"DLAtom_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLAtom_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLAtom_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLAtom_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLAtom_isMutable"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
 }
 
 - (NSString *)dataType {

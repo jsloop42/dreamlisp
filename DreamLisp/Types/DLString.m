@@ -41,9 +41,9 @@
     if (![DLString isString:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'string'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'string'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'string'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'string'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -52,6 +52,10 @@
 
 + (DLString *)mutable {
     return [[DLString alloc] initWithMutableString];
+}
+
++ (DLString *)stringWithString:(NSString *)string {
+    return [[DLString alloc] initWithString:string];
 }
 
 - (instancetype)init {
@@ -139,6 +143,42 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _string = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_value"];
+        _mstring = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_mstring"];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLString_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_string forKey:@"DLString_value"];
+    [coder encodeObject:_mstring forKey:@"DLString_mstring"];
+    [coder encodeObject:_meta forKey:@"DLString_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLString_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLString_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLString_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLString_isMutable"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (void)bootstrap {
     _isMutable = NO;
     _isImported = NO;
@@ -188,9 +228,9 @@
     NSString *str = [self value];
     if (!str) return @"";
     NSUInteger len = [str count];
-    if (start < 0) [[[DLError alloc] initWithFormat:IndexOutOfBounds, start, 0] throw];
-    if (end >= len) [[[DLError alloc] initWithFormat:IndexOutOfBounds, end, len] throw];
-    if (end < start) [[[DLError alloc] initWithFormat:IndexOutOfBounds, end, start] throw];
+    if (start < 0) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, start, 0] throw];
+    if (end >= len) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, end, len] throw];
+    if (end < start) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, end, start] throw];
     return [str substringWithRange:NSMakeRange(start, end - start + 1)];
 }
 
@@ -198,8 +238,8 @@
     NSString *str = [self value];
     if (!str) return @"";
     NSUInteger len = [str count];
-    if (start < 0) [[[DLError alloc] initWithFormat:IndexOutOfBounds, start, 0] throw];
-    if (count > len) [[[DLError alloc] initWithFormat:IndexOutOfBounds, count, count < 0 ? 0 : len] throw];
+    if (start < 0) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, start, 0] throw];
+    if (count > len) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, count, count < 0 ? 0 : len] throw];
     return [str substringWithRange:NSMakeRange(start, count)];
 }
 
@@ -278,17 +318,17 @@
 #pragma mark - Mutable
 
 - (void)append:(DLString *)string {
-    if (!_isMutable) [[[DLError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
+    if (!_isMutable) [[[DLError alloc] initWithFormat:DLIsImmutableError, [self dataTypeName]] throw];
     [_mstring appendString: [string isMutable] ? [string mutableValue] : [string value]];
 }
 
 - (void)appendString:(NSString *)string {
-    if (!_isMutable) [[[DLError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
+    if (!_isMutable) [[[DLError alloc] initWithFormat:DLIsImmutableError, [self dataTypeName]] throw];
     [_mstring appendString:string];
 }
 
 - (void)append:(id)object atIndex:(NSInteger)index {
-    if (!_isMutable) [[[DLError alloc] initWithFormat:IsImmutableError, [self dataTypeName]] throw];
+    if (!_isMutable) [[[DLError alloc] initWithFormat:DLIsImmutableError, [self dataTypeName]] throw];
     [_mstring insertString:[object description] atIndex:index];
 }
 

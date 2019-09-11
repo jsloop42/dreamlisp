@@ -12,7 +12,7 @@
     void (^_fn)(DLLazySequence *seq, NSMutableArray *xs);
     id<DLDataProtocol> _ast;
     NSMutableArray *_params;
-    Env *_env;
+    DLEnv *_env;
     BOOL _isMacro;
     id<DLDataProtocol> _meta;
     NSInteger _argsCount;
@@ -49,9 +49,9 @@
     if (![self isLazyFunction:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithArity, @"'lazy-function'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithArity, @"'lazy-function'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatch, @"'lazy-function'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatch, @"'lazy-function'", [data dataTypeName]];
         }
         [err throw];
     }
@@ -62,16 +62,16 @@
     if (![DLLazyFunction isLazyFunction:data]) {
         DLError *err = nil;
         if (position > 0) {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithNameArity, fnName, @"'lazy-function'", position, [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'lazy-function'", position, [data dataTypeName]];
         } else {
-            err = [[DLError alloc] initWithFormat:DataTypeMismatchWithName, fnName, @"'lazy-function'", [data dataTypeName]];
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'lazy-function'", [data dataTypeName]];
         }
         [err throw];
     }
     return (DLLazyFunction *)data;
 }
 
-- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
+- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(DLEnv *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
                          fn:(void (^)(DLLazySequence *seq, NSMutableArray *xs))fn name:(NSString *)name {
     self = [super init];
     if (self) {
@@ -87,7 +87,7 @@
     return self;
 }
 
-- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
+- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(DLEnv *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
                          fn:(void (^)(DLLazySequence *seq, NSMutableArray *xs))fn {
     self = [super init];
     if (self) {
@@ -144,6 +144,53 @@
         _isImported = [function isImported];
     }
     return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _fn = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazyFunction_fn"];
+        _ast = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazyFunction_ast"];
+        _params = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazyFunction_params"];
+        _argsCount = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazyFunction_argsCount"] integerValue];
+        _env = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazyFunction_env"];
+        _name = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazyFunction_name"];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazyFunction_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazyFunction_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazyFunction_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazyFunction_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLLazyFunction_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_fn forKey:@"DLLazyFunction_fn"];
+    [coder encodeObject:_ast forKey:@"DLLazyFunction_ast"];
+    [coder encodeObject:_params forKey:@"DLLazyFunction_params"];
+    [coder encodeObject:_env forKey:@"DLLazyFunction_env"];
+    NSValue *isMacroValue = [[NSValue alloc] initWithBytes:&_isMacro objCType:@encode(BOOL)];
+    [coder encodeObject:isMacroValue forKey:@"DLLazyFunction_isMacro"];
+    [coder encodeObject:@(_argsCount) forKey:@"DLLazyFunction_argsCount"];
+    [coder encodeObject:_name forKey:@"DLLazyFunction_name"];
+    [coder encodeObject:_meta forKey:@"DLLazyFunction_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLLazyFunction_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLLazyFunction_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLLazyFunction_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLLazyFunction_isMutable"];
+
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
 }
 
 - (NSString *)dataType {

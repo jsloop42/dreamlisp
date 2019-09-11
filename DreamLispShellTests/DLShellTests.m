@@ -7,9 +7,9 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "ShellConst.h"
+#import "DLShellConst.h"
 #import "NSString+DLDataProtocol.h"
-#import "MockStdIOService.h"
+#import "DLMockStdIOService.h"
 #import <DreamLisp/DreamLispLib.h>
 
 @interface DLShellTests : XCTestCase
@@ -25,20 +25,20 @@
 }
 
 - (void)testVersion {
-    NSString *ver = [ShellConst shellVersion];
+    NSString *ver = [DLShellConst shellVersion];
     XCTAssertNotNil(ver);
     XCTAssertTrue([ver isNotEmpty]);
 }
 
 - (void)testIO {
     DreamLisp *dl = [[DreamLisp alloc] init];
-    MockStdIOService *stdIOService = [MockStdIOService new];
+    DLMockStdIOService *stdIOService = [DLMockStdIOService new];
     [dl setIsREPL:YES];
     [dl bootstrap];
     [[dl ioService] setStdIODelegate:stdIOService];
     [dl printVersion];
     XCTAssertTrue([[stdIOService output] isNotEmpty]);
-    [dl loadCoreLib];
+    [dl loadDLModuleLibs];
     // Test write output
     NSString *inp = @"(+ 1 2)";
     NSString *ret = nil;

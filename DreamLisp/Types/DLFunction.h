@@ -8,11 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import "DLDataProtocol.h"
-#import "Env.h"
+#import "DLEnv.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class Env;
+@class DLEnv;
 
 @interface DLFunction: NSObject <DLDataProtocol>
 // ([id<DLDataProtocol>]) -> id<DLDataProtocol>
@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, copy, nullable) id<DLDataProtocol> ast;
 // [Symbols]
 @property (nonatomic, readwrite, retain, nullable) NSMutableArray *params;
-@property (nonatomic, readwrite, copy, nullable) Env *env;
+@property (nonatomic, readwrite, copy, nullable) DLEnv *env;
 @property (nonatomic, readwrite, assign, getter=isMacro) BOOL macro;
 /**
   The arity count of the function. For variadic functions it returns @c n and @c n+m where @c m is the non-variadic arguments if present.
@@ -31,16 +31,16 @@ NS_ASSUME_NONNULL_BEGIN
  @endcode
  */
 @property (nonatomic, readwrite) NSInteger argsCount;
-@property (nonatomic, readwrite) NSString *name;
+@property (nonatomic, readwrite, retain) NSString *name;
 + (instancetype)new NS_UNAVAILABLE;
 + (BOOL)isFunction:(id)object;
 + (DLFunction *)dataToFunction:(id<DLDataProtocol>)data;
 + (DLFunction *)dataToFunction:(id<DLDataProtocol>)data position:(NSInteger)position;
 + (DLFunction *)dataToFunction:(id<DLDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
+- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(DLEnv *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
                          fn:(id<DLDataProtocol> (^)(NSMutableArray *))fn;
-- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(Env *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
+- (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(DLEnv *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
                          fn:(id<DLDataProtocol> (^)(NSMutableArray *))fn name:(NSString *)name;
 - (instancetype)initWithFn:(id<DLDataProtocol> (^)(NSMutableArray *))fn name:(NSString *)name;
 - (instancetype)initWithFn:(id<DLDataProtocol> (^)(NSMutableArray *))fn argCount:(NSInteger)count name:(NSString *)name;

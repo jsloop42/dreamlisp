@@ -7,7 +7,7 @@
 //
 
 #import "NSArray+DLDataProtocol.h"
-#import "TypeUtils.h"
+#import "DLTypeUtils.h"
 
 @implementation NSArray (DLDataProtocol)
 
@@ -28,7 +28,7 @@
 }
 
 - (NSMutableArray *)map:(id (^)(id arg))block {
-    return [TypeUtils mapOnArray:[self mutableCopy] withBlock:block];
+    return [DLTypeUtils mapOnArray:[self mutableCopy] withBlock:block];
 }
 
 - (BOOL)isEmpty {

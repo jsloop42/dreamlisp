@@ -39,6 +39,42 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        NSValue *flagValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLBool_value"];
+        [flagValue getValue:&_flag];
+        _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLBool_meta"];
+        _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLBool_moduleName"];
+        _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLBool_position"] integerValue];
+        NSValue *isImportedValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLBool_isImported"];
+        [isImportedValue getValue:&_isImported];
+        NSValue *isMutableValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLBool_isMutable"];
+        [isMutableValue getValue:&_isMutable];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    NSValue *_flagValue = [[NSValue alloc] initWithBytes:&_flag objCType:@encode(BOOL)];
+    [coder encodeObject:_flagValue forKey:@"DLBool_value"];
+    [coder encodeObject:_meta forKey:@"DLBool_meta"];
+    [coder encodeObject:_moduleName forKey:@"DLBool_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLBool_position"];
+    NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
+    [coder encodeObject:isImportedValue forKey:@"DLBool_isImported"];
+    NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
+    [coder encodeObject:isMutableValue forKey:@"DLBool_isMutable"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (NSString *)dataType {
     return [self className];
 }

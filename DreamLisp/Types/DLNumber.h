@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "DLDataProtocol.h"
-#import "TypeUtils.h"
+#import "DLTypeUtils.h"
 #import "DLError.h"
 
 NS_ASSUME_NONNULL_BEGIN
