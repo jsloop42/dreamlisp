@@ -15,6 +15,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DLList : NSObject <DLDataProtocol>
+@property (nonatomic, readwrite, assign) NSInteger seekIndex;
 + (BOOL)isList:(id)object;
 + (BOOL)isKindOfList:(id)object;
 + (DLList *)dataToList:(id<DLDataProtocol>)data fnName:(NSString *)fnName;
@@ -22,6 +23,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init;
 - (instancetype)initWithArray:(NSArray *)list;
 - (instancetype)initWithMeta:(id<DLDataProtocol>)meta list:(DLList *)list;
+- (id<DLDataProtocol> _Nullable)previous;
+- (id<DLDataProtocol> _Nullable)next;
+- (BOOL)hasNext;
 - (void)add:(id<DLDataProtocol>)object;
 - (void)add:(id<DLDataProtocol>)object atIndex:(NSUInteger)index;
 - (DLList *)addObject:(id<DLDataProtocol>)object;
@@ -45,6 +49,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (DLList *)sort:(NSInteger (*)(id, id, void *))sorter;
 - (DLList *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator;
 - (NSMutableArray *)subArrayWithStartIndex:(NSInteger)start endIndex:(NSInteger)end;
+@end
+
+@interface DLList (NSFastEnumeration)
+
 @end
 
 NS_ASSUME_NONNULL_END

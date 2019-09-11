@@ -82,6 +82,12 @@
         return [NSString stringWithFormat:@"#<data %@>", [(DLData *)data value]];
     } else if ([DLRegex isRegex:data]) {
         return [NSString stringWithFormat:@"<regex %@>", [(DLRegex *)data value]];
+    } else if ([DLClass isClass:data]) {
+        return [NSString stringWithFormat:@"#<class %@>", data];
+    } else if ([DLObject isObject:data]) {
+        return [NSString stringWithFormat:@"#<object %@>", data];
+    } else if ([DLSlot isSlot:data]) {
+        return [NSString stringWithFormat:@"#<slot %@>", data];
     }
     [[[DLError alloc] initWithFormat:DLInvalidDataType, [(id)data classForCoder], data] throw];
     return nil;

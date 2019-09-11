@@ -116,11 +116,9 @@ static BOOL _isCacheEnabled;
 #pragma mark - List
 
 + (DLList *)addObjectsToList:(DLList *)list fromList:(DLList *)aList {
-    @autoreleasepool {
-        DLList *xs = [list copy];
-        [[xs value] addObjectsFromArray:[aList value]];
-        return xs;
-    }
+    DLList *xs = [list copy];
+    [[xs value] addObjectsFromArray:[aList value]];
+    return xs;
 }
 
 + (DLList *)addObjectsToList:(DLList *)list fromVector:(DLVector *)vector {
@@ -145,11 +143,9 @@ static BOOL _isCacheEnabled;
 #pragma mark - Vector
 
 + (DLVector *)addObjectsToVector:(DLVector *)vector fromList:(DLList *)list {
-    @autoreleasepool {
-        DLVector *vec = [vector copy];
-        [[vec value] addObjectsFromArray:[list value]];
-        return vec;
-    }
+    DLVector *vec = [vector copy];
+    [[vec value] addObjectsFromArray:[list value]];
+    return vec;
 }
 
 + (DLVector *)addObjectsToVector:(DLVector *)vector fromVector:(DLVector *)aVector {
@@ -465,6 +461,17 @@ static BOOL _isCacheEnabled;
     }
 }
 
++ (NSString *)capitalizeFirstChar:(NSString *)string {
+    NSString *first = [string substringWithRange:NSMakeRange(0, 1)];
+    return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[NSString stringWithFormat:@"%@", [first uppercaseString]]];
+}
+
++ (NSString *)promptWithModule:(NSString *)moduleName {
+    return [[NSString alloc] initWithFormat:@"λ %@> ", moduleName];
+}
+
+#pragma mark - Network
+
 + (NSString *)httpMethodTypeToString:(DLKeyword *)methodType {
     NSString *type = [methodType string];
     if ([type isEqualToString:@"get"]) return @"GET";
@@ -474,8 +481,95 @@ static BOOL _isCacheEnabled;
     return @"DELETE";
 }
 
-+ (NSString *)promptWithModule:(NSString *)moduleName {
-    return [[NSString alloc] initWithFormat:@"λ %@> ", moduleName];
+#pragma mark - Objective-C RT
+
+/*!
+ Updates the property attributes from the existing main values. Call this after setting value, which will then generate backing Ivar, getter, setter, type
+ string.
+ */
++ (void)updatePropertyAttr:(DLObjcPropertyAttr *)attr {
+    attr.name = [attr.value UTF8String];
+    attr.backingIvar = [[NSString stringWithFormat:@"_%s", attr.name] UTF8String];
+    if (attr.hasCustomGetter) {
+        NSString *getterName = attr.customGetter.value;
+        attr.getterName = [getterName UTF8String];
+    } else {
+        attr.getterName = attr.name;
+    }
+    if (attr.hasCustomSetter) {
+        NSString *setterName = attr.customSetter.value;
+        attr.setterName = [setterName UTF8String];
+    } else {
+        attr.setterName = [[self toSetterName:attr.value] UTF8String];
+    }
+    if (!attr.type) {
+        attr.type = "@";  /* Type assumes object as its default value if none given. */
+    }
+}
+
++ (NSString *)toAccessorVar:(NSString *)string {
+    if ([string count] == 0) return string;
+    NSString *first = [string substringWithRange:NSMakeRange(0, 1)];
+    return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[NSString stringWithFormat:@"_%@", [first lowercaseString]]];
+}
+
++ (NSString *)toSetterName:(NSString *)string {
+    if ([string count] == 0) return string;
+    NSString *first = [string substringWithRange:NSMakeRange(0, 1)];
+    return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[NSString stringWithFormat:@"set%@:", [first uppercaseString]]];
+}
+
++ (DLInvocationArgument *)convertToInvocationArgument:(id<DLDataProtocol>)elem {
+    DLInvocationArgument *invoArg = [DLInvocationArgument new];
+    NSMutableArray *arr = [NSMutableArray new];
+    invoArg.args = arr;
+    if ([DLList isKindOfList:elem]) {  /* DLList, DLVector */
+        DLList *xs = [(DLList *)elem value];
+        [arr addObject:xs];
+        invoArg.type = [xs dataType];
+    } else if ([DLAtom isAtom:elem]) {
+        DLAtom *atom = [(DLAtom *)elem value];
+        [self convertToInvocationArgument:atom]; /* DLAtom is a container class, as such we need to unpack the contained value. */
+    } else if ([DLBool isBool:elem]) {
+        BOOL flag = [(DLBool *)elem value];
+        NSValue *val = [NSValue value:&flag withObjCType:@encode(BOOL)];
+        [arr addObject:val];
+        invoArg.type = @"bool";
+    } else if ([DLClass isClass:elem]) {
+        [arr addObject:[(DLClass *)elem value]];
+        invoArg.type = @"class";
+    } else if ([DLFunction isFunction:elem]) {
+        /*
+         Cannot use a DLFunction as such because the function is a container for the body which is Lisp ast. So calling a DLFunction from Objective-C side of
+         things is not helpful because then we require an interpreter for running that function body. Another option is then to have a compiler which will parse
+         the DLFunction which is DL AST to Objective-C method.
+         So if in REPL only target, we would have to define an Objective-C block and then pass that as the argument. Or define an Objective-C method and pass
+         the SEL. The app with both, the compiler and the REPL, can use the compiler to convert the DLFunction into an Objective-C block (an iVar will be
+         created class definition time to hold the initarg which will be a block and then a block can be defined already as defblock or given inline as DL code,
+         which will be converted into a block.
+         */
+
+        // TODO: as such check if compiler is present, if so, invoke, else throw an error (with saying to use a block instead and an error code).
+        // TODO: add error code for all errors thrown so that details can be read from the documentation, any design decisions and such related to the error.
+        // This would provide a much better development experience than having to search text across the web.
+        [[[DLError alloc] initWithFormat:DLMakeInstanceFnTypeError, [elem dataTypeName]] throw];
+    } else if ([DLHashMap isHashMap:elem]) {
+        [arr addObject:[(DLHashMap *)elem value]];
+    } else if ([DLKeyword isKeyword:elem]) {
+        /*
+         DLKeyword is useful for ObjC, DL interop as one can pass them around, like example below. We can have parts of the logic in DL and some as DLOS.
+         Which means, we need DLKeyword as a runtime (linked) library when compiling if one uses this, else we do not have to link against DLLib.
+         (def week [:sunday :monday])
+         (defclass routine (ns-object) ((day :initarg :for-day)))
+         (make-instance 'routine :for-day :sunday)
+         */
+        [arr addObject:elem];  /* We can pass like :with-week :friday */
+    } else if ([DLNil isNil:elem]) {
+        [arr addObject:[(DLNil *)elem value]];
+    } else if ([DLNumber isNumber:elem]) {
+
+    }
+    return invoArg;
 }
 
 + (DLCacheTable *)cache {

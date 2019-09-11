@@ -1058,19 +1058,17 @@ double dmod(double a, double n) {
     #pragma mark flatten
     /** Takes any nested collection and returns its contents as a single collection. */
     void(^flatten)(DLLazySequence *seq, NSMutableArray *xs) = ^void(DLLazySequence *seq, NSMutableArray *xs) {
-        @autoreleasepool {
-            [DLTypeUtils checkArity:xs arity:1];
-            id<DLDataProtocol> first = (id<DLDataProtocol>)[xs first];
-            NSMutableArray *acc = [NSMutableArray new];
-            if ([DLList isKindOfList:first]) {
-                [self flatten:(DLList *)first acc:acc];
-                [[seq acc] addObjectsFromArray:acc];
-            } else if ([DLHashMap isHashMap:first]) {
-                [[seq acc] addObject:[self flattenHashMap:first acc:[NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
-                                                                                          valueOptions:NSMapTableStrongMemory]]];
-            } else {
-                [[seq acc] addObject:first];
-            }
+        [DLTypeUtils checkArity:xs arity:1];
+        id<DLDataProtocol> first = (id<DLDataProtocol>)[xs first];
+        NSMutableArray *acc = [NSMutableArray new];
+        if ([DLList isKindOfList:first]) {
+            [self flatten:(DLList *)first acc:acc];
+            [[seq acc] addObjectsFromArray:acc];
+        } else if ([DLHashMap isHashMap:first]) {
+            [[seq acc] addObject:[self flattenHashMap:first acc:[NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
+                                                                                      valueOptions:NSMapTableStrongMemory]]];
+        } else {
+            [[seq acc] addObject:first];
         }
     };
 
@@ -1182,52 +1180,50 @@ double dmod(double a, double n) {
 
     #pragma mark into
     id<DLDataProtocol>(^into)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            [DLTypeUtils checkArity:xs arity:2];
-            id<DLDataProtocol> first = [xs first];
-            id<DLDataProtocol> second = [xs second];
-            if ([DLNil isNil:second]) return first;
-            id<DLDataProtocol> ret = nil;
-            if ([DLList isList:first]) {
-                DLList *list = (DLList *)first;
-                if ([DLList isKindOfList:second]) {
-                    ret = [DLUtils addObjectsToList:list fromList:second];
-                } else if ([DLString isString:second]) {
-                    ret = [list addObject:second];
-                } else if ([DLHashMap isHashMap:second]) {
-                    ret = [DLUtils addObjectsToList:list fromHashMap:second];
-                } else {
-                    [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"into/2", @"'sequence' or 'collection'", [second dataTypeName]] throw];
-                    return [DLNil new];
-                }
-            } else if ([DLVector isVector:first]) {
-                DLVector *vec = (DLVector *)first;
-                if ([DLList isKindOfList:second]) {
-                    ret = [DLUtils addObjectsToVector:vec fromList:second];
-                } else if ([DLString isString:second]) {
-                    ret = [vec addObject:second];
-                } else if ([DLHashMap isHashMap:second]) {
-                    ret = [DLUtils addObjectsToVector:vec fromHashMap:second];
-                } else {
-                    [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"into/2", @"'sequence' or 'collection'", [second dataTypeName]] throw];
-                    return [DLNil new];
-                }
-            } else if ([DLHashMap isHashMap:first]) {
-                DLHashMap *hm = (DLHashMap *)first;
-                if ([DLList isKindOfList:second]) {
-                    ret = [DLUtils addObjectsToHashMap:hm fromList:second];
-                } else if ([DLHashMap isHashMap:second]) {
-                    ret = [DLUtils addObjectsToHashMap:hm fromHashMap:second];
-                } else {
-                    [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"into/2", @"'collection'", [second dataTypeName]] throw];
-                    return [DLNil new];
-                }
+        [DLTypeUtils checkArity:xs arity:2];
+        id<DLDataProtocol> first = [xs first];
+        id<DLDataProtocol> second = [xs second];
+        if ([DLNil isNil:second]) return first;
+        id<DLDataProtocol> ret = nil;
+        if ([DLList isList:first]) {
+            DLList *list = (DLList *)first;
+            if ([DLList isKindOfList:second]) {
+                ret = [DLUtils addObjectsToList:list fromList:second];
+            } else if ([DLString isString:second]) {
+                ret = [list addObject:second];
+            } else if ([DLHashMap isHashMap:second]) {
+                ret = [DLUtils addObjectsToList:list fromHashMap:second];
             } else {
-                [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, @"into/2", @"'collection'", 1, [first dataTypeName]] throw];
+                [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"into/2", @"'sequence' or 'collection'", [second dataTypeName]] throw];
                 return [DLNil new];
             }
-            return ret;
+        } else if ([DLVector isVector:first]) {
+            DLVector *vec = (DLVector *)first;
+            if ([DLList isKindOfList:second]) {
+                ret = [DLUtils addObjectsToVector:vec fromList:second];
+            } else if ([DLString isString:second]) {
+                ret = [vec addObject:second];
+            } else if ([DLHashMap isHashMap:second]) {
+                ret = [DLUtils addObjectsToVector:vec fromHashMap:second];
+            } else {
+                [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"into/2", @"'sequence' or 'collection'", [second dataTypeName]] throw];
+                return [DLNil new];
+            }
+        } else if ([DLHashMap isHashMap:first]) {
+            DLHashMap *hm = (DLHashMap *)first;
+            if ([DLList isKindOfList:second]) {
+                ret = [DLUtils addObjectsToHashMap:hm fromList:second];
+            } else if ([DLHashMap isHashMap:second]) {
+                ret = [DLUtils addObjectsToHashMap:hm fromHashMap:second];
+            } else {
+                [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"into/2", @"'collection'", [second dataTypeName]] throw];
+                return [DLNil new];
+            }
+        } else {
+            [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, @"into/2", @"'collection'", 1, [first dataTypeName]] throw];
+            return [DLNil new];
         }
+        return ret;
     };
     fn = [[DLFunction alloc] initWithFn:into argCount:2 name:@"into/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"into" moduleName:[DLConst coreModuleName]]];
@@ -1395,21 +1391,19 @@ double dmod(double a, double n) {
 }
 
 - (NSMutableArray *)flatten:(DLList *)xs acc:(NSMutableArray *)acc {
-    @autoreleasepool {
-        if (!acc) acc = [NSMutableArray new];
-        NSUInteger len = [xs count];
-        NSUInteger i = 0;
-        id<DLDataProtocol> elem = nil;
-        for (i = 0; i < len; i++) {
-            elem = [xs nth:i];
-            if ([DLList isKindOfList:elem]) {
-                [self flatten:elem acc:acc];
-            } else {
-                [acc addObject:elem];
-            }
+    if (!acc) acc = [NSMutableArray new];
+    NSUInteger len = [xs count];
+    NSUInteger i = 0;
+    id<DLDataProtocol> elem = nil;
+    for (i = 0; i < len; i++) {
+        elem = [xs nth:i];
+        if ([DLList isKindOfList:elem]) {
+            [self flatten:elem acc:acc];
+        } else {
+            [acc addObject:elem];
         }
-        return acc;
     }
+    return acc;
 }
 
 #pragma mark - Vector

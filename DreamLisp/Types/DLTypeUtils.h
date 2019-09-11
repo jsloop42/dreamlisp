@@ -43,6 +43,7 @@ typedef NS_ENUM(NSUInteger, DLSequenceType) {
 + (void)checkIndexBounds:(NSMutableArray *)xs index:(NSInteger)index;
 + (void)checkIndexBoundsCount:(NSInteger)count index:(NSInteger)index;
 + (void)checkIndexBoundsCount:(NSInteger)count startIndex:(NSInteger)start endIndex:(NSInteger)end;
++ (SEL)convertInitKeywordToSelector:(NSString *)kwdArg;
 @end
 
 extern NSInteger sortAscending(id obj1, id obj2, void *context);

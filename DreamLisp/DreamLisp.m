@@ -22,6 +22,7 @@ static NSString *langVersion;
     DLNetwork *_network;
     DLFileOps *_fileOps;
     DLIOService* _ioService;
+    DLObjc *_objc;
     BOOL _isQuasiquoteMode;
     NSUInteger _quasiquoteDepth;
     NSUInteger _unquoteDepth;
@@ -66,6 +67,7 @@ static NSString *langVersion;
     _printer = [DLPrinter new];
     _core = [DLCore new];
     [_core setDelegate:self];
+    _objc = [DLObjc new];
     _network = [DLNetwork new];
     _env = [[DLEnv alloc] initWithModuleName:DLConst.defaultModuleName isUserDefined:NO];
     [_env setModuleDescription:[DLConst defaultModuleDescription]];
@@ -416,6 +418,17 @@ static NSString *langVersion;
                     } else if ([[sym value] isEqual:@"remove-module"]) {
                         [self removeModule:ast];
                         return [DLNil new];
+                    } else if ([[sym value] isEqual:@"defclass"]) {
+                        DLClass *cls = [_objc parseClassForm:ast];
+                        [_objc defclass:cls];
+                        [self.env setObject:cls forKey:cls.name];
+                        return cls;
+                    } else if ([[sym value] isEqual:@"make-instance"]) {
+                        DLInvocation *invocation = [_objc parseMakeInstanceForm:ast withEnv:env];
+                        if (!invocation) [[[DLError alloc] initWithFormat:DLRTObjectInitError, invocation.cls.className] throw];
+                        return [_objc makeInstance:invocation];  /* Returns a DLObject */
+                    } else if ([[sym value] isEqual:@"defmethod"]) {
+
                     }
                 } else if ([xs count] == 2 && [DLKeyword isKeyword:[xs first]]) {
                     ast = [[DLList alloc] initWithArray:[@[[[DLSymbol alloc] initWithArity:2 string:@"get" moduleName:[DLConst coreModuleName]],

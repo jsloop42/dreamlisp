@@ -125,6 +125,25 @@
     return self;
 }
 
+- (id<DLDataProtocol> _Nullable)previous {
+    if (_seekIndex < 0) {
+        _seekIndex = 0;
+        return nil;
+    }
+    return [_array objectAtIndex:_seekIndex++];
+}
+
+- (id<DLDataProtocol> _Nullable)next {
+    if (_seekIndex >= [self count]) {
+        return nil;
+    }
+    return [_array objectAtIndex:_seekIndex++];
+}
+
+- (BOOL)hasNext {
+    return _seekIndex < [self count];
+}
+
 - (void)add:(id<DLDataProtocol>)object {
     [_array addObject:object];
 }
@@ -201,6 +220,15 @@
 
 - (void)enumerateConcurrent:(void (^)(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop))block; {
     [_array enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:block];
+}
+
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id  _Nullable __unsafe_unretained [])buffer count:(NSUInteger)len {
+    if (state->state == [self count]) return 0;
+    __unsafe_unretained id const *arr = &_array;
+    state->itemsPtr = (__typeof__(state->itemsPtr))arr;
+    state->mutationsPtr = &state->extra[0];
+    state->state = [self count];
+    return state->state;
 }
 
 - (BOOL)isEmpty {

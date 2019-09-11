@@ -159,6 +159,24 @@
     }
 }
 
++ (NSString *)capitalizeFirstChar:(NSString *)string {
+    NSString *first = [string substringWithRange:NSMakeRange(0, 1)];
+    return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[NSString stringWithFormat:@"%@", [first uppercaseString]]];
+}
+
+/*! Keyword selectors in @c :initarg are of the form :with-place, :with-full-name, which gets converted to selectors initWithPlace:, initWithFullName:. */
++ (SEL)convertInitKeywordToSelector:(NSString *)kwdArg {
+    NSArray *pathComp = [kwdArg componentsSeparatedByString:@"-"];
+    NSMutableString *selStr = [NSMutableString stringWithString:@"init"];
+    NSUInteger len = pathComp.count;
+    NSUInteger i = 1;
+    for (i = 1; i < len; i++) {
+        [selStr appendString:[self capitalizeFirstChar:[pathComp objectAtIndex:i]]];
+    }
+    [selStr appendString:@":cls:"];  /* Last arg is implicit, which is the DLClass object. */
+    return NSSelectorFromString(selStr);
+}
+
 @end
 
 NSInteger sortAscending(id obj1, id obj2, void *context) {

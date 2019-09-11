@@ -13,6 +13,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class DLInvocationArgument;
+@class DLObjcPropertyAttr;
+
 @interface DLUtils : NSObject
 + (DLCacheTable *)cache;
 + (void)enableCache;
@@ -53,8 +56,14 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark String
 + (NSMutableArray *)stringToArray:(DLString *)string isNative:(BOOL)isNative;
 + (void)appendStringFromArray:(NSMutableArray *)array string:(DLString *)string;
-+ (NSString *)httpMethodTypeToString:(DLKeyword *)methodType;
 + (NSString *)promptWithModule:(NSString *)moduleName;
+#pragma mark Network
++ (NSString *)httpMethodTypeToString:(DLKeyword *)methodType;
+#pragma mark Objective-C RT
++ (void)updatePropertyAttr:(DLObjcPropertyAttr *)attr;
++ (NSString *)toAccessorVar:(NSString *)string;
++ (NSString *)toSetterName:(NSString *)string;
++ (DLInvocationArgument *)convertToInvocationArgument:(id<DLDataProtocol>)elem;
 - (instancetype)init NS_UNAVAILABLE;
 @end
 
