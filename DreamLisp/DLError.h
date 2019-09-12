@@ -43,6 +43,8 @@ extern NSString *DLMakeInstanceFnTypeError;
 extern NSString *DLMakeInstanceNoneSpecifiedError;
 extern NSString *DLTypeValueNotSpecifiedError;
 extern NSString *DLMacroSymbolNotFound;
+extern NSString *DLMethodClassNotSpecifiedError;
+extern NSString *DLMethodNameNotFoundError;
 extern NSString *DLModuleArityDefinitionError;
 extern NSString *DLModuleEmpty;
 extern NSString *DLModuleNotFound;

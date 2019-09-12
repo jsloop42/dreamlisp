@@ -39,6 +39,10 @@
 #import "DLNetwork.h"
 /*! Runtime */
 #import "DLObjcPropertyAttr.h"
+#import "DLObjcMethodAttr.h"
+#import "DLClass.h"
+#import "DLObject.h"
+#import "DLMethod.h"
 #import "DLObjc.h"
 #import "DLObjc.h"
 #import "DLInvocation.h"

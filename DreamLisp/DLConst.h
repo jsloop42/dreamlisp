@@ -7,11 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "DLKeyword.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DLConst : NSObject
 @property (class, retain) NSArray *keywords;
+@property (class, retain) NSArray *objcMethodTypeAttribList;
 @property (class, retain) NSString *emptyModuleName;
 @property (class, retain) NSString *defaultModuleName;
 @property (class, retain) NSString *defaultModuleDescription;

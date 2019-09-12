@@ -15,6 +15,7 @@ static NSString *_moduleName = @"objcrt";
 @implementation DLObjc {
     DLEnv *_env;
     DLObjcRT *_rt;
+    DLObjcMethodAttrKey *_methodAttrKey;
 }
 
 - (void)dealloc {
@@ -34,6 +35,7 @@ static NSString *_moduleName = @"objcrt";
     [_env setModuleDescription:_description];
     [_env setIsUserDefined:NO];
     _rt = [DLObjcRT new];
+    _methodAttrKey = DLObjcMethodAttrKey.shared;
 }
 
 - (BOOL)addDLDataProtocol:(Class)cls {
@@ -78,7 +80,7 @@ static NSString *_moduleName = @"objcrt";
     /* Add init methods */
     DLSlot *slot;
     for (slot in cls.slots) {
-        [_rt addMethod:aCls name:[slot selectorForInitArg] imp:(IMP)initWithPropImp type:slot.methodType];
+        [_rt addMethod:aCls name:[slot selectorForInitArg] imp:(IMP)dl_initWithPropImp type:slot.methodType];
     }
     [_rt registerClass:aCls];
     [self addDLDataProtocol:aCls];
@@ -189,6 +191,57 @@ static NSString *_moduleName = @"objcrt";
     return cls;
 }
 
+/*!
+ Parses the given ast into a DLMethod
+
+ (defmethod ^[:class] gen-random 'utils (n :max max)  (..method-body..))  ; class method
+ (defmethod gen-random 'utils (n :max max)  (..method-body..))  ; instance method
+ (defmethod ^[:ns-decimal] gen-random 'utils (^[:ns-uinteger] n ^[:ns-integer :nullable] :max max)  (..method-body..))  ; instance method gen-random/2
+ (defmethod ^[:NSNumber :nullable] gen-random 'utils (^[:ns-uinteger] n)  (..method-body..))  ; instance method that takes only one arg gen-random/1
+ */
+- (DLMethod *)parseMethod:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env {
+    NSString *fnName = @"defmethod";
+    DLList *xs = [DLList dataToList:ast fnName:fnName];
+    NSUInteger len = [xs count];
+    ++xs.seekIndex;  /* The first element is the symbol defmethod. So increment the index. */
+    /* Get meta info if present */
+    NSUInteger i = 0;
+    NSUInteger count = 0;
+    id<DLDataProtocol> elem = [xs next];
+    DLMethod *method = [DLMethod new];
+    method.params = [NSMutableArray new];
+    DLMethodParam *params = [DLMethodParam new];
+    DLObjcMethodAttr *methodAttr = [DLObjcMethodAttr new];
+    if ([DLList isKindOfList:elem]) { /* meta details found */
+        DLVector *metaxs = (DLVector *)elem;
+        DLKeyword *kwd = nil;
+        len = [metaxs count];
+        for (i = 0; i < count; i++) {
+            if (i > 0) {
+                kwd = [metaxs nth:i];
+                if ([kwd isEqual:_methodAttrKey.kNullable]) {
+                    methodAttr.isNullable = YES;
+                } else { /* If none of the methor arr key matches => this is taken as a type */
+                    methodAttr.type = kwd;  //TODO: validate the type
+                }
+            }
+        }
+        method.attr = methodAttr; /* Set the method' return attr details */
+    }
+    /* Add method name */
+    if (![xs hasNext]) [[[DLError alloc] initWithFormat:DLMethodNameNotFoundError, fnName] throw];
+    elem = [xs next];
+    method.name = [DLSymbol dataToSymbol:elem position:xs.seekIndex - 1 fnName:fnName];
+    /* Add method's class */
+    if (![xs hasNext]) [[[DLError alloc] initWithFormat:DLMethodClassNotSpecifiedError, fnName] throw];
+    elem = [DLList dataToList:[xs next] fnName:fnName];
+    method.cls = [self classInfoFromAST:xs fnName:fnName env:env];
+    /* Add method params */
+    // TODO: method params
+    return method;
+}
+
+
 - (DLObject *)makeInstance:(DLInvocation *)invocation {
     id inst = [_rt instantiateFromInvocation:invocation.invocation];
     if (!inst) [[[DLError alloc] initWithFormat:DLRTObjectInitError, [invocation.invocation.target className]] throw];
@@ -198,9 +251,23 @@ static NSString *_moduleName = @"objcrt";
     return object;
 }
 
-// (make-instance 'person :init-with-name "Olive")
-// (make-instance 'series :init-with-count 3.141)
-// (make-instance 'person :alloc)
+- (DLClass *)classInfoFromAST:(DLList *)list fnName:(NSString *)fnName env:(DLEnv *)env {
+    DLList *clsList = [DLList dataToList:[list next] position:list.seekIndex - 1 fnName:fnName];
+    id<DLDataProtocol> quoteElem = [clsList next];
+    if (![DLSymbol isSymbol:quoteElem withName:@"quote"]) {
+        [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithArity, @"quote", clsList.seekIndex - 1, [quoteElem dataTypeName]] throw];
+    }
+    DLSymbol *clsSym = [clsList next];
+    return [env objectForKey:clsSym isThrow:YES];  /* Get the class from the env */
+}
+
+/*!
+ Parses the make-instance form giving an invocation object which can be used to create an object.
+
+ (make-instance 'person :init-with-name "Olive")
+ (make-instance 'series :init-with-count 3.141)
+ (make-instance 'person :alloc)
+ */
 - (DLInvocation *)parseMakeInstanceForm:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env {
     NSString *fnName = @"make-instance";
     DLList *list = [DLList dataToList:ast fnName:fnName];
@@ -208,13 +275,7 @@ static NSString *_moduleName = @"objcrt";
     if (len < 2) [[[DLError alloc] initWithFormat:DLMakeInstanceNoneSpecifiedError, @"'class'"] throw];
     ++list.seekIndex;  /* The first element is the symbol make-instance. So increment the index. */
     /* Get the class info */
-    DLList *clsList = [DLList dataToList:[list next] position:list.seekIndex - 1 fnName:fnName];
-    id<DLDataProtocol> quoteElem = [clsList next];
-    if (![DLSymbol isSymbol:quoteElem withName:@"quote"]) {
-        [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithArity, @"quote", clsList.seekIndex - 1, [quoteElem dataTypeName]] throw];
-    }
-    DLSymbol *clsSym = [clsList next];
-    DLClass *cls = [env objectForKey:clsSym isThrow:YES];  /* Get the class from the env */
+    DLClass *cls = [self classInfoFromAST:list fnName:fnName env:env];
     id<DLDataProtocol> elem = nil;
     BOOL isAllocEncountered = NO;
     BOOL isInitEncountered = NO; /* Any form of init. Either :init or the one specified in :initarg. */

@@ -428,7 +428,7 @@ static NSString *langVersion;
                         if (!invocation) [[[DLError alloc] initWithFormat:DLRTObjectInitError, invocation.cls.className] throw];
                         return [_objc makeInstance:invocation];  /* Returns a DLObject */
                     } else if ([[sym value] isEqual:@"defmethod"]) {
-
+                        [_objc parseMethod:ast withEnv:env]; // TODO update
                     }
                 } else if ([xs count] == 2 && [DLKeyword isKeyword:[xs first]]) {
                     ast = [[DLList alloc] initWithArray:[@[[[DLSymbol alloc] initWithArity:2 string:@"get" moduleName:[DLConst coreModuleName]],

@@ -9,6 +9,7 @@
 #import "DLConst.h"
 
 NSArray *_keywords;
+NSArray *_objcMethodTypeAttribList;
 NSString *_emptyModuleName;
 NSString *_defaultModuleName;
 NSString *_defaultModuleDescription;
@@ -31,6 +32,7 @@ NSString *_keyForNotificationValue;
 @implementation DLConst
 
 @dynamic keywords;
+@dynamic objcMethodTypeAttribList;
 @dynamic emptyModuleName;
 @dynamic defaultModuleName;
 @dynamic defaultModuleDescription;
@@ -56,6 +58,7 @@ NSString *_keyForNotificationValue;
     if (self == [self class]) {
         _keywords = @[@"fn*", @"if", @"do", @"quote", @"quasiquote", @"unquote", @"splice-unquote", @"macroexpand", @"try*", @"catch*", @"defmodule",
                       @"in-module", @"import", @"export", @"remove-module"];
+        _objcMethodTypeAttribList = @[[DLKeyword keywordWithString:@"nullable"]];
         _emptyModuleName = @"*";
         _defaultModuleName = @"user";
         _defaultModuleDescription = @"The default module.";
@@ -84,8 +87,12 @@ NSString *_keyForNotificationValue;
     return [NSString stringWithFormat:@"%@ (%@)", version, build];
 }
 
-+(NSArray *)keyword {
++ (NSArray *)keyword {
     return _keywords;
+}
+
++ (NSArray *)objcMethodTypeAttribList {
+    return _objcMethodTypeAttribList;
 }
 
 + (NSString *)emptyModuleName {

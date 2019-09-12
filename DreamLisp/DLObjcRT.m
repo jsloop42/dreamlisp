@@ -12,7 +12,7 @@ static NSRegularExpression *setterPttn;
 
 #pragma mark C IMP
 
-const char *setterName(NSString *name) {
+const char *dl_setterName(NSString *name) {
     NSArray *matches = [DLUtils matchesInString:name withExpression:setterPttn];
     NSTextCheckingResult *match = [matches firstObject];
     if ([match numberOfRanges] == 4) {
@@ -22,9 +22,9 @@ const char *setterName(NSString *name) {
     return "";
 }
 
-void setIvar(id self, SEL _cmd, id val) {
+void dl_setIvar(id self, SEL _cmd, id val) {
     NSString *cmdStr = NSStringFromSelector(_cmd);
-    const char *setterVar = setterName(cmdStr);
+    const char *setterVar = dl_setterName(cmdStr);
     Ivar ivar = class_getInstanceVariable([self class], setterVar);
     id oldVer = object_getIvar(self, ivar);
     if (oldVer != val) {
@@ -32,7 +32,7 @@ void setIvar(id self, SEL _cmd, id val) {
     }
 }
 
-void setIvarForName(id self, const char *name, id val) {
+void dl_setIvarForName(id self, const char *name, id val) {
     Ivar ivar = class_getInstanceVariable([self class], name);
     id oldVer = object_getIvar(self, ivar);
     if (oldVer != val) {
@@ -40,17 +40,17 @@ void setIvarForName(id self, const char *name, id val) {
     }
 }
 
-id getIvar(id self, SEL _cmd) {
+id dl_getIvar(id self, SEL _cmd) {
     const char *getterVar = [[DLUtils toAccessorVar:(NSStringFromSelector(_cmd))] UTF8String];
     Ivar ivar = class_getInstanceVariable([self class], getterVar);
     return object_getIvar(self, ivar);
 }
 
-id initWithPropImp(id self, SEL _cmd, id arg, DLClass *cls) {
+id dl_initWithPropImp(id self, SEL _cmd, id arg, DLClass *cls) {
     NSString *selStr = NSStringFromSelector(_cmd);
     DLSlot *slot = [cls slotWithInitArg:[[DLKeyword alloc] initWithString:selStr]];
     NSString *propName = [NSString stringWithFormat:@"_%@", slot.value.value];
-    setIvarForName(self, [propName UTF8String], arg);
+    dl_setIvarForName(self, [propName UTF8String], arg);
     return arg;
 }
 

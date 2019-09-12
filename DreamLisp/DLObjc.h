@@ -19,16 +19,20 @@
 #import "DLError.h"
 #import "DLInvocation.h"
 #import "DLTypeUtils.h"
+#import "DLMethod.h"
+#import "DLObjcMethodAttr.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class DLClass;
 @class DLObject;
 @class DLInvocation;
+@class DLMethod;
 
 @interface DLObjc : NSObject
 - (void)defclass:(DLClass *)cls;
 - (DLClass *)parseClassForm:(id<DLDataProtocol>)ast;
+- (DLMethod *)parseMethod:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env;
 - (DLObject *)makeInstance:(DLInvocation *)invocation;
 - (DLInvocation *)parseMakeInstanceForm:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env;
 @end
