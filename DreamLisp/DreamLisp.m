@@ -428,7 +428,10 @@ static NSString *langVersion;
                         if (!invocation) [[[DLError alloc] initWithFormat:DLRTObjectInitError, invocation.cls.className] throw];
                         return [_objc makeInstance:invocation];  /* Returns a DLObject */
                     } else if ([[sym value] isEqual:@"defmethod"]) {
-                        [_objc parseMethod:ast withEnv:env]; // TODO update
+                        DLMethod *method = [_objc parseMethod:ast withEnv:env];
+                        method.env = env;
+                        method.ast = [self toDoForm:[@[method.ast] mutableCopy]];  // TODO: add method to class
+                        return method;
                     }
                 } else if ([xs count] == 2 && [DLKeyword isKeyword:[xs first]]) {
                     ast = [[DLList alloc] initWithArray:[@[[[DLSymbol alloc] initWithArity:2 string:@"get" moduleName:[DLConst coreModuleName]],

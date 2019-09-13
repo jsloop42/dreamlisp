@@ -88,6 +88,8 @@
         return [NSString stringWithFormat:@"#<object %@>", data];
     } else if ([DLSlot isSlot:data]) {
         return [NSString stringWithFormat:@"#<slot %@>", data];
+    } else if ([DLMethod isMethod:data]) {
+        return [NSString stringWithFormat:@"#<method %@>", [data description]];
     }
     [[[DLError alloc] initWithFormat:DLInvalidDataType, [(id)data classForCoder], data] throw];
     return nil;

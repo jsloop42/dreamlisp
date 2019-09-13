@@ -191,6 +191,26 @@ static NSString *_moduleName = @"objcrt";
     return cls;
 }
 
+- (void)addMethodToClass:(DLMethod *)method {
+    //[_rt addMethod:method.cls name:[method selector] imp:(IMP)dl_initWithPropImp type:slot.methodType];
+}
+
+- (void)addMethodParamAttrs:(DLMethodParam *)param fromMeta:(DLList *)meta fnName:(NSString *)fnName {
+    DLKeyword *kwd = nil;
+    while([meta hasNext]) {  /* The meta list with type and other attrs */
+        DLList *list = [DLList dataToList:[meta next] fnName:fnName];
+        param.attr = [DLObjcMethodAttr new];
+        while ([list hasNext]) {
+            kwd = [list next];
+            if ([kwd isEqual:_methodAttrKey.kNullable]) {
+                param.attr.isNullable = YES;
+            } else {  /* Assuming this to be a type */
+                param.attr.type = kwd;  // TODO: validate type info
+            }
+        }
+    }
+}
+
 /*!
  Parses the given ast into a DLMethod
 
@@ -204,43 +224,85 @@ static NSString *_moduleName = @"objcrt";
     DLList *xs = [DLList dataToList:ast fnName:fnName];
     NSUInteger len = [xs count];
     ++xs.seekIndex;  /* The first element is the symbol defmethod. So increment the index. */
-    /* Get meta info if present */
-    NSUInteger i = 0;
-    NSUInteger count = 0;
+    if (![xs hasNext]) [[[DLError alloc] initWithFormat:DLMethodNameNotFoundError, fnName] throw];
     id<DLDataProtocol> elem = [xs next];
     DLMethod *method = [DLMethod new];
     method.params = [NSMutableArray new];
-    DLMethodParam *params = [DLMethodParam new];
-    DLObjcMethodAttr *methodAttr = [DLObjcMethodAttr new];
-    if ([DLList isKindOfList:elem]) { /* meta details found */
-        DLVector *metaxs = (DLVector *)elem;
-        DLKeyword *kwd = nil;
-        len = [metaxs count];
-        for (i = 0; i < count; i++) {
-            if (i > 0) {
-                kwd = [metaxs nth:i];
-                if ([kwd isEqual:_methodAttrKey.kNullable]) {
-                    methodAttr.isNullable = YES;
-                } else { /* If none of the methor arr key matches => this is taken as a type */
-                    methodAttr.type = kwd;  //TODO: validate the type
-                }
-            }
+    /* Get meta info if present */
+    if ([DLList isList:elem]) {
+        DLList *meta = (DLList *)elem;
+        if ([meta isEmpty]) [[[DLError alloc] initWithFormat:DLMethodNameNotFoundError, fnName] throw];
+        if ([DLSymbol isSymbol:[meta next] withName:@"with-meta"]) {  /* Meta encountered */
+            id<DLDataProtocol>metaElem = [meta next];
+            method.name = metaElem;
+            DLMethodParam *param = [DLMethodParam new];
+            [self addMethodParamAttrs:param fromMeta:meta fnName:fnName];
+            method.attr = param.attr;
         }
-        method.attr = methodAttr; /* Set the method' return attr details */
+    } else if ([DLSymbol isSymbol:elem]) {  /* No return meta, add method name */
+        method.name = [DLSymbol dataToSymbol:elem position:xs.seekIndex - 1 fnName:fnName];
     }
-    /* Add method name */
-    if (![xs hasNext]) [[[DLError alloc] initWithFormat:DLMethodNameNotFoundError, fnName] throw];
-    elem = [xs next];
-    method.name = [DLSymbol dataToSymbol:elem position:xs.seekIndex - 1 fnName:fnName];
     /* Add method's class */
     if (![xs hasNext]) [[[DLError alloc] initWithFormat:DLMethodClassNotSpecifiedError, fnName] throw];
     elem = [DLList dataToList:[xs next] fnName:fnName];
-    method.cls = [self classInfoFromAST:xs fnName:fnName env:env];
+    DLClass *cls = [self classInfoFromAST:elem fnName:fnName env:env];
+    method.cls = cls;
     /* Add method params */
-    // TODO: method params
+    DLList *argList = [DLList dataToList:[xs next] position:xs.seekIndex - 1 fnName:fnName];
+    len = [argList count];
+    DLList *meta = nil;
+    DLMethodParam *param = nil;
+    BOOL wasPreviousAKeyword = NO;
+    if (len > 0) {
+        id<DLDataProtocol> metaElem = nil;
+        while ([argList hasNext]) {
+            elem = [argList next];
+            if ([DLList isList:elem]) {
+                meta = (DLList *)elem;
+                if ([DLSymbol isSymbol:[meta next] withName:@"with-meta"]) {  /* Meta encountered */
+                    param = [DLMethodParam new];
+                    param.position = argList.seekIndex - 1;
+                    metaElem = [meta next];
+                    if ([DLSymbol isSymbol:metaElem]) {  /* arg name */
+                        param.name = metaElem;
+                    } else if ([DLKeyword isKeyword:metaElem]) {  /* The selector part */
+                        param.selectorName = metaElem;
+                    }
+                    [self addMethodParamAttrs:param fromMeta:meta fnName:fnName];
+                    [method.params addObject:param];
+                    param = nil;
+                    wasPreviousAKeyword = NO;
+                }
+            } else if ([DLKeyword isKeyword:elem]) {  /* An arg selector without a meta */
+                if ([method.params count] == 0) {  /* Keyword cannot appear at the first position */
+                    [[[DLError alloc] initWithFormat:DLMethodParseError, @"'meta' or 'symbol'", 0, [elem dataTypeName]] throw];
+                }
+                param = [DLMethodParam new];
+                param.position = argList.seekIndex - 1;
+                param.selectorName = elem;
+                wasPreviousAKeyword = YES;
+            } else if ([DLSymbol isSymbol:elem]) {
+                if (param && wasPreviousAKeyword) {  /* => Previous a selector found */
+                    param.name = elem;
+                } else {  /* Must be the first argument without a meta */
+                    param = [DLMethodParam new];
+                    param.name = elem;
+                    param.position = 0;
+                }
+                [method.params addObject:param];
+                param = nil;
+                wasPreviousAKeyword = NO;
+            }
+        }
+    }
+    /* Method body */
+    if (![xs hasNext]) [[[DLError alloc] initWithDescription:DLMethodBodyNotFoundError] throw];
+    method.ast = [xs next];
+    [DLUtils updateSELForMethod:method];
+    [DLUtils updateSelectorStringForMethod:method];
+    [cls.methods addObject:method];
     return method;
 }
-
 
 - (DLObject *)makeInstance:(DLInvocation *)invocation {
     id inst = [_rt instantiateFromInvocation:invocation.invocation];
@@ -252,12 +314,12 @@ static NSString *_moduleName = @"objcrt";
 }
 
 - (DLClass *)classInfoFromAST:(DLList *)list fnName:(NSString *)fnName env:(DLEnv *)env {
-    DLList *clsList = [DLList dataToList:[list next] position:list.seekIndex - 1 fnName:fnName];
-    id<DLDataProtocol> quoteElem = [clsList next];
+    if ([list count] != 2) [[[DLError alloc] initWithDescription:DLClassNameParseError] throw];
+    id<DLDataProtocol> quoteElem = [list next];
     if (![DLSymbol isSymbol:quoteElem withName:@"quote"]) {
-        [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithArity, @"quote", clsList.seekIndex - 1, [quoteElem dataTypeName]] throw];
+        [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithArity, @"quote", list.seekIndex - 1, [quoteElem dataTypeName]] throw];
     }
-    DLSymbol *clsSym = [clsList next];
+    DLSymbol *clsSym = [list next];
     return [env objectForKey:clsSym isThrow:YES];  /* Get the class from the env */
 }
 

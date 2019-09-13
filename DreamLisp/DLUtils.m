@@ -483,6 +483,67 @@ static BOOL _isCacheEnabled;
 
 #pragma mark - Objective-C RT
 
++ (NSString *)lispCaseToCamelCase:(NSString *)string {
+    NSArray *arr = [string componentsSeparatedByString:@"-"];
+    NSUInteger i = 0;
+    NSUInteger len = [arr count];
+    NSMutableString *acc = [NSMutableString new];
+    [acc appendString:[arr firstObject]];
+    NSMutableString *str = nil;
+    NSString *first = nil;
+    for (i = 1; i < len; i++) {
+        str = [NSMutableString stringWithString:[arr objectAtIndex:i]];
+        if (![str isEmpty]) {
+            first = [str substringToIndex:1];
+            [str replaceCharactersInRange:NSMakeRange(0, 1) withString:[first capitalizedString]];
+            [acc appendString:str];
+        }
+    }
+    return acc;
+}
+
+/*!
+ Adds selector for the method with lisp case converted into camel case.
+
+ For a method like:
+ (defmethod gen-random 'utils (start :with-max end) ())
+ the selector string is
+ genRandom:withMax:
+ */
++ (void)updateSELForMethod:(DLMethod *)method {
+    NSMutableArray *paramsList = method.params;
+    NSUInteger i = 0;
+    NSUInteger len = [paramsList count];
+    DLMethodParam *param = nil;
+    NSMutableString *selName = [NSMutableString new];
+    [selName appendString:method.name.value];
+    [selName appendString:@":"];
+    for (i = 0; i < len; i++) {
+        param = [paramsList objectAtIndex:i];
+        if (param.selectorName) {
+            [selName appendString:[self lispCaseToCamelCase:[param.selectorName string]]];
+            [selName appendString:@":"];
+        }
+    }
+    SEL sel = NSSelectorFromString(selName);
+    method.selector = sel;
+}
+
+/*! Adds selector string in lisp case */
++ (void)updateSelectorStringForMethod:(DLMethod *)method {
+    NSMutableString *str = [NSMutableString new];
+    [str appendString:method.name.value];
+    [str appendString:@":"];
+    DLMethodParam *param;
+    for (param in method.params) {
+        if (param.selectorName) {
+            [str appendString:[param.selectorName string]];
+            [str appendString:@":"];
+        }
+    }
+    method.selectorString = [[DLString alloc] initWithMutableString:str];
+}
+
 /*!
  Updates the property attributes from the existing main values. Call this after setting value, which will then generate backing Ivar, getter, setter, type
  string.

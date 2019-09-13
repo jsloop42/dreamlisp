@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class DLInvocationArgument;
 @class DLObjcPropertyAttr;
+@class DLMethod;
 
 @interface DLUtils : NSObject
 + (DLCacheTable *)cache;
@@ -60,6 +61,8 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark Network
 + (NSString *)httpMethodTypeToString:(DLKeyword *)methodType;
 #pragma mark Objective-C RT
++ (void)updateSELForMethod:(DLMethod *)method;
++ (void)updateSelectorStringForMethod:(DLMethod *)method;
 + (void)updatePropertyAttr:(DLObjcPropertyAttr *)attr;
 + (NSString *)toAccessorVar:(NSString *)string;
 + (NSString *)toSetterName:(NSString *)string;

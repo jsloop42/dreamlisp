@@ -11,6 +11,7 @@
 #import "DLSymbol.h"
 #import "DLSlot.h"
 #import "DLKeyword.h"
+#import "DLMethod.h"
 #import "DLLogger.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -18,12 +19,14 @@ NS_ASSUME_NONNULL_BEGIN
 @class DLSymbol;
 @class DLSlot;
 @class DLKeyword;
+@class DLMethod;
 
 @interface DLClass : NSObject <DLDataProtocol>
 @property (nonatomic, readwrite, retain) Class value;
 @property (nonatomic, readwrite, retain) DLSymbol *name;  /* The name of the class */
 @property (nonatomic, readwrite, retain) NSMutableArray<DLSymbol *> *conformance;
 @property (nonatomic, readwrite, retain) NSMutableArray<DLSlot *> *slots;
+@property (nonatomic, readwrite, retain) NSMutableSet<DLMethod *> *methods;
 + (BOOL)isClass:(id)any;
 - (instancetype)init;
 - (instancetype)initWithClass:(Class)cls;

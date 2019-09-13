@@ -72,6 +72,17 @@
     return @"object";
 }
 
+/*! Returns the method param as a string, which can be either the param name or the parameterized name part. */
+- (NSString *)string {
+    if (_name) {  /* => arg name symbol */
+        return [_name value];
+    }
+    if (_selectorName) {  /* => parameterized part of the arg */
+        return [_selectorName string];
+    }
+    return @"";
+}
+
 - (BOOL)isEqual:(id)object {
     if (![DLMethodParam isMethodParam:object]) return NO;
     DLMethodParam *obj = (DLMethodParam *)object;
@@ -155,19 +166,10 @@
     return self;
 }
 
-- (instancetype)initWithFunction:(DLFunction *)fn {
-    self = [super init];
-    if (self) {
-        [self bootstrap];
-        _fn = fn;
-    }
-    return self;
-}
-
 - (instancetype)initWithCoder:(NSCoder *)coder {
     self = [super init];
     if (self) {
-        _fn = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_fn"];
+        _ast = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_value"];
         _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_meta"];
         _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_moduleName"];
         _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_position"] integerValue];
@@ -180,7 +182,7 @@
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [coder encodeObject:_fn forKey:@"DLMethod_value"];
+    [coder encodeObject:_ast forKey:@"DLMethod_value"];
     [coder encodeObject:_meta forKey:@"DLMethod_meta"];
     [coder encodeObject:_moduleName forKey:@"DLMethod_moduleName"];
     [coder encodeObject:@(_position) forKey:@"DLMethod_position"];
@@ -209,14 +211,24 @@
     return @"object";
 }
 
+/*! Param binding for env */
+- (NSMutableArray *)binds {
+    DLMethodParam *param;
+    NSMutableArray *bind = [NSMutableArray new];
+    for (param in _params) {
+        [bind addObject:param.name];
+    }
+    return bind;
+}
+
 - (BOOL)isEqual:(id)object {
     if (![DLMethod isMethod:object]) return NO;
     DLMethod *obj = (DLMethod *)object;
-    return [obj.value isEqual:_fn];
+    return [obj.value isEqual:_ast];
 }
 
 - (NSUInteger)hash {
-    return [_fn hash];
+    return [_ast hash];
 }
 
 - (BOOL)hasMeta {
@@ -238,7 +250,17 @@
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     DLMethod *obj = [DLMethod new];
-    obj.value = _fn;
+    obj.name = _name;
+    obj.params = _params;
+    obj.ast = _ast;
+    obj.fn = _fn;
+    obj.env = _env;
+    obj.attr = _attr;
+    obj.cls = _cls;
+    obj.selectorString = _selectorString;
+    obj.selector = _selector;
+    obj.signature = _signature;
+    obj.imp = _imp;
     obj.isMutable = _isMutable;
     obj.isImported = _isImported;
     obj.meta = _meta;
@@ -251,7 +273,7 @@
 }
 
 - (NSString *)description {
-    return [_fn description];
+    return [_selectorString value];
 }
 
 - (NSString *)debugDescription {

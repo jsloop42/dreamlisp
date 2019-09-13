@@ -54,8 +54,12 @@ id dl_initWithPropImp(id self, SEL _cmd, id arg, DLClass *cls) {
     return arg;
 }
 
-id initImp(id self, SEL _cmd) {
+id dl_initImp(id self, SEL _cmd) {
     // TODO initialise the object
+    return self;
+}
+
+id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArray *args) {
     return self;
 }
 

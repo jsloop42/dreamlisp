@@ -19,6 +19,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class DLReader;
+
 @interface DreamLisp: NSObject <DLDelegate>
 @property (nonatomic, readwrite, retain) DLReader *reader;
 @property (nonatomic, readwrite, retain) DLEnv *globalEnv;

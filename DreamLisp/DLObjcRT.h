@@ -12,6 +12,7 @@
 #import "DLInvocation.h"
 #import "DLUtils.h"
 #import "DLLogger.h"
+#import "DreamLisp.h"
 
 //! Project version number for DreamLisp.
 FOUNDATION_EXPORT double DreamLispVersionNumber;
@@ -23,12 +24,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class DLInvocation;
 @class DLClass;
+@class DreamLisp;
 
 extern void dl_setIvarForName(id self, const char *name, id val);
 extern void dl_setIvar(id self, SEL _cmd, id ver);
 extern id dl_getIvar(id self, SEL _cmd);
 extern id dl_initWithPropImp(id self, SEL _cmd, DLClass *cls, id arg);
 extern id dl_initImp(id self, SEL _cmd);
+extern id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArray *args);
 
 @interface DLObjcRT : NSObject
 - (Class)allocateClass:(NSString *)name superclass:(Class _Nullable)superclass;

@@ -85,6 +85,7 @@
 - (void)bootstrap {
     _slots = [NSMutableArray new];
     _conformance = [NSMutableArray new];
+    _methods = [NSMutableSet new];
 }
 
 - (NSString *)dataType {
