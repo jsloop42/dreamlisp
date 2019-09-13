@@ -431,6 +431,7 @@ static NSString *langVersion;
                         DLMethod *method = [_objc parseMethod:ast withEnv:env];
                         method.env = env;
                         method.ast = [self toDoForm:[@[method.ast] mutableCopy]];  // TODO: add method to class
+                        [_objc addMethodToClass:method];
                         return method;
                     }
                 } else if ([xs count] == 2 && [DLKeyword isKeyword:[xs first]]) {

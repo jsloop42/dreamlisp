@@ -33,6 +33,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)loadDLModuleLibs;
 - (void)printVersion;
 - (NSString * _Nullable)rep:(NSString *)string;
+- (id<DLDataProtocol>)evalAST:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env;
+- (id<DLDataProtocol>)quasiquote:(id<DLDataProtocol>)ast;
+- (BOOL)isMacroCall:(id<DLDataProtocol>)ast env:(DLEnv *)env;
+- (id<DLDataProtocol>)macroExpand:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env;
+- (DLList *)toDoForm:(NSMutableArray *)arr;
+- (id<DLDataProtocol>)eval:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env;
 - (NSString * _Nullable)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably;
 @end
 

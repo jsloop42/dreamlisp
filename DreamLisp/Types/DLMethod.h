@@ -43,6 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, assign, nonnull) SEL selector;
 @property (nonatomic, readwrite, retain) NSMethodSignature *signature;
 @property (nonatomic, readwrite, assign, nonnull) IMP imp;
+@property (nonatomic, readwrite, assign) const char *type;
 + (BOOL)isMethod:(id)any;
 - (NSMutableArray *)binds;
 @end

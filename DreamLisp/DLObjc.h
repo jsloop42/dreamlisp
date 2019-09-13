@@ -32,6 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface DLObjc : NSObject
 - (void)defclass:(DLClass *)cls;
 - (DLClass *)parseClassForm:(id<DLDataProtocol>)ast;
+- (void)addMethodToClass:(DLMethod *)method;
 - (DLMethod *)parseMethod:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env;
 - (DLObject *)makeInstance:(DLInvocation *)invocation;
 - (DLInvocation *)parseMakeInstanceForm:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env;

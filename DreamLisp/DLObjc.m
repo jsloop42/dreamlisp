@@ -192,7 +192,7 @@ static NSString *_moduleName = @"objcrt";
 }
 
 - (void)addMethodToClass:(DLMethod *)method {
-    //[_rt addMethod:method.cls name:[method selector] imp:(IMP)dl_initWithPropImp type:slot.methodType];
+    [_rt addMethod:method.cls.value name:[method selector] imp:(IMP)dl_methodImp type:method.type];
 }
 
 - (void)addMethodParamAttrs:(DLMethodParam *)param fromMeta:(DLList *)meta fnName:(NSString *)fnName {
@@ -337,7 +337,7 @@ static NSString *_moduleName = @"objcrt";
     if (len < 2) [[[DLError alloc] initWithFormat:DLMakeInstanceNoneSpecifiedError, @"'class'"] throw];
     ++list.seekIndex;  /* The first element is the symbol make-instance. So increment the index. */
     /* Get the class info */
-    DLClass *cls = [self classInfoFromAST:list fnName:fnName env:env];
+    DLClass *cls = [self classInfoFromAST:[list next] fnName:fnName env:env];
     id<DLDataProtocol> elem = nil;
     BOOL isAllocEncountered = NO;
     BOOL isInitEncountered = NO; /* Any form of init. Either :init or the one specified in :initarg. */

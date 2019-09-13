@@ -60,7 +60,9 @@ id dl_initImp(id self, SEL _cmd) {
 }
 
 id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArray *args) {
-    return self;
+    DLEnv *env = [[DLEnv alloc] initWithEnv:method.env binds:[method binds] exprs:args];
+    id<DLDataProtocol> elem = [dl eval:method.ast withEnv:env];
+    return elem;
 }
 
 @implementation DLObjcRT

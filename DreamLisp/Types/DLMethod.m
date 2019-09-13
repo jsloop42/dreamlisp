@@ -201,6 +201,7 @@
 }
 
 - (void)bootstrap {
+    _type = [[NSString stringWithFormat:@"%s%s%s%s%s%s", @encode(id), @encode(id), @encode(SEL), @encode(id), @encode(id), @encode(id)] UTF8String];
 }
 
 - (NSString *)dataType {
