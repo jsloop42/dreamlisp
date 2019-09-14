@@ -13,6 +13,7 @@
 #import "DLUtils.h"
 #import "DLLogger.h"
 #import "DreamLisp.h"
+#import "DLProxyProtocol.h"
 
 //! Project version number for DreamLisp.
 FOUNDATION_EXPORT double DreamLispVersionNumber;
@@ -36,6 +37,8 @@ extern id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMut
 @interface DLObjcRT : NSObject
 - (Class)allocateClass:(NSString *)name superclass:(Class _Nullable)superclass;
 - (void)registerClass:(Class)cls;
+- (id _Nullable)getClass:(NSString *)className;
+- (Class _Nullable)lookUpClass:(NSString *)className;
 - (BOOL)addIVar:(Class)cls name:(NSString *)name type:(NSString *)type;
 - (BOOL)addProperty:(Class)cls name:(NSString *)name attr:(DLObjcPropertyAttr *)prop;
 - (NSMutableArray *)getPropertiesAttributes:(NSString *)className;
@@ -45,8 +48,11 @@ extern id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMut
 - (BOOL)conformsToProtocol:(id)object protocolName:(NSString *)name;
 - (IMP _Nullable)implementationFor:(Class)cls selector:(SEL)name;
 - (DLInvocation *)invocationFromClass:(DLClass *)cls forSelector:(SEL)sel args:(NSMutableArray *)args;
+- (DLInvocation *)invocationForMethod:(SEL)selector withProxy:(id<DLProxyProtocol>)proxy args:(NSMutableArray *)args;
 - (id)instantiate:(DLClass *)cls selector:(SEL)sel args:(NSMutableArray *)args;
-- (id)instantiateFromInvocation:(NSInvocation *)invocation;
+- (id)invoke:(NSInvocation *)invocation;
+- (void)setAssociatedObject:(id _Nullable)assocObject toObject:(id)object withKey:(const void *)key;
+- (id)getAssociatedObject:(id)object forKey:(const void *)key;
 - (const char *)typeFromKeywordString:(NSString *)string;
 @end
 

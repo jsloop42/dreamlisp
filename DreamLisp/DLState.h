@@ -16,6 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isVerbose;
 + (NSString *)currentModuleName;
 + (void)setCurrentModuleName:(NSString *)name;
++ (NSUInteger)assocObjectCounter;
++ (NSUInteger)currentAssocObjectCounter;
 - (NSUInteger)counter;
 - (NSInteger)currentCounter;
 @end

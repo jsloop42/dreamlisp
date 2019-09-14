@@ -11,6 +11,7 @@
 static NSUInteger _genSymCounter = 0;
 static BOOL _isVerbose = NO;
 static NSString *_currentModuleName;
+static NSUInteger _dlObjCounter = 0;
 
 @implementation DLState
 
@@ -21,6 +22,10 @@ static NSString *_currentModuleName;
     @synchronized (self) {
         return ++_genSymCounter;
     }
+}
+
++ (NSUInteger)currentGenSymCount {
+    return _genSymCounter;
 }
 
 + (void)setIsVerbose:(BOOL)flag {
@@ -39,6 +44,17 @@ static NSString *_currentModuleName;
     @synchronized (self) {
         _currentModuleName = name;
     }
+}
+
+/*! Used to generated unique count for a DLObject's associated object key */
++ (NSUInteger)assocObjectCounter {
+    @synchronized (self) {
+        return ++_dlObjCounter;
+    }
+}
+
++ (NSUInteger)currentAssocObjectCounter {
+    return _dlObjCounter;
 }
 
 #pragma mark Instance methods

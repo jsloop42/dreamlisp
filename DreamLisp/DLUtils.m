@@ -10,6 +10,8 @@
 
 static DLCacheTable *_cache;
 static BOOL _isCacheEnabled;
+static Protocol *_dlDataProtocol;
+static Protocol *_dlProxyProtocol;
 
 #pragma mark - CacheKey
 
@@ -45,6 +47,8 @@ static BOOL _isCacheEnabled;
     if (self == [self class]) {
         _cache = [DLCacheTable new];
         [self enableCache];
+        _dlDataProtocol = objc_getProtocol("DLDataProtocol");
+        _dlProxyProtocol = objc_getProtocol("DLProxyProtocol");
     }
 }
 
@@ -281,41 +285,6 @@ static BOOL _isCacheEnabled;
     return dict;
 }
 
-+ (id)convertFromDLTypeToFoundationType:(id<DLDataProtocol>)value {
-    Protocol *dlDataProtocol = objc_getProtocol("DLDataProtocol");
-    id val = @"";
-    if ([DLNil isNil:value]) {
-        val = @"";
-    } else if ([DLKeyword isKeyword:value]) {
-        val = [(DLKeyword *)value string];
-    } else if ([DLHashMap isHashMap:value]) {
-        val = [self hashMapToFoundationType:value];
-    } else if ([DLList isKindOfList:value]) {
-        NSMutableArray *xs = [(DLList *)value value];
-        id<DLDataProtocol> elem = nil;
-        NSMutableArray *list = [NSMutableArray new];
-        for (elem in xs) {
-            [list addObject:[self convertFromDLTypeToFoundationType:elem]];
-        }
-        val = list;
-    } else if ([DLAtom isAtom:value]) {
-        val = [self convertFromDLTypeToFoundationType:[(DLAtom *)value value]];
-    } else if ([DLNumber isNumber:value]) {
-        DLNumber *num = (DLNumber *)value;
-        val = [num value];
-    } else if ([DLBool isBool:value]) {
-        BOOL flag = (BOOL)[value value];
-        val = flag ? @YES : @NO;
-    } else if ([DLString isString:value]) {
-        val = [value value];
-    } else if ([value conformsToProtocol:dlDataProtocol]) {
-        val = [value value];
-    } else {
-        val = value;
-    }
-    return val;
-}
-
 /** Converts the given hash map to Foundation data type, useful for JSON encoding. */
 + (NSMutableDictionary *)hashMapToFoundationType:(DLHashMap *)hashMap {
     NSMutableDictionary *dict = [NSMutableDictionary new];
@@ -334,46 +303,6 @@ static BOOL _isCacheEnabled;
         [dict setObject:val forKey:key];
     }
     return dict;
-}
-
-/** Check if the given number is represents a BOOL value. */
-+ (BOOL)isBoolNumber:(NSNumber *)num {
-    CFTypeID boolID = CFBooleanGetTypeID();
-    CFTypeID numID = CFGetTypeID((__bridge CFTypeRef)(num));
-    return numID == boolID;
-}
-
-/** Converts the given Foundation type to DL type. Used mainly in JSON de-serialization. */
-+ (id<DLDataProtocol>)convertFromFoundationTypeToDLType:(id)value {
-    id<DLDataProtocol> val = nil;
-    if ([value isKindOfClass:[NSNull class]]) {
-        val = [DLNil new];
-    } else if ([value isKindOfClass:[NSMutableDictionary class]]) {
-        val = [self dictionaryToDLType:value];
-    } else if ([value isKindOfClass:[NSMutableArray class]] || [value isKindOfClass:[NSArray class]]) {
-        NSArray *xs = (NSArray *)value;
-        id elem = nil;
-        DLVector *vec = [DLVector new];  /* It's better to use a vector instead of a list so that any potential code evaluation does not happen. */
-        for (elem in xs) {
-            [vec appendObject:[self convertFromFoundationTypeToDLType:elem]];
-        }
-        val = vec;
-    } else if ([value isKindOfClass:[NSNumber class]]) {
-        NSNumber *n = (NSNumber *)value;
-        BOOL doesRepresentBool = [self isBoolNumber:n];
-        if (doesRepresentBool) {
-            CFBooleanRef boolRef = (__bridge CFBooleanRef)n;
-            Boolean flag = CFBooleanGetValue(boolRef);
-            val = [[DLBool alloc] initWithBool:flag];
-        } else {
-            val = [[DLNumber alloc] initWithString:[n stringValue]];
-        }
-    } else if ([value isKindOfClass:[NSString class]]) {
-        val = [DLString stringWithString:value];
-    } else {
-        val = [DLString stringWithString:[value description]];
-    }
-    return val;
 }
 
 + (DLHashMap *)dictionaryToDLType:(NSMutableDictionary *)dict {
@@ -470,19 +399,6 @@ static BOOL _isCacheEnabled;
     return [[NSString alloc] initWithFormat:@"λ %@> ", moduleName];
 }
 
-#pragma mark - Network
-
-+ (NSString *)httpMethodTypeToString:(DLKeyword *)methodType {
-    NSString *type = [methodType string];
-    if ([type isEqualToString:@"get"]) return @"GET";
-    if ([type isEqualToString:@"post"]) return @"POST";
-    if ([type isEqualToString:@"put"]) return @"PUT";
-    if ([type isEqualToString:@"patch"]) return @"PATCH";
-    return @"DELETE";
-}
-
-#pragma mark - Objective-C RT
-
 + (NSString *)lispCaseToCamelCase:(NSString *)string {
     NSArray *arr = [string componentsSeparatedByString:@"-"];
     NSUInteger i = 0;
@@ -502,6 +418,110 @@ static BOOL _isCacheEnabled;
     return acc;
 }
 
+#pragma mark - Network
+
++ (NSString *)httpMethodTypeToString:(DLKeyword *)methodType {
+    NSString *type = [methodType string];
+    if ([type isEqualToString:@"get"]) return @"GET";
+    if ([type isEqualToString:@"post"]) return @"POST";
+    if ([type isEqualToString:@"put"]) return @"PUT";
+    if ([type isEqualToString:@"patch"]) return @"PATCH";
+    return @"DELETE";
+}
+
+#pragma mark - Objective-C RT
+
+/** Check if the given number is represents a BOOL value. */
++ (BOOL)isBoolNumber:(NSNumber *)num {
+    CFTypeID boolID = CFBooleanGetTypeID();
+    CFTypeID numID = CFGetTypeID((__bridge CFTypeRef)(num));
+    return numID == boolID;
+}
+
+/** Converts the given Foundation type to DL type. Used mainly in JSON de-serialization. */
++ (id<DLDataProtocol>)convertFromFoundationTypeToDLType:(id)value {
+    id<DLDataProtocol> val = nil;
+    if ([value isKindOfClass:[NSNull class]]) {
+        val = [DLNil new];
+    } else if ([value isKindOfClass:[NSMutableDictionary class]]) {
+        val = [self dictionaryToDLType:value];
+    } else if ([value isKindOfClass:[NSMutableArray class]] || [value isKindOfClass:[NSArray class]]) {
+        NSArray *xs = (NSArray *)value;
+        id elem = nil;
+        DLVector *vec = [DLVector new];  /* It's better to use a vector instead of a list so that any potential code evaluation does not happen. */
+        for (elem in xs) {
+            [vec appendObject:[self convertFromFoundationTypeToDLType:elem]];
+        }
+        val = vec;
+    } else if ([value isKindOfClass:[NSNumber class]]) {
+        NSNumber *n = (NSNumber *)value;
+        BOOL doesRepresentBool = [self isBoolNumber:n];
+        if (doesRepresentBool) {
+            CFBooleanRef boolRef = (__bridge CFBooleanRef)n;
+            Boolean flag = CFBooleanGetValue(boolRef);
+            val = [[DLBool alloc] initWithBool:flag];
+        } else {
+            val = [[DLNumber alloc] initWithString:[n stringValue]];
+        }
+    } else if ([value isKindOfClass:[NSString class]]) {
+        val = [DLString stringWithString:value];
+    } else {
+        val = [DLString stringWithString:[value description]];
+    }
+    return val;
+}
+
++ (id)convertFromDLTypeToFoundationType:(id<DLDataProtocol>)value {
+    id val = @"";
+    if ([DLNil isNil:value]) {
+        val = @"";
+    } else if ([DLKeyword isKeyword:value]) {
+        val = [(DLKeyword *)value string];
+    } else if ([DLHashMap isHashMap:value]) {
+        val = [self hashMapToFoundationType:value];
+    } else if ([DLList isKindOfList:value]) {
+        NSMutableArray *xs = [(DLList *)value value];
+        id<DLDataProtocol> elem = nil;
+        NSMutableArray *list = [NSMutableArray new];
+        for (elem in xs) {
+            [list addObject:[self convertFromDLTypeToFoundationType:elem]];
+        }
+        val = list;
+    } else if ([DLAtom isAtom:value]) {
+        val = [self convertFromDLTypeToFoundationType:[(DLAtom *)value value]];
+    } else if ([DLNumber isNumber:value]) {
+        DLNumber *num = (DLNumber *)value;
+        val = [num value];
+    } else if ([DLBool isBool:value]) {
+        BOOL flag = (BOOL)[value value];
+        val = flag ? @YES : @NO;
+    } else if ([DLString isString:value]) {
+        val = [value value];
+    } else if ([value conformsToProtocol:_dlDataProtocol]) {
+        val = [value value];
+    } else {
+        val = value;
+    }
+    return val;
+}
+
+/*!
+ Convert the given keyword to a selector
+
+ :init-with-string to initWithString:
+ */
++ (SEL)convertKeywordToSelector:(NSMutableArray<DLKeyword *> *)keywordArr {
+    DLKeyword *kwd = nil;
+    NSString *kwdStr = nil;
+    NSMutableString *str = [NSMutableString new];
+    for (kwd in keywordArr) {
+        kwdStr = [kwd string];
+        [str appendString:[self lispCaseToCamelCase:kwdStr]];
+        [str appendString:@":"];
+    }
+    return NSSelectorFromString(str);
+}
+
 /*!
  Adds selector for the method with lisp case converted into camel case.
 
@@ -517,7 +537,7 @@ static BOOL _isCacheEnabled;
     DLMethodParam *param = nil;
     NSMutableString *selName = [NSMutableString new];
     [selName appendString:method.name.value];
-    [selName appendString:@":"];
+    if (len > 0) [selName appendString:@":"];
     for (i = 0; i < len; i++) {
         param = [paramsList objectAtIndex:i];
         if (param.selectorName) {
@@ -529,11 +549,11 @@ static BOOL _isCacheEnabled;
     method.selector = sel;
 }
 
-/*! Adds selector string in lisp case */
+/*! Adds selector string in lisp case (default), used for printing. */
 + (void)updateSelectorStringForMethod:(DLMethod *)method {
     NSMutableString *str = [NSMutableString new];
     [str appendString:method.name.value];
-    [str appendString:@":"];
+    if (method.params.count > 0) [str appendString:@":"];
     DLMethodParam *param;
     for (param in method.params) {
         if (param.selectorName) {

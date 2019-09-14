@@ -8,12 +8,12 @@
 
 #import "DLObjcRT.h"
 
-static NSRegularExpression *setterPttn;
+static NSRegularExpression *_setterPttn;
 
 #pragma mark C IMP
 
 const char *dl_setterName(NSString *name) {
-    NSArray *matches = [DLUtils matchesInString:name withExpression:setterPttn];
+    NSArray *matches = [DLUtils matchesInString:name withExpression:_setterPttn];
     NSTextCheckingResult *match = [matches firstObject];
     if ([match numberOfRanges] == 4) {
         NSString *mstr = [name substringWithRange:[match rangeAtIndex:2]];
@@ -51,7 +51,7 @@ id dl_initWithPropImp(id self, SEL _cmd, id arg, DLClass *cls) {
     DLSlot *slot = [cls slotWithInitArg:[[DLKeyword alloc] initWithString:selStr]];
     NSString *propName = [NSString stringWithFormat:@"_%@", slot.value.value];
     dl_setIvarForName(self, [propName UTF8String], arg);
-    return arg;
+    return self;
 }
 
 id dl_initImp(id self, SEL _cmd) {
@@ -65,10 +65,13 @@ id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArr
     return elem;
 }
 
-@implementation DLObjcRT
+@implementation DLObjcRT {
+    Protocol *_dlDataProtocol;
+    Protocol *_dlProxyProtocol;
+}
 
 - (void)dealloc {
-    [DLLog debug:[NSString stringWithFormat:@"%@ dealloc", [self className]]];
+    [DLLog info:@"DLObjcRT dealloc"];
 }
 
 - (instancetype)init {
@@ -80,7 +83,9 @@ id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArr
 }
 
 - (void)bootstrap {
-    setterPttn = [NSRegularExpression regularExpressionWithPattern:@"(set)(.*)(:)" options:0 error:nil];
+    _setterPttn = [NSRegularExpression regularExpressionWithPattern:@"(set)(.*)(:)" options:0 error:nil];
+    _dlDataProtocol = [self protocolFromString:@"DLDataProtocol"];
+    _dlProxyProtocol = [self protocolFromString:@"DLProxyProtocol"];
 }
 
 - (Class)allocateClass:(NSString *)name superclass:(Class _Nullable)superclass {
@@ -189,6 +194,18 @@ id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArr
     objc_registerClassPair(class);
 }
 
+/*!
+ Returns the class object if the class is registered with the runtime. If the class is not registered, it calls the class handler callback and check for a
+ second time to see if the class is registered. */
+- (id _Nullable)getClass:(NSString *)className {
+    return objc_getClass([className UTF8String]);
+}
+
+/*! Returns a the class if it's registered with the Objective-C runtime, else nil. */
+- (Class _Nullable)lookUpClass:(NSString *)className {
+    return objc_lookUpClass([className UTF8String]);
+}
+
 /** Add protocol conformance to the given class. */
 - (BOOL)addDLDataProtocol:(Class)cls proto:(NSString *)proto {
     Protocol *aProto = objc_getProtocol([proto UTF8String]);
@@ -219,6 +236,9 @@ id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArr
         NSUInteger i = 0;
         while (i < len) {
             id arg = [args objectAtIndex:i];
+//            if ([obj conformsToProtocol:_dlDataProtocol]) {
+//                arg = [DLUtils convertFromDLTypeToFoundationType:arg];
+//            }
             [invo setArgument:&arg atIndex:i + 2];
             i++;
         }
@@ -227,6 +247,33 @@ id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArr
     DLInvocation *dlInvo = [DLInvocation new];
     dlInvo.invocation = invo;
     dlInvo.cls = cls;
+    dlInvo.args = args;
+    return dlInvo;
+}
+
+/*! Creates a invocation for the selector with the given proxy, which can be an object or a class with the specified arguments. */
+- (DLInvocation *)invocationForMethod:(SEL)selector withProxy:(id<DLProxyProtocol>)proxy args:(NSMutableArray *)args {
+    NSMethodSignature *sig = [proxy methodSignatureForSelector:selector];
+    DLInvocation *dlInvo = [DLInvocation new];
+    if (!sig) {
+        [[[DLError alloc] initWithFormat:DLMethodSignatureNotFoundError, NSStringFromSelector(selector)] throw];
+        return dlInvo;
+    }
+    NSInvocation *invo = [NSInvocation invocationWithMethodSignature:sig];
+    invo.target = proxy;
+    invo.selector = selector;
+    NSUInteger len = args.count;
+    if (len > 0) {
+        NSUInteger i = 0;
+        while (i < len) {
+            id arg = [args objectAtIndex:i];
+            [invo setArgument:&arg atIndex:i + 2];
+            i++;
+        }
+    }
+    [invo retainArguments];
+    dlInvo.invocation = invo;
+    dlInvo.cls = [DLClass isClass:proxy] ? proxy : [(DLObject *)proxy cls];
     dlInvo.args = args;
     return dlInvo;
 }
@@ -243,11 +290,24 @@ id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArr
 }
 
 /*! Instantiate an object from the given invocation object. */
-- (id)instantiateFromInvocation:(NSInvocation *)invocation {
+- (id)invoke:(NSInvocation *)invocation {
     [invocation invoke];
     id ret = nil;
     [invocation getReturnValue:&ret];
     return ret;
+}
+
+/*!
+ Sets an associated object to the given object with the key. This increase the retain count of the associated object. We can use this to also remove the
+ association by passing in a null for the associated object, for the same key.
+ */
+- (void)setAssociatedObject:(id _Nullable)assocObject toObject:(id)object withKey:(const void *)key {
+    objc_setAssociatedObject(object, key, assocObject, OBJC_ASSOCIATION_RETAIN);
+}
+
+/*! Retrieves an associated object using the given key for object. */
+- (id)getAssociatedObject:(id)object forKey:(const void *)key {
+    return objc_getAssociatedObject(object, key);
 }
 
 /*!
