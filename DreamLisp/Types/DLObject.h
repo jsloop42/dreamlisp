@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "DLProxyProtocol.h"
 #import "DLClass.h"
 #import "DLLogger.h"
 
@@ -14,11 +15,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class DLClass;
 
-@interface DLObject : NSObject <DLDataProtocol>
+@interface DLObject : NSProxy <DLProxyProtocol>
 @property (nonatomic, readwrite, retain) DLClass *cls;
-@property (nonatomic, readwrite, retain) id value;  /* The object that the class holds */
+/*! The object that the class holds */
 + (BOOL)isObject:(id)any;
-- (instancetype)initWithObject:(id)object;
++ (DLObject *)dataToObject:(id<DLDataProtocol>)data fnName:(NSString *)fnName;
++ (DLObject *)dataToObject:(id<DLDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 @end
 
 NS_ASSUME_NONNULL_END

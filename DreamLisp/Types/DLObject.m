@@ -9,7 +9,10 @@
 #import "DLObject.h"
 
 @implementation DLObject {
-    id _object;
+    id _proxy;
+    id _returnValue;
+    NSString *_proxyAssocKey;
+    NSString *_returnAssocKey;
     id<DLDataProtocol> _meta;
     NSInteger _position;
     NSString *_moduleName;
@@ -17,8 +20,11 @@
     BOOL _isMutable;
 }
 
+@synthesize proxy = _proxy;
+@synthesize returnValue = _returnValue;
+@synthesize proxyAssocKey = _proxyAssocKey;
+@synthesize returnAssocKey = _returnAssocKey;
 @synthesize meta = _meta;
-@synthesize value = _object;
 @synthesize isImported = _isImported;
 @synthesize moduleName = _moduleName;
 @synthesize isMutable = _isMutable;
@@ -27,32 +33,54 @@
     return [[any className] isEqual:[self className]];
 }
 
++ (NSString *)className {
+    return NSStringFromClass([self class]);
+}
+
++ (instancetype)new {
+    return [[DLObject alloc] init];
+}
+
++ (DLObject *)dataToObject:(id<DLDataProtocol>)data fnName:(NSString *)fnName {
+    return [self dataToObject:data position:-1 fnName:fnName];
+}
+
++ (DLObject *)dataToObject:(id<DLDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
+    if (![DLObject isObject:data]) {
+        DLError *err = nil;
+        if (position > 0) {
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'object'", position, [data dataTypeName]];
+        } else {
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'object'", [data dataTypeName]];
+        }
+        [err throw];
+    }
+    return (DLObject *)data;
+}
+
 - (void)dealloc {
-    [DLLog debug:[NSString stringWithFormat:@"%@ dealloc", [self className]]];
+    [DLLog info:@"DLObject dealloc"];
 }
 
 - (instancetype)init {
-    self = [super init];
     if (self) {
         [self bootstrap];
     }
     return self;
 }
 
-- (instancetype)initWithObject:(id)object {
-    self = [super init];
+- (instancetype)initWithProxy:(id)object {
     if (self) {
-        [self bootstrap];
-        _object = object;
+        //[self bootstrap];
+        _proxy = object;
     }
     return self;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder {
-    self = [super init];
     if (self) {
-        _object = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLObject_value"];
-        _cls = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLObject_value"];
+        _proxy = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLObject_proxy"];
+        _cls = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLObject_cls"];
         _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLObject_meta"];
         _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLObject_moduleName"];
         _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLObject_position"] integerValue];
@@ -65,15 +93,15 @@
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [coder encodeObject:_object forKey:@"DLObject_value"];
+    [coder encodeObject:_proxy forKey:@"DLObject_proxy"];
     [coder encodeObject:_cls forKey:@"DLObject_cls"];
     [coder encodeObject:_meta forKey:@"DLObject_meta"];
-    [coder encodeObject:_moduleName forKey:@"DLKeyword_moduleName"];
-    [coder encodeObject:@(_position) forKey:@"DLKeyword_position"];
+    [coder encodeObject:_moduleName forKey:@"DLObject_moduleName"];
+    [coder encodeObject:@(_position) forKey:@"DLObject_position"];
     NSValue *isImportedValue = [[NSValue alloc] initWithBytes:&_isImported objCType:@encode(BOOL)];
-    [coder encodeObject:isImportedValue forKey:@"DLKeyword_isImported"];
+    [coder encodeObject:isImportedValue forKey:@"DLObject_isImported"];
     NSValue *isMutableValue = [[NSValue alloc] initWithBytes:&_isMutable objCType:@encode(BOOL)];
-    [coder encodeObject:isMutableValue forKey:@"DLKeyword_isMutable"];
+    [coder encodeObject:isMutableValue forKey:@"DLObject_isMutable"];
 }
 
 - (Class)classForCoder {
@@ -88,6 +116,10 @@
 - (void)bootstrap {
 }
 
+- (NSString *)className {
+    return NSStringFromClass([self class]);
+}
+
 - (NSString *)dataType {
     return [self className];
 }
@@ -96,14 +128,22 @@
     return @"object";
 }
 
+- (id)value {
+    return _proxy;
+}
+
+- (void)setValue:(id)value {
+    [_proxy doesNotRecognizeSelector:_cmd];
+}
+
 - (BOOL)isEqual:(id)object {
     if (![DLObject isObject:object]) return NO;
     DLObject *obj = (DLObject *)object;
-    return [obj.value isEqual:_object];
+    return [obj.value isEqual:_proxy];
 }
 
 - (NSUInteger)hash {
-    return [_object hash];
+    return [_proxy hash];
 }
 
 - (BOOL)hasMeta {
@@ -123,9 +163,23 @@
     return [self hash];
 }
 
+- (void)forwardInvocation:(NSInvocation *)invocation {
+    // TODO: Convert DL types to NS types. When creating an Objective-C class, method, even if we are giving DL type, they are converted into NS types as arg.
+    [invocation invokeWithTarget:_proxy];
+}
+
+- (NSMethodSignature *)methodSignatureForSelector:(SEL)sel {
+    //if ([self respondsToSelector:sel]) return [self methodSignatureForSelector:sel];
+    return [_proxy methodSignatureForSelector:sel];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     DLObject *obj = [DLObject new];
-    obj.value = _object;
+    obj.proxy = _proxy;
+    obj.proxyAssocKey = _proxyAssocKey;
+    obj.returnAssocKey = _returnAssocKey;
+    obj.returnValue = _returnValue;
+    obj.cls = _cls;
     obj.isMutable = _isMutable;
     obj.isImported = _isImported;
     obj.meta = _meta;
@@ -138,7 +192,7 @@
 }
 
 - (NSString *)description {
-    return [_object description];
+    return [_proxy description];
 }
 
 - (NSString *)debugDescription {

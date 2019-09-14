@@ -27,8 +27,25 @@
     return [[any className] isEqual:[self className]];
 }
 
++ (DLClass *)dataToClass:(id<DLDataProtocol>)data fnName:(NSString *)fnName {
+    return [self dataToClass:data position:-1 fnName:fnName];
+}
+
++ (DLClass *)dataToClass:(id<DLDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName {
+    if (![DLClass isClass:data]) {
+        DLError *err = nil;
+        if (position > 0) {
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'class'", position, [data dataTypeName]];
+        } else {
+            err = [[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, fnName, @"'class'", [data dataTypeName]];
+        }
+        [err throw];
+    }
+    return (DLClass *)data;
+}
+
 - (void)dealloc {
-    [DLLog debug:[NSString stringWithFormat:@"%@ dealloc", [self className]]];
+    [DLLog info:@"DLClass dealloc"];
 }
 
 - (instancetype)init {

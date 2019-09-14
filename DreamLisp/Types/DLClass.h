@@ -28,6 +28,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, retain) NSMutableArray<DLSlot *> *slots;
 @property (nonatomic, readwrite, retain) NSMutableSet<DLMethod *> *methods;
 + (BOOL)isClass:(id)any;
++ (DLClass *)dataToClass:(id<DLDataProtocol>)data fnName:(NSString *)fnName;
++ (DLClass *)dataToClass:(id<DLDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
 - (instancetype)init;
 - (instancetype)initWithClass:(Class)cls;
 - (BOOL)containsSlotWithInitArg:(DLKeyword *)keyword;
