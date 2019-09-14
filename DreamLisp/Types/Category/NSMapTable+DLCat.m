@@ -6,17 +6,9 @@
 //  Copyright © 2019 DreamLisp. All rights reserved.
 //
 
-#import "NSMapTable+DLHashMap.h"
+#import "NSMapTable+DLCat.h"
 
-@implementation NSMapTable (DLHashMap)
-
-+ (NSString *)dataType {
-    return @"NSMapTable";
-}
-
-- (NSString *)dataType {
-    return @"NSMapTable";
-}
+@implementation NSMapTable (DLCat)
 
 /** Returns all keys present in the `NSMapTable`. */
 - (NSArray *)allKeys {

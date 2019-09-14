@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface NSArray (DLDataProtocol)
+@interface NSArray (DLCat)
 - (id)first;
 - (id)second;
 - (NSMutableArray *)map:(id (^)(id arg))block;

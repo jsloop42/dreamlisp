@@ -6,20 +6,12 @@
 //  Copyright © 2019 DreamLisp. All rights reserved.
 //
 
-#import "NSMutableArray+DLList.h"
+#import "NSMutableArray+DLCat.h"
 
-@implementation NSMutableArray (DLList)
+@implementation NSMutableArray (DLCat)
 
 + (BOOL)isMutableArray:(id)object {
     return [object isKindOfClass:[NSMutableArray class]];
-}
-
-+ (NSString *)dataType {
-    return @"NSMutableArray";
-}
-
-- (NSString *)dataType {
-    return @"NSMutableArray";
 }
 
 - (void)add:(id)object atIndex:(NSUInteger)index {

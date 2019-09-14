@@ -1,5 +1,5 @@
 //
-//  NSNumber+DLNumber.h
+//  NSString+DLString.h
 //  DreamLisp
 //
 //  Created by jsloop on 13/04/19.
@@ -10,7 +10,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface NSNumber (DLDataProtocol)
+@interface NSString (DLCat)
++ (BOOL)isString:(id)object;
+- (BOOL)isEmpty;
+- (BOOL)isNotEmpty;
+- (NSUInteger)count;
+- (NSString *)trim;
+- (NSInteger)sortValue;
 @end
 
 NS_ASSUME_NONNULL_END

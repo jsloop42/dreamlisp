@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface NSMutableArray (DLList)
+@interface NSMutableArray (DLCat)
 + (BOOL)isMutableArray:(id)object;
 - (void)add:(id)object atIndex:(NSUInteger)index;
 - (void)update:(id)object atIndex:(NSUInteger)index;

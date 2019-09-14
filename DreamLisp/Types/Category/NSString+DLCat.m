@@ -6,9 +6,9 @@
 //  Copyright © 2019 DreamLisp. All rights reserved.
 //
 
-#import "NSString+DLDataProtocol.h"
+#import "NSString+DLCat.h"
 
-@implementation NSString (DLDataProtocol)
+@implementation NSString (DLCat)
 
 + (BOOL)isString:(id)object {
     return [object isKindOfClass:[NSString class]];

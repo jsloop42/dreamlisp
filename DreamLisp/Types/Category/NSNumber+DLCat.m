@@ -6,9 +6,9 @@
 //  Copyright © 2019 DreamLisp. All rights reserved.
 //
 
-#import "NSNumber+DLDataProtocol.h"
+#import "NSNumber+DLCat.h"
 
-@implementation NSNumber (DLDataProtocol)
+@implementation NSNumber (DLCat)
 
 + (NSString *)dataType {
     return @"NSNumber";

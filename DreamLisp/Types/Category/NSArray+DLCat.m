@@ -6,18 +6,18 @@
 //  Copyright © 2019 DreamLisp. All rights reserved.
 //
 
-#import "NSArray+DLDataProtocol.h"
+#import "NSArray+DLCat.h"
 #import "DLTypeUtils.h"
 
-@implementation NSArray (DLDataProtocol)
+@implementation NSArray (DLCat)
 
-+ (NSString *)dataType {
-    return @"NSArray";
-}
-
-- (NSString *)dataType {
-    return @"NSArray";
-}
+//+ (NSString *)dataType {
+//    return @"NSArray";
+//}
+//
+//- (NSString *)dataType {
+//    return @"NSArray";
+//}
 
 - (id)first {
     return [self objectAtIndex:0];

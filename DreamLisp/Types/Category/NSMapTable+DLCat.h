@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface NSMapTable (DLHashMap)
+@interface NSMapTable (DLCat)
 - (NSArray *)allKeys;
 - (NSArray *)allObjects;
 - (NSMapTable *)assoc:(NSMapTable *)table;
