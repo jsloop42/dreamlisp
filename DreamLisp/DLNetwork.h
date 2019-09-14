@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "DLDataProtocol.h"
-#import "NSMapTable+DLHashMap.h"
+#import "NSMapTable+DLCat.h"
 #import "DLNotificationTable.h"
 #import "DLNotificationData.h"
 #import "DLNetworkSessionTable.h"

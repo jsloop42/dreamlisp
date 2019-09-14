@@ -53,7 +53,7 @@ static NSString *_historyFile = @"/dlisp-history";
 - (void)loadHistoryFile:(NSString *)path {
     @try {
         [_fops openFileForAppending:path];
-        while([_fops hasNext]) {
+        while ([_fops hasNext]) {
             NSString *line = [_fops readLine];
             if ([line length] > 0) add_history([line cStringUsingEncoding:NSUTF8StringEncoding]);
             [line release];

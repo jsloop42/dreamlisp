@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "NSMapTable+DLHashMap.h"
+#import "NSMapTable+DLCat.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

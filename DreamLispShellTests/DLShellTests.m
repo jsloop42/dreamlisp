@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "DLShellConst.h"
-#import "NSString+DLDataProtocol.h"
+#import "NSString+DLCat.h"
 #import "DLMockStdIOService.h"
 #import <DreamLisp/DreamLispLib.h>
 

@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "NSMapTable+DLHashMap.h"
+#import "NSMapTable+DLCat.h"
 #import "DLDataProtocol.h"
 #import "DLKeyword.h"
 #import "DLFunction.h"

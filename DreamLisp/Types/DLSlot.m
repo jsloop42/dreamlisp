@@ -28,7 +28,7 @@
 }
 
 - (void)dealloc {
-    [DLLog debug:[NSString stringWithFormat:@"%@ dealloc", [self className]]];
+    [DLLog info:@"DLSlot dealloc"];
 }
 
 - (instancetype)init {

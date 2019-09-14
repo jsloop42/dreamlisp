@@ -336,6 +336,19 @@
     return _meta != nil;
 }
 
+- (void)forwardInvocation:(NSInvocation *)anInvocation {
+    if ([self respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:self];
+    } else {
+        [anInvocation invokeWithTarget:_string];
+    }
+}
+
+- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
+    if ([self respondsToSelector:aSelector]) return [self methodSignatureForSelector:aSelector];
+    return [_string methodSignatureForSelector:aSelector];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id elem = [[DLString alloc] initWithString:_string];
     [elem setIsImported:_isImported];

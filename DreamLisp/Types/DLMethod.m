@@ -8,6 +8,7 @@
 
 #import "DLMethod.h"
 
+/*! Represents method parameter in a `defmethod` form as well as in method invocation expression. Accordingly only the relevent parts will be set. */
 @implementation DLMethodParam {
     id<DLDataProtocol> _meta;
     NSInteger _position;
@@ -142,8 +143,11 @@
     NSString *_moduleName;
     BOOL _isImported;
     BOOL _isMutable;
+    /*! Indicates whether the method represent a user defined method or an existing method (eg: Foundation methods). If it's native, there won't be ast. */
+    BOOL _isNative;
 }
 
+@synthesize isNative = _isNative;
 @synthesize meta = _meta;
 @synthesize value;
 @synthesize isImported = _isImported;
@@ -155,7 +159,7 @@
 }
 
 - (void)dealloc {
-    [DLLog debug:[NSString stringWithFormat:@"%@ dealloc", [self className]]];
+    [DLLog info:@"DLMethod dealloc"];
 }
 
 - (instancetype)init {
@@ -169,7 +173,16 @@
 - (instancetype)initWithCoder:(NSCoder *)coder {
     self = [super init];
     if (self) {
+        _name = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_name"];
+        _params = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_params"];
         _ast = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_value"];
+//        _fn = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_fn"];
+        _env = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_env"];
+        NSValue *isNativeValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_isNative"];
+        [isNativeValue getValue:&_isNative];
+        _attr = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_attr"];
+        _cls = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_cls"];
+        _selectorString = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_selectorString"];
         _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_meta"];
         _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_moduleName"];
         _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLMethod_position"] integerValue];
@@ -182,7 +195,16 @@
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_name forKey:@"DLMethod_name"];
+    [coder encodeObject:_params forKey:@"DLMethod_params"];
     [coder encodeObject:_ast forKey:@"DLMethod_value"];
+//    [coder encodeObject:_fn forKey:@"DLMethod_fn"];
+    [coder encodeObject:_env forKey:@"DLMethod_env"];
+    NSValue *isNativeValue = [[NSValue alloc] initWithBytes:&_isNative objCType:@encode(BOOL)];
+    [coder encodeObject:isNativeValue forKey:@"DLMethod_isNative"];
+    [coder encodeObject:_attr forKey:@"DLMethod_attr"];
+    [coder encodeObject:_cls forKey:@"DLMethod_cls"];
+    [coder encodeObject:_selectorString forKey:@"DLMethod_selectorString"];
     [coder encodeObject:_meta forKey:@"DLMethod_meta"];
     [coder encodeObject:_moduleName forKey:@"DLMethod_moduleName"];
     [coder encodeObject:@(_position) forKey:@"DLMethod_position"];
@@ -201,6 +223,7 @@
 }
 
 - (void)bootstrap {
+    _isNative = YES;
     _type = [[NSString stringWithFormat:@"%s%s%s%s%s%s", @encode(id), @encode(id), @encode(SEL), @encode(id), @encode(id), @encode(id)] UTF8String];
 }
 
@@ -212,14 +235,35 @@
     return @"object";
 }
 
-/*! Param binding for env */
+- (void)setIsNative:(BOOL)isNative {
+    _isNative = isNative;
+    if (!isNative) {
+        _type = "";
+    }
+}
+
+/*! Parameter name binding for the env. */
 - (NSMutableArray *)binds {
     DLMethodParam *param;
     NSMutableArray *bind = [NSMutableArray new];
     for (param in _params) {
-        [bind addObject:param.name];
+        if (param.name) {
+            [bind addObject:param.name];
+        }
     }
     return bind;
+}
+
+/*! Returns the method arguments which can be passed directly as invocation argument */
+- (NSMutableArray *)args {
+    DLMethodParam *param;
+    NSMutableArray *args = [NSMutableArray new];
+    for (param in _params) {
+        if (param.value) {
+            [args addObject:param.value];
+        }
+    }
+    return args;
 }
 
 - (BOOL)isEqual:(id)object {
@@ -254,7 +298,7 @@
     obj.name = _name;
     obj.params = _params;
     obj.ast = _ast;
-    obj.fn = _fn;
+//    obj.fn = _fn;
     obj.env = _env;
     obj.attr = _attr;
     obj.cls = _cls;

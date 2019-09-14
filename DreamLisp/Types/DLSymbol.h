@@ -10,8 +10,8 @@
 #import "DLDataProtocol.h"
 #import "DLFunction.h"
 #import "DLList.h"
-#import "NSString+DLDataProtocol.h"
-#import "NSMutableArray+DLList.h"
+#import "NSString+DLCat.h"
+#import "NSMutableArray+DLCat.h"
 #import "DLError.h"
 #import "DLState.h"
 

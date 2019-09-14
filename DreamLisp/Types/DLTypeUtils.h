@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "DLError.h"
-#import "NSArray+DLDataProtocol.h"
+#import "NSArray+DLCat.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

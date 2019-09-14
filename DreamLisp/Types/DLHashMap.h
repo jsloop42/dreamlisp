@@ -12,7 +12,7 @@
 #import "DLLogger.h"
 #import "DLConst.h"
 #import "DLTypeUtils.h"
-#import "NSMapTable+DLHashMap.h"
+#import "NSMapTable+DLCat.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

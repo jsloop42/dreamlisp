@@ -26,13 +26,11 @@
 #import "DLRegex.h"
 #import "DLData.h"
 /*! DLCategories */
-#import "NSArray+DLDataProtocol.h"
-#import "NSDecimalNumber+DLDataProtocol.h"
-#import "NSMapTable+DLHashMap.h"
-#import "NSMutableArray+DLList.h"
-#import "NSMutableDictionary+DLHashMap.h"
-#import "NSNumber+DLDataProtocol.h"
-#import "NSString+DLDataProtocol.h"
+#import "NSArray+DLCat.h"
+#import "NSMapTable+DLCat.h"
+#import "NSMutableArray+DLCat.h"
+#import "NSNumber+DLCat.h"
+#import "NSString+DLCat.h"
 /*! Network */
 #import "DLTable.h"
 #import "DLNetworkSessionTable.h"

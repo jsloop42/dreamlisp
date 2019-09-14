@@ -11,7 +11,7 @@
 @implementation DLInvocationArgument
 
 - (void)dealloc {
-    [DLLog debug:[NSString stringWithFormat:@"%@ dealloc", [self className]]];
+    [DLLog info:@"DLInvocationArgument dealloc"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder {

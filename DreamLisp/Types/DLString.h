@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "DLConst.h"
 #import "DLDataProtocol.h"
-#import "NSString+DLDataProtocol.h"
+#import "NSString+DLCat.h"
 #import "DLError.h"
 
 NS_ASSUME_NONNULL_BEGIN

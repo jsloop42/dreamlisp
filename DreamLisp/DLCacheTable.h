@@ -8,8 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import "DLDataProtocol.h"
-#import "NSMutableArray+DLList.h"
-#import "NSMapTable+DLHashMap.h"
+#import "NSMutableArray+DLCat.h"
+#import "NSMapTable+DLCat.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
