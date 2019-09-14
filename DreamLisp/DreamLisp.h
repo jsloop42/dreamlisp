@@ -15,6 +15,7 @@
 #import "DLCore.h"
 #import "DLFileOps.h"
 #import "DLIOService.h"
+#import "DLLogger.h"
 #import <objc/objc-api.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -38,6 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)isMacroCall:(id<DLDataProtocol>)ast env:(DLEnv *)env;
 - (id<DLDataProtocol>)macroExpand:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env;
 - (DLList *)toDoForm:(NSMutableArray *)arr;
+- (DLMethod *)parseMethodForm:(id<DLDataProtocol>)ast object:(id<DLProxyProtocol>)object withEnv:(DLEnv *)env;
 - (id<DLDataProtocol>)eval:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env;
 - (NSString * _Nullable)printException:(NSException *)exception log:(BOOL)log readably:(BOOL)readably;
 @end

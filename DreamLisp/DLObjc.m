@@ -19,7 +19,8 @@ static NSString *_moduleName = @"objcrt";
 }
 
 - (void)dealloc {
-    [DLLog debug:[NSString stringWithFormat:@"%@ dealloc", [self className]]];
+    [DLLog debug:@"DLObjc dealloc"];
+    [super dealloc];
 }
 
 - (instancetype)init {
@@ -30,11 +31,11 @@ static NSString *_moduleName = @"objcrt";
 }
 
 - (void)bootstrap {
-    _env = [[DLEnv alloc] init];
+    _env = [[[DLEnv alloc] init] autorelease];
     [_env setModuleName:_moduleName];
     [_env setModuleDescription:_description];
     [_env setIsUserDefined:NO];
-    _rt = [DLObjcRT new];
+    _rt = [[DLObjcRT new] autorelease];
     _methodAttrKey = DLObjcMethodAttrKey.shared;
 }
 
@@ -43,7 +44,7 @@ static NSString *_moduleName = @"objcrt";
 }
 
 - (void)checkError:(BOOL)status msg:(NSString *)msg {
-    if (!status) [[[DLError alloc] initWithDescription:msg] throw];
+    if (!status) [[[[DLError alloc] initWithDescription:msg] autorelease] throw];
 }
 
 - (void)addProperty:(DLClass *)cls {
@@ -95,12 +96,11 @@ static NSString *_moduleName = @"objcrt";
     NSString *fnName = @"defclass";
     DLList *list = [DLList dataToList:ast fnName:fnName];  /* Here we are not checking if the first element is defclass because it's already done before */
     if (![DLSymbol isSymbol:[list next] withName:fnName]) {
-        [[[DLError alloc] initWithFormat:DLSymbolMismatchError, @"'defclass'", [[list first] dataTypeName]] throw];
+        [[[[DLError alloc] initWithFormat:DLSymbolMismatchError, @"'defclass'", [[list first] dataTypeName]] autorelease] throw];
     }
     id<DLDataProtocol> elem = [list next];
-    DLClass *cls = nil;
+    DLClass *cls = [[DLClass new] autorelease];
     if (elem) {  // class name sym
-        cls = [DLClass new];
         cls.name = [DLSymbol dataToSymbol:elem position:list.seekIndex fnName:fnName];
         /* Add class, delegate details if present */
         elem = [list next];
@@ -113,7 +113,7 @@ static NSString *_moduleName = @"objcrt";
                 NSUInteger i = 0;
                 for (i = 0; i < len; i++) {
                     aSym = [cnfArr objectAtIndex:i];
-                    if (![DLSymbol isSymbol:aSym]) [[[DLError alloc] initWithFormat:DLClassConformanceParseError, i, [aSym dataTypeName]] throw];
+                    if (![DLSymbol isSymbol:aSym]) [[[[DLError alloc] initWithFormat:DLClassConformanceParseError, i, [aSym dataTypeName]] autorelease] throw];
                     [cls.conformance addObject:aSym];
                 }
             }
@@ -126,8 +126,9 @@ static NSString *_moduleName = @"objcrt";
                 id<DLDataProtocol> slotData = nil;
                 DLSlot *slot = nil;
                 NSMutableArray *slotsArr = slotsList.value;
+                DLList *slotList = nil;
                 for (slotData in slotsArr) {  // Process each slot
-                    DLList *slotList = [DLList dataToList:slotData fnName:fnName];  // Not all elements in the slot list is mandatory.
+                    slotList= [DLList dataToList:slotData fnName:fnName];  // Not all elements in the slot list is mandatory.
                     slot = [DLSlot new];
                     DLObjcPropertyAttr *attr = [DLObjcPropertyAttr new];
                     id<DLDataProtocol> token = nil;
@@ -141,8 +142,8 @@ static NSString *_moduleName = @"objcrt";
                                     DLKeyword *arg = [DLKeyword dataToKeyword:[slotList next] position:slotList.seekIndex - 1 fnName:fnName];
                                     DLKeyword *initKwd = [[DLKeyword alloc] initWithString:[NSString stringWithFormat:@"init-%@", [arg string]]];
                                     slot.initializationArg = initKwd;
-                                    const char *type = [[NSString stringWithFormat:@"%s%s%s%s%s", @encode(id), @encode(id), @encode(SEL), @encode(id), @encode(id)] UTF8String];  // id:return id:self, SEL, prop, DLClass*
-                                    slot.methodType = type;
+                                    [initKwd release];
+                                    slot.methodType = [[NSString stringWithFormat:@"%s%s%s%s%s", @encode(id), @encode(id), @encode(SEL), @encode(id), @encode(id)] UTF8String];  // id:return id:self, SEL, prop, DLClass*
                                 } else if ([[kwd value] isEqual:@":read-only"]) {
                                     attr.isReadOnly = YES;
                                 } else if ([[kwd value] isEqual:@":read-write"]) {
@@ -172,7 +173,7 @@ static NSString *_moduleName = @"objcrt";
                                         attr.type = [[NSString stringWithFormat:@"%s\"%@\"", attr.type, typeStr] UTF8String];
                                     }
                                 } else {
-                                    [[[DLError alloc] initWithFormat:DLRTSlotFormatError, kwd] throw];
+                                    [[[[DLError alloc] initWithFormat:DLRTSlotFormatError, kwd] autorelease] throw];
                                 }
                             }
                         } else {
@@ -183,7 +184,9 @@ static NSString *_moduleName = @"objcrt";
                     }
                     [DLUtils updatePropertyAttr:attr];
                     slot.attribute = attr;
+                    [attr release];
                     [cls.slots addObject:slot];
+                    [slot release];
                 }
             }
         }
@@ -191,15 +194,38 @@ static NSString *_moduleName = @"objcrt";
     return cls;
 }
 
+/*! Invoke a selector on the given object */
+- (id<DLDataProtocol>)invokeMethod:(SEL)selector withObject:(id<DLProxyProtocol>)object args:(NSMutableArray *)args {
+    DLInvocation *invo = [_rt invocationForMethod:selector withProxy:object args:args];
+    return [_rt invoke:invo.invocation];
+}
+
+/*! Invokes the given selector on the proxy object with args and sets the return value if any in the object. */
+- (id<DLDataProtocol>)invokeMethodWithReturn:(SEL)selector withObject:(id<DLProxyProtocol>)object args:(NSMutableArray *)args {
+    id ret = [self invokeMethod:selector withObject:object args:args];
+    return [self objectWithProxy:ret withClass:[(DLObject *)object cls]];
+//    if (object.returnAssocKey) {
+//        object.returnValue = nil;  /* Removing the reference, deallocs the return object. */
+//        object.returnAssocKey = nil;
+//    }
+//    if (ret) {
+//        const void *retKey = [self generateAssocKey:[object hash]];
+//        object.returnAssocKey = retKey;
+//        [_rt setAssociatedObject:ret toObject:object withKey:retKey];  /* Add latest return value to the object using assoc ref */
+//        object.returnValue = ret;
+//    }
+}
+
 - (void)addMethodToClass:(DLMethod *)method {
-    [_rt addMethod:method.cls.value name:[method selector] imp:(IMP)dl_methodImp type:method.type];
+    method.imp = (IMP)dl_methodImp;
+    [_rt addMethod:method.cls.value name:[method selector] imp:method.imp type:method.type];
 }
 
 - (void)addMethodParamAttrs:(DLMethodParam *)param fromMeta:(DLList *)meta fnName:(NSString *)fnName {
     DLKeyword *kwd = nil;
-    while([meta hasNext]) {  /* The meta list with type and other attrs */
+    while ([meta hasNext]) {  /* The meta list with type and other attrs */
         DLList *list = [DLList dataToList:[meta next] fnName:fnName];
-        param.attr = [DLObjcMethodAttr new];
+        param.attr = [[DLObjcMethodAttr new] autorelease];
         while ([list hasNext]) {
             kwd = [list next];
             if ([kwd isEqual:_methodAttrKey.kNullable]) {
@@ -222,20 +248,20 @@ static NSString *_moduleName = @"objcrt";
 - (DLMethod *)parseMethod:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env {
     NSString *fnName = @"defmethod";
     DLList *xs = [DLList dataToList:ast fnName:fnName];
-    NSUInteger len = [xs count];
+    NSUInteger len;
     ++xs.seekIndex;  /* The first element is the symbol defmethod. So increment the index. */
-    if (![xs hasNext]) [[[DLError alloc] initWithFormat:DLMethodNameNotFoundError, fnName] throw];
+    if (![xs hasNext]) [[[[DLError alloc] initWithFormat:DLMethodNameNotFoundError, fnName] autorelease] throw];
     id<DLDataProtocol> elem = [xs next];
-    DLMethod *method = [DLMethod new];
-    method.params = [NSMutableArray new];
+    DLMethod *method = [[DLMethod new] autorelease];
+    method.params = [[NSMutableArray new] autorelease];
     /* Get meta info if present */
     if ([DLList isList:elem]) {
         DLList *meta = (DLList *)elem;
-        if ([meta isEmpty]) [[[DLError alloc] initWithFormat:DLMethodNameNotFoundError, fnName] throw];
+        if ([meta isEmpty]) [[[[DLError alloc] initWithFormat:DLMethodNameNotFoundError, fnName] autorelease] throw];
         if ([DLSymbol isSymbol:[meta next] withName:@"with-meta"]) {  /* Meta encountered */
             id<DLDataProtocol>metaElem = [meta next];
             method.name = metaElem;
-            DLMethodParam *param = [DLMethodParam new];
+            DLMethodParam *param = [[DLMethodParam new] autorelease];
             [self addMethodParamAttrs:param fromMeta:meta fnName:fnName];
             method.attr = param.attr;
         }
@@ -243,7 +269,7 @@ static NSString *_moduleName = @"objcrt";
         method.name = [DLSymbol dataToSymbol:elem position:xs.seekIndex - 1 fnName:fnName];
     }
     /* Add method's class */
-    if (![xs hasNext]) [[[DLError alloc] initWithFormat:DLMethodClassNotSpecifiedError, fnName] throw];
+    if (![xs hasNext]) [[[[DLError alloc] initWithFormat:DLMethodClassNotSpecifiedError, fnName] autorelease] throw];
     elem = [DLList dataToList:[xs next] fnName:fnName];
     DLClass *cls = [self classInfoFromAST:elem fnName:fnName env:env];
     method.cls = cls;
@@ -260,7 +286,7 @@ static NSString *_moduleName = @"objcrt";
             if ([DLList isList:elem]) {
                 meta = (DLList *)elem;
                 if ([DLSymbol isSymbol:[meta next] withName:@"with-meta"]) {  /* Meta encountered */
-                    param = [DLMethodParam new];
+                    param = [[DLMethodParam new] autorelease];
                     param.position = argList.seekIndex - 1;
                     metaElem = [meta next];
                     if ([DLSymbol isSymbol:metaElem]) {  /* arg name */
@@ -275,9 +301,9 @@ static NSString *_moduleName = @"objcrt";
                 }
             } else if ([DLKeyword isKeyword:elem]) {  /* An arg selector without a meta */
                 if ([method.params count] == 0) {  /* Keyword cannot appear at the first position */
-                    [[[DLError alloc] initWithFormat:DLMethodParseError, @"'meta' or 'symbol'", 0, [elem dataTypeName]] throw];
+                    [[[[DLError alloc] initWithFormat:DLMethodParseError, @"'meta' or 'symbol'", 0, [elem dataTypeName]] autorelease] throw];
                 }
-                param = [DLMethodParam new];
+                param = [[DLMethodParam new] autorelease];
                 param.position = argList.seekIndex - 1;
                 param.selectorName = elem;
                 wasPreviousAKeyword = YES;
@@ -285,7 +311,7 @@ static NSString *_moduleName = @"objcrt";
                 if (param && wasPreviousAKeyword) {  /* => Previous a selector found */
                     param.name = elem;
                 } else {  /* Must be the first argument without a meta */
-                    param = [DLMethodParam new];
+                    param = [[DLMethodParam new] autorelease];
                     param.name = elem;
                     param.position = 0;
                 }
@@ -296,7 +322,7 @@ static NSString *_moduleName = @"objcrt";
         }
     }
     /* Method body */
-    if (![xs hasNext]) [[[DLError alloc] initWithDescription:DLMethodBodyNotFoundError] throw];
+    if (![xs hasNext]) [[[[DLError alloc] initWithDescription:DLMethodBodyNotFoundError] autorelease] throw];
     method.ast = [xs next];
     [DLUtils updateSELForMethod:method];
     [DLUtils updateSelectorStringForMethod:method];
@@ -304,23 +330,43 @@ static NSString *_moduleName = @"objcrt";
     return method;
 }
 
-- (DLObject *)makeInstance:(DLInvocation *)invocation {
-    id inst = [_rt instantiateFromInvocation:invocation.invocation];
-    if (!inst) [[[DLError alloc] initWithFormat:DLRTObjectInitError, [invocation.invocation.target className]] throw];
-    DLObject *object = [[DLObject alloc] initWithObject:inst];
-    object.cls = invocation.cls;
-    invocation.object = object;
+- (NSString *)generateAssocKey:(NSUInteger)hash {
+    return [NSString stringWithFormat:@"dlproxy_%ld_%ld", [DLState assocObjectCounter], hash];
+}
+
+- (DLObject *)objectWithProxy:(id)proxy withClass:(DLClass *)cls {
+    DLObject *object = [[[DLObject alloc] initWithProxy:proxy] autorelease];
+    object.proxyAssocKey = [self generateAssocKey:[proxy hash]];
+    [_rt setAssociatedObject:proxy toObject:object withKey:[object.proxyAssocKey UTF8String]];
+    object.cls = cls;
     return object;
 }
 
-- (DLClass *)classInfoFromAST:(DLList *)list fnName:(NSString *)fnName env:(DLEnv *)env {
-    if ([list count] != 2) [[[DLError alloc] initWithDescription:DLClassNameParseError] throw];
+- (DLObject * _Nullable)makeInstance:(DLInvocation *)invocation {
+    id inst = [_rt invoke:invocation.invocation];
+    if (!inst) {
+        [[[[DLError alloc] initWithFormat:DLRTObjectInitError, [invocation.invocation.target className]] autorelease] throw];
+        return nil;
+    }
+    return [self objectWithProxy:inst withClass:invocation.cls];
+}
+
+- (DLClass * _Nullable)classInfoFromAST:(DLList *)list fnName:(NSString *)fnName env:(DLEnv *)env {
+    if ([list count] != 2) [[[[DLError alloc] initWithDescription:DLClassNameParseError] autorelease] throw];
     id<DLDataProtocol> quoteElem = [list next];
     if (![DLSymbol isSymbol:quoteElem withName:@"quote"]) {
-        [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithArity, @"quote", list.seekIndex - 1, [quoteElem dataTypeName]] throw];
+        [[[[DLError alloc] initWithFormat:DLDataTypeMismatchWithArity, @"quote", list.seekIndex - 1, [quoteElem dataTypeName]] autorelease] throw];
     }
     DLSymbol *clsSym = [list next];
-    return [env objectForKey:clsSym isThrow:YES];  /* Get the class from the env */
+    id<DLDataProtocol> elem = [env objectForKey:clsSym isThrow:NO];  /* Get the class from the env */
+    if (elem) return [DLClass dataToClass:elem fnName:fnName];
+    /* DLClass not found, check if the class is loaded into the RT */
+    Class clazz = [_rt lookUpClass:clsSym.value];
+    if (!clazz) {
+        [[[[DLError alloc] initWithFormat:DLClassNotFoundError, [clsSym value]] autorelease] throw];
+        return nil;
+    }
+    return [[[DLClass alloc] initWithClass:clazz] autorelease];
 }
 
 /*!
@@ -329,22 +375,27 @@ static NSString *_moduleName = @"objcrt";
  (make-instance 'person :init-with-name "Olive")
  (make-instance 'series :init-with-count 3.141)
  (make-instance 'person :alloc)
+ (make-instance 'NSString :init-with-c-string "olive" :encoding :ns-utf8-string)
  */
-- (DLInvocation *)parseMakeInstanceForm:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env {
+- (DLInvocation  * _Nullable)parseMakeInstanceForm:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env {
     NSString *fnName = @"make-instance";
     DLList *list = [DLList dataToList:ast fnName:fnName];
     NSUInteger len = [list count];
-    if (len < 2) [[[DLError alloc] initWithFormat:DLMakeInstanceNoneSpecifiedError, @"'class'"] throw];
+    if (len < 2) [[[[DLError alloc] initWithFormat:DLMakeInstanceNoneSpecifiedError, @"'class'"] autorelease] throw];
     ++list.seekIndex;  /* The first element is the symbol make-instance. So increment the index. */
     /* Get the class info */
     DLClass *cls = [self classInfoFromAST:[list next] fnName:fnName env:env];
     id<DLDataProtocol> elem = nil;
     BOOL isAllocEncountered = NO;
     BOOL isInitEncountered = NO; /* Any form of init. Either :init or the one specified in :initarg. */
+    NSMutableArray *selKeywordArr = [[NSMutableArray new] autorelease];
+    NSMutableArray *argsArr = [[NSMutableArray new] autorelease];
+    DLKeyword *kwd = nil;
+    DLInvocation *invocation = nil;
     while ([list hasNext]) {
         elem = [list next];
         if ([DLKeyword isKeyword:elem]) {
-            DLKeyword *kwd = (DLKeyword *)elem;
+            kwd = (DLKeyword *)elem;
             NSString *kwdName = [kwd string];
             if ([kwdName isEqual:@"alloc"]) {
                 isAllocEncountered = YES;
@@ -367,16 +418,33 @@ static NSString *_moduleName = @"objcrt";
                      (make-instance 'person :init-with-name "Olive" :with-age 32)
                      */
                     SEL sel = [DLTypeUtils convertInitKeywordToSelector:[kwd string]];
-                    if (![list hasNext]) [[[DLError alloc] initWithFormat:DLMakeInstanceNoneSpecifiedError, @"initarg value"] throw];
-                    id<DLDataProtocol>arg = [list next];
-                    DLInvocation *invocation = [_rt invocationFromClass:cls forSelector:sel args:[@[arg, cls] mutableCopy]];
+                    if (![list hasNext]) [[[[DLError alloc] initWithFormat:DLMakeInstanceNoneSpecifiedError, @"initarg value"] autorelease] throw];
+                    id<DLDataProtocol>arg = [list next];  /* the param value */
+                    invocation = [_rt invocationFromClass:cls forSelector:sel args:[@[arg, cls] mutableCopy]];
                     return invocation;
                 }
+
             }
-            // TODO: case where we init using a defined method instead of a property
-            //} else if (keyword starts with init) {
-            // get values in the form: id :keyword id :keyword id
-            //}
+        }
+        /* Not a slot based init */
+        if (!isAllocEncountered && !isInitEncountered) {
+            while ([list hasNext]) {
+                if (list.seekIndex % 2 != 0) {
+                    [selKeywordArr addObject:[DLKeyword dataToKeyword:elem fnName:fnName]];
+                } else {
+                    [argsArr addObject:elem];
+                }
+                elem = [list next];
+            }
+            [argsArr addObject:elem];
+            if ([selKeywordArr isEmpty]) [[[[DLError alloc] initWithDescription:DLMakeInstanceNoSELFoundError] autorelease] throw];
+            if ([selKeywordArr count] != [argsArr count]) {
+                [[[[DLError alloc] initWithFormat:DLMakeInstanceSELArgCountMismatchError, [selKeywordArr count], [argsArr count]] autorelease] throw];
+            }
+            //[argsArr addObject:cls];
+            SEL sel = [DLUtils convertKeywordToSelector:selKeywordArr];
+            invocation = [_rt invocationFromClass:cls forSelector:sel args:argsArr];
+            return invocation;
         }
     }
     return nil;

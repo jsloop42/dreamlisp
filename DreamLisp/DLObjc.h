@@ -21,6 +21,7 @@
 #import "DLTypeUtils.h"
 #import "DLMethod.h"
 #import "DLObjcMethodAttr.h"
+#import "DLState.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -32,10 +33,12 @@ NS_ASSUME_NONNULL_BEGIN
 @interface DLObjc : NSObject
 - (void)defclass:(DLClass *)cls;
 - (DLClass *)parseClassForm:(id<DLDataProtocol>)ast;
+- (id<DLDataProtocol>)invokeMethod:(SEL)selector withObject:(id<DLProxyProtocol>)object args:(NSMutableArray *)args;
+- (id<DLDataProtocol>)invokeMethodWithReturn:(SEL)selector withObject:(id<DLProxyProtocol>)object args:(NSMutableArray *)args;
 - (void)addMethodToClass:(DLMethod *)method;
 - (DLMethod *)parseMethod:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env;
-- (DLObject *)makeInstance:(DLInvocation *)invocation;
-- (DLInvocation *)parseMakeInstanceForm:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env;
+- (DLObject * _Nullable)makeInstance:(DLInvocation *)invocation;
+- (DLInvocation * _Nullable)parseMakeInstanceForm:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -45,10 +45,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (DLHashMap *)convertKeywordKeysToString:(DLHashMap *)hashmap;
 + (DLHashMap *)errorToHashMap:(NSError *)error;
 + (NSMutableDictionary *)dictionaryFromHashMap:(DLHashMap *)hashMap;
-+ (id)convertFromDLTypeToFoundationType:(id<DLDataProtocol>)value;
 + (NSMutableDictionary *)hashMapToFoundationType:(DLHashMap *)hashMap;
-+ (BOOL)isBoolNumber:(NSNumber *)num;
-+ (id<DLDataProtocol>)convertFromFoundationTypeToDLType:(id)value;
 + (DLHashMap *)dictionaryToDLType:(NSMutableDictionary *)dict;
 + (DLHashMap *)decodeJSON:(DLString *)string;
 + (DLHashMap *)decodeJSONFromData:(NSData *)data;
@@ -58,9 +55,14 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSMutableArray *)stringToArray:(DLString *)string isNative:(BOOL)isNative;
 + (void)appendStringFromArray:(NSMutableArray *)array string:(DLString *)string;
 + (NSString *)promptWithModule:(NSString *)moduleName;
++ (NSString *)lispCaseToCamelCase:(NSString *)string;
 #pragma mark Network
 + (NSString *)httpMethodTypeToString:(DLKeyword *)methodType;
 #pragma mark Objective-C RT
++ (BOOL)isBoolNumber:(NSNumber *)num;
++ (id<DLDataProtocol>)convertFromFoundationTypeToDLType:(id)value;
++ (id)convertFromDLTypeToFoundationType:(id<DLDataProtocol>)value;
++ (SEL)convertKeywordToSelector:(NSMutableArray<DLKeyword *> *)keywordArr;
 + (void)updateSELForMethod:(DLMethod *)method;
 + (void)updateSelectorStringForMethod:(DLMethod *)method;
 + (void)updatePropertyAttr:(DLObjcPropertyAttr *)attr;
