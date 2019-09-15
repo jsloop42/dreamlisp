@@ -14,6 +14,7 @@
 #import "NSMutableArray+DLCat.h"
 #import "DLError.h"
 #import "DLState.h"
+#import "DLLogger.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

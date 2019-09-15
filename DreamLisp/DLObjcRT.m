@@ -49,7 +49,7 @@ id dl_getIvar(id self, SEL _cmd) {
 id dl_initWithPropImp(id self, SEL _cmd, id arg, DLClass *cls) {
     NSString *selStr = NSStringFromSelector(_cmd);
     DLSlot *slot = [cls slotWithInitArg:[[DLKeyword alloc] initWithString:selStr]];
-    NSString *propName = [NSString stringWithFormat:@"_%@", slot.value.value];
+    NSString *propName = [[NSString alloc] initWithFormat:@"_%@", slot.value.value];
     dl_setIvarForName(self, [propName UTF8String], arg);
     return self;
 }
@@ -71,7 +71,7 @@ id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArr
 }
 
 - (void)dealloc {
-    [DLLog info:@"DLObjcRT dealloc"];
+    [DLLog debug:@"DLObjcRT dealloc"];
 }
 
 - (instancetype)init {
@@ -179,7 +179,7 @@ id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArr
     NSMutableArray *arr = [NSMutableArray new];
     for (i = 0; i < outCount; i++) {
         objc_property_t property = properties[i];
-        [arr addObject:[NSString stringWithUTF8String:property_getAttributes(property)]];
+        [arr addObject:[[NSString alloc] initWithUTF8String:property_getAttributes(property)]];
     }
     return arr;
 }
@@ -225,9 +225,11 @@ id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArr
     return class_getMethodImplementation(cls, name);
 }
 
+/*! Allocates an object of the proxy class returning an invocation object which can be used to instantiate the object later. */
 - (DLInvocation *)invocationFromClass:(DLClass *)cls forSelector:(SEL)sel args:(NSMutableArray *)args {
-    id obj = [cls.value alloc];
+    id obj = [cls.proxy alloc];
     NSMethodSignature *sig = [obj methodSignatureForSelector:sel];
+    if (!sig) @throw [DLError exceptionWithFormat:DLMethodSignatureNotFoundError, NSStringFromSelector(sel)];
     NSInvocation *invo = [NSInvocation invocationWithMethodSignature:sig];
     invo.target = obj;
     invo.selector = sel;

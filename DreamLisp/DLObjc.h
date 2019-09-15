@@ -34,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)defclass:(DLClass *)cls;
 - (DLClass *)parseClassForm:(id<DLDataProtocol>)ast;
 - (id<DLDataProtocol>)invokeMethod:(SEL)selector withObject:(id<DLProxyProtocol>)object args:(NSMutableArray *)args;
-- (id<DLDataProtocol>)invokeMethodWithReturn:(SEL)selector withObject:(id<DLProxyProtocol>)object args:(NSMutableArray *)args;
+- (void)invokeMethodWithReturn:(SEL)selector withObject:(id<DLProxyProtocol>)object args:(NSMutableArray *)args;
 - (void)addMethodToClass:(DLMethod *)method;
 - (DLMethod *)parseMethod:(id<DLDataProtocol>)ast withEnv:(DLEnv *)env;
 - (DLObject * _Nullable)makeInstance:(DLInvocation *)invocation;

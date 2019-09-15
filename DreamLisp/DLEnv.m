@@ -428,7 +428,7 @@ static NSMapTable<NSString *, DLEnv *> *_modules;
 
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"<%@ %p moduleName: %@, isExportAll: %hhd>", NSStringFromClass([self class]), self, [self moduleName], _isExportAll];
+    return [[NSString alloc] initWithFormat:@"<%@ %p moduleName: %@, isExportAll: %hhd>", NSStringFromClass([self class]), self, [self moduleName], _isExportAll];
 }
 
 @end

@@ -30,6 +30,8 @@ static NSString *langVersion;
     dispatch_queue_t _repQueue;  // Used for REPL queue for processing symbols from symbol table
     BOOL _isREPL;  // Is running a REPL
     NSString *_prompt;
+    BOOL _isDebug;
+    BOOL _isVerbose;
 }
 
 @synthesize reader = _reader;
@@ -37,6 +39,8 @@ static NSString *langVersion;
 @synthesize env = _env;
 @synthesize isREPL = _isREPL;
 @synthesize prompt = _prompt;
+@synthesize isDebug = _isDebug;
+@synthesize isVerbose = _isVerbose;
 
 + (void)initialize {
     hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
@@ -84,6 +88,16 @@ static NSString *langVersion;
     [self setLoadFileToREPL];
     [self setEvalToREPL];
     if (_isREPL) _prompt = [DLUtils promptWithModule:[DLState currentModuleName]];
+}
+
+- (void)setIsDebug:(BOOL)isDebug {
+    _isDebug = isDebug;
+    [DLLog setIsDebug:_isDebug];
+}
+
+- (void)setIsVerbose:(BOOL)isVerbose {
+    _isVerbose = isVerbose;
+    [DLLog setIsVerbose:_isVerbose];
 }
 
 #pragma mark Env setup
@@ -286,10 +300,16 @@ static NSString *langVersion;
     return [[DLList alloc] initWithArray:arr];
 }
 
-// (capitalizeString util-obj :lisp-case :max-length 10)
-// (capitalizeString util-obj "olive" :case :lisp-case :max-length 10)
-// (capitalizeString utils-obj (some-exp) (gen-keyword) (gen-val))
-// (capitalizeString utils-obj)  Here there is no argument => the selector does not have a colon at the end.
+/*!
+ Parse the ast validating method expression form, giving a method object.
+
+ (capitalizeString util-obj :lisp-case :max-length 10)
+ (capitalizeString util-obj "olive" :case :lisp-case :max-length 10)
+ (capitalizeString utils-obj (some-exp) (gen-keyword) (gen-val))
+ (capitalizeString utils-obj)  ; Here there is no argument => the selector does not have a colon at the end.
+
+ @return DLMethod
+ */
 - (DLMethod *)parseMethodForm:(id<DLDataProtocol>)ast object:(id<DLProxyProtocol>)object withEnv:(DLEnv *)env {
     DLMethod *method = [DLMethod new];
     method.params = [NSMutableArray new];
@@ -298,9 +318,6 @@ static NSString *langVersion;
     id<DLDataProtocol> elem = [xs next];
     if (![DLSymbol isSymbol:elem]) [[[DLError alloc] initWithDescription:DLMethodExpressionParseError] throw];
     NSUInteger selCount = 0;  /* The second arg onwards */
-    //[str appendString:[DLUtils lispCaseToCamelCase:elem.value]];  /* First part of the selector */
-    //[str appendString:@":"];
-    //++selCount;
     ++xs.seekIndex;  /* We have the object, so increment the position. */
     method.name = elem;
     id<DLDataProtocol> val = nil;
@@ -312,7 +329,6 @@ static NSString *langVersion;
         if (xs.seekIndex % 2 != 0) {  /* => value */
             if ([DLKeyword isKeyword:elem]) {  /* => enum */
                 // TODO: convert keyword to NS enum
-                //[args addObject:elem];
                 methodParam.value = elem;
             } else {  /* we need to eval the form */
                 val = [self eval:elem withEnv:env];
@@ -320,7 +336,6 @@ static NSString *langVersion;
                     // TODO: convert keyword to NS enum value
                     methodParam.value = val;
                 } else {
-                    //[args addObject:val];
                     methodParam.value = val;
                 }
             }
@@ -332,8 +347,6 @@ static NSString *langVersion;
                 selKeyword = elem;
             }
             methodParam.selectorName = selKeyword;
-            //[str appendString:[DLUtils lispCaseToCamelCase:[(DLKeyword *)selKeyword string]]];
-            //[str appendString:@":"];
             ++selCount;
         }
         [method.params addObject:methodParam];
@@ -492,11 +505,14 @@ static NSString *langVersion;
                         method.env = env;
                         method.ast = [self toDoForm:[@[method.ast] mutableCopy]];  // TODO: add method to class
                         [_objc addMethodToClass:method];
-                        // TODO: a method can have parameterized args => we need to use selector string
-                        // gen-random:withMax:
                         method.name.arity = [[method params] count];
                         [method.name updateArity];
-                        [env setObject:method forKey:method.name];
+                        DLSymbol *methodSym = [[DLSymbol alloc] initWithName:method.selectorString.value];
+                        methodSym.moduleName = [_env moduleName];
+                        methodSym.initialModuleName = methodSym.moduleName;
+                        methodSym.initialArity = method.name.arity;
+                        [methodSym resetArity];
+                        [env setObject:method forKey:methodSym];
                         return method;
                     }
                 } else if ([xs count] == 2 && [DLKeyword isKeyword:[xs first]]) {
@@ -514,15 +530,35 @@ static NSString *langVersion;
                     if ([DLList isList:ast]) {
                         DLList *aList = (DLList *)ast;
                         DLSymbol *objSym = [aList second];
+                        DLSymbol *aSym = (DLSymbol *)[aList first];
+                        if (![DLSymbol isSymbol:objSym]) {
+                            aSym.initialArity = aList.count - 1;
+                            [aSym updateArity];
+                            @throw [DLError exceptionWithFormat:DLSymbolNotFound, [aSym string]];
+                        }
                         id<DLDataProtocol> obj = [env objectForKey:objSym isThrow:NO];
                         if (obj && [DLObject isObject:obj]) {  // TODO: usecase: if the obj is a class
                             id<DLProxyProtocol> dlObj = (DLObject *)obj;
-                            // (capitalizeString olive);
                             DLMethod *method = [self parseMethodForm:aList object:dlObj withEnv:env];
                             DLSymbol *methodSym = [[DLSymbol alloc] initWithName:method.selectorString.value];
                             methodSym.moduleName = objSym.moduleName;
                             methodSym.initialModuleName = objSym.initialModuleName;
-                            return [_objc invokeMethodWithReturn:method.selector withObject:dlObj args:[method args]];
+                            methodSym.initialArity = method.params.count;
+                            [methodSym resetArity];
+                            DLMethod *theMethod = [env objectForKey:methodSym isThrow:NO];
+                            if (theMethod) {  /* User defined method. Since the method body is s-exp we need to eval the body. */
+                                [DLLog debug:@"DLMethod found in env"];
+                                NSMutableArray *args = [NSMutableArray new];
+                                [args addObject:self];
+                                [args addObject:theMethod];
+                                [args addObject:[method args]];
+                                [_objc invokeMethodWithReturn:method.selector withObject:dlObj args:args];
+                                return [dlObj returnValue];
+                            }
+                            /* Method not defined within dlisp, assuming built-in. */
+                            [_objc invokeMethodWithReturn:method.selector withObject:dlObj args:[method args]];
+                            [DLLog debugWithFormat:@"object ret: %@", [dlObj returnValue]];
+                            return [dlObj returnValue];
                         }
                     }
                     @throw excep;
@@ -553,24 +589,6 @@ static NSString *langVersion;
                 } else {
                     [[[DLError alloc] initWithFormat:DLSymbolNotFound, elem] throw];
                 }
-//                else if ([DLMethod isMethod:elem]) {  // FIXME: This won't be true because we will be storing the selector and the first elem most likely won't match the entire selector
-//                    DLMethod *method = (DLMethod *)elem;
-//                    NSUInteger len = [list count];
-//                    id<DLProxyProtocol> token = nil;
-//                    NSUInteger idx = 1;
-//                    token = [list objectAtIndex:idx];
-//                    if ([DLObject isObject:token]) {
-//                        NSMutableArray *args = [NSMutableArray new];
-//                        [args addObject:self];
-//                        [args addObject:method];
-//                        [args addObject:[list subarrayWithRange:NSMakeRange(idx, len - 1)]];
-//                        return [_objc invokeMethod:method.selector withObject:token args:args];
-//                    } else if ([DLClass isClass:token]) {
-//                        // TODO: add class info
-//                        return [DLNil new];
-//                    }
-//                    [[[DLError alloc] initWithFormat:DLMethodResponderNotFoundError, idx] throw];
-//                }
             } else if ([DLHashMap isHashMap:ast]) {
                 DLHashMap *dict = (DLHashMap *)ast;
                 NSArray *keys = [dict allKeys];

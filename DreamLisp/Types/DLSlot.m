@@ -28,7 +28,7 @@
 }
 
 - (void)dealloc {
-    [DLLog info:@"DLSlot dealloc"];
+    [DLLog debug:@"DLSlot dealloc"];
 }
 
 - (instancetype)init {
@@ -133,7 +133,7 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %@ %p>", [self dataTypeName], [self description], self];
+    return [[NSString alloc] initWithFormat:@"<%@ %@ %p>", [self dataTypeName], [self description], self];
 }
 
 @end

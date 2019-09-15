@@ -35,58 +35,78 @@ static DLIOService *_ioService;
 }
 
 + (void)info:(NSString *)message {
-    [_ioService writeOutput:[NSString stringWithFormat:@"[info] %@", message]];
+    NSString *msg = [[NSString alloc] initWithFormat:@"[info] %@", message];
+    [_ioService writeOutput:msg];
+    [msg release];
 }
 
 + (void)infoWithFormat:(NSString *)format, ... {
     va_list args;
     va_start(args, format);
-    NSString *message = [[NSString alloc] initWithFormat:format arguments:args];
+    NSString *fmt = [[NSString alloc] initWithFormat:format arguments:args];
+    NSString *msg = [[NSString alloc] initWithFormat:@"[info] %@", fmt];
     va_end(args);
-    [_ioService writeOutput:[NSString stringWithFormat:@"[info] %@", message]];
-    [message release];
+    [_ioService writeOutput:msg];
+    [msg release];
+    [fmt release];
 }
 
 + (void)debug:(NSString *)message {
-    if (_isDebug) [_ioService writeOutput:[NSString stringWithFormat:@"[debug] %@", message]];
+    if (_isDebug) {
+        NSString *msg = [[NSString alloc] initWithFormat:@"[debug] %@", message];
+        [_ioService writeOutput:msg];
+        [msg release];
+    }
 }
 
 + (void)debugWithFormat:(NSString *)format, ... {
     if (_isDebug) {
         va_list args;
         va_start(args, format);
-        NSString *message = [[NSString alloc] initWithFormat:format arguments:args];
+        NSString *fmt = [[NSString alloc] initWithFormat:format arguments:args];
+        NSString *msg = [[NSString alloc] initWithFormat:@"[debug] %@", fmt];
         va_end(args);
-        [_ioService writeOutput:[NSString stringWithFormat:@"[debug] %@", message]];
-        [message release];
+        [_ioService writeOutput:msg];
+        [msg release];
+        [fmt release];
     }
 }
 
 + (void)error:(NSString *)message {
-    [_ioService writeOutput:[NSString stringWithFormat:@"[error] %@", message]];
+    NSString *msg = [[NSString alloc] initWithFormat:@"[error] %@", message];
+    [_ioService writeOutput:msg];
+    [msg release];
 }
 
 + (void)errorWithFormat:(NSString *)format, ... {
     va_list args;
     va_start(args, format);
-    NSString *message = [[NSString alloc] initWithFormat:format arguments:args];
+    NSString *fmt = [[NSString alloc] initWithFormat:format arguments:args];
+    NSString *msg = [[NSString alloc] initWithFormat:@"[error] %@", fmt];
     va_end(args);
-    [_ioService writeOutput:[NSString stringWithFormat:@"[error] %@", message]];
-    [message release];
+    [_ioService writeOutput:msg];
+    [msg release];
+    [fmt release];
 }
 
 + (void)verbose:(NSString *)message {
-    if (_isVerbose) [_ioService writeOutput:[NSString stringWithFormat:@"[verbose] %@", message]];
+    if (_isVerbose) {
+        NSString *msg = [[NSString alloc] initWithFormat:@"[verbose] %@", message];
+        [_ioService writeOutput:msg];
+        [msg release];
+    }
 }
 
 + (void)verboseWithFormat:(NSString *)format, ... {
     if (_isVerbose) {
         va_list args;
         va_start(args, format);
-        NSString *message = [[NSString alloc] initWithFormat:format arguments:args];
+        NSString *fmt = [[NSString alloc] initWithFormat:format arguments:args];
+        NSString *msg = [[NSString alloc] initWithFormat:@"[verbose] %@", fmt];
         va_end(args);
-        [_ioService writeOutput:[NSString stringWithFormat:@"[verbose] %@", message]];
-        [message release];
+        [_ioService writeOutput:msg];
+        [msg release];
+        [fmt release];
     }
 }
 

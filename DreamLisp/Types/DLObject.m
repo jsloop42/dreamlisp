@@ -10,7 +10,7 @@
 
 @implementation DLObject {
     id _proxy;
-    id _returnValue;
+    __unsafe_unretained id _returnValue;
     NSString *_proxyAssocKey;
     NSString *_returnAssocKey;
     id<DLDataProtocol> _meta;
@@ -59,7 +59,7 @@
 }
 
 - (void)dealloc {
-    [DLLog info:@"DLObject dealloc"];
+    [DLLog debug:@"DLObject dealloc"];
 }
 
 - (instancetype)init {
@@ -112,7 +112,6 @@
     return YES;
 }
 
-
 - (void)bootstrap {
 }
 
@@ -164,13 +163,19 @@
 }
 
 - (void)forwardInvocation:(NSInvocation *)invocation {
-    // TODO: Convert DL types to NS types. When creating an Objective-C class, method, even if we are giving DL type, they are converted into NS types as arg.
+    // TODO: Convert DL types to NS types. When creating an Objective-C class, method, even if we are giving DL type, they are converted into NS types as arg. 
     [invocation invokeWithTarget:_proxy];
+//    if (_proxy && [_proxy respondsToSelector:invocation.selector]) {
+//        [invocation invokeWithTarget:_proxy];
+//    } else {
+//        @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, _proxy, invocation.selector];
+//    }
 }
 
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)sel {
-    //if ([self respondsToSelector:sel]) return [self methodSignatureForSelector:sel];
     return [_proxy methodSignatureForSelector:sel];
+//    if (_proxy && [_proxy respondsToSelector:sel]) return [_proxy methodSignatureForSelector:sel];
+//    @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, _proxy, sel];
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
@@ -196,7 +201,7 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %@ %p>", [self dataTypeName], [self description], self];
+    return [[NSString alloc] initWithFormat:@"<%@ %@ %p>", [self dataTypeName], [self description], self];
 }
 
 @end

@@ -44,6 +44,10 @@
     return (DLAtom *)data;
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLAtom dealloc"];
+}
+
 - (instancetype)initWithData:(id<DLDataProtocol>)data {
     self = [super init];
     if (self) _data = data;
@@ -138,11 +142,11 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"(atom %@)", _data];
+    return [[NSString alloc] initWithFormat:@"(atom %@)", _data];
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _data, _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _data, _meta];
 }
 
 @end

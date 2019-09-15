@@ -52,6 +52,10 @@
     return [[DLKeyword alloc] initWithString:string];
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLKeyword dealloc"];
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -203,7 +207,7 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _string, _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _string, _meta];
 }
 
 @end

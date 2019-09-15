@@ -40,7 +40,7 @@ static NSString *_historyFile = @"/dlisp-history";
 }
 
 - (const char *)promptWithModule:(NSString *)moduleName {
-    return [[NSString stringWithFormat:@"λ %@> ", moduleName] cStringUsingEncoding:NSUTF8StringEncoding];
+    return [[[NSString alloc] initWithFormat:@"λ %@> ", moduleName] cStringUsingEncoding:NSUTF8StringEncoding];
 }
 
 - (void)checkPath {
@@ -76,7 +76,7 @@ static NSString *_historyFile = @"/dlisp-history";
     char *input = readline(prompt);
     if (input) {
         if (_isHistoryEnabled) add_history(input);
-        exp = [NSString stringWithFormat:@"%s\n", input];
+        exp = [[[NSString alloc] initWithFormat:@"%s\n", input] autorelease];
         free(input);
         [_fops append:exp];
     }

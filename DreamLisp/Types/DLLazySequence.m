@@ -85,6 +85,10 @@
     return (DLLazySequence *)data;
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLLazySequence dealloc"];
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {

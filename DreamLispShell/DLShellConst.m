@@ -20,7 +20,7 @@
     NSDictionary *info = [self infoDictionary];
     NSString *version = [info valueForKey:@"CFBundleShortVersionString"];
     NSString *build = [info valueForKey:@"CFBundleVersion"];
-    return [NSString stringWithFormat:@"Shell v%@ (%@)\n", version, build];
+    return [[NSString alloc] initWithFormat:@"Shell v%@ (%@)\n", version, build];
 }
 
 @end

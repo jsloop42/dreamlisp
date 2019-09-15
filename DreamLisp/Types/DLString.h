@@ -11,6 +11,7 @@
 #import "DLDataProtocol.h"
 #import "NSString+DLCat.h"
 #import "DLError.h"
+#import "DLLogger.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

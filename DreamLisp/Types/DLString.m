@@ -58,6 +58,10 @@
     return [[DLString alloc] initWithString:string];
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLString dealloc"];
+}
+
 - (instancetype)init {
     self = [super init];
     return self;
@@ -339,14 +343,17 @@
 - (void)forwardInvocation:(NSInvocation *)anInvocation {
     if ([self respondsToSelector:anInvocation.selector]) {
         [anInvocation invokeWithTarget:self];
-    } else {
+    } else if ([_string respondsToSelector:anInvocation.selector]) {
         [anInvocation invokeWithTarget:_string];
+    } else {
+        @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, anInvocation.selector];
     }
 }
 
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
     if ([self respondsToSelector:aSelector]) return [self methodSignatureForSelector:aSelector];
-    return [_string methodSignatureForSelector:aSelector];
+    if ([_string respondsToSelector:aSelector]) return [_string methodSignatureForSelector:aSelector];
+    @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, aSelector];
 }
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
@@ -370,7 +377,7 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@ isMutable: %hhd meta: %@>", NSStringFromClass([self class]),
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ isMutable: %hhd meta: %@>", NSStringFromClass([self class]),
             self, _isMutable ? _mstring : _string, _isMutable, _meta];
 }
 

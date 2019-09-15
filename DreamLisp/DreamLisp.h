@@ -28,9 +28,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, retain) DLEnv *env;
 @property (nonatomic, readwrite) BOOL isREPL;
 @property (nonatomic, readwrite, retain) NSString *prompt;
+@property (nonatomic, readwrite) BOOL isDebug;
+@property (nonatomic, readwrite) BOOL isVerbose;
 - (instancetype)init;
 - (instancetype)initWithoutREPL;
 - (void)bootstrap;
+- (void)setIsDebug:(BOOL)isDebug;
+- (void)setIsVerbose:(BOOL)isVerbose;
 - (void)loadDLModuleLibs;
 - (void)printVersion;
 - (NSString * _Nullable)rep:(NSString *)string;

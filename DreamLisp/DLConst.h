@@ -32,6 +32,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (class, retain) NSString *valueKeyword;
 @property (class, retain) NSString *keyForNotificationKey;
 @property (class, retain) NSString *keyForNotificationValue;
+@property (class, retain) NSString *foundationPrefix;
+@property (class, retain) NSString *dreamLispPrefix;
 + (NSString *)dlVersion;
 @end
 

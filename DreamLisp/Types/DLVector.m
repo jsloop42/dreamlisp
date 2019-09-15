@@ -9,7 +9,7 @@
 #import "DLVector.h"
 
 @implementation DLVector {
-    NSMutableArray *_array;
+    //NSMutableArray *_array;
     id<DLDataProtocol> _meta;
     NSInteger _position;
     BOOL _isImported;
@@ -17,7 +17,7 @@
 }
 
 @synthesize meta = _meta;
-@synthesize value = _array;
+@dynamic value;
 @synthesize isImported = _isImported;
 @synthesize moduleName = _moduleName;
 
@@ -50,20 +50,18 @@
     return (DLList *)data;
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLVector dealloc"];
+}
+
 - (instancetype)init {
-    self = [super init];
-    if (self) {
-        _array = [NSMutableArray new];
-        [super setValue:_array];
-    }
-    return self;
+    return [super init];
 }
 
 - (instancetype)initWithArray:(NSArray *)list {
     self = [super init];
     if (self) {
-        _array = [[NSMutableArray alloc] initWithArray:list];
-        [super setValue:_array];
+        [super setValue:[list mutableCopy]];
     }
     return self;
 }
@@ -71,8 +69,7 @@
 - (instancetype)initWithMeta:(id<DLDataProtocol>)meta vector:(DLVector *)vector {
     self = [super init];
     if (self) {
-        _array = [vector value];
-        [super setValue:_array];
+        [super setValue:[vector value]];
         _meta = meta;
     }
     return self;
@@ -81,8 +78,7 @@
 - (instancetype)initWithCoder:(NSCoder *)coder {
     self = [super init];
     if (self) {
-        _array = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLVector_value"];
-        [super setValue:_array];
+        self.value = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLVector_value"];
         _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLVector_meta"];
         _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLVector_moduleName"];
         _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLVector_position"] integerValue];
@@ -121,17 +117,25 @@
     return _position;
 }
 
+- (id)value {
+    return [super value];
+}
+
+- (void)setValue:(id)value {
+    [super setValue:value];
+}
+
 - (id<DLDataProtocol>)setPosition:(NSInteger)position {
     _position = position;
     return self;
 }
 
 - (NSMutableArray *)map:(id (^)(id arg))block {
-    return [DLTypeUtils mapOnArray:_array withBlock:block];
+    return [DLTypeUtils mapOnArray:self.value withBlock:block];
 }
 
 - (void)enumerateConcurrent:(void (^)(id _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop))block {
-    [_array enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:block];
+    [self.value enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:block];
 }
 
 - (DLVector *)addObject:(id<DLDataProtocol>)object {
@@ -141,16 +145,16 @@
 }
 
 - (void)appendObject:(id<DLDataProtocol>)object {
-    [_array addObject:object];
+    [(NSMutableArray *)self.value addObject:object];
 }
 
 - (DLList *)list {
-    return [[DLList alloc] initWithArray:_array];
+    return [[DLList alloc] initWithArray:self.value];
 }
 
 /** Returns a new list which the reverse of the current list. */
 - (DLVector *)reverse {
-    return [[DLVector alloc] initWithArray:[_array reverse]];
+    return [[DLVector alloc] initWithArray:[self.value reverse]];
 }
 
 /** Drops n elements. */
@@ -161,25 +165,25 @@
 - (BOOL)isEqual:(id)object {
     if (![DLList isKindOfList:object]) return NO;
     DLVector *vector = (DLVector *)object;
-    NSUInteger len = [_array count];
+    NSUInteger len = [self.value count];
     NSUInteger i = 0;
     if (len != [vector count]) return NO;
     for (i = 0; i < len; i++) {
-        if (![_array[i] isEqual:[vector nth:i]]) return NO;
+        if (![self.value[i] isEqual:[vector nth:i]]) return NO;
     }
     return YES;
 }
 
 - (NSUInteger)hash {
-    return [_array count];
+    return [self.value count];
 }
 
 - (DLVector *)sort:(NSInteger (*)(id, id, void *))sorter {
-    return [[DLVector alloc] initWithArray:[_array sortedArrayUsingFunction:sorter context:nil]];
+    return [[DLVector alloc] initWithArray:[self.value sortedArrayUsingFunction:sorter context:nil]];
 }
 
 - (DLVector *)sortedUsingComparator:(NSComparisonResult (^)(id obj1, id obj2))comparator {
-    return [[DLVector alloc] initWithArray:[_array sortedArrayUsingComparator:comparator]];
+    return [[DLVector alloc] initWithArray:[self.value sortedArrayUsingComparator:comparator]];
 }
 
 - (NSInteger)sortValue {
@@ -190,8 +194,24 @@
     return _meta != nil;
 }
 
+- (void)forwardInvocation:(NSInvocation *)anInvocation {
+    if ([self respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:self];
+    } else if ([self.value respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:self.value];
+    } else {
+        @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, anInvocation.selector];
+    }
+}
+
+- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
+    if ([self respondsToSelector:aSelector]) return [self methodSignatureForSelector:aSelector];
+    if ([self.value respondsToSelector:aSelector]) return [self.value methodSignatureForSelector:aSelector];
+    @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, aSelector];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
-    id elem = [[DLVector alloc] initWithArray:_array];
+    id elem = [[DLVector alloc] initWithArray:self.value];
     [elem setIsImported:_isImported];
     return elem;
 }
@@ -202,18 +222,18 @@
 
 - (NSString *)description {
     NSMutableString *str = [NSMutableString new];
-    NSUInteger len = [_array count];
+    NSUInteger len = [self.value count];
     NSUInteger last = len - 1;
     NSUInteger i = 0;
     for (i = 0; i < len; i++) {
-        [str appendString:[_array[i] description]];
+        [str appendString:[self.value[i] description]];
         if (i != last) [str appendString:@" "];
     }
-    return [NSString stringWithFormat:@"[%@]", str];
+    return [[NSString alloc] initWithFormat:@"[%@]", str];
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [_array description], _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [self.value description], _meta];
 }
 
 @end

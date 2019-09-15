@@ -71,6 +71,10 @@
     return (DLFunction *)data;
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLFunction dealloc"];
+}
+
 - (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(DLEnv *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
                          fn:(id<DLDataProtocol> (^)(NSMutableArray *))fn name:(NSString *)name {
     self = [super init];
@@ -192,7 +196,6 @@
     return YES;
 }
 
-
 - (NSString *)dataType {
     return [self className];
 }
@@ -263,7 +266,7 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - params: %@, ast: %@ meta: %@>", NSStringFromClass([self class]), self, [_params description], _ast, _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - params: %@, ast: %@ meta: %@>", NSStringFromClass([self class]), self, [_params description], _ast, _meta];
 }
 
 @end

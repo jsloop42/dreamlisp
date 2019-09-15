@@ -14,6 +14,7 @@
 #import "DLLazyFunction.h"
 #import "DLError.h"
 #import "DLTypeUtils.h"
+#import "DLLogger.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

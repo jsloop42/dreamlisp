@@ -71,6 +71,10 @@
     return (DLLazyFunction *)data;
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLLazyFunction dealloc"];
+}
+
 - (instancetype)initWithAst:(id<DLDataProtocol>)ast params:(NSMutableArray *)params env:(DLEnv *)env macro:(BOOL)isMacro meta:(id<DLDataProtocol> _Nullable)meta
                          fn:(void (^)(DLLazySequence *seq, NSMutableArray *xs))fn name:(NSString *)name {
     self = [super init];
@@ -263,7 +267,7 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - params: %@, ast: %@ meta: %@>", NSStringFromClass([self class]), self, [_params description], _ast, _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - params: %@, ast: %@ meta: %@>", NSStringFromClass([self class]), self, [_params description], _ast, _meta];
 }
 
 @end

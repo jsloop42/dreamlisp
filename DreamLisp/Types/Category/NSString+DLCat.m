@@ -18,6 +18,10 @@
     return @"NSString";
 }
 
+- (void)dealloc {
+    [DLLog debug:@"NSString dealloc"];
+}
+
 - (NSString *)dataType {
     return @"NSString";
 }

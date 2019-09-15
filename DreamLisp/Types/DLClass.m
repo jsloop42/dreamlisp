@@ -9,7 +9,10 @@
 #import "DLClass.h"
 
 @implementation DLClass {
-    Class _cls;
+    Class _proxy;
+    __unsafe_unretained id _returnValue;
+    NSString *_proxyAssocKey;
+    NSString *_returnAssocKey;
     id<DLDataProtocol> _meta;
     NSInteger _position;
     NSString *_moduleName;
@@ -17,8 +20,11 @@
     BOOL _isMutable;
 }
 
+@synthesize proxy = _proxy;
+@synthesize returnValue = _returnValue;
+@synthesize proxyAssocKey = _proxyAssocKey;
+@synthesize returnAssocKey = _returnAssocKey;
 @synthesize meta = _meta;
-@synthesize value = _cls;
 @synthesize isImported = _isImported;
 @synthesize moduleName = _moduleName;
 @synthesize isMutable = _isMutable;
@@ -44,8 +50,16 @@
     return (DLClass *)data;
 }
 
++ (NSString *)className {
+    return NSStringFromClass([self class]);
+}
+
++ (instancetype)new {
+    return [[DLClass alloc] init];
+}
+
 - (void)dealloc {
-    [DLLog info:@"DLClass dealloc"];
+    [DLLog debug:@"DLClass dealloc"];
 }
 
 - (instancetype)init {
@@ -56,11 +70,10 @@
     return self;
 }
 
-- (instancetype)initWithClass:(Class)cls {
-    self = [super init];
+- (nonnull instancetype)initWithProxy:(nonnull id)object {
     if (self) {
         [self bootstrap];
-        _cls = cls;
+        _proxy = object;
     }
     return self;
 }
@@ -68,7 +81,10 @@
 - (instancetype)initWithCoder:(NSCoder *)coder {
     self = [super init];
     if (self) {
-        _cls = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLClass_value"];
+        _proxy = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLClass_proxy"];
+        _returnValue = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLClass_returnValue"];
+        _proxyAssocKey = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLClass_proxyAssocKey"];
+        _returnAssocKey = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLClass_returnAssocKey"];
         _meta = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLClass_meta"];
         _moduleName = [coder decodeObjectOfClass:[self classForCoder] forKey:@"DLClass_moduleName"];
         _position = [[coder decodeObjectOfClass:[self classForCoder] forKey:@"DLClass_position"] integerValue];
@@ -81,7 +97,10 @@
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-    [coder encodeObject:_cls forKey:@"DLClass_value"];
+    [coder encodeObject:_proxy forKey:@"DLClass_proxy"];
+    [coder encodeObject:_returnValue forKey:@"DLClass_returnValue"];
+    [coder encodeObject:_proxyAssocKey forKey:@"DLClass_proxyAssocKey"];
+    [coder encodeObject:_returnAssocKey forKey:@"DLClass_returnAssocKey"];
     [coder encodeObject:_meta forKey:@"DLClass_meta"];
     [coder encodeObject:_moduleName forKey:@"DLClass_moduleName"];
     [coder encodeObject:@(_position) forKey:@"DLClass_position"];
@@ -113,6 +132,14 @@
     return @"class";
 }
 
+- (id)value {
+    return _proxy;
+}
+
+- (void)setValue:(id)value {
+    [_proxy doesNotRecognizeSelector:_cmd];
+}
+
 - (BOOL)containsSlotWithInitArg:(DLKeyword *)keyword {
     DLSlot *slot = nil;
     for (slot in self.slots) {
@@ -132,11 +159,11 @@
 - (BOOL)isEqual:(id)object {
     if (![DLClass isClass:object]) return NO;
     DLClass *cls = (DLClass *)object;
-    return [cls.value isEqual:_cls];
+    return [cls.value isEqual:_proxy];
 }
 
 - (NSUInteger)hash {
-    return [_cls hash];
+    return [_proxy hash];
 }
 
 - (BOOL)hasMeta {
@@ -156,9 +183,26 @@
     return [self hash];
 }
 
+- (void)forwardInvocation:(NSInvocation *)invocation {
+    // TODO: Convert DL types to NS types. When creating an Objective-C class, method, even if we are giving DL type, they are converted into NS types as arg.
+    if ([_proxy respondsToSelector:invocation.selector]) {
+        [invocation invokeWithTarget:_proxy];
+    } else {
+        @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, _proxy, invocation.selector];
+    }
+}
+
+- (NSMethodSignature *)methodSignatureForSelector:(SEL)sel {
+    if ([_proxy respondsToSelector:sel]) return [_proxy methodSignatureForSelector:sel];
+    @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, _proxy, sel];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     DLClass *cls = [DLClass new];
-    cls.value = _cls;
+    cls.proxy = _proxy;
+    cls.returnValue = _returnValue;
+    cls.proxyAssocKey = _proxyAssocKey;
+    cls.returnAssocKey = _returnAssocKey;
     cls.isMutable = _isMutable;
     cls.isImported = _isImported;
     cls.meta = _meta;
@@ -171,11 +215,11 @@
 }
 
 - (NSString *)description {
-    return NSStringFromClass(_cls);
+    return NSStringFromClass(_proxy);
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %@ %p>", [self dataTypeName], [self description], self];
+    return [[NSString alloc] initWithFormat:@"<%@ %@ %p>", [self dataTypeName], [self description], self];
 }
 
 @end

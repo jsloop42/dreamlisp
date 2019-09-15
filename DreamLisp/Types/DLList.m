@@ -49,6 +49,10 @@
     return (DLList *)data;
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLList dealloc"];
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -283,6 +287,22 @@
     return _meta != nil;
 }
 
+- (void)forwardInvocation:(NSInvocation *)anInvocation {
+    if ([self respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:self];
+    } else if ([_array respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:_array];
+    } else {
+        @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, anInvocation.selector];
+    }
+}
+
+- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
+    if ([self respondsToSelector:aSelector]) return [self methodSignatureForSelector:aSelector];
+    if ([_array respondsToSelector:aSelector]) return [_array methodSignatureForSelector:aSelector];
+    @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, aSelector];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id elem = [[DLList alloc] initWithArray:_array];
     [elem setIsImported:_isImported];
@@ -302,11 +322,11 @@
         [str appendString:[_array[i] description]];
         if (i != last) [str appendString:@" "];
     }
-    return [NSString stringWithFormat:@"(%@)", str];
+    return [[NSString alloc] initWithFormat:@"(%@)", str];
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [_array description], _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [_array description], _meta];
 }
 
 @end

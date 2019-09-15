@@ -44,6 +44,10 @@
     return (DLData *)data;
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLData dealloc"];
+}
+
 - (instancetype)initWithData:(NSData *)data {
     self = [super init];
     if (self) {
@@ -140,6 +144,22 @@
     return [self hash];
 }
 
+- (void)forwardInvocation:(NSInvocation *)anInvocation {
+    if ([self respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:self];
+    } else if ([_data respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:_data];
+    } else {
+        @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, anInvocation.selector];
+    }
+}
+
+- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
+    if ([self respondsToSelector:aSelector]) return [self methodSignatureForSelector:aSelector];
+    if ([_data respondsToSelector:aSelector]) return [_data methodSignatureForSelector:aSelector];
+    @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, aSelector];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id elem = [[DLData allocWithZone:zone] initWithData:_data];
     [elem setIsImported:_isImported];
@@ -158,7 +178,7 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@>", NSStringFromClass([self class]), self, [self description]];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@>", NSStringFromClass([self class]), self, [self description]];
 }
 
 @end

@@ -1746,7 +1746,7 @@ double dmod(double a, double n) {
             if ([DLFunction isFunction:first]) {
                 DLFunction *fn = (DLFunction *)first;
                 name = [fn name];
-                if ([[fn value] isEmpty]) name = [NSString stringWithFormat:@"*/%ld", [fn argsCount]];
+                if ([[fn value] isEmpty]) name = [[NSString alloc] initWithFormat:@"*/%ld", [fn argsCount]];
             } else {
                 name = [[DLString dataToString:first fnName:@"symbol/1"] value];
             }
@@ -2250,7 +2250,7 @@ double dmod(double a, double n) {
             if ([xs count] == 1) {
                 name = [self nameFromObject:[xs first]];
             }
-            return [[DLSymbol alloc] initWithName:[NSString stringWithFormat:@"%@__%ld", name, [DLState counter]]];
+            return [[DLSymbol alloc] initWithName:[[NSString alloc] initWithFormat:@"%@__%ld", name, [DLState counter]]];
         }
     };
     fn = [[DLFunction alloc] initWithFn:gensym argCount:-1 name:@"gensym/n"];

@@ -21,6 +21,10 @@ static DLObjcMethodAttrKey *_objcMethodAttrKey;
     }
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLObjcMethodAttr dealloc"];
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {

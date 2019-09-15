@@ -27,6 +27,10 @@
     return [[any className] isEqual:[self className]];
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLMethodParam dealloc"];
+}
+
 - (instancetype)initWithCoder:(NSCoder *)coder {
     self = [super init];
     if (self) {
@@ -132,7 +136,7 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %@ %p>", [self dataTypeName], [self description], self];
+    return [[NSString alloc] initWithFormat:@"<%@ %@ %p>", [self dataTypeName], [self description], self];
 }
 
 @end
@@ -159,7 +163,7 @@
 }
 
 - (void)dealloc {
-    [DLLog info:@"DLMethod dealloc"];
+    [DLLog debug:@"DLMethod dealloc"];
 }
 
 - (instancetype)init {
@@ -224,7 +228,8 @@
 
 - (void)bootstrap {
     _isNative = YES;
-    _type = [[NSString stringWithFormat:@"%s%s%s%s%s%s", @encode(id), @encode(id), @encode(SEL), @encode(id), @encode(id), @encode(id)] UTF8String];
+    _type = [[[NSString alloc] initWithFormat:@"%s%s%s%s%s%s", @encode(id), @encode(id), @encode(SEL), @encode(id), @encode(id), @encode(id)] UTF8String];
+    _params = [NSMutableArray new];
 }
 
 - (NSString *)dataType {
@@ -322,7 +327,7 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %@ %p>", [self dataTypeName], [self description], self];
+    return [[NSString alloc] initWithFormat:@"<%@ %@ %p>", [self dataTypeName], [self description], self];
 }
 
 @end

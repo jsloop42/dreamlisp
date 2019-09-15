@@ -26,6 +26,10 @@
     return [[object className] isEqual:[self className]];
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLNil dealloc"];
+}
+
 - (instancetype)init {
     self = [super init];
     return self;
@@ -111,7 +115,7 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, @"nil", _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, @"nil", _meta];
 }
 
 @end

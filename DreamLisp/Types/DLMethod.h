@@ -14,6 +14,7 @@
 #import "DLObjcMethodAttr.h"
 #import "DLClass.h"
 #import "DLEnv.h"
+#import "DLMethod.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

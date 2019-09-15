@@ -10,6 +10,10 @@
 
 @implementation NSMutableArray (DLCat)
 
+- (void)dealloc {
+    [DLLog debug:@"NSMutableArray dealloc"];
+}
+
 + (BOOL)isMutableArray:(id)object {
     return [object isKindOfClass:[NSMutableArray class]];
 }
@@ -96,7 +100,7 @@
         [str appendString:[self[i] description]];
         if (i != last) [str appendString:@" "];
     }
-    return [NSString stringWithFormat:@"[%@]", str];
+    return [[NSString alloc] initWithFormat:@"[%@]", str];
 }
 
 @end

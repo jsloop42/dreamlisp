@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "DLDataProtocol.h"
+#import "DLProxyProtocol.h"
 #import "DLSymbol.h"
 #import "DLSlot.h"
 #import "DLKeyword.h"
@@ -21,8 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class DLKeyword;
 @class DLMethod;
 
-@interface DLClass : NSObject <DLDataProtocol>
-@property (nonatomic, readwrite, retain) Class value;
+@interface DLClass : NSObject <DLProxyProtocol>
 @property (nonatomic, readwrite, retain) DLSymbol *name;  /* The name of the class */
 @property (nonatomic, readwrite, retain) NSMutableArray<DLSymbol *> *conformance;
 @property (nonatomic, readwrite, retain) NSMutableArray<DLSlot *> *slots;
@@ -30,8 +30,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isClass:(id)any;
 + (DLClass *)dataToClass:(id<DLDataProtocol>)data fnName:(NSString *)fnName;
 + (DLClass *)dataToClass:(id<DLDataProtocol>)data position:(NSInteger)position fnName:(NSString *)fnName;
-- (instancetype)init;
-- (instancetype)initWithClass:(Class)cls;
 - (BOOL)containsSlotWithInitArg:(DLKeyword *)keyword;
 - (DLSlot  * _Nullable)slotWithInitArg:(DLKeyword *)keyword;
 @end

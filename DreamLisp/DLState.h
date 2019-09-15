@@ -7,10 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "DLConst.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DLState : NSObject
+@property (class, retain) NSMutableArray *prefixList;
 + (NSUInteger)counter;
 + (void)setIsVerbose:(BOOL)flag;
 + (BOOL)isVerbose;
@@ -18,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)setCurrentModuleName:(NSString *)name;
 + (NSUInteger)assocObjectCounter;
 + (NSUInteger)currentAssocObjectCounter;
++ (void)addPrefix:(NSString *)prefix;
++ (void)removePrefix:(NSString *)prefix;
 - (NSUInteger)counter;
 - (NSInteger)currentCounter;
 @end

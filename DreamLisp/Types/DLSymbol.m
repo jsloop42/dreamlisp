@@ -139,6 +139,10 @@
     return NSOrderedSame;
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLSymbol dealloc"];
+}
+
 - (instancetype)initWithName:(NSString *)name {
     self = [self initWithName:name moduleName:_moduleName];
     _moduleName = [DLState currentModuleName];
@@ -384,7 +388,7 @@
         return [[NSString alloc] initWithFormat:@"%@:%@", _moduleName, _name];
     }
     return [[NSString alloc] initWithFormat:@"%@:%@/%@", _moduleName, _name, (_initialArity == -1) ? @"n" : [[NSString alloc]
-                                                                                                             initWithFormat:@"%ld", _initialArity]];    return @"";
+                                                                                                             initWithFormat:@"%ld", _initialArity]];
 }
 
 - (void)copyMeta:(id<DLDataProtocol>)object {
@@ -451,7 +455,7 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - ModuleName: %@, InitialModuleName: %@, " \
+    return [[NSString alloc] initWithFormat:@"<%@ %p - ModuleName: %@, InitialModuleName: %@, " \
             @"Name: %@, Arity:%ld, InitialArity: %ld, " \
             @"isQualified: %hhd, isFault: %hhd, " \
             @"meta: %@>",

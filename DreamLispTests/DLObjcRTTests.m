@@ -50,17 +50,39 @@
     XCTAssertThrows([rt parseClassForm:ast]);
 }
 
-- (void)testCreateClass {
+- (void)notestCreateClass {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
     [dl rep:@"(defclass bird (NSObject) ((wingspan :initarg :with-wing-span)))"];
     XCTAssertEqualObjects([dl rep:@"(type bird)"], @"\"class\"");
 }
 
-- (void)testMakeInstance {
+- (void)notestMakeInstance {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
     [dl rep:@"(defclass person (NSObject) ((name :initarg :with-name)))"];
     [dl rep:@"(def olive (make-instance 'person :init-with-name \"Olive\"))"];
     XCTAssertEqualObjects([dl rep:@"(type olive)"], @"\"object\"");
+}
+
+- (void)testCamelCaseToLispCase {
+    XCTAssertEqualObjects([DLUtils camelCaseToLispCase:@"componentsSeparatedByString"], @"components-separated-by-string");
+    XCTAssertEqualObjects([DLUtils camelCaseToLispCase:@"componentsSeparatedByNSString"], @"components-separated-by-ns-string");
+    XCTAssertEqualObjects([DLUtils camelCaseToLispCase:@"componentsSeparatedByDLString"], @"components-separated-by-dl-string");
+    XCTAssertEqualObjects([DLUtils camelCaseToLispCase:@"componentsSeparatedByStringDL"], @"components-separated-by-string-dl");
+    XCTAssertEqualObjects([DLUtils camelCaseToLispCase:@"componentsseparatedbystring"], @"componentsseparatedbystring");
+}
+
+- (void)testSelectorStringConversion {
+    /* Test selector string convertion from camel case to lisp case */
+    DLMethod *method = [DLMethod new];
+    method.name = [[DLSymbol alloc] initWithName:@"genRandom"];
+    DLMethodParam *param = [DLMethodParam new];
+    param.selectorName = [[DLKeyword alloc] initWithString:@"separatedByNum"];
+    [method.params addObject:param];
+    param = [DLMethodParam new];
+    param.selectorName = [[DLKeyword alloc] initWithString:@"withDLRange"];
+    [method.params addObject:param];
+    [DLUtils updateSelectorStringForMethod:method];
+    XCTAssertEqualObjects(method.selectorString.value, @"gen-random:separated-by-num:with-dl-range:");
 }
 
 @end

@@ -174,7 +174,8 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
         if ([_fm fileExistsAtPath:path]) {
             DLFileResult *result = [[DLFileResult new] autorelease];
             [result setIndex:i];
-            [result setContent:[NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil]];
+            NSString *content = [[[NSString alloc] initWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil] autorelease];
+            [result setContent:content];
             if (isLookup && [contents count] == 0) {
                 [contents addObject:result];
                 break;

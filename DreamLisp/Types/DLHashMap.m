@@ -48,6 +48,10 @@
     return [[DLHashMap alloc] initWithDictionary:dictionary];
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLHashMap dealloc"];
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -232,6 +236,22 @@
     return _meta != nil;
 }
 
+- (void)forwardInvocation:(NSInvocation *)anInvocation {
+    if ([self respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:self];
+    } else if ([_table respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:_table];
+    } else {
+        @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, anInvocation.selector];
+    }
+}
+
+- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
+    if ([self respondsToSelector:aSelector]) return [self methodSignatureForSelector:aSelector];
+    if ([_table respondsToSelector:aSelector]) return [_table methodSignatureForSelector:aSelector];
+    @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, aSelector];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id elem = [[DLHashMap alloc] initWithMapTable:_table];
     [elem setIsImported:_isImported];
@@ -249,11 +269,11 @@
     for (key in allKeys) {
         [str appendFormat:@"%@ %@", [key description], [[self objectForKey:key] description]];
     }
-    return [NSString stringWithFormat:@"{%@}", str];
+    return [[NSString alloc] initWithFormat:@"{%@}", str];
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [_table description], _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, [_table description], _meta];
 }
 
 @end

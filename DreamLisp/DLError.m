@@ -71,6 +71,7 @@ NSString *DLSymbolMismatchError = @"Expecting '%@', but found %@";
 NSString *DLSymbolNotFound = @"'%@' not found";
 NSString *DLSymbolParseError = @"Symbol parse error for %@";
 NSString *DLSymbolTableTimeout = @"Symbol table processing timed out";
+NSString *DLUnrecognizedSelectorError = @"%@ does not respond to selector %s";
 
 @implementation DLError {
     NSString *_description;
@@ -78,6 +79,31 @@ NSString *DLSymbolTableTimeout = @"Symbol table processing timed out";
 }
 
 @synthesize description = _description;
+@synthesize info = _errDict;
+
++ (NSException *)exceptionWithDescription:(NSString *)description {
+    DLError *err = [[DLError alloc] initWithDescription:description];
+    return [err exception];
+}
+
++ (NSException *)exceptionWithFormat:(NSString *)format, ... {
+    DLError *err = [DLError new];
+    va_list args, argscopy;
+    va_start(args, format);
+    va_copy(argscopy, args);
+    err.description = [[NSString alloc] initWithFormat:format arguments:argscopy];
+    va_end(args);
+    [err.info setValue:err.description forKey:@"description"];
+    return [err exception];
+}
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        [self bootstrap];
+    }
+    return self;
+}
 
 - (instancetype)initWithDescription:(NSString *)description {
     self = [super init];
@@ -96,8 +122,8 @@ NSString *DLSymbolTableTimeout = @"Symbol table processing timed out";
         va_list args, argscopy;
         va_start(args, format);
         va_copy(argscopy, args);
-        va_end(args);
         _description = [[NSString alloc] initWithFormat:format arguments:argscopy];
+        va_end(args);
         [_errDict setValue:_description forKey:@"description"];
     }
     return self;
@@ -132,8 +158,12 @@ NSString *DLSymbolTableTimeout = @"Symbol table processing timed out";
     return _errDict;
 }
 
+- (NSException *)exception {
+    return [[NSException alloc] initWithName:DLException reason:_description userInfo:_errDict];
+}
+
 - (void)throw {
-    @throw [[NSException alloc] initWithName:DLException reason:DLException userInfo:_errDict];
+    @throw [self exception];
 }
 
 @end

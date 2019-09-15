@@ -44,6 +44,10 @@
     return (DLRegex *)data;
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLRegex dealloc"];
+}
+
 - (instancetype)initWithString:(NSString *)string {
     self = [super init];
     if (self) {
@@ -136,6 +140,22 @@
     return [self hash];
 }
 
+- (void)forwardInvocation:(NSInvocation *)anInvocation {
+    if ([self respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:self];
+    } else if ([_regex respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:_regex];
+    } else {
+        @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, anInvocation.selector];
+    }
+}
+
+- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
+    if ([self respondsToSelector:aSelector]) return [self methodSignatureForSelector:aSelector];
+    if ([_regex respondsToSelector:aSelector]) return [_regex methodSignatureForSelector:aSelector];
+    @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, aSelector];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     DLRegex *regex = [[DLRegex allocWithZone:zone] initWithRegularExpression:_regex];
     regex.position = _position;
@@ -155,7 +175,7 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@>", NSStringFromClass([self class]), self, [self description]];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@>", NSStringFromClass([self class]), self, [self description]];
 }
 
 @end

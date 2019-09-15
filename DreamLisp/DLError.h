@@ -74,14 +74,17 @@ extern NSString *DLSymbolMismatchError;
 extern NSString *DLSymbolNotFound;
 extern NSString *DLSymbolParseError;
 extern NSString *DLSymbolTableTimeout;
+extern NSString *DLUnrecognizedSelectorError;
 
 @interface DLError : NSObject
 @property (nonatomic, readwrite, retain) NSString *description;
+@property (nonatomic, readwrite, retain) NSMutableDictionary *info;
++ (NSException *)exceptionWithDescription:(NSString *)description;
++ (NSException *)exceptionWithFormat:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2);
 - (instancetype)initWithDescription:(NSString *)description;
 - (instancetype)initWithFormat:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2);
 - (instancetype)initWithData:(id<DLDataProtocol>)data;
 - (instancetype)initWithUserInfo:(NSDictionary *)data;
-- (NSMutableDictionary *)value;
 - (void)throw;
 @end
 

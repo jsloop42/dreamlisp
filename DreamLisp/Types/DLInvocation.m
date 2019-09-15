@@ -11,7 +11,7 @@
 @implementation DLInvocation
 
 - (void)dealloc {
-    [DLLog info:@"DLInvocation dealloc"];
+    [DLLog debug:@"DLInvocation dealloc"];
 }
 
 @end

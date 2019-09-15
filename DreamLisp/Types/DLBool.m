@@ -27,6 +27,10 @@
     return [[object className] isEqual:[self className]];
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLBool dealloc"];
+}
+
 - (instancetype)initWithBool:(BOOL)flag {
     self = [super init];
     if (self) _flag = flag;
@@ -124,11 +128,11 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"%@", _flag ? @"true" : @"false"];
+    return [[NSString alloc] initWithFormat:@"%@", _flag ? @"true" : @"false"];
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _flag ? @"YES" : @"NO", _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _flag ? @"YES" : @"NO", _meta];
 }
 
 @end

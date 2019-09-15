@@ -1649,7 +1649,7 @@
 /** Returns the file from the current bundle's resources. */
 - (NSString *)pathForFile:(NSString *)filename {
     NSString *path = [[NSBundle bundleForClass:[self class]] resourcePath];
-    return [NSString stringWithFormat:@"%@/%@", path, filename];
+    return [[NSString alloc] initWithFormat:@"%@/%@", path, filename];
 }
 
 - (void)testReadString {

@@ -12,6 +12,8 @@ static DLCacheTable *_cache;
 static BOOL _isCacheEnabled;
 static Protocol *_dlDataProtocol;
 static Protocol *_dlProxyProtocol;
+static NSRegularExpression *_lowerCaseRegex;
+static NSRegularExpression *_upperCaseRegex;
 
 #pragma mark - CacheKey
 
@@ -49,6 +51,8 @@ static Protocol *_dlProxyProtocol;
         [self enableCache];
         _dlDataProtocol = objc_getProtocol("DLDataProtocol");
         _dlProxyProtocol = objc_getProtocol("DLProxyProtocol");
+        _upperCaseRegex = [NSRegularExpression regularExpressionWithPattern:@"[A-Z]+" options:NSRegularExpressionUseUnixLineSeparators error:nil];
+        _lowerCaseRegex = [NSRegularExpression regularExpressionWithPattern:@"[^A-Z]+" options:NSRegularExpressionUseUnixLineSeparators error:nil];
     }
 }
 
@@ -375,7 +379,7 @@ static Protocol *_dlProxyProtocol;
     id elem = nil;
     for (elem in array) {
         if ([DLNumber isNumber:elem]) {
-            [string appendString:[NSString stringWithFormat:@"%ld", [(DLNumber *)elem integerValue]]];
+            [string appendString:[[NSString alloc] initWithFormat:@"%ld", [(DLNumber *)elem integerValue]]];
         } else if ([DLList isKindOfList:elem]) {
             id<DLDataProtocol> x = nil;
             NSMutableArray *arr = [(DLList *)elem value];
@@ -392,7 +396,7 @@ static Protocol *_dlProxyProtocol;
 
 + (NSString *)capitalizeFirstChar:(NSString *)string {
     NSString *first = [string substringWithRange:NSMakeRange(0, 1)];
-    return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[NSString stringWithFormat:@"%@", [first uppercaseString]]];
+    return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[[NSString alloc] initWithFormat:@"%@", [first uppercaseString]]];
 }
 
 + (NSString *)promptWithModule:(NSString *)moduleName {
@@ -418,6 +422,55 @@ static Protocol *_dlProxyProtocol;
     return acc;
 }
 
+/*! Converts the given camel case string to lisp case. */
++ (NSString *)camelCaseToLispCase:(NSString *)string {
+    NSMutableString *str = [NSMutableString new];
+    NSUInteger len = [string length];
+    NSArray *lowerCaseMatches = [_lowerCaseRegex matchesInString:string options:0 range:NSMakeRange(0, len)];
+    NSArray *upperCaseMatches = [_upperCaseRegex matchesInString:string options:0 range:NSMakeRange(0, len)];
+    NSUInteger upperCaseMatchCount = [upperCaseMatches count];
+    if (upperCaseMatchCount == 0) return string;
+    NSEnumerator *enumerator = upperCaseMatches.objectEnumerator;
+    NSTextCheckingResult *lcMatch;
+    NSTextCheckingResult *ucMatch;
+    /*
+     In a string of format componentsSeparatedByNSString, the lower case regex matches:
+     components, eperated, y, ring
+     and the upper case regex matches
+     S, B, NSS
+     If there are more that two uppercase characters, then we check if it's in the prefixes list. If so, we convert them to lowercase, else, we convert the
+     whole prefix into lowercase.
+     */
+    NSRange range;
+    NSString *caps = nil;
+    NSUInteger idx = 0;
+    NSUInteger size = [lowerCaseMatches count];
+    for (lcMatch in lowerCaseMatches) {
+        ++idx;
+        range = lcMatch.range;
+        ucMatch = [enumerator nextObject];
+        [str appendString:[string substringWithRange:range]];
+        if (ucMatch) {
+            [str appendString:@"-"];
+            caps = [string substringWithRange:ucMatch.range];
+            if ([caps length] > 1) {
+                NSString *prefix = [caps substringToIndex:caps.length - 1];
+                if ([DLState.prefixList containsObject:prefix]) {
+                    [str appendString:[prefix lowercaseString]];
+                    [str appendString:@"-"];
+                    [str appendString:[[caps substringFromIndex:caps.length - 1] lowercaseString]];
+                } else {
+                    [str appendString:[caps lowercaseString]];
+                    if (idx < size) [str appendString:@"-"];
+                }
+            } else {
+                [str appendString:[caps lowercaseString]];
+            }
+        }
+    }
+    return [[NSString alloc] initWithString:str];
+}
+
 #pragma mark - Network
 
 + (NSString *)httpMethodTypeToString:(DLKeyword *)methodType {
@@ -441,11 +494,8 @@ static Protocol *_dlProxyProtocol;
 /** Converts the given Foundation type to DL type. Used mainly in JSON de-serialization. */
 + (id<DLDataProtocol>)convertFromFoundationTypeToDLType:(id)value {
     id<DLDataProtocol> val = nil;
-    if ([value isKindOfClass:[NSNull class]]) {
-        val = [DLNil new];
-    } else if ([value isKindOfClass:[NSMutableDictionary class]]) {
-        val = [self dictionaryToDLType:value];
-    } else if ([value isKindOfClass:[NSMutableArray class]] || [value isKindOfClass:[NSArray class]]) {
+    if (class_conformsToProtocol([value class], _dlDataProtocol)) return value;
+    if ([value isKindOfClass:[NSMutableArray class]] || [value isKindOfClass:[NSArray class]]) {
         NSArray *xs = (NSArray *)value;
         id elem = nil;
         DLVector *vec = [DLVector new];  /* It's better to use a vector instead of a list so that any potential code evaluation does not happen. */
@@ -453,7 +503,9 @@ static Protocol *_dlProxyProtocol;
             [vec appendObject:[self convertFromFoundationTypeToDLType:elem]];
         }
         val = vec;
-    } else if ([value isKindOfClass:[NSNumber class]]) {
+    } else if ([value isKindOfClass:[NSMutableDictionary class]]) {  // TODO: check for NSMapTable
+        val = [self dictionaryToDLType:value];
+    } else if ([value isKindOfClass:[NSNumber class]]) {  // TODO: check for other number types like NSDecimalNumber
         NSNumber *n = (NSNumber *)value;
         BOOL doesRepresentBool = [self isBoolNumber:n];
         if (doesRepresentBool) {
@@ -465,7 +517,22 @@ static Protocol *_dlProxyProtocol;
         }
     } else if ([value isKindOfClass:[NSString class]]) {
         val = [DLString stringWithString:value];
+    } else if ([value isKindOfClass:[NSMutableString class]]) {
+        val = [[DLString alloc] initWithMutableString:value];
+    } else if ([value isKindOfClass:[NSData class]]) {
+        val = [[DLData alloc] initWithData:value];
+    } else if ([value isKindOfClass:[NSRegularExpression class]]) {
+        val = [[DLRegex alloc] initWithRegularExpression:value];
+    } else if ([value isKindOfClass:[NSNull class]]) {
+        val = [DLNil new];
+    } else if ([value isKindOfClass:[NSObject class]]) {
+        val = [[DLObject alloc] initWithProxy:value];
+    } else if (class_isMetaClass(object_getClass(value))) {
+        val = [[DLClass alloc] initWithProxy:value];
+    } else if (!value) {
+        val = [DLNil new];
     } else {
+        NSAssert(false, @"This path should not be taken");
         val = [DLString stringWithString:[value description]];
     }
     return val;
@@ -536,7 +603,7 @@ static Protocol *_dlProxyProtocol;
     NSUInteger len = [paramsList count];
     DLMethodParam *param = nil;
     NSMutableString *selName = [NSMutableString new];
-    [selName appendString:method.name.value];
+    [selName appendString:[self lispCaseToCamelCase:method.name.value]];
     if (len > 0) [selName appendString:@":"];
     for (i = 0; i < len; i++) {
         param = [paramsList objectAtIndex:i];
@@ -552,12 +619,12 @@ static Protocol *_dlProxyProtocol;
 /*! Adds selector string in lisp case (default), used for printing. */
 + (void)updateSelectorStringForMethod:(DLMethod *)method {
     NSMutableString *str = [NSMutableString new];
-    [str appendString:method.name.value];
+    [str appendString:[self camelCaseToLispCase:method.name.value]];  // componentsSeparatedByString -> components-separated-by-string
     if (method.params.count > 0) [str appendString:@":"];
     DLMethodParam *param;
     for (param in method.params) {
         if (param.selectorName) {
-            [str appendString:[param.selectorName string]];
+            [str appendString:[self camelCaseToLispCase:[param.selectorName string]]];
             [str appendString:@":"];
         }
     }
@@ -570,7 +637,7 @@ static Protocol *_dlProxyProtocol;
  */
 + (void)updatePropertyAttr:(DLObjcPropertyAttr *)attr {
     attr.name = [attr.value UTF8String];
-    attr.backingIvar = [[NSString stringWithFormat:@"_%s", attr.name] UTF8String];
+    attr.backingIvar = [[[NSString alloc] initWithFormat:@"_%s", attr.name] UTF8String];
     if (attr.hasCustomGetter) {
         NSString *getterName = attr.customGetter.value;
         attr.getterName = [getterName UTF8String];
@@ -591,13 +658,13 @@ static Protocol *_dlProxyProtocol;
 + (NSString *)toAccessorVar:(NSString *)string {
     if ([string count] == 0) return string;
     NSString *first = [string substringWithRange:NSMakeRange(0, 1)];
-    return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[NSString stringWithFormat:@"_%@", [first lowercaseString]]];
+    return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[[NSString alloc] initWithFormat:@"_%@", [first lowercaseString]]];
 }
 
 + (NSString *)toSetterName:(NSString *)string {
     if ([string count] == 0) return string;
     NSString *first = [string substringWithRange:NSMakeRange(0, 1)];
-    return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[NSString stringWithFormat:@"set%@:", [first uppercaseString]]];
+    return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[[NSString alloc] initWithFormat:@"set%@:", [first uppercaseString]]];
 }
 
 + (DLInvocationArgument *)convertToInvocationArgument:(id<DLDataProtocol>)elem {

@@ -161,7 +161,7 @@
 
 + (NSString *)capitalizeFirstChar:(NSString *)string {
     NSString *first = [string substringWithRange:NSMakeRange(0, 1)];
-    return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[NSString stringWithFormat:@"%@", [first uppercaseString]]];
+    return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[[NSString alloc] initWithFormat:@"%@", [first uppercaseString]]];
 }
 
 /*! Keyword selectors in @c :initarg are of the form :with-place, :with-full-name, which gets converted to selectors initWithPlace:, initWithFullName:. */

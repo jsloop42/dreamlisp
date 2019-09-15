@@ -19,6 +19,10 @@
 //    return @"NSArray";
 //}
 
+- (void)dealloc {
+    [DLLog debug:@"NSArray dealloc"];
+}
+
 - (id)first {
     return [self objectAtIndex:0];
 }

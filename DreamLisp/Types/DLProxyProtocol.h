@@ -17,12 +17,12 @@ NS_ASSUME_NONNULL_BEGIN
 /*! The key used in linking the return object if present as an associated object. */
 @property (nonatomic, readwrite, retain, nullable) NSString *returnAssocKey;
 /*! The proxy object contained by the object references to. */
-@property (nonatomic, readwrite, retain, nullable) id proxy;
+@property (nonatomic, readwrite, retain) id proxy;
 /*!
  The return value associated with invoking the proxy object other than during an init. The init value of the proxy object can be obtained from the @c value
  property.
  */
-@property (nonatomic, readwrite, retain, nullable) id returnValue;
+@property (nonatomic, readwrite, assign) id returnValue;
 + (instancetype)new;
 + (NSString *)className;
 - (instancetype)init;

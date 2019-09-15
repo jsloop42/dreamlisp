@@ -28,6 +28,8 @@ NSString *_keyKeyword;
 NSString *_valueKeyword;
 NSString *_keyForNotificationKey;
 NSString *_keyForNotificationValue;
+NSString *_foundationPrefix;
+NSString *_dreamLispPrefix;
 
 @implementation DLConst
 
@@ -53,6 +55,8 @@ NSString *_keyForNotificationValue;
 @dynamic keyForNotificationKey;
 /*! The key associated with a DL notification value (the function param). */
 @dynamic keyForNotificationValue;
+@dynamic foundationPrefix;
+@dynamic dreamLispPrefix;
 
 + (void)initialize {
     if (self == [self class]) {
@@ -77,6 +81,8 @@ NSString *_keyForNotificationValue;
         _valueKeyword = @":value";
         _keyForNotificationKey = @"notifKey";
         _keyForNotificationValue = @"args";
+        _foundationPrefix = @"NS";
+        _dreamLispPrefix = @"DL";
     }
 }
 
@@ -84,7 +90,7 @@ NSString *_keyForNotificationValue;
     NSDictionary *info = [[NSBundle bundleForClass:[self class]] infoDictionary];
     NSString *version = [info valueForKey:@"CFBundleShortVersionString"];
     NSString *build = [info valueForKey:@"CFBundleVersion"];
-    return [NSString stringWithFormat:@"%@ (%@)", version, build];
+    return [[NSString alloc] initWithFormat:@"%@ (%@)", version, build];
 }
 
 + (NSArray *)keyword {
@@ -166,6 +172,14 @@ NSString *_keyForNotificationValue;
 
 + (NSString *)keyForNotificationValue {
     return _keyForNotificationValue;
+}
+
++ (NSString *)foundationPrefix {
+    return _foundationPrefix;
+}
+
++ (NSString *)dreamLispPrefix {
+    return _dreamLispPrefix;
 }
 
 @end

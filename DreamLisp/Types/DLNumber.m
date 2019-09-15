@@ -64,6 +64,10 @@
     return (DLNumber *)data;
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLNumber dealloc"];
+}
+
 - (instancetype)initWithDouble:(double)number {
     self = [super init];
     if (self) {
@@ -220,7 +224,7 @@
 
 - (NSString *)string {
     if (_isDouble && ![self checkDouble:[_n stringValue]]) {
-        return [NSString stringWithFormat:@"%.01f", [_n doubleValue]];
+        return [[NSString alloc] initWithFormat:@"%.01f", [_n doubleValue]];
     }
     return [_n stringValue];
 }
@@ -242,6 +246,23 @@
     return _isDouble ? [_n doubleValue] : [_n integerValue];
 }
 
+- (void)forwardInvocation:(NSInvocation *)anInvocation {
+    if ([self respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:self];
+    } else if ([_n respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:_n];
+    } else {
+        //@throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, anInvocation.selector];
+    }
+}
+
+- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
+    if ([self respondsToSelector:aSelector]) return [self methodSignatureForSelector:aSelector];
+    //if ([_n respondsToSelector:aSelector])
+    return [_n methodSignatureForSelector:aSelector];
+    //@throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, self, aSelector];
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     id elem = [[DLNumber alloc] initWithNumber:_n];
     [elem setIsImported:_isImported];
@@ -257,7 +278,7 @@
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _n, _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ meta: %@>", NSStringFromClass([self class]), self, _n, _meta];
 }
 
 @end

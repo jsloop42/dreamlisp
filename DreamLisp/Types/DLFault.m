@@ -28,6 +28,10 @@
     return [[object className] isEqual:[self className]];
 }
 
+- (void)dealloc {
+    [DLLog debug:@"DLFault dealloc"];
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -130,11 +134,11 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"%@", _value];
+    return [[NSString alloc] initWithFormat:@"%@", _value];
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"<%@ %p - value: %@>", NSStringFromClass([self class]), self, _value];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@>", NSStringFromClass([self class]), self, _value];
 }
 
 @end

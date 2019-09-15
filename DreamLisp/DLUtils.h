@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "DLTypes.h"
 #import "DLCacheTable.h"
+#import "DLState.h"
 #import <objc/objc-runtime.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -56,6 +57,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)appendStringFromArray:(NSMutableArray *)array string:(DLString *)string;
 + (NSString *)promptWithModule:(NSString *)moduleName;
 + (NSString *)lispCaseToCamelCase:(NSString *)string;
++ (NSString *)camelCaseToLispCase:(NSString *)string;
 #pragma mark Network
 + (NSString *)httpMethodTypeToString:(DLKeyword *)methodType;
 #pragma mark Objective-C RT

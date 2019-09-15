@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "DLDataProtocol.h"
 #import "DLEnv.h"
+#import "DLLogger.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

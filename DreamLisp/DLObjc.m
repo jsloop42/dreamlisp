@@ -64,19 +64,19 @@ static NSString *_moduleName = @"objcrt";
     } else {
         aCls = [_rt allocateClass:cls.name.value superclass:nil];
     }
-    cls.value = aCls;
+    cls.proxy = aCls;
     [self addProperty:cls];  /* Add property */
     BOOL ret = [_rt addMethod:aCls name:@selector(dataType) imp:[_rt implementationFor:[cls class] selector:@selector(dataType)]
-                         type:[[NSString stringWithFormat:@"%s%s%s", @encode(id), @encode(id), @encode(SEL)] UTF8String]];
+                         type:[[[[NSString alloc] initWithFormat:@"%s%s%s", @encode(id), @encode(id), @encode(SEL)] autorelease] UTF8String]];
     [self checkError:ret msg:DLRTAddMethodError];
     ret = [_rt addMethod:aCls name:@selector(dataTypeName) imp:[_rt implementationFor:[cls class] selector:@selector(dataTypeName)]
-                    type:[[NSString stringWithFormat:@"%s%s%s", @encode(id), @encode(id), @encode(SEL)] UTF8String]];
+                    type:[[[[NSString alloc] initWithFormat:@"%s%s%s", @encode(id), @encode(id), @encode(SEL)] autorelease] UTF8String]];
     [self checkError:ret msg:DLRTAddMethodError];
     ret = [_rt addMethod:aCls name:@selector(meta) imp:[_rt implementationFor:[cls class] selector:@selector(meta)]
-                    type:[[NSString stringWithFormat:@"%s%s%s", @encode(id), @encode(id), @encode(SEL)] UTF8String]];
+                    type:[[[[NSString alloc] initWithFormat:@"%s%s%s", @encode(id), @encode(id), @encode(SEL)] autorelease] UTF8String]];
     [self checkError:ret msg:DLRTAddMethodError];
     ret = [_rt addMethod:aCls name:@selector(moduleName) imp:[_rt implementationFor:[cls class] selector:@selector(moduleName)]
-                    type:[[NSString stringWithFormat:@"%s%s%s", @encode(id), @encode(id), @encode(SEL)] UTF8String]];
+                    type:[[[[NSString alloc] initWithFormat:@"%s%s%s", @encode(id), @encode(id), @encode(SEL)] autorelease] UTF8String]];
     [self checkError:ret msg:DLRTAddMethodError];
     /* Add init methods */
     DLSlot *slot;
@@ -140,10 +140,12 @@ static NSString *_moduleName = @"objcrt";
                                 kwd = (DLKeyword *)token;
                                 if ([[kwd value] isEqual:@":initarg"]) {
                                     DLKeyword *arg = [DLKeyword dataToKeyword:[slotList next] position:slotList.seekIndex - 1 fnName:fnName];
-                                    DLKeyword *initKwd = [[DLKeyword alloc] initWithString:[NSString stringWithFormat:@"init-%@", [arg string]]];
+                                    DLKeyword *initKwd = [[DLKeyword alloc] initWithString:[[[NSString alloc] initWithFormat:@"init-%@",
+                                                                                             [arg string]] autorelease]];
                                     slot.initializationArg = initKwd;
                                     [initKwd release];
-                                    slot.methodType = [[NSString stringWithFormat:@"%s%s%s%s%s", @encode(id), @encode(id), @encode(SEL), @encode(id), @encode(id)] UTF8String];  // id:return id:self, SEL, prop, DLClass*
+                                    slot.methodType = [[[[NSString alloc] initWithFormat:@"%s%s%s%s%s", @encode(id), @encode(id), @encode(SEL), @encode(id),
+                                                        @encode(id)] autorelease] UTF8String];  // id:return id:self, SEL, prop, DLClass*
                                 } else if ([[kwd value] isEqual:@":read-only"]) {
                                     attr.isReadOnly = YES;
                                 } else if ([[kwd value] isEqual:@":read-write"]) {
@@ -168,9 +170,9 @@ static NSString *_moduleName = @"objcrt";
                                     DLKeyword *typeKwd = [DLKeyword dataToKeyword:[slotList next] position:slotList.seekIndex - 1 fnName:fnName];
                                     NSString *typeStr = [typeKwd string];
                                     slot.propertyType = [_rt typeFromKeywordString:typeStr];
-                                    attr.type = [[NSString stringWithFormat:@"T%s", slot.propertyType] UTF8String];
+                                    attr.type = [[[[NSString alloc] initWithFormat:@"T%s", slot.propertyType] autorelease] UTF8String];
                                     if (strncmp(attr.type, "T@", sizeof(attr.type)) && ![typeStr isEqual:@"any"]) {  // => The type is an object and has more specific than an id.
-                                        attr.type = [[NSString stringWithFormat:@"%s\"%@\"", attr.type, typeStr] UTF8String];
+                                        attr.type = [[[[NSString alloc] initWithFormat:@"%s\"%@\"", attr.type, typeStr] autorelease] UTF8String];
                                     }
                                 } else {
                                     [[[[DLError alloc] initWithFormat:DLRTSlotFormatError, kwd] autorelease] throw];
@@ -201,24 +203,16 @@ static NSString *_moduleName = @"objcrt";
 }
 
 /*! Invokes the given selector on the proxy object with args and sets the return value if any in the object. */
-- (id<DLDataProtocol>)invokeMethodWithReturn:(SEL)selector withObject:(id<DLProxyProtocol>)object args:(NSMutableArray *)args {
+- (void)invokeMethodWithReturn:(SEL)selector withObject:(id<DLProxyProtocol>)object args:(NSMutableArray *)args {
     id ret = [self invokeMethod:selector withObject:object args:args];
-    return [self objectWithProxy:ret withClass:[(DLObject *)object cls]];
-//    if (object.returnAssocKey) {
-//        object.returnValue = nil;  /* Removing the reference, deallocs the return object. */
-//        object.returnAssocKey = nil;
-//    }
-//    if (ret) {
-//        const void *retKey = [self generateAssocKey:[object hash]];
-//        object.returnAssocKey = retKey;
-//        [_rt setAssociatedObject:ret toObject:object withKey:retKey];  /* Add latest return value to the object using assoc ref */
-//        object.returnValue = ret;
-//    }
+    [ret retain];  /* Use use assign in the property. So this object needs to be retained so that the property points to a valid memory location. */
+    id<DLDataProtocol> elem = [DLUtils convertFromFoundationTypeToDLType:ret];
+    [object setReturnValue:elem];
 }
 
 - (void)addMethodToClass:(DLMethod *)method {
     method.imp = (IMP)dl_methodImp;
-    [_rt addMethod:method.cls.value name:[method selector] imp:method.imp type:method.type];
+    [_rt addMethod:method.cls.proxy name:[method selector] imp:method.imp type:method.type];
 }
 
 - (void)addMethodParamAttrs:(DLMethodParam *)param fromMeta:(DLList *)meta fnName:(NSString *)fnName {
@@ -260,7 +254,7 @@ static NSString *_moduleName = @"objcrt";
         if ([meta isEmpty]) [[[[DLError alloc] initWithFormat:DLMethodNameNotFoundError, fnName] autorelease] throw];
         if ([DLSymbol isSymbol:[meta next] withName:@"with-meta"]) {  /* Meta encountered */
             id<DLDataProtocol>metaElem = [meta next];
-            method.name = metaElem;
+            method.name = [DLSymbol dataToSymbol:metaElem position:meta.seekIndex - 1 fnName:fnName];
             DLMethodParam *param = [[DLMethodParam new] autorelease];
             [self addMethodParamAttrs:param fromMeta:meta fnName:fnName];
             method.attr = param.attr;
@@ -268,6 +262,7 @@ static NSString *_moduleName = @"objcrt";
     } else if ([DLSymbol isSymbol:elem]) {  /* No return meta, add method name */
         method.name = [DLSymbol dataToSymbol:elem position:xs.seekIndex - 1 fnName:fnName];
     }
+    method.name.value = [DLUtils lispCaseToCamelCase:method.name.value];
     /* Add method's class */
     if (![xs hasNext]) [[[[DLError alloc] initWithFormat:DLMethodClassNotSpecifiedError, fnName] autorelease] throw];
     elem = [DLList dataToList:[xs next] fnName:fnName];
@@ -331,19 +326,18 @@ static NSString *_moduleName = @"objcrt";
 }
 
 - (NSString *)generateAssocKey:(NSUInteger)hash {
-    return [NSString stringWithFormat:@"dlproxy_%ld_%ld", [DLState assocObjectCounter], hash];
+    return [[[NSString alloc] initWithFormat:@"dlproxy_%ld_%ld", [DLState assocObjectCounter], hash] autorelease];
 }
 
 - (DLObject *)objectWithProxy:(id)proxy withClass:(DLClass *)cls {
     DLObject *object = [[[DLObject alloc] initWithProxy:proxy] autorelease];
-    object.proxyAssocKey = [self generateAssocKey:[proxy hash]];
-    [_rt setAssociatedObject:proxy toObject:object withKey:[object.proxyAssocKey UTF8String]];
     object.cls = cls;
     return object;
 }
 
 - (DLObject * _Nullable)makeInstance:(DLInvocation *)invocation {
     id inst = [_rt invoke:invocation.invocation];
+    [inst retain];
     if (!inst) {
         [[[[DLError alloc] initWithFormat:DLRTObjectInitError, [invocation.invocation.target className]] autorelease] throw];
         return nil;
@@ -366,7 +360,7 @@ static NSString *_moduleName = @"objcrt";
         [[[[DLError alloc] initWithFormat:DLClassNotFoundError, [clsSym value]] autorelease] throw];
         return nil;
     }
-    return [[[DLClass alloc] initWithClass:clazz] autorelease];
+    return [[[DLClass alloc] initWithProxy:clazz] autorelease];
 }
 
 /*!

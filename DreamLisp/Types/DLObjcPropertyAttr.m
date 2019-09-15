@@ -13,7 +13,7 @@ static DLObjcPropertyAttrType *propType;
 @implementation DLObjcPropertyAttrType
 
 - (void)dealloc {
-    [DLLog info:@"DLObjcPropertyAttrType dealloc"];
+    [DLLog debug:@"DLObjcPropertyAttrType dealloc"];
 }
 
 + (instancetype)shared {
@@ -41,5 +41,9 @@ static DLObjcPropertyAttrType *propType;
 @end
 
 @implementation DLObjcPropertyAttr
+
+- (void)dealloc {
+    [DLLog debug:@"DLObjcPropertyAttr dealloc"];
+}
 
 @end
