@@ -179,14 +179,14 @@
 
 @end
 
-NSInteger sortAscending(id obj1, id obj2, void *context) {
+NSInteger dl_sortAscending(id obj1, id obj2, void *context) {
     NSInteger h1 = [obj1 sortValue];
     NSInteger h2 = [obj2 sortValue];
     if (h1 == h2) return NSOrderedSame;
     return h1 < h2 ? NSOrderedAscending : NSOrderedDescending;
 }
 
-NSInteger sortDescending(id obj1, id obj2, void *context) {
+NSInteger dl_sortDescending(id obj1, id obj2, void *context) {
     NSInteger h1 = [obj1 sortValue];
     NSInteger h2 = [obj2 sortValue];
     if (h1 == h2) return NSOrderedSame;

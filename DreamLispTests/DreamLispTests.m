@@ -2188,9 +2188,9 @@
     DLNumber *n3 = [[DLNumber alloc] initWithInteger:3];
     DLNumber *n4 = [[DLNumber alloc] initWithInteger:2];
     DLList *list = [[DLList alloc] initWithArray:[@[n1, n2, n3, n4] mutableCopy]];
-    DLList *sorted = [list sort:sortAscending];
+    DLList *sorted = [list sort:dl_sortAscending];
     XCTAssertEqualObjects([sorted first], n1);
-    sorted = [list sort:sortDescending];
+    sorted = [list sort:dl_sortDescending];
     XCTAssertEqualObjects([sorted first], n2);
 }
 

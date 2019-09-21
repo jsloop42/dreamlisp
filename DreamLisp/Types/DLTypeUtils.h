@@ -46,7 +46,7 @@ typedef NS_ENUM(NSUInteger, DLSequenceType) {
 + (SEL)convertInitKeywordToSelector:(NSString *)kwdArg;
 @end
 
-extern NSInteger sortAscending(id obj1, id obj2, void *context);
-extern NSInteger sortDescending(id obj1, id obj2, void *context);
+extern NSInteger dl_sortAscending(id obj1, id obj2, void *context);
+extern NSInteger dl_sortDescending(id obj1, id obj2, void *context);
 
 NS_ASSUME_NONNULL_END

@@ -14,11 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 #define DLAlgo DLAlgorithm
 
 @interface DLAlgorithm : NSObject
-#pragma mark Sort
-+ (void)introSort:(NSMutableArray *)xs isAscending:(BOOL)isAscending;
-+ (void)quickSort:(NSMutableArray *)xs isAscending:(BOOL)isAscending;
-+ (void)heapSort:(NSMutableArray *)xs isAscending:(BOOL)isAscending;
-+ (void)insertionSort:(NSMutableArray *)xs isAscending:(BOOL)isAscending;
+
 @end
 
 NS_ASSUME_NONNULL_END

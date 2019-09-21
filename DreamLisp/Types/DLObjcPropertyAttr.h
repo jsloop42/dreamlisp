@@ -36,14 +36,15 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, assign) const char *type;
 /*! The property name. */
 @property (nonatomic, readwrite, assign) NSString *value;
+/*! Objective-C compatiable name (camel case) */
 @property (nonatomic, readwrite, assign) const char *name;
 @property (nonatomic, readwrite, assign) const char *backingIvar;
-/*! Custom getter name. */
-@property (nonatomic, readwrite, nullable, retain) DLKeyword *customGetter;
+/*! Getter name. */
+@property (nonatomic, readwrite, nullable, retain) DLKeyword *getter;
 /*! Getter name SEL string */
 @property (nonatomic, readwrite, assign) const char *getterName;
-/*! Custom setter name. */
-@property (nonatomic, readwrite, nullable, retain) DLKeyword *customSetter;
+/*! Setter name. */
+@property (nonatomic, readwrite, nullable, retain) DLKeyword *setter;
 /*! Setter name SEL string */
 @property (nonatomic, readwrite, assign) const char *setterName;
 @property (nonatomic, readwrite, assign) BOOL isReadOnly;

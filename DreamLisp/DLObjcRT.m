@@ -10,14 +10,14 @@
 
 static NSRegularExpression *_setterPttn;
 
-#pragma mark C IMP
+#pragma mark C Helpers
 
 const char *dl_setterName(NSString *name) {
     NSArray *matches = [DLUtils matchesInString:name withExpression:_setterPttn];
     NSTextCheckingResult *match = [matches firstObject];
     if ([match numberOfRanges] == 4) {
         NSString *mstr = [name substringWithRange:[match rangeAtIndex:2]];
-        return [[DLUtils toAccessorVar:mstr] UTF8String];
+        return [[DLUtils toAccessorVarFromGetter:mstr] UTF8String];
     }
     return "";
 }
@@ -41,10 +41,12 @@ void dl_setIvarForName(id self, const char *name, id val) {
 }
 
 id dl_getIvar(id self, SEL _cmd) {
-    const char *getterVar = [[DLUtils toAccessorVar:(NSStringFromSelector(_cmd))] UTF8String];
+    const char *getterVar = [[DLUtils toAccessorVarFromGetter:(NSStringFromSelector(_cmd))] UTF8String];
     Ivar ivar = class_getInstanceVariable([self class], getterVar);
     return object_getIvar(self, ivar);
 }
+
+#pragma mark IMP
 
 id dl_initWithPropImp(id self, SEL _cmd, id arg, DLClass *cls) {
     NSString *selStr = NSStringFromSelector(_cmd);

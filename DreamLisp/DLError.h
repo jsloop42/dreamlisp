@@ -23,6 +23,7 @@ extern NSString *DLArityMultipleError;
 extern NSString *DLArityOddError;
 extern NSString *DLClassNameParseError;
 extern NSString *DLClassConformanceParseError;
+extern NSString *DLClassExistsError;
 extern NSString *DLClassNotFoundError;
 extern NSString *DLCollectionCountError;
 extern NSString *DLCollectionCountWithPositionError;

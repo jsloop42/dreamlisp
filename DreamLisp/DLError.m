@@ -19,6 +19,7 @@ NSString *DLArityMinError = @"Expected a minimum arity of %ld, but obtained %ld"
 NSString *DLArityMultipleError = @"Expected arity in multiples of %ld, but obtained %ld";
 NSString *DLArityOddError = @"Expected arity to be even, but obtained %ld";
 NSString *DLClassConformanceParseError = @"'defclass' conformance list requires 'symbol' at %ld, but obtained '%@'";
+NSString *DLClassExistsError = @"%@ class already exists";
 NSString *DLClassNameParseError = @"Error parsing class name";
 NSString *DLClassNotFoundError = @"%@ class not found";
 NSString *DLCollectionCountError = @"Expected collections with equal count of %ld, but obtained %ld.";

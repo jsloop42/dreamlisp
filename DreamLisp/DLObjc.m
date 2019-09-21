@@ -43,6 +43,7 @@ static NSString *_moduleName = @"objcrt";
     return [_rt addDLDataProtocol:cls proto:@"DLDataProtocol"];
 }
 
+/*! Checks if the given status is @c true, else throws an exception with the given message. */
 - (void)checkError:(BOOL)status msg:(NSString *)msg {
     if (!status) [[[[DLError alloc] initWithDescription:msg] autorelease] throw];
 }
@@ -56,13 +57,25 @@ static NSString *_moduleName = @"objcrt";
     }
 }
 
+/*!
+ Checks whether the given class name is registered with the runtime.
+
+ @return BOOL
+ */
+- (BOOL)isClassExists:(NSString *)className {
+    return [_rt lookUpClass:className] != nil;
+}
+
+/*! Registers the proxy class with the Objective-C runtime. */
 - (void)defclass:(DLClass *)cls {
     DLSymbol *supClassSym = cls.conformance.count >= 1 ? cls.conformance.firstObject : nil;
     Class aCls = nil;
+    NSString *proxyClassName = cls.name.value;
+    if ([self isClassExists:proxyClassName]) @throw [DLError exceptionWithFormat:DLClassExistsError, proxyClassName];
     if (supClassSym) {
-        aCls = [_rt allocateClass:cls.name.value superclass:NSClassFromString(supClassSym.value)];
+        aCls = [_rt allocateClass:proxyClassName superclass:NSClassFromString(supClassSym.value)];
     } else {
-        aCls = [_rt allocateClass:cls.name.value superclass:nil];
+        aCls = [_rt allocateClass:proxyClassName superclass:nil];
     }
     cls.proxy = aCls;
     [self addProperty:cls];  /* Add property */
@@ -82,6 +95,9 @@ static NSString *_moduleName = @"objcrt";
     DLSlot *slot;
     for (slot in cls.slots) {
         [_rt addMethod:aCls name:[slot selectorForInitArg] imp:(IMP)dl_initWithPropImp type:slot.methodType];
+        // todo:
+        /* Add getter and setter methods */
+        
     }
     [_rt registerClass:aCls];
     [self addDLDataProtocol:aCls];
@@ -158,10 +174,10 @@ static NSString *_moduleName = @"objcrt";
                                     attr.isCopy = YES;
                                 } else if ([[kwd value] isEqual:@":getter"]) {  /* Specifies a custom getter */
                                     attr.hasCustomGetter = YES;
-                                    attr.customGetter = [DLKeyword dataToKeyword:[slotList next] position:slotList.seekIndex - 1 fnName:fnName];
+                                    attr.getter = [DLKeyword dataToKeyword:[slotList next] position:slotList.seekIndex - 1 fnName:fnName];
                                 } else if ([[kwd value] isEqual:@":setter"]) {  /* Specifies a custom setter */
                                     attr.hasCustomSetter = YES;
-                                    attr.customSetter = [DLKeyword dataToKeyword:[slotList next] position:slotList.seekIndex - 1 fnName:fnName];
+                                    attr.setter = [DLKeyword dataToKeyword:[slotList next] position:slotList.seekIndex - 1 fnName:fnName];
                                 } else if ([[kwd value] isEqual:@":dynamic"]) {
                                     attr.isDynamic = YES;
                                 } else if ([[kwd value] isEqual:@":weak"]) {

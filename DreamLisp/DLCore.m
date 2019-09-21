@@ -894,7 +894,7 @@ double dmod(double a, double n) {
             [DLTypeUtils checkArity:xs arity:2 predicate:ArityPredicateLessThanOrEq];
             id<DLDataProtocol> first = [xs first];
             id<DLDataProtocol> second = [xs second];
-            NSInteger (*sorter)(id obj1, id obj2, void * context) = sortAscending;
+            NSInteger (*sorter)(id obj1, id obj2, void * context) = dl_sortAscending;
             DLFunction __block *fn = nil;
             NSComparisonResult (^comparator)(id obj1, id obj2) = ^NSComparisonResult(id obj1, id obj2) {
                 @autoreleasepool {
@@ -905,9 +905,9 @@ double dmod(double a, double n) {
             if ([DLKeyword isKeyword:first]) {  // (sort :asc [1 2])
                 NSString *kwd = [(DLKeyword *)first value];
                 if ([kwd isEqual:[DLConst ascendingKeyword]]) {
-                    sorter = sortAscending;
+                    sorter = dl_sortAscending;
                 } else if ([kwd isEqual:[DLConst descendingKeyword]]) {
-                    sorter = sortDescending;
+                    sorter = dl_sortDescending;
                 }
                 if ([DLList isList:second]) {
                     return [(DLList *)second sort:sorter];
@@ -937,10 +937,10 @@ double dmod(double a, double n) {
                 }];
                 if (isKey) {
                     if (fn) return [[DLVector alloc] initWithArray:[hm sortedKeysUsingComparator:comparator]];
-                    return [[DLVector alloc] initWithArray:[hm sortKeys: isAsc ? sortAscending : sortDescending]];
+                    return [[DLVector alloc] initWithArray:[hm sortKeys: isAsc ? dl_sortAscending : dl_sortDescending]];
                 }
                 if (fn) return [[DLVector alloc] initWithArray:[hm sortedObjectsUsingComparator:comparator]];
-                return [[DLVector alloc] initWithArray:[hm sortObjects: isAsc ? sortAscending : sortDescending]];
+                return [[DLVector alloc] initWithArray:[hm sortObjects: isAsc ? dl_sortAscending : dl_sortDescending]];
             } else if ([DLFunction isFunction:first]) {  // (sort (fn (a b) (..)) [4 2 5])
                 fn = (DLFunction *)first;
                 if ([DLList isList:second]) {
@@ -2667,7 +2667,7 @@ double dmod(double a, double n) {
     #pragma mark all-modules
     id<DLDataProtocol>(^allModules)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
-            NSArray *modArr = [[[DLEnv modules] allKeys] sortedArrayUsingFunction:sortAscending context:nil hint:[self allModulesSortHint]];
+            NSArray *modArr = [[[DLEnv modules] allKeys] sortedArrayUsingFunction:dl_sortAscending context:nil hint:[self allModulesSortHint]];
             [self setAllModulesSortHint:[modArr sortedArrayHint]];
             NSMutableArray *modules = [NSMutableArray new];
             NSString *name = nil;

@@ -9,6 +9,10 @@
 #import <XCTest/XCTest.h>
 #import <DreamLisp/DreamLispLib.h>
 
+#define DL_EQUAL 0
+#define DL_LESSTHAN -1
+#define DL_GREATERTHAN 1
+
 @interface DLObjcRTTests : XCTestCase
 
 @end
@@ -26,8 +30,71 @@
             methodName = [setterName substringWithRange:[match rangeAtIndex:2]];
         }
     }
-    NSString *effSetterName = [DLUtils toAccessorVar:methodName];
+    NSString *effSetterName = [DLUtils toAccessorVarFromGetter:methodName];
     XCTAssertEqualObjects(effSetterName, @"_moduleName");
+}
+
+- (void)testUpdatePropertyAttribute {
+    DLObjcPropertyAttr *attr = [DLObjcPropertyAttr new];
+    [attr setValue:@"name"];
+    [DLUtils updatePropertyAttr:attr];
+    XCTAssertEqual(strncmp(attr.name, "name", strlen(attr.name)), DL_EQUAL);
+    XCTAssertEqual(strncmp(attr.setterName, "setName:", strlen(attr.setterName)), DL_EQUAL);
+    XCTAssertEqual(strncmp(attr.getterName, "name", strlen(attr.getterName)), DL_EQUAL);
+}
+
+- (void)testParseClasss {
+    DLObjc *objc = [[DLObjc alloc] init];
+    DLReader *reader = [[DLReader alloc] init];
+    NSMutableArray *astxs = [reader readString:@"(defclass person (NSObject) ((name :initarg :with-name)))"];
+    XCTAssertEqual(astxs.count, 1);
+    id<DLDataProtocol> ast = [astxs first];
+    DLClass *dlcls = [objc parseClassForm:ast];
+    XCTAssertNotNil(dlcls);
+    XCTAssertEqualObjects(dlcls.name.value, @"person");
+    XCTAssertEqual(dlcls.conformance.count, 1);
+    XCTAssertEqualObjects([(DLSymbol *)[dlcls.conformance first] value], @"NSObject");
+    XCTAssertNil(dlcls.proxy);
+    XCTAssertEqual(dlcls.slots.count, 1);
+    DLSlot *slot = [dlcls.slots first];
+    XCTAssertNotNil(slot.initializationArg);
+    XCTAssertEqualObjects([slot.initializationArg string], @"init-with-name");
+    XCTAssertNotNil(slot.value);
+    XCTAssertEqualObjects(slot.value.value, @"name");
+    const char *slotMethodType = [[[NSString alloc] initWithFormat:@"%s%s%s%s%s", @encode(id), @encode(id), @encode(SEL), @encode(id), @encode(id)] UTF8String];  // last arg is _cls
+    XCTAssertEqual(strncmp(slot.methodType, slotMethodType, strlen(slotMethodType)), DL_EQUAL);
+    XCTAssertEqual(slot.position, 0);
+    XCTAssertNotNil(slot.attribute);
+    DLObjcPropertyAttr *attr = slot.attribute;
+    XCTAssertEqual(strncmp(attr.type, "@", strlen(attr.type)), DL_EQUAL);
+    XCTAssertEqual(strncmp(attr.name, "name", strlen(attr.name)), DL_EQUAL);
+    XCTAssertEqual(strncmp(attr.backingIvar, "_name", strlen(attr.backingIvar)), DL_EQUAL);
+    XCTAssertEqual(strncmp(attr.type, "@", strlen(attr.type)), DL_EQUAL);
+    XCTAssertEqual(strncmp(attr.getterName, "name", strlen(attr.getterName)), DL_EQUAL);
+    XCTAssertEqual(strncmp(attr.setterName, "setName:", strlen(attr.setterName)), DL_EQUAL);
+    XCTAssertFalse(attr.hasCustomGetter);
+    XCTAssertFalse(attr.hasCustomSetter);
+    XCTAssertFalse(attr.isReadOnly);
+    XCTAssertFalse(attr.isCopy);
+    XCTAssertFalse(attr.isRetain);
+    XCTAssertFalse(attr.isNonAtomic);
+    XCTAssertFalse(attr.isDynamic);
+    XCTAssertFalse(attr.isWeakReference);
+    XCTAssertFalse(attr.isEligibleForGC);
+}
+
+- (void)testDefClass {
+    DLObjc *objc = [DLObjc new];
+    DLReader *reader = [DLReader new];
+    NSMutableArray *astList = [reader readString:@"(defclass persona (NSObject) ((universe :initarg :with-universe)))"];
+    XCTAssertEqual([astList count], 1);
+    id<DLDataProtocol> ast = [astList first];
+    DLClass *dlCls = [objc parseClassForm:ast];
+    XCTAssertNotNil(dlCls);
+    XCTAssertNil(dlCls.proxy);
+    XCTAssertNoThrow([objc defclass:dlCls]);
+    XCTAssertNotNil(dlCls.proxy);
+    XCTAssertTrue([objc isClassExists:dlCls.name.value]);
 }
 
 - (void)testParseClassForm {
@@ -50,13 +117,13 @@
     XCTAssertThrows([rt parseClassForm:ast]);
 }
 
-- (void)notestCreateClass {
+- (void)testCreateClass {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
     [dl rep:@"(defclass bird (NSObject) ((wingspan :initarg :with-wing-span)))"];
     XCTAssertEqualObjects([dl rep:@"(type bird)"], @"\"class\"");
 }
 
-- (void)notestMakeInstance {
+- (void)testMakeInstance {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
     [dl rep:@"(defclass person (NSObject) ((name :initarg :with-name)))"];
     [dl rep:@"(def olive (make-instance 'person :init-with-name \"Olive\"))"];
@@ -83,6 +150,10 @@
     [method.params addObject:param];
     [DLUtils updateSelectorStringForMethod:method];
     XCTAssertEqualObjects(method.selectorString.value, @"gen-random:separated-by-num:with-dl-range:");
+}
+
+- (void)testDLOS {
+
 }
 
 @end

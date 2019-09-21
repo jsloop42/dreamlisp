@@ -31,6 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class DLMethod;
 
 @interface DLObjc : NSObject
+- (BOOL)isClassExists:(NSString *)className;
 - (void)defclass:(DLClass *)cls;
 - (DLClass *)parseClassForm:(id<DLDataProtocol>)ast;
 - (id<DLDataProtocol>)invokeMethod:(SEL)selector withObject:(id<DLProxyProtocol>)object args:(NSMutableArray *)args;

@@ -119,6 +119,8 @@
 		9E96593823194F5700B695ED /* DLError.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E96593723194F5600B695ED /* DLError.h */; };
 		9E96593A23194F9000B695ED /* DreamLisp.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E96593923194F9000B695ED /* DreamLisp.h */; };
 		9E9B622B225BAA280060DA9A /* libedit.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E9B622A225BAA270060DA9A /* libedit.tbd */; };
+		9E9E9D092330197000308606 /* DLTrie.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E9E9D072330197000308606 /* DLTrie.h */; };
+		9E9E9D0A2330197000308606 /* DLTrie.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9E9D082330197000308606 /* DLTrie.m */; };
 		9EBA29B8232921F20002FF2B /* DLNotificationData.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EBA29B6232921F10002FF2B /* DLNotificationData.h */; };
 		9EBA29B9232921F20002FF2B /* DLNotificationData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EBA29B7232921F10002FF2B /* DLNotificationData.m */; };
 		9EBA29BE23295BFD0002FF2B /* DLObjc.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EBA29BA23295BFB0002FF2B /* DLObjc.h */; };
@@ -295,6 +297,8 @@
 		9E9B6226225B9FC20060DA9A /* DLFileOps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLFileOps.h; sourceTree = "<group>"; };
 		9E9B6227225B9FC20060DA9A /* DLFileOps.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLFileOps.m; sourceTree = "<group>"; };
 		9E9B622A225BAA270060DA9A /* libedit.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libedit.tbd; path = usr/lib/libedit.tbd; sourceTree = SDKROOT; };
+		9E9E9D072330197000308606 /* DLTrie.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLTrie.h; sourceTree = "<group>"; };
+		9E9E9D082330197000308606 /* DLTrie.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLTrie.m; sourceTree = "<group>"; };
 		9EBA29B6232921F10002FF2B /* DLNotificationData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLNotificationData.h; sourceTree = "<group>"; };
 		9EBA29B7232921F10002FF2B /* DLNotificationData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DLNotificationData.m; sourceTree = "<group>"; };
 		9EBA29BA23295BFB0002FF2B /* DLObjc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLObjc.h; sourceTree = "<group>"; };
@@ -561,6 +565,8 @@
 				9E1E697A22C5395400E52162 /* DLStdIOServiceDelegate.h */,
 				9E43105322BE9C6C00512081 /* DLSymbolTable.h */,
 				9E43105422BE9C6C00512081 /* DLSymbolTable.m */,
+				9E9E9D072330197000308606 /* DLTrie.h */,
+				9E9E9D082330197000308606 /* DLTrie.m */,
 				9E281CE8225890B10038A5AF /* DLUtils.h */,
 				9E281CE9225890B10038A5AF /* DLUtils.m */,
 				9E7942D222C12A310086A47F /* Info.plist */,
@@ -644,6 +650,7 @@
 				9E741EA922C12DBA009680E8 /* DLAtom.h in Headers */,
 				9EBA29C523295C140002FF2B /* DLInvocation.h in Headers */,
 				9E326C9222C7891800B456A2 /* DLLazySequence.h in Headers */,
+				9E9E9D092330197000308606 /* DLTrie.h in Headers */,
 				9E741EB522C12DBA009680E8 /* DLVector.h in Headers */,
 				9EE413CB232CED4400CECE0D /* NSMutableArray+DLCat.h in Headers */,
 				9E28E343232451030024A414 /* DLTable.h in Headers */,
@@ -896,6 +903,7 @@
 				9E741E8C22C12C23009680E8 /* DLSymbol.m in Sources */,
 				9E326C9822C8C5D300B456A2 /* DLLazyFunction.m in Sources */,
 				9E741E8622C12C23009680E8 /* DLHashMap.m in Sources */,
+				9E9E9D0A2330197000308606 /* DLTrie.m in Sources */,
 				9E741E9522C12C38009680E8 /* DreamLisp.m in Sources */,
 				9E741E8322C12C23009680E8 /* DLBool.m in Sources */,
 				9EE413C7232CED4400CECE0D /* NSArray+DLCat.m in Sources */,
