@@ -34,6 +34,8 @@
 		9E4E10AA232ACE530027C2F5 /* DLMethod.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4E10A8232ACE530027C2F5 /* DLMethod.m */; };
 		9E4E10AD232AD5E30027C2F5 /* DLObjcMethodAttr.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E4E10AB232AD5E30027C2F5 /* DLObjcMethodAttr.h */; };
 		9E4E10AE232AD5E30027C2F5 /* DLObjcMethodAttr.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4E10AC232AD5E30027C2F5 /* DLObjcMethodAttr.m */; };
+		9E5545D423366829005D7AA6 /* DLTrieTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5545D323366829005D7AA6 /* DLTrieTests.m */; };
+		9E5545E22336AA98005D7AA6 /* DLResultTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E5545E12336AA98005D7AA6 /* DLResultTypes.h */; };
 		9E5D7B4B225B947E00970453 /* DLTerminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* DLTerminal.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E5D7B4C225B947E00970453 /* DLTerminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* DLTerminal.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E67D32E23290D5500807F3E /* DLAlgorithm.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E67D32D23290D5300807F3E /* DLAlgorithm.h */; };
@@ -265,6 +267,9 @@
 		9E4E10AC232AD5E30027C2F5 /* DLObjcMethodAttr.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLObjcMethodAttr.m; sourceTree = "<group>"; };
 		9E4F02D52291A1E80064081F /* DLFault.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLFault.h; sourceTree = "<group>"; };
 		9E4F02D62291A1E80064081F /* DLFault.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLFault.m; sourceTree = "<group>"; };
+		9E5545D2233664A3005D7AA6 /* DreamLispAll.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = DreamLispAll.xctestplan; sourceTree = "<group>"; };
+		9E5545D323366829005D7AA6 /* DLTrieTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLTrieTests.m; sourceTree = "<group>"; };
+		9E5545E12336AA98005D7AA6 /* DLResultTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLResultTypes.h; sourceTree = "<group>"; };
 		9E5D7B49225B947E00970453 /* DLTerminal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLTerminal.h; sourceTree = "<group>"; };
 		9E5D7B4A225B947E00970453 /* DLTerminal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLTerminal.m; sourceTree = "<group>"; };
 		9E67D32D23290D5300807F3E /* DLAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLAlgorithm.h; sourceTree = "<group>"; };
@@ -426,6 +431,7 @@
 				9E3538B1232CD79B00A37AB8 /* DLProxyProtocol.h */,
 				9E28AB9E2323FE9A00133494 /* DLRegex.h */,
 				9E28AB9F2323FE9A00133494 /* DLRegex.m */,
+				9E5545E12336AA98005D7AA6 /* DLResultTypes.h */,
 				9EBA29CA23295DB50002FF2B /* DLSlot.h */,
 				9EBA29C723295DB40002FF2B /* DLSlot.m */,
 				9E33AAB32275775800A6EB98 /* DLString.h */,
@@ -482,6 +488,7 @@
 		9E3A9D5922568B1300348529 /* DreamLispShellTests */ = {
 			isa = PBXGroup;
 			children = (
+				9E5545D2233664A3005D7AA6 /* DreamLispAll.xctestplan */,
 				9E741EDB22C14556009680E8 /* DLShellTests.m */,
 				9E326C8D22C7598F00B456A2 /* DLMockStdIOService.h */,
 				9E326C8E22C7598F00B456A2 /* DLMockStdIOService.m */,
@@ -580,6 +587,7 @@
 				9E741ECA22C1399C009680E8 /* dlisp */,
 				9E8FEB5622D1223F00717127 /* DLAlgorithmTest.m */,
 				9ED5349222B6991A004A2CB2 /* DLCacheTableTests.m */,
+				9E5545D323366829005D7AA6 /* DLTrieTests.m */,
 				9E36651E22BF6781003DC5EF /* DreamLispPerfTests.m */,
 				9E3A9D5A22568B1300348529 /* DreamLispTests.m */,
 				9E326C8A22C7524900B456A2 /* DLMockStdIOService.h */,
@@ -659,6 +667,7 @@
 				9E741EB922C12DCE009680E8 /* DLConst.h in Headers */,
 				9EE413C8232CED4400CECE0D /* NSString+DLCat.h in Headers */,
 				9E741EC022C12DCE009680E8 /* DLModuleTable.h in Headers */,
+				9E5545E22336AA98005D7AA6 /* DLResultTypes.h in Headers */,
 				9E741EA122C12D98009680E8 /* DLFileOps.h in Headers */,
 				9EBA29D023295DB70002FF2B /* DLInvocationArgument.h in Headers */,
 				9E1E697722C5377E00E52162 /* DLFileIOServiceDelegate.h in Headers */,
@@ -919,6 +928,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E5545D423366829005D7AA6 /* DLTrieTests.m in Sources */,
 				9E741E9E22C12C47009680E8 /* DreamLispPerfTests.m in Sources */,
 				9E741E9D22C12C42009680E8 /* DLCacheTableTests.m in Sources */,
 				9E741EA022C12D17009680E8 /* DreamLispTests.m in Sources */,

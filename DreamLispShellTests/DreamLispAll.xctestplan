@@ -1,0 +1,45 @@
+{
+  "configurations" : [
+    {
+      "id" : "2A6D1E34-4578-4131-9C90-02C71A7F080B",
+      "name" : "Test in random order",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "addressSanitizer" : {
+      "detectStackUseAfterReturn" : true,
+      "enabled" : true
+    },
+    "mallocScribbleEnabled" : true,
+    "nsZombieEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:DreamLisp.xcodeproj",
+      "identifier" : "9E3A9D4922568AFC00348529",
+      "name" : "DreamLispShell"
+    },
+    "testExecutionOrdering" : "random",
+    "undefinedBehaviorSanitizerEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:DreamLisp.xcodeproj",
+        "identifier" : "9E7942D622C12A310086A47F",
+        "name" : "DreamLispTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:DreamLisp.xcodeproj",
+        "identifier" : "9E3A9D5722568B1300348529",
+        "name" : "DreamLispShellTests"
+      }
+    }
+  ],
+  "version" : 1
+}
