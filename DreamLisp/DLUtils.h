@@ -52,15 +52,16 @@ NS_ASSUME_NONNULL_BEGIN
 + (DLHashMap *)decodeJSONFromData:(NSData *)data;
 + (DLString *)encodeJSON:(DLHashMap *)hashMap;
 + (NSData *)encodeDictionaryToJSONData:(NSMutableDictionary *)dict;
-#pragma mark String
+#pragma mark - String
 + (NSMutableArray *)stringToArray:(DLString *)string isNative:(BOOL)isNative;
 + (void)appendStringFromArray:(NSMutableArray *)array string:(DLString *)string;
 + (NSString *)promptWithModule:(NSString *)moduleName;
 + (NSString *)lispCaseToCamelCase:(NSString *)string;
 + (NSString *)camelCaseToLispCase:(NSString *)string;
-#pragma mark Network
++ (NSMutableArray *)splitString:(NSString *)string;
+#pragma mark - Network
 + (NSString *)httpMethodTypeToString:(DLKeyword *)methodType;
-#pragma mark Objective-C RT
+#pragma mark - Objective-C RT
 + (BOOL)isBoolNumber:(NSNumber *)num;
 + (id<DLDataProtocol>)convertFromFoundationTypeToDLType:(id)value;
 + (id)convertFromDLTypeToFoundationType:(id<DLDataProtocol>)value;
@@ -68,8 +69,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)updateSELForMethod:(DLMethod *)method;
 + (void)updateSelectorStringForMethod:(DLMethod *)method;
 + (void)updatePropertyAttr:(DLObjcPropertyAttr *)attr;
-+ (NSString *)toAccessorVar:(NSString *)string;
-+ (NSString *)toSetterName:(NSString *)string;
++ (NSString *)propertyNameFromSelector:(NSString *)selector;
++ (NSString *)toAccessorVarFromGetter:(NSString *)string;
++ (NSString *)toSetterName:(NSString *)propName isCamelCase:(BOOL)isCamelCase;
 + (DLInvocationArgument *)convertToInvocationArgument:(id<DLDataProtocol>)elem;
 - (instancetype)init NS_UNAVAILABLE;
 @end

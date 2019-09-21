@@ -51,4 +51,15 @@ static NSString *form = @"(defun collatz (n) (collatz n [])) (defun collatz (n a
     }];
 }
 
+- (void)testPerformanceSplitString {
+    NSString *str = @"NSString";
+    NSUInteger __block i = 0;
+    NSUInteger len = 100000;
+    [self measureBlock:^{
+        for (i = 0; i < len; i++) {
+            [DLUtils splitString:str];
+        }
+    }];
+}
+
 @end

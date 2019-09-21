@@ -14,6 +14,7 @@ static Protocol *_dlDataProtocol;
 static Protocol *_dlProxyProtocol;
 static NSRegularExpression *_lowerCaseRegex;
 static NSRegularExpression *_upperCaseRegex;
+static NSRegularExpression *_setterRegex;
 
 #pragma mark - CacheKey
 
@@ -53,6 +54,8 @@ static NSRegularExpression *_upperCaseRegex;
         _dlProxyProtocol = objc_getProtocol("DLProxyProtocol");
         _upperCaseRegex = [NSRegularExpression regularExpressionWithPattern:@"[A-Z]+" options:NSRegularExpressionUseUnixLineSeparators error:nil];
         _lowerCaseRegex = [NSRegularExpression regularExpressionWithPattern:@"[^A-Z]+" options:NSRegularExpressionUseUnixLineSeparators error:nil];
+        /* Regex that matches setter string form, eg: setUniverseName: */
+        _setterRegex = [NSRegularExpression regularExpressionWithPattern:@"set(\\w+)(:)" options:NSRegularExpressionUseUnixLineSeparators error:nil];
     }
 }
 
@@ -403,6 +406,27 @@ static NSRegularExpression *_upperCaseRegex;
     return [[NSString alloc] initWithFormat:@"λ %@> ", moduleName];
 }
 
+/*! Converts the pascal case string to camel case string. */
++ (NSString *)pascalCaseToCamelCase:(NSString *)string {
+    NSString *first = [string substringToIndex:1];
+    NSMutableString *str = [NSMutableString new];
+    if ([first isEqualToString:[first uppercaseString]]) {  /* => String starts with a caps */
+        [str appendString:[first lowercaseString]];
+        [str appendString:[string substringFromIndex:1]];
+    }
+    return str;
+}
+
++ (NSString *)lispCaseToPascalCase:(NSString *)string {
+    
+    return @"";
+}
+
+/*! Converts the given pascal case string to lisp case.  */
++ (NSString *)pascalCaseToLispCase:(NSString *)string {
+    return @"";
+}
+
 + (NSString *)lispCaseToCamelCase:(NSString *)string {
     NSArray *arr = [string componentsSeparatedByString:@"-"];
     NSUInteger i = 0;
@@ -469,6 +493,22 @@ static NSRegularExpression *_upperCaseRegex;
         }
     }
     return [[NSString alloc] initWithString:str];
+}
+
+/*!
+ Splits the given string into individual string components
+ @returns NSMutableArray
+ */
++ (NSMutableArray *)splitString:(NSString *)string {
+    NSUInteger len = [string length];
+    NSUInteger i = 0;
+    unichar uchar;
+    NSMutableArray *strxs = [NSMutableArray new];
+    for (i = 0; i < len; i++) {
+        uchar = [string characterAtIndex:i];
+        [strxs addObject:[[NSString alloc] initWithCharacters:&uchar length:1]];
+    }
+    return strxs;
 }
 
 #pragma mark - Network
@@ -636,35 +676,66 @@ static NSRegularExpression *_upperCaseRegex;
  string.
  */
 + (void)updatePropertyAttr:(DLObjcPropertyAttr *)attr {
-    attr.name = [attr.value UTF8String];
+    NSString *attrName = [self lispCaseToCamelCase:attr.value];
+    attr.name = [attrName UTF8String];
     attr.backingIvar = [[[NSString alloc] initWithFormat:@"_%s", attr.name] UTF8String];
     if (attr.hasCustomGetter) {
-        NSString *getterName = attr.customGetter.value;
+        NSString *getterName = [self lispCaseToCamelCase:attr.getter.value];
         attr.getterName = [getterName UTF8String];
     } else {
         attr.getterName = attr.name;
     }
     if (attr.hasCustomSetter) {
-        NSString *setterName = attr.customSetter.value;
+        NSString *setterName = [self lispCaseToCamelCase:attr.setter.value];
         attr.setterName = [setterName UTF8String];
     } else {
-        attr.setterName = [[self toSetterName:attr.value] UTF8String];
+        attr.setterName = [[self toSetterName:attrName isCamelCase:YES] UTF8String];
     }
     if (!attr.type) {
         attr.type = "@";  /* Type assumes object as its default value if none given. */
     }
 }
 
-+ (NSString *)toAccessorVar:(NSString *)string {
+/*!
+ Returns the property name corresponding to the given selector string, which is already in camel case.
+ Eg: setUniverseName: gives universeName
+ */
++ (NSString *)propertyNameFromSelector:(NSString *)selector {
+    BOOL flag = [selector hasSuffix:@":"];
+    if (!flag) return selector;  /* Not a setter string */
+    NSArray *matches = [_setterRegex matchesInString:selector options:0 range:NSMakeRange(0, selector.length)];
+    if (matches.count == 1) {
+        NSTextCheckingResult *match = matches.firstObject;
+        NSUInteger ranges = match.numberOfRanges;
+        NSString *propName = nil;
+        if (ranges == 3) {  /* we have a setter */
+            propName = [selector substringWithRange:[match rangeAtIndex:1]];
+            return [self pascalCaseToCamelCase:propName];
+        }
+    }
+    return selector;
+}
+
+/*! Converts the given getter string to accessor var with an @c _ */
++ (NSString *)toAccessorVarFromGetter:(NSString *)string {
     if ([string count] == 0) return string;
     NSString *first = [string substringWithRange:NSMakeRange(0, 1)];
     return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[[NSString alloc] initWithFormat:@"_%@", [first lowercaseString]]];
 }
 
-+ (NSString *)toSetterName:(NSString *)string {
-    if ([string count] == 0) return string;
-    NSString *first = [string substringWithRange:NSMakeRange(0, 1)];
-    return [string stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[[NSString alloc] initWithFormat:@"set%@:", [first uppercaseString]]];
+/*!
+ Converts the given property name to setter name with camel case. Set the @c isCamelCase if the string is already in camel case, else case conversion will be
+ done. */
++ (NSString *)toSetterName:(NSString *)propName isCamelCase:(BOOL)isCamelCase {
+    if ([propName isEmpty]) return propName;
+    propName = isCamelCase ? propName : [self lispCaseToCamelCase:propName];
+    NSString *first = [propName substringToIndex:1];
+    NSMutableString *str = [NSMutableString new];
+    [str appendString:@"set"];
+    [str appendString:[first uppercaseString]];
+    [str appendString:[propName substringFromIndex:1]];
+    [str appendString:@":"];
+    return str;
 }
 
 + (DLInvocationArgument *)convertToInvocationArgument:(id<DLDataProtocol>)elem {

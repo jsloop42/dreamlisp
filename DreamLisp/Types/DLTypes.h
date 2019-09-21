@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 /*! DLTypes */
 #import "DLDataProtocol.h"
+#import "DLResultTypes.h"
 #import "DLAtom.h"
 #import "DLBool.h"
 #import "DLFunction.h"

@@ -2493,4 +2493,20 @@
     XCTAssertEqualObjects([dl rep:@"(replace \"123\" \"+\" \"he123llo wo123rld\")"], @"\"he+llo wo+rld\"");
 }
 
+- (void)testSplitString {
+    NSString *string = @"NSString";
+    NSMutableArray *xs = [DLUtils splitString:string];
+    XCTAssertEqual([xs count], 8);
+    string = @"Pirate Love Daisies";
+    xs = [DLUtils splitString:string];
+    XCTAssertEqual([xs count], 19);
+}
+
+- (void)testStringWithChar {
+    NSString *string = @"Pirates";
+    unichar uchar = [string characterAtIndex:0];
+    NSString *str = [[NSString alloc] initWithCharacters:&uchar length:1];
+    XCTAssertTrue([str isEqual:@"P"]);
+}
+
 @end
