@@ -186,7 +186,6 @@ id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArr
     return arr;
 }
 
-
 - (BOOL)addMethod:(Class)cls name:(SEL)name imp:(IMP)imp type:(const char *)types {
     return class_addMethod(cls, name, imp, types);
 }
@@ -198,7 +197,8 @@ id dl_methodImp(id self, SEL _cmd, DreamLisp *dl, DLMethod *method, NSMutableArr
 
 /*!
  Returns the class object if the class is registered with the runtime. If the class is not registered, it calls the class handler callback and check for a
- second time to see if the class is registered. */
+ second time to see if the class is registered.
+ */
 - (id _Nullable)getClass:(NSString *)className {
     return objc_getClass([className UTF8String]);
 }

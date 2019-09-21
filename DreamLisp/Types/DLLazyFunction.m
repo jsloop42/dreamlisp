@@ -8,6 +8,10 @@
 
 #import "DLLazyFunction.h"
 
+/*!
+ Used for running a user defined function lazily.
+ NB: Feature not implemented fully. 
+ */
 @implementation DLLazyFunction {
     void (^_fn)(DLLazySequence *seq, NSMutableArray *xs);
     id<DLDataProtocol> _ast;
