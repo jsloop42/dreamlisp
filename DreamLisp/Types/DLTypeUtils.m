@@ -177,6 +177,22 @@
     return NSSelectorFromString(selStr);
 }
 
+/*!
+ Splits the given string into individual string components
+ @returns NSMutableArray
+ */
++ (NSMutableArray *)splitString:(NSString *)string {
+    NSUInteger len = [string length];
+    NSUInteger i = 0;
+    unichar uchar;
+    NSMutableArray *strxs = [NSMutableArray new];
+    for (i = 0; i < len; i++) {
+        uchar = [string characterAtIndex:i];
+        [strxs addObject:[[NSString alloc] initWithCharacters:&uchar length:1]];
+    }
+    return strxs;
+}
+
 @end
 
 NSInteger dl_sortAscending(id obj1, id obj2, void *context) {

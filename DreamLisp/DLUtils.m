@@ -479,14 +479,16 @@ static NSRegularExpression *_setterRegex;
             caps = [string substringWithRange:ucMatch.range];
             if ([caps length] > 1) {
                 NSString *prefix = [caps substringToIndex:caps.length - 1];
-                if ([DLState.prefixList containsObject:prefix]) {
-                    [str appendString:[prefix lowercaseString]];
-                    [str appendString:@"-"];
-                    [str appendString:[[caps substringFromIndex:caps.length - 1] lowercaseString]];
-                } else {
-                    [str appendString:[caps lowercaseString]];
-                    if (idx < size) [str appendString:@"-"];
-                }
+//                DLTrieSearchResult *res = [DLState.shared.prefixTree search:prefix isResultInCaps:NO];
+//                if (res.isExist) {
+//                    [str appendString:[prefix lowercaseString]];
+//                    [str appendString:@"-"];
+//                    [str appendString:[[caps substringFromIndex:caps.length - 1] lowercaseString]];
+//                } else {
+//                    //NSString *match = res.prefixes
+//                    [str appendString:[caps lowercaseString]];
+//                    if (idx < size) [str appendString:@"-"];
+//                }
             } else {
                 [str appendString:[caps lowercaseString]];
             }
@@ -790,6 +792,77 @@ static NSRegularExpression *_setterRegex;
     }
     return invoArg;
 }
+
+#pragma mark - Build Helpers
+
+/*!
+ Save state to a binary file.
+ */
+//+ (BOOL)serializePrefixState:(DLState *)state toFile:(NSString *)file {
+//    NSError *err;
+//    NSMutableDictionary *dict = [NSMutableDictionary new];
+//    [dict setObject:state forKey:@"state"];
+//    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:dict requiringSecureCoding:YES error:&err];
+//    if (err) {
+//        [DLLog error:@"Error serializing state"];
+//        return NO;
+//    }
+//    DLFileOps *fops = [DLFileOps new];
+//    [fops createFileIfNotExist:file];
+//    [fops openFileForWriting:file];
+//    [fops write:data];
+//    return YES;
+//}
+
+/*!
+ Restore the state from the serialized binary.
+ */
+//+ (DLState * _Nullable)deserializePrefixStateFromFile:(NSString *)file {
+//    NSData *data = [[NSData alloc] initWithContentsOfFile:file];
+//    NSError *err;
+//    NSSet *set = [[NSSet alloc] initWithArray:@[[NSMutableDictionary class], [DLState class], [DLTrie class], [NSValue class], [NSMutableArray class], [NSString class], [NSDecimalNumber class]]];
+//    //NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:data error:&err];
+//    //DLState *state = [unarchiver decodeObjectForKey:@"state"];
+//    DLState *state = [NSKeyedUnarchiver unarchivedObjectOfClasses:set fromData:data error:&err];
+//    if (err) {
+//        NSLog(@"Error deserializing state data: %@", err);
+//        return nil;
+//    }
+//    return state;
+//}
+
+/*!
+ Initializes prefix state from serialized data.
+ */
+//+ (BOOL)initializePrefixState {
+//    DLFileOps *fops = [DLFileOps new];
+//    DLState *state = [self deserializePrefixStateFromFile:[[NSString alloc] initWithFormat:@"%@%@", [fops projectRoot], DLConst.prefixBinFilePathFrag]];
+//    if (state) {
+//        DLState.shared.prefixTree = state.prefixTree;
+//        DLState.shared.userPrefixTree = state.userPrefixTree;
+//        return YES;
+//    }
+//    return NO;
+//}
+
+/*!
+ Loads the plist containing the prefix into the current state object and serialize it to a binary, which can then be loaded
+ there after.
+ */
+//+ (BOOL)generatePrefixState {
+//    DLFileOps *fops = [DLFileOps new];
+//    NSString *prefixPlistPath = [[NSString alloc] initWithFormat:@"%@%@", fops.projectRoot, DLConst.prefixPlistPathFrag];
+//    NSData *plistData = [[NSData alloc] initWithContentsOfFile:prefixPlistPath];
+//    NSError *err;
+//    NSMutableDictionary *plist = [NSPropertyListSerialization propertyListWithData:plistData options:NSPropertyListImmutable format:nil error:&err];
+//    NSArray *prefixList = [plist objectForKey:@"prefixes"];
+//    DLState *state = [DLState new];
+//    if (prefixList.count > 0) {
+//        [state initPrefixes:prefixList];
+//    }
+//    [self serializePrefixState:state toFile:[[NSString alloc] initWithFormat:@"%@%@", fops.projectRoot, DLConst.prefixBinFilePathFrag]];
+//    return YES;
+//}
 
 + (DLCacheTable *)cache {
     return _cache;

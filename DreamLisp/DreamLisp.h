@@ -16,6 +16,7 @@
 #import "DLFileOps.h"
 #import "DLIOService.h"
 #import "DLLogger.h"
+#import "DLPersistenceService.h"
 #import <objc/objc-api.h>
 
 NS_ASSUME_NONNULL_BEGIN

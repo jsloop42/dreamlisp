@@ -101,6 +101,43 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _name = [coder decodeObjectOfClass:[NSString class] forKey:@"DLTrie_name"];
+        //_value = [coder decodeObjectOfClass:[NSObject class] forKey:@"DLTrie_value"];
+        _weight = [coder decodeObjectOfClass:[NSDecimalNumber class] forKey:@"DLTrie_weight"];
+        NSValue *isPathExistsValue = [coder decodeObjectOfClass:[NSValue class] forKey:@"DLTrie_isPathExists"];
+        [isPathExistsValue getValue:&_isPathExist];
+        NSMutableDictionary *dict = [coder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"DLTrie_children"];
+        _children = [dict objectForKey:@"children"];
+        _sortHint = [coder decodeObjectOfClass:[NSData class] forKey:@"DLTrie_sortHint"];
+        NSValue *isRootValue = [coder decodeObjectOfClass:[NSValue class] forKey:@"DLTrie_isRoot"];
+        [isRootValue getValue:&_isRoot];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_name forKey:@"DLTrie_name"];
+    //[coder encodeObject:_value forKey:@"DLTrie_value"];
+    [coder encodeObject:_weight forKey:@"DLTrie_weight"];
+    NSValue *isPathExistValue = [[NSValue alloc] initWithBytes:&_isPathExist objCType:@encode(BOOL)];
+    [coder encodeObject:isPathExistValue forKey:@"DLTrie_isPathExists"];
+    [coder encodeObject:[@{@"children": _children} mutableCopy] forKey:@"DLTrie_children"];
+    [coder encodeObject:_sortHint forKey:@"DLTrie_sortHint"];
+    NSValue *isRootValue = [[NSValue alloc] initWithBytes:&_isRoot objCType:@encode(BOOL)];
+    [coder encodeObject:isRootValue forKey:@"DLTrie_isRoot"];
+}
+
+- (Class)classForCoder {
+    return [self class];
+}
+
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
 - (void)bootstrap {
     _children = [NSMutableArray new];
 }
@@ -110,7 +147,7 @@
  @returns BOOL Indicates if the operation was a success.
  */
 - (BOOL)insert:(NSString *)string {
-    NSMutableArray *strArr = [DLUtils splitString:string];
+    NSMutableArray *strArr = [DLTypeUtils splitString:string];
     NSUInteger len = [strArr count];
     NSUInteger i;
     NSString *unit = nil;
@@ -164,7 +201,7 @@
  @returns DLTrieSearchResult
  */
 - (DLTrieSearchResult *)search:(NSString *)string isResultInCaps:(BOOL)isCaps {
-    NSMutableArray *xs = [DLUtils splitString:string];
+    NSMutableArray *xs = [DLTypeUtils splitString:string];
     NSEnumerator *iter = [xs objectEnumerator];
     NSString *elem = nil;
     DLTrie *trie = self;
@@ -198,7 +235,7 @@
  @return DLRet
  */
 - (DLRet)delete:(NSString *)name {
-    NSMutableArray *arr = [DLUtils splitString:name];
+    NSMutableArray *arr = [DLTypeUtils splitString:name];
     NSEnumerator *iter = [arr objectEnumerator];
     DLTrie *trie = self;
     NSString *elem = nil;

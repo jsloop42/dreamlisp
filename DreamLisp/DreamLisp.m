@@ -22,6 +22,7 @@ static NSString *langVersion;
     DLNetwork *_network;
     DLFileOps *_fileOps;
     DLIOService* _ioService;
+    DLPersistenceService *_dbService;
     DLObjc *_objc;
     BOOL _isQuasiquoteMode;
     NSUInteger _quasiquoteDepth;
@@ -71,11 +72,19 @@ static NSString *langVersion;
     _printer = [DLPrinter new];
     _core = [DLCore new];
     [_core setDelegate:self];
+    _dbService = [DLPersistenceService new];
+    DreamLisp __weak *weakSelf = self;
+    [_dbService initPrefixStore:^{
+        DreamLisp *this = weakSelf;
+        [DLLog debug:@"Persistence store loaded callback"];
+        [this->_dbService updateStateWithPrefix];
+    }];
+    //[DLUtils initializePrefixState];  /* Deserialize prefix state */
     _objc = [DLObjc new];
     _network = [DLNetwork new];
     _env = [[DLEnv alloc] initWithModuleName:DLConst.defaultModuleName isUserDefined:NO];
     [_env setModuleDescription:[DLConst defaultModuleDescription]];
-    [DLState setCurrentModuleName:[_env moduleName]];
+    [DLState.shared setCurrentModuleName:[_env moduleName]];
     // Add modules to module table
     [self addModule:_env];  // default module
     [self addModule:[_core env]];  // core module
@@ -87,7 +96,7 @@ static NSString *langVersion;
     _repQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     [self setLoadFileToREPL];
     [self setEvalToREPL];
-    if (_isREPL) _prompt = [DLUtils promptWithModule:[DLState currentModuleName]];
+    if (_isREPL) _prompt = [DLUtils promptWithModule:[DLState.shared currentModuleName]];
 }
 
 - (void)setIsDebug:(BOOL)isDebug {
@@ -638,7 +647,7 @@ static NSString *langVersion;
     NSString *modName = [modSym value];
     DLEnv *modEnv = [[DLEnv alloc] initWithModuleName:modName isUserDefined:YES];
     [self addModule:modEnv];
-    [DLState setCurrentModuleName:[modEnv moduleName]];
+    [DLState.shared setCurrentModuleName:[modEnv moduleName]];
     _env = modEnv; // change env to current module
     [self updateModuleName:modName];
     // The third element onwards are imports and exports
@@ -774,7 +783,7 @@ static NSString *langVersion;
         if (modEnv) {
             _env = modEnv;
         } else {
-            [[self reader] setModuleName:[DLState currentModuleName]];
+            [[self reader] setModuleName:[DLState.shared currentModuleName]];
             [[[DLError alloc] initWithFormat:DLModuleNotFound, modName] throw];
         }
     }
@@ -785,7 +794,7 @@ static NSString *langVersion;
 /** Changes the prompt if in REPL and updates the @c currentModuleName */
 - (void)updateModuleName:(NSString *)moduleName {
     if (_isREPL) _prompt = [DLUtils promptWithModule:moduleName];
-    [DLState setCurrentModuleName:moduleName];
+    [DLState.shared setCurrentModuleName:moduleName];
     [[self reader] setModuleName:moduleName];
 }
 
@@ -796,7 +805,7 @@ static NSString *langVersion;
         return;
     }
     [self setEnv:env];
-    [DLState setCurrentModuleName:moduleName];
+    [DLState.shared setCurrentModuleName:moduleName];
     [[self reader] setModuleName:moduleName];
     if (_isREPL) _prompt = [DLUtils promptWithModule:moduleName];
 }

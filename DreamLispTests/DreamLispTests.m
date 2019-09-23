@@ -158,13 +158,13 @@
 }
 
 - (void)testJSSymbolComparison {
-    DLSymbol *sym1 = [[DLSymbol alloc] initWithName:@"a" moduleName:[DLState currentModuleName]];
+    DLSymbol *sym1 = [[DLSymbol alloc] initWithName:@"a" moduleName:[DLState.shared currentModuleName]];
     [sym1 setArity:-2];
-    DLSymbol *sym2 = [[DLSymbol alloc] initWithName:@"b" moduleName:[DLState currentModuleName]];
+    DLSymbol *sym2 = [[DLSymbol alloc] initWithName:@"b" moduleName:[DLState.shared currentModuleName]];
     [sym2 setArity:-1];
-    DLSymbol *sym3 = [[DLSymbol alloc] initWithName:@"c" moduleName:[DLState currentModuleName]];
+    DLSymbol *sym3 = [[DLSymbol alloc] initWithName:@"c" moduleName:[DLState.shared currentModuleName]];
     [sym3 setArity:0];
-    DLSymbol *sym4 = [[DLSymbol alloc] initWithName:@"d" moduleName:[DLState currentModuleName]];
+    DLSymbol *sym4 = [[DLSymbol alloc] initWithName:@"d" moduleName:[DLState.shared currentModuleName]];
     [sym4 setArity:1];
     NSMutableArray *arr = [@[sym3, sym4, sym2, sym1] mutableCopy];
     [arr sortUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
@@ -176,24 +176,24 @@
 }
 
 - (void)testJSSymbolProcess {
-    [DLState setCurrentModuleName:DLConst.defaultModuleName];
+    [DLState.shared setCurrentModuleName:DLConst.defaultModuleName];
     DLSymbol *sym = [DLSymbol processName:@"mod:func/1"];
-    XCTAssertEqualObjects([sym moduleName], [DLState currentModuleName]);
+    XCTAssertEqualObjects([sym moduleName], [DLState.shared currentModuleName]);
     XCTAssertEqualObjects([sym initialModuleName], @"mod");
     XCTAssertEqual([sym arity], 1);
     XCTAssertEqual([sym initialArity], 1);
     XCTAssertTrue([sym isQualified]);
     XCTAssertTrue([sym isFunction]);
     sym = [DLSymbol processName:@"func/1"];
-    XCTAssertEqualObjects([sym moduleName], [DLState currentModuleName]);
-    XCTAssertEqualObjects([sym initialModuleName], [DLState currentModuleName]);
+    XCTAssertEqualObjects([sym moduleName], [DLState.shared currentModuleName]);
+    XCTAssertEqualObjects([sym initialModuleName], [DLState.shared currentModuleName]);
     XCTAssertEqual([sym arity], 1);
     XCTAssertEqual([sym initialArity], 1);
     XCTAssertFalse([sym isQualified]);
     XCTAssertTrue([sym isFunction]);
     sym = [DLSymbol processName:@"var"];
-    XCTAssertEqualObjects([sym moduleName], [DLState currentModuleName]);
-    XCTAssertEqualObjects([sym initialModuleName], [DLState currentModuleName]);
+    XCTAssertEqualObjects([sym moduleName], [DLState.shared currentModuleName]);
+    XCTAssertEqualObjects([sym initialModuleName], [DLState.shared currentModuleName]);
     XCTAssertEqual([sym arity], -2);
     XCTAssertEqual([sym initialArity], -2);
     XCTAssertFalse([sym isQualified]);
@@ -313,7 +313,7 @@
     XCTAssertFalse([writeIO isFileExists:filePath]);
     XCTAssertNoThrow([writeIO createFileIfNotExist:filePath]);
     XCTAssertNoThrow([writeIO openFileForWriting:filePath]);
-    [writeIO write:content];
+    [writeIO writeString:content];
     [writeIO closeFile];
     XCTAssertNoThrow([readIO openFileForReading:filePath]);
     XCTAssertTrue([readIO hasNext]);
@@ -2040,7 +2040,7 @@
 - (void)testExportSymbolResolveFault {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
     [dl rep:@"(defmodule foo (export all))"];
-    XCTAssertEqualObjects([DLState currentModuleName], @"foo");
+    XCTAssertEqualObjects([DLState.shared currentModuleName], @"foo");
     DLEnv *fooEnv = [DLEnv envForModuleName:@"foo"];
     XCTAssertNotNil(fooEnv);
     XCTAssertEqualObjects([dl rep:@"(defun fa (n) n)"], @"foo:fa/1");
@@ -2048,7 +2048,7 @@
     [dl rep:@"(in-module \"user\")"];
     XCTAssertEqualObjects([dl rep:@"(foo:fa 21)"], @"21");
     [dl rep:@"(defmodule bar (export (ba 1) (bb 1)))"];
-    XCTAssertEqualObjects([DLState currentModuleName], @"bar");
+    XCTAssertEqualObjects([DLState.shared currentModuleName], @"bar");
     DLEnv *barEnv = [DLEnv envForModuleName:@"bar"];
     XCTAssertNotNil(barEnv);
     NSArray *barKeys = [[barEnv exportTable] allKeys];

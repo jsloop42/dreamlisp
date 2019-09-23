@@ -34,6 +34,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (class, retain) NSString *keyForNotificationValue;
 @property (class, retain) NSString *foundationPrefix;
 @property (class, retain) NSString *dreamLispPrefix;
+@property (class, retain) NSString *appHome;
+@property (class, retain) NSString *prefixBinFilePathFrag;
+@property (class, retain) NSString *prefixPlistPathFrag;
+@property (class, retain) NSString *prefixStoreName;
 + (NSString *)dlVersion;
 @end
 

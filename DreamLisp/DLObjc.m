@@ -342,7 +342,7 @@ static NSString *_moduleName = @"objcrt";
 }
 
 - (NSString *)generateAssocKey:(NSUInteger)hash {
-    return [[[NSString alloc] initWithFormat:@"dlproxy_%ld_%ld", [DLState assocObjectCounter], hash] autorelease];
+    return [[[NSString alloc] initWithFormat:@"dlproxy_%ld_%ld", [DLState.shared assocObjectCounter], hash] autorelease];
 }
 
 - (DLObject *)objectWithProxy:(id)proxy withClass:(DLClass *)cls {

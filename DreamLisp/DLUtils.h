@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class DLInvocationArgument;
 @class DLObjcPropertyAttr;
 @class DLMethod;
+@class DLTrie;
 
 @interface DLUtils : NSObject
 + (DLCacheTable *)cache;
@@ -73,6 +74,11 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)toAccessorVarFromGetter:(NSString *)string;
 + (NSString *)toSetterName:(NSString *)propName isCamelCase:(BOOL)isCamelCase;
 + (DLInvocationArgument *)convertToInvocationArgument:(id<DLDataProtocol>)elem;
+#pragma mark - Build Helpers
+//+ (BOOL)serializePrefixState:(DLState *)state toFile:(NSString *)file;
+//+ (DLState * _Nullable)deserializePrefixStateFromFile:(NSString *)file;
+//+ (BOOL)initializePrefixState;
+//+ (BOOL)generatePrefixState;
 - (instancetype)init NS_UNAVAILABLE;
 @end
 

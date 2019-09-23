@@ -7,8 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "DLUtils.h"
 #import "DLLogger.h"
+#import "DLError.h"
 #import "DLFileIOServiceDelegate.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -25,9 +25,17 @@ typedef NS_ENUM(NSUInteger, DLFileMode) {
 @end
 
 @interface DLFileOps : NSObject
+@property (nonatomic, readwrite, retain) NSString *path;
 - (instancetype)init;
 - (BOOL)isDirectoryExists:(NSString *)path;
 - (BOOL)isFileExists:(NSString *)path;
+- (NSString *)currentDirectoryPath;
+- (NSString *)projectRoot;
+- (NSBundle *)mainBundle;
+- (NSString *)resourcePath;
+- (NSInteger)fileSize;
+- (NSURL *)applicationSupportDirectory;
+- (BOOL)copyFile:(NSURL *)sourceURL toURL:(NSURL *)destinationURL;
 - (void)createDirectoryWithIntermediate:(NSString *)path;
 - (void)createFileIfNotExist:(NSString *)path;
 - (void)openFileForReading:(NSString *)path;
@@ -35,13 +43,11 @@ typedef NS_ENUM(NSUInteger, DLFileMode) {
 - (void)openFileForWriting:(NSString *)path;
 - (void)closeFile;
 - (NSMutableArray<DLFileResult *> *)loadFileFromPath:(NSMutableArray *)locations isConcurrent:(BOOL)isConcurrent isLookup:(BOOL)isLookup;
-- (NSString *)currentDirectoryPath;
-- (NSBundle *)mainBundle;
-- (NSString *)resourcePath;
 - (BOOL)hasNext;
 - (NSString *)readLine;
 - (void)append:(NSString *)string;
-- (void)write:(NSString *)string;
+- (void)writeString:(NSString *)string;
+- (void)write:(NSData *)data;
 - (BOOL)delete:(NSString *)path;
 @end
 

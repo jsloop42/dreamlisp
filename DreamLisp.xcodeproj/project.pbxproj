@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9E1E66F82337E8160067A5FB /* DLBuildHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1E66F72337E8160067A5FB /* DLBuildHelper.m */; };
 		9E1E697722C5377E00E52162 /* DLFileIOServiceDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E1E697522C5377E00E52162 /* DLFileIOServiceDelegate.h */; };
 		9E1E697B22C5395500E52162 /* DLStdIOServiceDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E1E697A22C5395400E52162 /* DLStdIOServiceDelegate.h */; };
 		9E1E697E22C53EAB00E52162 /* DLIOService.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E1E697C22C53EAB00E52162 /* DLIOService.h */; };
@@ -34,8 +35,15 @@
 		9E4E10AA232ACE530027C2F5 /* DLMethod.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4E10A8232ACE530027C2F5 /* DLMethod.m */; };
 		9E4E10AD232AD5E30027C2F5 /* DLObjcMethodAttr.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E4E10AB232AD5E30027C2F5 /* DLObjcMethodAttr.h */; };
 		9E4E10AE232AD5E30027C2F5 /* DLObjcMethodAttr.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4E10AC232AD5E30027C2F5 /* DLObjcMethodAttr.m */; };
+		9E4F69C22339455B007B3B49 /* DreamLisp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E7942CF22C12A310086A47F /* DreamLisp.framework */; };
+		9E4F69D023396992007B3B49 /* DLPrefix+CoreDataClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E4F69CF23396992007B3B49 /* DLPrefix+CoreDataClass.h */; };
+		9E4F69D42339699D007B3B49 /* DLPrefix+CoreDataProperties.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F69D22339699C007B3B49 /* DLPrefix+CoreDataProperties.m */; };
+		9E4F69D52339699D007B3B49 /* DLPrefix+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F69D12339699C007B3B49 /* DLPrefix+CoreDataClass.m */; };
 		9E5545D423366829005D7AA6 /* DLTrieTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5545D323366829005D7AA6 /* DLTrieTests.m */; };
 		9E5545E22336AA98005D7AA6 /* DLResultTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E5545E12336AA98005D7AA6 /* DLResultTypes.h */; };
+		9E5739EF233912BD0057BCE7 /* DLPersistenceService.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E5739ED233912BC0057BCE7 /* DLPersistenceService.h */; };
+		9E5739F0233912BD0057BCE7 /* DLPersistenceService.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5739EE233912BC0057BCE7 /* DLPersistenceService.m */; };
+		9E5739F7233927F50057BCE7 /* DLPrefixModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9E5739F5233927F50057BCE7 /* DLPrefixModel.xcdatamodeld */; };
 		9E5D7B4B225B947E00970453 /* DLTerminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* DLTerminal.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E5D7B4C225B947E00970453 /* DLTerminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* DLTerminal.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E67D32E23290D5500807F3E /* DLAlgorithm.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E67D32D23290D5300807F3E /* DLAlgorithm.h */; };
@@ -109,7 +117,6 @@
 		9E741ED122C13A13009680E8 /* i.test.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECD22C139B1009680E8 /* i.test.dlisp */; };
 		9E741ED222C13A13009680E8 /* module-test.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECE22C139B9009680E8 /* module-test.dlisp */; };
 		9E741ED322C13A13009680E8 /* scope.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E741ECF22C139BC009680E8 /* scope.dlisp */; };
-		9E741ED422C140C0009680E8 /* DreamLisp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E7942CF22C12A310086A47F /* DreamLisp.framework */; };
 		9E741ED522C140CA009680E8 /* DreamLisp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E7942CF22C12A310086A47F /* DreamLisp.framework */; };
 		9E741EDC22C14556009680E8 /* DLShellTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E741EDB22C14556009680E8 /* DLShellTests.m */; };
 		9E741EE322C150DA009680E8 /* DLShellConst.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E741EE222C150DA009680E8 /* DLShellConst.m */; };
@@ -184,6 +191,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9E1E66F62337C5340067A5FB /* Data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Data; sourceTree = "<group>"; };
+		9E1E66F72337E8160067A5FB /* DLBuildHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLBuildHelper.m; sourceTree = "<group>"; };
 		9E1E697522C5377E00E52162 /* DLFileIOServiceDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLFileIOServiceDelegate.h; sourceTree = "<group>"; };
 		9E1E697A22C5395400E52162 /* DLStdIOServiceDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLStdIOServiceDelegate.h; sourceTree = "<group>"; };
 		9E1E697C22C53EAB00E52162 /* DLIOService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLIOService.h; sourceTree = "<group>"; };
@@ -267,9 +276,16 @@
 		9E4E10AC232AD5E30027C2F5 /* DLObjcMethodAttr.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLObjcMethodAttr.m; sourceTree = "<group>"; };
 		9E4F02D52291A1E80064081F /* DLFault.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLFault.h; sourceTree = "<group>"; };
 		9E4F02D62291A1E80064081F /* DLFault.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLFault.m; sourceTree = "<group>"; };
+		9E4F69CF23396992007B3B49 /* DLPrefix+CoreDataClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DLPrefix+CoreDataClass.h"; sourceTree = "<group>"; };
+		9E4F69D12339699C007B3B49 /* DLPrefix+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "DLPrefix+CoreDataClass.m"; path = "/Users/jsloop/dev/DreamLisp/DreamLisp/Model/DLPrefix+CoreDataClass.m"; sourceTree = "<absolute>"; };
+		9E4F69D22339699C007B3B49 /* DLPrefix+CoreDataProperties.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "DLPrefix+CoreDataProperties.m"; path = "/Users/jsloop/dev/DreamLisp/DreamLisp/Model/DLPrefix+CoreDataProperties.m"; sourceTree = "<absolute>"; };
+		9E4F69D32339699D007B3B49 /* DLPrefix+CoreDataProperties.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "DLPrefix+CoreDataProperties.h"; path = "/Users/jsloop/dev/DreamLisp/DreamLisp/Model/DLPrefix+CoreDataProperties.h"; sourceTree = "<absolute>"; };
 		9E5545D2233664A3005D7AA6 /* DreamLispAll.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = DreamLispAll.xctestplan; sourceTree = "<group>"; };
 		9E5545D323366829005D7AA6 /* DLTrieTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLTrieTests.m; sourceTree = "<group>"; };
 		9E5545E12336AA98005D7AA6 /* DLResultTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLResultTypes.h; sourceTree = "<group>"; };
+		9E5739ED233912BC0057BCE7 /* DLPersistenceService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLPersistenceService.h; sourceTree = "<group>"; };
+		9E5739EE233912BC0057BCE7 /* DLPersistenceService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLPersistenceService.m; sourceTree = "<group>"; };
+		9E5739F6233927F50057BCE7 /* DLPrefixModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DLPrefixModel.xcdatamodel; sourceTree = "<group>"; };
 		9E5D7B49225B947E00970453 /* DLTerminal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLTerminal.h; sourceTree = "<group>"; };
 		9E5D7B4A225B947E00970453 /* DLTerminal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLTerminal.m; sourceTree = "<group>"; };
 		9E67D32D23290D5300807F3E /* DLAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLAlgorithm.h; sourceTree = "<group>"; };
@@ -344,7 +360,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E741ED422C140C0009680E8 /* DreamLisp.framework in Frameworks */,
+				9E4F69C22339455B007B3B49 /* DreamLisp.framework in Frameworks */,
 				9E281CF8225A4C790038A5AF /* libreadline.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -450,6 +466,7 @@
 		9E3A9D4122568AFC00348529 = {
 			isa = PBXGroup;
 			children = (
+				9E1E66F62337C5340067A5FB /* Data */,
 				9E30555C2261C4DC001D4597 /* build */,
 				9E281D02225A608D0038A5AF /* test */,
 				9E7942D022C12A310086A47F /* DreamLisp */,
@@ -497,6 +514,18 @@
 			path = DreamLispShellTests;
 			sourceTree = "<group>";
 		};
+		9E5739F1233915A90057BCE7 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				9E4F69CF23396992007B3B49 /* DLPrefix+CoreDataClass.h */,
+				9E4F69D12339699C007B3B49 /* DLPrefix+CoreDataClass.m */,
+				9E4F69D32339699D007B3B49 /* DLPrefix+CoreDataProperties.h */,
+				9E4F69D22339699C007B3B49 /* DLPrefix+CoreDataProperties.m */,
+				9E5739F5233927F50057BCE7 /* DLPrefixModel.xcdatamodeld */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		9E70861722ACF1CB00ADD464 /* Libs */ = {
 			isa = PBXGroup;
 			children = (
@@ -521,6 +550,7 @@
 		9E7942D022C12A310086A47F /* DreamLisp */ = {
 			isa = PBXGroup;
 			children = (
+				9E5739F1233915A90057BCE7 /* Model */,
 				9E70861722ACF1CB00ADD464 /* Libs */,
 				9E30554122612BA4001D4597 /* Types */,
 				9E67D32D23290D5300807F3E /* DLAlgorithm.h */,
@@ -563,6 +593,8 @@
 				9EBA29BB23295BFB0002FF2B /* DLObjc.m */,
 				9EBA29BD23295BFC0002FF2B /* DLObjcRT.h */,
 				9EBA29BC23295BFC0002FF2B /* DLObjcRT.m */,
+				9E5739ED233912BC0057BCE7 /* DLPersistenceService.h */,
+				9E5739EE233912BC0057BCE7 /* DLPersistenceService.m */,
 				9E3A9D6F22568DB100348529 /* DLPrinter.h */,
 				9E3A9D7022568DB100348529 /* DLPrinter.m */,
 				9E3A9D7322568DBD00348529 /* DLReader.h */,
@@ -585,6 +617,7 @@
 			isa = PBXGroup;
 			children = (
 				9E741ECA22C1399C009680E8 /* dlisp */,
+				9E1E66F72337E8160067A5FB /* DLBuildHelper.m */,
 				9E8FEB5622D1223F00717127 /* DLAlgorithmTest.m */,
 				9ED5349222B6991A004A2CB2 /* DLCacheTableTests.m */,
 				9E5545D323366829005D7AA6 /* DLTrieTests.m */,
@@ -622,6 +655,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E5739EF233912BD0057BCE7 /* DLPersistenceService.h in Headers */,
 				9E741EBB22C12DCE009680E8 /* DLEnv.h in Headers */,
 				9E69232323255DFF00B12A65 /* DLNetwork.h in Headers */,
 				9E741EAE22C12DBA009680E8 /* DLHashMap.h in Headers */,
@@ -648,6 +682,7 @@
 				9E3538B3232CD79B00A37AB8 /* DLProxyProtocol.h in Headers */,
 				9E4E10A9232ACE530027C2F5 /* DLMethod.h in Headers */,
 				9E1E697E22C53EAB00E52162 /* DLIOService.h in Headers */,
+				9E4F69D023396992007B3B49 /* DLPrefix+CoreDataClass.h in Headers */,
 				9E741EB422C12DBA009680E8 /* DLSymbol.h in Headers */,
 				9E741EAB22C12DBA009680E8 /* DLDataProtocol.h in Headers */,
 				9E741EC222C12DCE009680E8 /* DLReader.h in Headers */,
@@ -884,6 +919,7 @@
 				9EE413CA232CED4400CECE0D /* NSString+DLCat.m in Sources */,
 				9EE413C5232CED4400CECE0D /* NSMutableArray+DLCat.m in Sources */,
 				9E8FEB5B22D243FD00717127 /* DLAlgorithm.m in Sources */,
+				9E5739F7233927F50057BCE7 /* DLPrefixModel.xcdatamodeld in Sources */,
 				9E741E8222C12C23009680E8 /* DLAtom.m in Sources */,
 				9EBA29D523295DB70002FF2B /* DLObject.m in Sources */,
 				9EBA29BF23295BFD0002FF2B /* DLObjc.m in Sources */,
@@ -895,6 +931,7 @@
 				9E741E9822C12C38009680E8 /* DLPrinter.m in Sources */,
 				9E741E8922C12C23009680E8 /* DLNil.m in Sources */,
 				9EBA29B9232921F20002FF2B /* DLNotificationData.m in Sources */,
+				9E4F69D52339699D007B3B49 /* DLPrefix+CoreDataClass.m in Sources */,
 				9EE413CD232CED4400CECE0D /* NSMapTable+DLCat.m in Sources */,
 				9E741E8B22C12C23009680E8 /* DLString.m in Sources */,
 				9EE413C6232CED4400CECE0D /* NSNumber+DLCat.m in Sources */,
@@ -914,6 +951,7 @@
 				9E741E8622C12C23009680E8 /* DLHashMap.m in Sources */,
 				9E9E9D0A2330197000308606 /* DLTrie.m in Sources */,
 				9E741E9522C12C38009680E8 /* DreamLisp.m in Sources */,
+				9E4F69D42339699D007B3B49 /* DLPrefix+CoreDataProperties.m in Sources */,
 				9E741E8322C12C23009680E8 /* DLBool.m in Sources */,
 				9EE413C7232CED4400CECE0D /* NSArray+DLCat.m in Sources */,
 				9E741E9322C12C38009680E8 /* DLFileOps.m in Sources */,
@@ -921,6 +959,7 @@
 				9E28ABA12323FE9A00133494 /* DLRegex.m in Sources */,
 				9E741E9C22C12C38009680E8 /* DLUtils.m in Sources */,
 				9E1E697F22C53EAB00E52162 /* DLIOService.m in Sources */,
+				9E5739F0233912BD0057BCE7 /* DLPersistenceService.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -928,6 +967,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E1E66F82337E8160067A5FB /* DLBuildHelper.m in Sources */,
 				9E5545D423366829005D7AA6 /* DLTrieTests.m in Sources */,
 				9E741E9E22C12C47009680E8 /* DreamLispPerfTests.m in Sources */,
 				9E741E9D22C12C42009680E8 /* DLCacheTableTests.m in Sources */,
@@ -1084,7 +1124,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.estoapps.dreamlisp.dlispshell;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dreamlisp.dlisp.shell;
 				PRODUCT_NAME = dlisp;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -1105,7 +1145,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.estoapps.dreamlisp.dlispshell;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dreamlisp.dlisp.shell;
 				PRODUCT_NAME = dlisp;
 				SWIFT_VERSION = 5.0;
 			};
@@ -1155,7 +1195,7 @@
 		9E7942E022C12A320086A47F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1177,7 +1217,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.estoapps.dreamlisp.dlisplib;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dreamlisp.dlisp.dllib;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1188,7 +1228,7 @@
 		9E7942E122C12A320086A47F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1206,7 +1246,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.estoapps.dreamlisp.dlisplib;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dreamlisp.dlisp.dllib;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1303,6 +1343,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		9E5739F5233927F50057BCE7 /* DLPrefixModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				9E5739F6233927F50057BCE7 /* DLPrefixModel.xcdatamodel */,
+			);
+			currentVersion = 9E5739F6233927F50057BCE7 /* DLPrefixModel.xcdatamodel */;
+			path = DLPrefixModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 9E3A9D4222568AFC00348529 /* Project object */;
 }

@@ -10,6 +10,7 @@
 
 NSString * const READ_ERROR = @"READ_ERROR";
 NSString * const READ_ERROR_MSG = @"Error reading file.";
+static NSString *_projectRoot;
 
 @implementation DLFileResult {
     NSUInteger _index;
@@ -55,6 +56,8 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     BOOL _isFileClosed;
 }
 
+@synthesize path = _path;
+
 - (instancetype)init {
     self = [super init];
     if (self) [self bootstrap];
@@ -80,21 +83,82 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     return [_fm fileExistsAtPath:path];
 }
 
-- (void)createFileIfNotExist:(NSString *)path {
-    _path = path;
-    if (![self isFileExists:_path]) [_fm createFileAtPath:_path contents:nil attributes:nil];
-}
-
 - (BOOL)isDirectoryExists:(NSString *)path {
     BOOL isDir = YES;
     return [_fm fileExistsAtPath:path isDirectory:&isDir];
 }
+
+/** Returns the current working directory. */
+- (NSString *)currentDirectoryPath {
+    return [_fm currentDirectoryPath];
+}
+
+/*!
+ Returns the project root directory path.
+ */
+- (NSString *)projectRoot {
+    if (!_projectRoot) {
+        NSString *fileName = @__FILE__;
+        _projectRoot = [[NSString alloc] initWithFormat:@"/%@",
+                        [[[fileName pathComponents] objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(1, 4)]]
+                         componentsJoinedByString:@"/"]];
+    }
+    return _projectRoot;
+}
+
+/** Return the path from where the executable is placed. */
+- (NSBundle *)mainBundle {
+    return [NSBundle bundleForClass:[self class]];
+}
+
+/** Returns the main bundle resource path. */
+- (NSString *)resourcePath {
+    return [[self mainBundle] resourcePath];
+}
+
+/*!
+ Returns the file size of the currently open file. If error, returns NSNotFound.
+ */
+- (NSInteger)fileSize {
+    NSError *err;
+    if (_path) {
+        NSDictionary *attrs = [_fm attributesOfItemAtPath:_path error:&err];
+        if (err) {
+            NSLog(@"Error getting file attributes: %@", err);
+            return NSNotFound;
+        }
+        return [attrs fileSize];
+    }
+    return NSNotFound;
+}
+
+/*!
+ Returns the Application Support directory path.
+ */
+- (NSURL *)applicationSupportDirectory {
+    return [[_fm URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask] lastObject];
+}
+
+/*!
+ Copies the given source file to the destination file.
+ */
+- (BOOL)copyFile:(NSURL *)sourceURL toURL:(NSURL *)destinationURL {
+    NSError *err;
+    return [_fm copyItemAtURL:sourceURL toURL:destinationURL error:&err];
+}
+
+#pragma IO Ops
 
 - (void)createDirectoryWithIntermediate:(NSString *)path {
     NSError *err = nil;
     BOOL ret = NO;
     ret = [_fm createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&err];
     if (!ret || err) [[[[DLError alloc] initWithUserInfo:[err userInfo]] autorelease] throw];
+}
+
+- (void)createFileIfNotExist:(NSString *)path {
+    _path = path;
+    if (![self isFileExists:_path]) [_fm createFileAtPath:_path contents:nil attributes:nil];
 }
 
 /*!
@@ -187,26 +251,6 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     return contents;
 }
 
-/** Returns the current working directory. */
-- (NSString *)currentDirectoryPath {
-    return [_fm currentDirectoryPath];
-}
-
-/** Return the path from where the executable is placed. */
-- (NSBundle *)mainBundle {
-    return [NSBundle bundleForClass:[self class]];
-}
-
-/** Returns the main bundle resource path. */
-- (NSString *)resourcePath {
-    return [[self mainBundle] resourcePath];
-}
-
-/** Checks if the there are contents left for reading. */
-- (BOOL)hasNext {
-    return _start < _buff;
-}
-
 /** Reads a line of string. */
 - (NSString *)readLine {
     NSData *line = nil;
@@ -226,10 +270,15 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     return [[[NSString alloc] initWithData:line encoding:NSUTF8StringEncoding] autorelease];
 }
 
+/** Checks if the there are contents left for reading. */
+- (BOOL)hasNext {
+    return _start < _buff;
+}
+
 - (void)append:(NSString *)string {
     if (_appendFileHandle) {
         [_appendFileHandle seekToEndOfFile];
-        NSData *data = [[NSData alloc] initWithBytes:[string cStringUsingEncoding:NSUTF8StringEncoding] length:[string count]];
+        NSData *data = [[NSData alloc] initWithBytes:[string cStringUsingEncoding:NSUTF8StringEncoding] length:[string length]];
         if (data) {
             [_appendFileHandle writeData:data];
             [data release];
@@ -241,8 +290,12 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 }
 
 /** Writes the given string to the file. */
-- (void)write:(NSString *)string {
-    [_writeFileHandle writeData:[NSData dataWithBytes:[string UTF8String] length:[string length]]];
+- (void)writeString:(NSString *)string {
+    [self write:[NSData dataWithBytes:[string UTF8String] length:[string length]]];
+}
+
+- (void)write:(NSData *)data {
+    [_writeFileHandle writeData:data];
 }
 
 /** Deletes the file at the given path. */
@@ -256,7 +309,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 #pragma mark - FileIOServiceDelegate
 
 - (NSString *)readFile:(NSString *)path {
-    DLFileResult *res = [[self loadFileFromPath:[[@[path] mutableCopy] autorelease] isConcurrent:NO isLookup:NO] first];
+    DLFileResult *res = [[self loadFileFromPath:[[@[path] mutableCopy] autorelease] isConcurrent:NO isLookup:NO] firstObject];
     return [res content];
 }
 

@@ -8,92 +8,88 @@
 
 #import "DLState.h"
 
-static NSUInteger _genSymCounter = 0;
-static BOOL _isVerbose = NO;
-static NSString *_currentModuleName;
-static NSUInteger _dlObjCounter = 0;
-static NSMutableArray *_prefixList;
+static DLState *_state;
 
-@implementation DLState
-
-#pragma mark Class methods
-
-@dynamic prefixList;
-
-+ (void)initialize {
-    if (self == [self class]) {
-        _prefixList = [@[DLConst.foundationPrefix, DLConst.dreamLispPrefix] mutableCopy];
-    }
+@implementation DLState {
+    NSUInteger _genSymCounter;
+    NSUInteger _dlObjCounter;
 }
 
-/** Increments the auto gensymn counter. */
-+ (NSUInteger)counter {
+@synthesize currentGenSymCount = _genSymCounter;
+@synthesize currentAssocObjectCount = _dlObjCounter;
+
++ (instancetype)shared {
     @synchronized (self) {
-        return ++_genSymCounter;
+        if (!_state) {
+            _state = [DLState new];
+        }
+        return _state;
     }
 }
 
-+ (NSUInteger)currentGenSymCount {
-    return _genSymCounter;
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        _prefixTree = [DLTrie new];
+        _userPrefixTree = [DLTrie new];
+        _genSymCounter = 0;
+        _isVerbose = NO;
+        _dlObjCounter = 0;
+    }
+    return self;
 }
 
-+ (void)setIsVerbose:(BOOL)flag {
-    _isVerbose = flag;
-}
-
-+ (BOOL)isVerbose {
-    return _isVerbose;
-}
-
-+ (NSString *)currentModuleName {
-    return _currentModuleName;
-}
-
-+ (void)setCurrentModuleName:(NSString *)name {
-    @synchronized (self) {
-        _currentModuleName = name;
+/*!
+ Initializes the internal trie with the prefixes from the given array.
+ */
+- (void)initPrefixes:(NSArray *)prefixes {
+    NSEnumerator *iter = [prefixes objectEnumerator];
+    NSString *str = nil;
+    while ((str = [iter nextObject]) !=  nil) {
+        [_prefixTree insert:str];
     }
 }
 
-/*! Used to generated unique count for a DLObject's associated object key */
-+ (NSUInteger)assocObjectCounter {
-    @synchronized (self) {
-        return ++_dlObjCounter;
+#pragma mark - Gensym Counter
+
+- (NSUInteger)genSymCounter {
+    return ++_genSymCounter;
+}
+
+#pragma mark - Assoc Object Counter
+
+- (NSUInteger)assocObjectCounter {
+    return ++_dlObjCounter;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _prefixTree = [coder decodeObjectOfClass:[DLTrie classForCoder] forKey:@"DLState_prefixTree"];
+        _userPrefixTree = [coder decodeObjectOfClass:[DLTrie classForCoder] forKey:@"DLState_userPrefixTree"];
     }
+    return self;
 }
 
-+ (NSUInteger)currentAssocObjectCounter {
-    return _dlObjCounter;
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:_prefixTree forKey:@"DLState_prefixTree"];
+    [coder encodeObject:_userPrefixTree forKey:@"DLState_userPrefixTree"];
 }
 
-+ (NSMutableArray *)prefixList {
-    return _prefixList;
+- (Class)classForCoder {
+    return [self class];
 }
 
-+ (void)setPrefixList:(NSMutableArray *)prefixList {
-    _prefixList = prefixList;
++ (BOOL)supportsSecureCoding {
+    return YES;
 }
 
-+ (void)addPrefix:(NSString *)prefix {
-    if (![_prefixList containsObject:prefix]) [_prefixList addObject:prefix];
+- (void)addPrefix:(NSString *)prefix {
+    [_userPrefixTree insert:prefix];
 }
 
-+ (void)removePrefix:(NSString *)prefix {
-    [_prefixList removeObject:prefix];
-}
-
-#pragma mark Instance methods
-
-/** Increments the auto gensymn counter. */
-- (NSUInteger)counter {
-    @synchronized (self) {
-        return ++_genSymCounter;
-    }
-}
-
-/** Return the current auto gensymn counter. */
-- (NSInteger)currentCounter {
-    return _genSymCounter;
+- (void)removePrefix:(NSString *)prefix {
+    [_userPrefixTree delete:prefix];
 }
 
 @end

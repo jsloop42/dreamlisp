@@ -101,7 +101,7 @@
 }
 
 - (void)bootstrap {
-    _moduleName = [DLState currentModuleName];
+    _moduleName = [DLState.shared currentModuleName];
     _isImported = NO;
     _isMutable = NO;
 }

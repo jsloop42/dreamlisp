@@ -2250,7 +2250,7 @@ double dmod(double a, double n) {
             if ([xs count] == 1) {
                 name = [self nameFromObject:[xs first]];
             }
-            return [[DLSymbol alloc] initWithName:[[NSString alloc] initWithFormat:@"%@__%ld", name, [DLState counter]]];
+            return [[DLSymbol alloc] initWithName:[[NSString alloc] initWithFormat:@"%@__%ld", name, [DLState.shared genSymCounter]]];
         }
     };
     fn = [[DLFunction alloc] initWithFn:gensym argCount:-1 name:@"gensym/n"];
@@ -2290,7 +2290,7 @@ double dmod(double a, double n) {
         NSString *path = [filePath value];
         [fops createFileIfNotExist:path];
         [fops openFileForWriting:path];
-        [fops write:[aString value]];
+        [fops writeString:[aString value]];
         [fops closeFile];
         return [[DLBool alloc] initWithBool:YES];
     };
@@ -2633,7 +2633,7 @@ double dmod(double a, double n) {
     #pragma mark current-module-name
     id<DLDataProtocol>(^currentModuleName)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
-            return [[DLString alloc] initWithString:[DLState currentModuleName]];
+            return [[DLString alloc] initWithString:[DLState.shared currentModuleName]];
         }
     };
     fn = [[DLFunction alloc] initWithFn:currentModuleName argCount:0 name:@"current-module-name/0"];

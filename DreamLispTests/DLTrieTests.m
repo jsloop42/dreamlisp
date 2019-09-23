@@ -36,6 +36,10 @@
     DLTrieSearchResult *result = [trie search:@"NSURL" isResultInCaps:YES];
     XCTAssertTrue(result.isExist);
     XCTAssertEqual(result.prefixes.count, 2);
+    /* near match */
+    result = [trie search:@"NSURLConnection" isResultInCaps:YES];
+    XCTAssertFalse(result.isExist);
+    XCTAssertEqual(result.prefixes.count, 2);
 }
 
 - (void)testTrieDelete {
@@ -49,7 +53,6 @@
     result = [trie search:@"NSURLSession" isResultInCaps:YES];
     XCTAssertFalse(result.isExist);
 }
-
 
 - (void)notestPerformanceExample {
     [self measureBlock:^{

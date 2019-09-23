@@ -7,8 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "DLUtils.h"
 #import "DLResultTypes.h"
+#import "NSMutableArray+DLCat.h"
+#import "DLTypeUtils.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -18,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, assign) BOOL isCaps;
 @end
 
-@interface DLTrie : NSObject
+@interface DLTrie : NSObject<NSSecureCoding>
 @property (nonatomic, readwrite, retain) NSString *name;
 @property (nonatomic, readwrite, retain) id value;
 @property (nonatomic, readwrite, retain) NSDecimalNumber *weight;

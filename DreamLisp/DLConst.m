@@ -30,6 +30,10 @@ NSString *_keyForNotificationKey;
 NSString *_keyForNotificationValue;
 NSString *_foundationPrefix;
 NSString *_dreamLispPrefix;
+NSString *_appHome;
+NSString *_prefixBinFilePathFrag;
+NSString *_prefixPlistPathFrag;
+NSString *_prefixStoreName;
 
 @implementation DLConst
 
@@ -57,6 +61,13 @@ NSString *_dreamLispPrefix;
 @dynamic keyForNotificationValue;
 @dynamic foundationPrefix;
 @dynamic dreamLispPrefix;
+@dynamic prefixBinFilePathFrag;
+@dynamic prefixPlistPathFrag;
+@dynamic prefixStoreName;
+/*!
+ The dlisp home dir where any user configuration, history will be stored.
+ */
+@dynamic appHome;
 
 + (void)initialize {
     if (self == [self class]) {
@@ -83,6 +94,10 @@ NSString *_dreamLispPrefix;
         _keyForNotificationValue = @"args";
         _foundationPrefix = @"NS";
         _dreamLispPrefix = @"DL";
+        _appHome = @"/.dlisp";
+        _prefixBinFilePathFrag = @"/Data/Prefixes";
+        _prefixPlistPathFrag = @"/Data/Prefixes.plist";
+        _prefixStoreName = @"DLPrefixModel";
     }
 }
 
@@ -180,6 +195,22 @@ NSString *_dreamLispPrefix;
 
 + (NSString *)dreamLispPrefix {
     return _dreamLispPrefix;
+}
+
++ (NSString *)appHome {
+    return _appHome;
+}
+
++ (NSString *)prefixBinFilePathFrag {
+    return _prefixBinFilePathFrag;
+}
+
++ (NSString *)prefixPlistPathFrag {
+    return _prefixPlistPathFrag;
+}
+
++ (NSString *)prefixStoreName {
+    return _prefixStoreName;
 }
 
 @end
