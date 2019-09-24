@@ -17,10 +17,18 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DLPersistenceService : NSObject
+@property (nonatomic, readwrite, retain) NSPersistentStoreCoordinator *prefixStoreCoordinator;
+@property (nonatomic, readwrite, retain) NSPersistentStore *prefixStore;
+@property (nonatomic, readwrite, retain) NSPersistentContainer *prefixContainer;
 @property (nonatomic, readonly, retain) NSManagedObjectContext *prefixMOC;
++ (instancetype)shared;
+- (BOOL)checkIfPrefixStoreExists;
 - (void)initPrefixStore:(void (^)(void))callback;
+- (NSURL *)prefixStoreURL;
 - (void)insertPrefixToStoreInBatch:(void(^)(BOOL))callback;
-- (void)updateStateWithPrefix;
+- (BOOL)copyPrefixStoreToProject;
+- (void)getPrefixes:(void(^)(NSArray<DLPrefix *> *))callback isSort:(BOOL)isSort;
+- (void)updateStateWithPrefix:(void(^ _Nullable)(BOOL))callback;
 - (NSArray *)loadPrefixFromPList;
 @end
 

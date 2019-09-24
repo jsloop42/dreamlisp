@@ -33,3 +33,4 @@ FOUNDATION_EXPORT const unsigned char DreamLispVersionString[];
 #import "DLPrinter.h"
 #import "DreamLisp.h"
 #import "DLTrie.h"
+#import "DLPersistenceService.h"

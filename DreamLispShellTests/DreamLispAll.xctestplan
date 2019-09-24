@@ -26,6 +26,9 @@
   "testTargets" : [
     {
       "parallelizable" : true,
+      "skippedTests" : [
+        "DLBuildHelper"
+      ],
       "target" : {
         "containerPath" : "container:DreamLisp.xcodeproj",
         "identifier" : "9E7942D622C12A310086A47F",

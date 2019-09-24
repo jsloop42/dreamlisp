@@ -1,0 +1,45 @@
+{
+  "configurations" : [
+    {
+      "id" : "4641B7D7-6EF7-473A-9EA2-C340915392C2",
+      "name" : "Serial Test Configuration",
+      "options" : {
+        "addressSanitizer" : {
+          "detectStackUseAfterReturn" : true,
+          "enabled" : true
+        },
+        "mainThreadCheckerEnabled" : true,
+        "mallocScribbleEnabled" : true,
+        "mallocStackLoggingOptions" : null,
+        "nsZombieEnabled" : true,
+        "targetForVariableExpansion" : {
+          "containerPath" : "container:DreamLisp.xcodeproj",
+          "identifier" : "9E3A9D4922568AFC00348529",
+          "name" : "DreamLispShell"
+        },
+        "undefinedBehaviorSanitizerEnabled" : true
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "skippedTests" : [
+        "DLAlgorithmTest",
+        "DLCacheTableTests",
+        "DLObjcRTTests",
+        "DLPerfTests",
+        "DLTests",
+        "DLTrieTests"
+      ],
+      "target" : {
+        "containerPath" : "container:DreamLisp.xcodeproj",
+        "identifier" : "9E7942D622C12A310086A47F",
+        "name" : "DreamLispTests"
+      }
+    }
+  ],
+  "version" : 1
+}

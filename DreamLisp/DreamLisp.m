@@ -77,7 +77,7 @@ static NSString *langVersion;
     [_dbService initPrefixStore:^{
         DreamLisp *this = weakSelf;
         [DLLog debug:@"Persistence store loaded callback"];
-        [this->_dbService updateStateWithPrefix];
+        [this->_dbService updateStateWithPrefix:nil];
     }];
     //[DLUtils initializePrefixState];  /* Deserialize prefix state */
     _objc = [DLObjc new];

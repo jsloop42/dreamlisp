@@ -8,18 +8,30 @@
 
 #import "DLPersistenceService.h"
 
+static DLPersistenceService *_dbService;
+
 @interface DLPersistenceService ()
-@property (nonatomic, readwrite, retain) NSPersistentStoreCoordinator *prefixStoreCoordinator;
 @end
 
 @implementation DLPersistenceService {
-    NSPersistentContainer *_prefixContainer;
     NSManagedObjectContext *_prefixMOC;
     DLFileOps *_fops;
+    NSFileManager *_fm;
 }
 
 @synthesize prefixMOC = _prefixMOC;
 @synthesize prefixStoreCoordinator;
+@synthesize prefixStore;
+@synthesize prefixContainer;
+
++ (instancetype)shared {
+    @synchronized (self) {
+        if (!_dbService) {
+            _dbService = [DLPersistenceService new];
+        }
+        return _dbService;
+    }
+}
 
 - (instancetype)init {
     self = [super init];
@@ -31,10 +43,12 @@
 
 - (void)bootstrap {
     _fops = [DLFileOps new];
+    _fm = [NSFileManager defaultManager];
 }
 
 - (BOOL)checkIfPrefixStoreExists {
-    return NO;
+    NSURL *url = [self prefixStoreURL];
+    return [_fm fileExistsAtPath:[url path]];
 }
 
 /*!
@@ -71,10 +85,11 @@
         [DLLog error:@"Managed Object Model initialization failed"];
         return;
     }
-    NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
-    NSManagedObjectContext *moc = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-    [moc setPersistentStoreCoordinator:coordinator];
-    _prefixMOC = moc;
+//    self.prefixStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
+    _prefixMOC = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    [self.prefixMOC setPersistentStoreCoordinator:self.prefixStoreCoordinator];
+    self.prefixContainer = [[NSPersistentContainer alloc] initWithName:@"PrefixContainer" managedObjectModel:mom];
+    self.prefixStoreCoordinator = self.prefixContainer.persistentStoreCoordinator;
 //    NSURL *storeURL = [NSURL URLWithString:@"/Users/jsloop/temp/dlprefix.sqlite"];
 //    NSError *err;
     //NSPersistentStore *store = [coordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:nil options:nil error:&err];
@@ -84,16 +99,14 @@
     DLPersistenceService __weak *weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         DLPersistenceService *this = weakSelf;
-        NSPersistentStoreCoordinator *psc = [self.prefixMOC persistentStoreCoordinator];
-        //NSPersistentStore *store = [[NSPersistentStore alloc] initWithPersistentStoreCoordinator:psc configurationName:DLConst.prefixStoreName URL:[NSURL URLWithString:@"/Users/jsloop/temp/dlispstore.sqlite"] options:nil];
-
         NSError *err;
-        NSPersistentStore *store = [psc addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:[self prefixStoreURL] options:nil error:&err];
-        if (!store) {
+        this.prefixStore = [this.prefixContainer.persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:[self prefixStoreURL]
+                                                                                               options:nil error:&err];
+        if (!this.prefixStore) {
             [DLLog errorWithFormat:@"Failed to initialize prefix store: %@", err.description];
             return;
         }
-        [[this->_prefixContainer viewContext] setAutomaticallyMergesChangesFromParent:YES];
+        [[self.prefixContainer viewContext] setAutomaticallyMergesChangesFromParent:YES];
         if (!callback) return;
         dispatch_async(dispatch_get_main_queue(), ^{
             callback();
@@ -111,14 +124,14 @@
     NSString *bundleID = [info objectForKey:@"CFBundleIdentifier"];
     NSURL *storeDirURL = [docURL URLByAppendingPathComponent: bundleID];
     NSString *storeDirPath = [storeDirURL path];
-    if ([_fops isDirectoryExists:storeDirPath]) {
+    if (![_fops isDirectoryExists:storeDirPath]) {
         [_fops createDirectoryWithIntermediate:storeDirPath];
     }
     return [storeDirURL URLByAppendingPathComponent:[[NSString alloc] initWithFormat:@"/%@.sqlite", DLConst.prefixStoreName]];
 }
 
 - (void)insertPrefixToStoreInBatch:(void(^)(BOOL))callback {
-    [_prefixContainer performBackgroundTask:^(NSManagedObjectContext *bgMOC) {
+    [self.prefixContainer performBackgroundTask:^(NSManagedObjectContext *bgMOC) {
         NSArray *prefixList = [self loadPrefixFromPList];
         NSEnumerator *iter = [prefixList objectEnumerator];
         NSString *elem = nil;
@@ -148,25 +161,38 @@
     return [_fops copyFile:url toURL:[NSURL URLWithString:destStr]];
 }
 
-- (void)updateStateWithPrefix {
-    /*
-     1. Pre-req: Load the prefix store
-     2. Get all prefixes and update the trie
-     */
-    [_prefixContainer performBackgroundTask:^(NSManagedObjectContext * bgMOC) {
+- (void)getPrefixes:(void(^)(NSArray<DLPrefix *> *))callback isSort:(BOOL)isSort {
+    [self.prefixContainer performBackgroundTask:^(NSManagedObjectContext * bgMOC) {
         NSFetchRequest *req = [NSFetchRequest new];
+        if (isSort) {
+            NSSortDescriptor *desc = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES];
+            [req setSortDescriptors:@[desc]];
+        }
         [req setEntity:[NSEntityDescription entityForName:@"DLPrefix" inManagedObjectContext:bgMOC]];
         NSError *err;
         NSArray *prefixes = [bgMOC executeFetchRequest:req error:&err];
         if (err) {
             [DLLog errorWithFormat:@"Error fetching prefix from store: %@", err];
         }
-        NSEnumerator *iter = [prefixes objectEnumerator];
-        DLPrefix *prefix = nil;
-        while ((prefix = [iter nextObject]) != nil) {
-            [DLState.shared.prefixTree insert:prefix.name];
-        }
+        callback(prefixes);
     }];
+}
+
+- (void)updateStateWithPrefix:(void(^ _Nullable)(BOOL))callback {
+    /*
+     1. Pre-req: Load the prefix store
+     2. Get all prefixes and update the trie
+     */
+    [self getPrefixes:^(NSArray<DLPrefix *> *prefixes) {
+        [[[prefixes firstObject] managedObjectContext] performBlock:^{
+            NSEnumerator *iter = [prefixes objectEnumerator];
+            DLPrefix *prefix = nil;
+            while ((prefix = [iter nextObject]) != nil) {
+                [DLState.shared.prefixTree insert:prefix.name];
+            }
+            if (callback) callback(YES);
+        }];
+    } isSort:NO];
 }
 
 /*!

@@ -83,6 +83,9 @@
             reference = "container:DreamLispShellTests/DreamLispAll.xctestplan"
             default = "YES">
          </TestPlanReference>
+         <TestPlanReference
+            reference = "container:DreamLispShellTests/DreamLispSerialTestPlan.xctestplan">
+         </TestPlanReference>
       </TestPlans>
       <Testables>
          <TestableReference
