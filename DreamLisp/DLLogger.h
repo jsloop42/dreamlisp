@@ -11,6 +11,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+#ifdef DEBUG
+#   define debugLog(...) NSLog(__VA_ARGS__)
+#   define infoLog(...) NSLog(__VA_ARGS__)
+#   define errorLog(...) NSLog(__VA_ARGS__)
+#else
+#   define debugLog(...) (void)0
+#   define infoLog(...) NSLog(__VA_ARGS__)
+#   define errorLog(...) NSLog(__VA_ARGS__)
+#endif
+
 #define DLLog DLLogger
 
 @interface DLLogger : NSObject

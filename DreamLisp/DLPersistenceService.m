@@ -9,6 +9,7 @@
 #import "DLPersistenceService.h"
 
 static DLPersistenceService *_dbService;
+static NSString *_projDataDir;
 
 @interface DLPersistenceService ()
 @end
@@ -44,6 +45,7 @@ static DLPersistenceService *_dbService;
 - (void)bootstrap {
     _fops = [DLFileOps new];
     _fm = [NSFileManager defaultManager];
+    _projDataDir = @"Data";
 }
 
 - (BOOL)checkIfPrefixStoreExists {
@@ -127,7 +129,7 @@ static DLPersistenceService *_dbService;
     if (![_fops isDirectoryExists:storeDirPath]) {
         [_fops createDirectoryWithIntermediate:storeDirPath];
     }
-    return [storeDirURL URLByAppendingPathComponent:[[NSString alloc] initWithFormat:@"/%@.sqlite", DLConst.prefixStoreName]];
+    return [storeDirURL URLByAppendingPathComponent:[[NSString alloc] initWithFormat:@"%@.sqlite", DLConst.prefixStoreName]];
 }
 
 - (void)insertPrefixToStoreInBatch:(void(^)(BOOL))callback {
@@ -152,13 +154,24 @@ static DLPersistenceService *_dbService;
     }];
 }
 
-- (BOOL)copyPrefixStoreToProject {
-    NSURL *url = [self prefixStoreURL];
+/*!
+ Returns the prefix store project data URL
+ */
+- (NSURL *)prefixStoreProjectDataURL {
     NSMutableString *destStr = [NSMutableString new];
     [destStr appendString:[_fops projectRoot]];
-    [destStr appendString:@"/data/"];
+    [destStr appendFormat:@"/%@/", _projDataDir];
     [destStr appendString:DLConst.prefixStoreName];
-    return [_fops copyFile:url toURL:[NSURL URLWithString:destStr]];
+    [destStr appendString:@".sqlite"];
+    return [[NSURL alloc] initFileURLWithPath:destStr];
+}
+
+/*!
+ Copies the prefix sqlite store from the Application Support directory to the data folder of the project.
+ */
+- (BOOL)copyPrefixStoreToProject {
+    NSURL *url = [self prefixStoreURL];
+    return [_fops copyFile:url toURL:[self prefixStoreProjectDataURL]];
 }
 
 - (void)getPrefixes:(void(^)(NSArray<DLPrefix *> *))callback isSort:(BOOL)isSort {

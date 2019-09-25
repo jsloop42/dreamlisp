@@ -26,6 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)initPrefixStore:(void (^)(void))callback;
 - (NSURL *)prefixStoreURL;
 - (void)insertPrefixToStoreInBatch:(void(^)(BOOL))callback;
+- (NSURL *)prefixStoreProjectDataURL;
 - (BOOL)copyPrefixStoreToProject;
 - (void)getPrefixes:(void(^)(NSArray<DLPrefix *> *))callback isSort:(BOOL)isSort;
 - (void)updateStateWithPrefix:(void(^ _Nullable)(BOOL))callback;

@@ -118,4 +118,22 @@ static BOOL _isDBServiceInitialized;
     [self waitForExpectations:@[exp] timeout:10.0];
 }
 
+- (void)testG_prefixStoreProjectDataURL {
+    NSURL *dataURL = [_dbService prefixStoreProjectDataURL];
+    NSString *dataPath = [dataURL path];
+    XCTAssertEqualObjects(dataPath, @"/Users/jsloop/dev/DreamLisp/data/DLPrefixModel.sqlite");
+}
+
+- (void)testH_copyPrefixToProject {
+    NSURL *dataURL = [_dbService prefixStoreProjectDataURL];
+    DLFileOps *fops = [DLFileOps new];
+    NSString *dataPath = [dataURL path];
+    if ([fops isFileExists:dataPath]) {
+        [fops delete:dataPath];
+    }
+    XCTAssertFalse([fops isFileExists:dataPath]);
+    [_dbService copyPrefixStoreToProject];
+    XCTAssertTrue([fops isFileExists:dataPath]);
+}
+
 @end

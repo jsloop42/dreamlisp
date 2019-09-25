@@ -26,6 +26,7 @@ typedef NS_ENUM(NSUInteger, DLFileMode) {
 
 @interface DLFileOps : NSObject
 @property (nonatomic, readwrite, retain) NSString *path;
+@property (nonatomic, readwrite, retain) NSFileManager *fm;
 - (instancetype)init;
 - (BOOL)isDirectoryExists:(NSString *)path;
 - (BOOL)isFileExists:(NSString *)path;

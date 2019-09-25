@@ -57,6 +57,7 @@ static NSString *_projectRoot;
 }
 
 @synthesize path = _path;
+@synthesize fm = _fm;
 
 - (instancetype)init {
     self = [super init];
@@ -75,7 +76,7 @@ static NSString *_projectRoot;
     _start = 0;
     _offset = 0;
     _buff = 0;
-    _fm = [NSFileManager defaultManager];
+    _fm = [[NSFileManager alloc] init];
     _serialQueue = dispatch_queue_create("dl-fileops-queue", DISPATCH_QUEUE_SERIAL);
 }
 
@@ -144,7 +145,11 @@ static NSString *_projectRoot;
  */
 - (BOOL)copyFile:(NSURL *)sourceURL toURL:(NSURL *)destinationURL {
     NSError *err;
-    return [_fm copyItemAtURL:sourceURL toURL:destinationURL error:&err];
+    BOOL ret = [_fm copyItemAtURL:sourceURL toURL:destinationURL error:&err];
+    if (!ret && err) {
+        debugLog(@"Error copying file: %@", err);
+    }
+    return ret;
 }
 
 #pragma IO Ops
