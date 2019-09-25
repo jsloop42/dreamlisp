@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9E0117CD233BF62C0087621C /* DLPrefixModel.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 9E0117CC233BF62C0087621C /* DLPrefixModel.sqlite */; };
 		9E1E66F82337E8160067A5FB /* DLBuildHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1E66F72337E8160067A5FB /* DLBuildHelper.m */; };
 		9E1E697722C5377E00E52162 /* DLFileIOServiceDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E1E697522C5377E00E52162 /* DLFileIOServiceDelegate.h */; };
 		9E1E697B22C5395500E52162 /* DLStdIOServiceDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E1E697A22C5395400E52162 /* DLStdIOServiceDelegate.h */; };
@@ -191,7 +192,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		9E1E66F62337C5340067A5FB /* Data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Data; sourceTree = "<group>"; };
+		9E0117C8233BF61E0087621C /* Prefixes.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Prefixes.plist; sourceTree = "<group>"; };
+		9E0117C9233BF61E0087621C /* prefix.dlisp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = prefix.dlisp; sourceTree = "<group>"; };
+		9E0117CC233BF62C0087621C /* DLPrefixModel.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = DLPrefixModel.sqlite; sourceTree = "<group>"; };
 		9E1E66F72337E8160067A5FB /* DLBuildHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLBuildHelper.m; sourceTree = "<group>"; };
 		9E1E697522C5377E00E52162 /* DLFileIOServiceDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLFileIOServiceDelegate.h; sourceTree = "<group>"; };
 		9E1E697A22C5395400E52162 /* DLStdIOServiceDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLStdIOServiceDelegate.h; sourceTree = "<group>"; };
@@ -393,6 +396,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9E0117C7233BF5E90087621C /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				9E0117CC233BF62C0087621C /* DLPrefixModel.sqlite */,
+				9E0117C9233BF61E0087621C /* prefix.dlisp */,
+				9E0117C8233BF61E0087621C /* Prefixes.plist */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
 		9E281CF6225A4C780038A5AF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -467,7 +480,7 @@
 		9E3A9D4122568AFC00348529 = {
 			isa = PBXGroup;
 			children = (
-				9E1E66F62337C5340067A5FB /* Data */,
+				9E0117C7233BF5E90087621C /* Data */,
 				9E30555C2261C4DC001D4597 /* build */,
 				9E281D02225A608D0038A5AF /* test */,
 				9E7942D022C12A310086A47F /* DreamLisp */,
@@ -860,6 +873,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E741EC922C1325C009680E8 /* test.dlisp in Resources */,
+				9E0117CD233BF62C0087621C /* DLPrefixModel.sqlite in Resources */,
 				9E741EC822C13257009680E8 /* core.dlisp in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
