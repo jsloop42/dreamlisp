@@ -110,4 +110,31 @@ static DLIOService *_ioService;
     }
 }
 
+#pragma mark - Std IO Service Delegate
+
+- (void)dealloc {
+    if (_isDebug) {
+        NSLog(@"DLLogger dealloc");
+    }
+    [super dealloc];
+}
+
+- (NSString *)readInput {
+    fprintf(stdout, "[Error] DLLogger read input invoked.");
+    return @"";
+}
+
+- (NSString *)readInputWithPrompt:(NSString *)prompt {
+    fprintf(stdout, "[Error] DLLogger read input with prompt invoked.");
+    return @"";
+}
+
+- (void)writeOutput:(NSString *)string {
+    fprintf(stdout,"%s\n", [string UTF8String]);
+}
+
+- (void)writeOutput:(NSString *)string terminator:(NSString *)terminator {
+    fprintf(stdout,"%s%s", [string UTF8String], [terminator UTF8String]);
+}
+
 @end

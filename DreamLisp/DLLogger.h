@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #define DLLog DLLogger
 
-@interface DLLogger : NSObject
+@interface DLLogger : NSObject <DLStdIOServiceDelegate>
 + (BOOL)isDebug;
 + (BOOL)isVerbose;
 + (void)setIsDebug:(BOOL)flag;
