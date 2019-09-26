@@ -143,6 +143,7 @@
 		9E9B622B225BAA280060DA9A /* libedit.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E9B622A225BAA270060DA9A /* libedit.tbd */; };
 		9E9E9D092330197000308606 /* DLTrie.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E9E9D072330197000308606 /* DLTrie.h */; };
 		9E9E9D0A2330197000308606 /* DLTrie.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9E9D082330197000308606 /* DLTrie.m */; };
+		9EA666BB233D5C2400DE4789 /* libobjc.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EA666B8233D5BBA00DE4789 /* libobjc.tbd */; };
 		9EBA29B8232921F20002FF2B /* DLNotificationData.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EBA29B6232921F10002FF2B /* DLNotificationData.h */; };
 		9EBA29B9232921F20002FF2B /* DLNotificationData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EBA29B7232921F10002FF2B /* DLNotificationData.m */; };
 		9EBA29BE23295BFD0002FF2B /* DLObjc.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EBA29BA23295BFB0002FF2B /* DLObjc.h */; };
@@ -387,6 +388,11 @@
 		9E9B622A225BAA270060DA9A /* libedit.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libedit.tbd; path = usr/lib/libedit.tbd; sourceTree = SDKROOT; };
 		9E9E9D072330197000308606 /* DLTrie.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLTrie.h; sourceTree = "<group>"; };
 		9E9E9D082330197000308606 /* DLTrie.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLTrie.m; sourceTree = "<group>"; };
+		9EA666B8233D5BBA00DE4789 /* libobjc.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libobjc.tbd; path = usr/lib/libobjc.tbd; sourceTree = SDKROOT; };
+		9EA666B9233D5BD100DE4789 /* libobjc.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libobjc.tbd; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.0.sdk/usr/lib/libobjc.tbd; sourceTree = DEVELOPER_DIR; };
+		9EA666BA233D5C0900DE4789 /* libobjc.A.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libobjc.A.tbd; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.0.sdk/usr/lib/libobjc.A.tbd; sourceTree = DEVELOPER_DIR; };
+		9EA666BC233D5C2400DE4789 /* libobjc-trampolines.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libobjc-trampolines.tbd"; path = "usr/lib/libobjc-trampolines.tbd"; sourceTree = SDKROOT; };
+		9EA666BD233D5C2400DE4789 /* libobjc.A.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libobjc.A.tbd; path = usr/lib/libobjc.A.tbd; sourceTree = SDKROOT; };
 		9EBA29B6232921F10002FF2B /* DLNotificationData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLNotificationData.h; sourceTree = "<group>"; };
 		9EBA29B7232921F10002FF2B /* DLNotificationData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DLNotificationData.m; sourceTree = "<group>"; };
 		9EBA29BA23295BFB0002FF2B /* DLObjc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLObjc.h; sourceTree = "<group>"; };
@@ -467,6 +473,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9EA666BB233D5C2400DE4789 /* libobjc.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -531,6 +538,11 @@
 		9E281CF6225A4C780038A5AF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9EA666BA233D5C0900DE4789 /* libobjc.A.tbd */,
+				9EA666BC233D5C2400DE4789 /* libobjc-trampolines.tbd */,
+				9EA666BD233D5C2400DE4789 /* libobjc.A.tbd */,
+				9EA666B8233D5BBA00DE4789 /* libobjc.tbd */,
+				9EA666B9233D5BD100DE4789 /* libobjc.tbd */,
 				9E9B622A225BAA270060DA9A /* libedit.tbd */,
 				9E281CF7225A4C790038A5AF /* libreadline.tbd */,
 			);
@@ -1297,6 +1309,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 7S7UE44956;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1326,6 +1339,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 7S7UE44956;
 				FRAMEWORK_SEARCH_PATHS = (

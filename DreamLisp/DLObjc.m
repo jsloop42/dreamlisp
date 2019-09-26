@@ -20,6 +20,8 @@ static NSString *_moduleName = @"objcrt";
 
 - (void)dealloc {
     [DLLog debug:@"DLObjc dealloc"];
+    [_env release];
+    [_rt release];
     [super dealloc];
 }
 
@@ -31,11 +33,11 @@ static NSString *_moduleName = @"objcrt";
 }
 
 - (void)bootstrap {
-    _env = [[[DLEnv alloc] init] autorelease];
+    _env = [[DLEnv alloc] init];
     [_env setModuleName:_moduleName];
     [_env setModuleDescription:_description];
     [_env setIsUserDefined:NO];
-    _rt = [[DLObjcRT new] autorelease];
+    _rt = [DLObjcRT new];
     _methodAttrKey = DLObjcMethodAttrKey.shared;
 }
 
