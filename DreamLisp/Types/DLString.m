@@ -25,7 +25,7 @@
 @synthesize moduleName = _moduleName;
 
 + (BOOL)isString:(id)object {
-    return [[object className] isEqual:[self className]];
+    return [[object class] isEqual:[self class]];
 }
 
 + (BOOL)isString:(id)object withValue:(NSString *)name {
@@ -189,7 +189,7 @@
 }
 
 - (NSString *)dataType {
-    return [self className];
+    return NSStringFromClass([self class]);
 }
 
 - (NSString *)dataTypeName {
@@ -377,8 +377,8 @@
 }
 
 - (NSString *)debugDescription {
-    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ isMutable: %hhd meta: %@>", NSStringFromClass([self class]),
-            self, _isMutable ? _mstring : _string, _isMutable, _meta];
+    return [[NSString alloc] initWithFormat:@"<%@ %p - value: %@ isMutable: %d meta: %@>", NSStringFromClass([self class]),
+            self, _isMutable ? _mstring : _string, (int)_isMutable, _meta];
 }
 
 @end

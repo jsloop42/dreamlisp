@@ -24,7 +24,7 @@
 @synthesize isMutable = _isMutable;
 
 + (BOOL)isMethodParam:(id)any {
-    return [[any className] isEqual:[self className]];
+    return [[any class] isEqual:[self class]];
 }
 
 - (void)dealloc {
@@ -70,7 +70,7 @@
 }
 
 - (NSString *)dataType {
-    return [self className];
+    return NSStringFromClass([self class]);
 }
 
 - (NSString *)dataTypeName {
@@ -159,7 +159,7 @@
 @synthesize isMutable = _isMutable;
 
 + (BOOL)isMethod:(id)any {
-    return [[any className] isEqual:[self className]];
+    return [[any class] isEqual:[self class]];
 }
 
 - (void)dealloc {
@@ -233,7 +233,7 @@
 }
 
 - (NSString *)dataType {
-    return [self className];
+    return NSStringFromClass([self class]);
 }
 
 - (NSString *)dataTypeName {

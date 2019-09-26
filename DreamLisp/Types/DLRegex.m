@@ -24,7 +24,7 @@
 @synthesize isMutable = _isMutable;
 
 + (BOOL)isRegex:(id)object {
-    return [[object className] isEqual:[self className]];
+    return [[object class] isEqual:[self class]];
 }
 
 + (DLRegex *)dataToRegex:(id<DLDataProtocol>)data fnName:(NSString *)fnName {
@@ -107,7 +107,7 @@
 }
 
 - (NSString *)dataType {
-    return [self className];
+    return NSStringFromClass([self class]);
 }
 
 - (NSString *)dataTypeName {

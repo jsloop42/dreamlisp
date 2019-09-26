@@ -45,7 +45,7 @@
 @synthesize isMutable = _isMutable;
 
 + (BOOL)isSymbol:(id)object {
-    return [[object className] isEqual:[self className]];
+    return [[object class] isEqual:[self class]];
 }
 
 + (BOOL)isSymbol:(id)object withName:(NSString *)name {
@@ -340,7 +340,7 @@
 }
 
 - (NSString *)dataType {
-    return [self className];
+    return NSStringFromClass([self class]);
 }
 
 - (NSString *)dataTypeName {
@@ -457,9 +457,9 @@
 - (NSString *)debugDescription {
     return [[NSString alloc] initWithFormat:@"<%@ %p - ModuleName: %@, InitialModuleName: %@, " \
             @"Name: %@, Arity:%ld, InitialArity: %ld, " \
-            @"isQualified: %hhd, isFault: %hhd, " \
+            @"isQualified: %d, isFault: %d, " \
             @"meta: %@>",
-            NSStringFromClass([self class]), self, _moduleName, _initialModuleName, _name, _arity, _initialArity, _isQualified, _isFault, _meta];
+            NSStringFromClass([self class]), self, _moduleName, _initialModuleName, _name, _arity, _initialArity, (int)_isQualified, (int)_isFault, _meta];
 }
 
 @end

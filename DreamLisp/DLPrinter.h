@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "DLTypes.h"
 #import "DLConst.h"
-#import <objc/objc-runtime.h>
+#import <objc/runtime.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

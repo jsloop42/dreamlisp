@@ -24,7 +24,7 @@
 @synthesize isMutable = _isMutable;
 
 + (BOOL)isBool:(id)object {
-    return [[object className] isEqual:[self className]];
+    return [[object class] isEqual:[self class]];
 }
 
 - (void)dealloc {
@@ -80,7 +80,7 @@
 }
 
 - (NSString *)dataType {
-    return [self className];
+    return NSStringFromClass([self class]);
 }
 
 - (NSString *)dataTypeName {

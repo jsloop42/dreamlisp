@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <objc/objc-runtime.h>
+#import <objc/runtime.h>
 #import "DLObjcPropertyAttr.h"
 #import "DLInvocation.h"
 #import "DLUtils.h"

@@ -219,28 +219,28 @@ double dmod(double a, double n) {
 
     #pragma mark <
     DLFunction *lessThan = [[DLFunction alloc] initWithFn:^id<DLDataProtocol>(NSMutableArray *args) {
-        return compare(args, @selector(isLessThan:));
+        return compare(args, NSSelectorFromString(@"isLessThan:"));
     } name:@"</n"];
     [lessThan setArgsCount:-1];
     [_env setObject:lessThan forKey:[[DLSymbol alloc] initWithFunction:lessThan name:@"<" moduleName:[DLConst coreModuleName]]];
 
     #pragma mark >
     DLFunction *greaterThan = [[DLFunction alloc] initWithFn:^id<DLDataProtocol>(NSMutableArray *args) {
-        return compare(args, @selector(isGreaterThan:));
+        return compare(args, NSSelectorFromString(@"isGreaterThan:"));
     } name:@">/n"];
     [greaterThan setArgsCount:-1];
     [_env setObject:greaterThan forKey:[[DLSymbol alloc] initWithFunction:greaterThan name:@">" moduleName:[DLConst coreModuleName]]];
 
     #pragma mark <=
     DLFunction *lessThanOrEqualTo = [[DLFunction alloc] initWithFn:^id<DLDataProtocol>(NSMutableArray *args) {
-        return compare(args, @selector(isLessThanOrEqualTo:));
+        return compare(args, NSSelectorFromString(@"isLessThanOrEqualTo:"));
     } name:@"<=/n"];
     [lessThanOrEqualTo setArgsCount:-1];
     [_env setObject:lessThanOrEqualTo forKey:[[DLSymbol alloc] initWithFunction:lessThanOrEqualTo name:@"<=" moduleName:[DLConst coreModuleName]]];
 
     #pragma mark >=
     DLFunction *greaterThanOrEqualTo = [[DLFunction alloc] initWithFn:^id<DLDataProtocol>(NSMutableArray *args) {
-        return compare(args, @selector(isGreaterThanOrEqualTo:));
+        return compare(args, NSSelectorFromString(@"isGreaterThanOrEqualTo:"));
     } name:@">=/n"];
     [greaterThanOrEqualTo setArgsCount:-1];
     [_env setObject:greaterThanOrEqualTo forKey:[[DLSymbol alloc] initWithFunction:greaterThanOrEqualTo name:@">=" moduleName:[DLConst coreModuleName]]];

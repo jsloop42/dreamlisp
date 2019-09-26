@@ -6,7 +6,6 @@
 //  Copyright © 2019 DreamLisp. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
 #import "DLProxyProtocol.h"
 #import "DLClass.h"
 #import "DLLogger.h"

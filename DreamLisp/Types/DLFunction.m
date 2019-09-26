@@ -38,7 +38,7 @@
 @synthesize isMutable = _isMutable;
 
 + (BOOL)isFunction:(id)object {
-    return [[object className] isEqual:[self className]];
+    return [[object class] isEqual:[self class]];
 }
 
 + (DLFunction *)dataToFunction:(id<DLDataProtocol>)data {
@@ -197,7 +197,7 @@
 }
 
 - (NSString *)dataType {
-    return [self className];
+    return NSStringFromClass([self class]);
 }
 
 - (NSString *)dataTypeName {
@@ -246,7 +246,7 @@
 }
 
 - (NSUInteger)hash {
-    return [_name hash] + [_params hash] + _isMacro ? 1 : 0;
+    return [_name hash] + [_params hash] + (_isMacro ? 1 : 0);
 }
 
 - (NSInteger)sortValue {

@@ -24,7 +24,7 @@
 @synthesize isMutable = _isMutable;
 
 + (BOOL)isHashMap:(id)object {
-    return [[object className] isEqual:[self className]];
+    return [[object class] isEqual:[self class]];
 }
 
 + (DLHashMap *)dataToHashMap:(id<DLDataProtocol>)data fnName:(NSString *)fnName {
@@ -138,7 +138,7 @@
 }
 
 - (NSString *)dataType {
-    return [self className];
+    return NSStringFromClass([self class]);
 }
 
 - (NSString *)dataTypeName {

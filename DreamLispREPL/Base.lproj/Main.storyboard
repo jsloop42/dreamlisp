@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="cgz-3f-WY8">
+                                <rect key="frame" x="20" y="44" width="374" height="510"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                                <color key="textColor" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Ww9-9Z-Jtf">
+                                <rect key="frame" x="20" y="562" width="374" height="211"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="211" id="Rwc-nb-0KD"/>
+                                </constraints>
+                                <color key="textColor" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZR4-Js-fNM">
+                                <rect key="frame" x="20" y="781" width="374" height="81"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kg2-Jv-gnh">
+                                        <rect key="frame" x="336" y="25.5" width="30" height="30"/>
+                                        <state key="normal" title="Eval"/>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <constraints>
+                                    <constraint firstItem="Kg2-Jv-gnh" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="ZR4-Js-fNM" secondAttribute="leading" constant="20" symbolic="YES" id="Ddc-EH-Tiv"/>
+                                    <constraint firstItem="Kg2-Jv-gnh" firstAttribute="centerY" secondItem="ZR4-Js-fNM" secondAttribute="centerY" id="HAs-Mj-ixn"/>
+                                    <constraint firstAttribute="trailing" secondItem="Kg2-Jv-gnh" secondAttribute="trailing" constant="8" id="PES-qO-tzC"/>
+                                    <constraint firstAttribute="height" constant="81" id="R1h-az-CXe"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="Ww9-9Z-Jtf" firstAttribute="top" secondItem="cgz-3f-WY8" secondAttribute="bottom" constant="8" id="0ih-hC-g54"/>
+                            <constraint firstItem="Ww9-9Z-Jtf" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="4NG-dF-NTz"/>
+                            <constraint firstItem="ZR4-Js-fNM" firstAttribute="top" secondItem="Ww9-9Z-Jtf" secondAttribute="bottom" constant="8" id="4yg-X2-ikp"/>
+                            <constraint firstItem="cgz-3f-WY8" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="AA1-1o-PG2"/>
+                            <constraint firstItem="Ww9-9Z-Jtf" firstAttribute="top" secondItem="cgz-3f-WY8" secondAttribute="bottom" constant="8" id="Bzg-d6-GR8"/>
+                            <constraint firstItem="ZR4-Js-fNM" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="CBF-qQ-6pM"/>
+                            <constraint firstItem="ZR4-Js-fNM" firstAttribute="top" secondItem="Ww9-9Z-Jtf" secondAttribute="bottom" constant="8" id="GSq-ab-dwY"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="ZR4-Js-fNM" secondAttribute="trailing" constant="20" id="Lfp-FJ-zfi"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Ww9-9Z-Jtf" secondAttribute="trailing" constant="20" id="ek9-uN-f7Q"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="cgz-3f-WY8" secondAttribute="trailing" constant="20" id="mQZ-2X-Wbk"/>
+                            <constraint firstItem="ZR4-Js-fNM" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="q5M-yD-SRQ"/>
+                            <constraint firstItem="cgz-3f-WY8" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="vd7-sf-Kze"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                    </view>
+                    <connections>
+                        <outlet property="bottomConstraint" destination="CBF-qQ-6pM" id="12H-9b-yl6"/>
+                        <outlet property="evalBtn" destination="Kg2-Jv-gnh" id="PUa-Pq-43y"/>
+                        <outlet property="inputTextView" destination="Ww9-9Z-Jtf" id="Z4s-B9-35A"/>
+                        <outlet property="outputTextView" destination="cgz-3f-WY8" id="3OG-T7-Vh8"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="137.68115942028987" y="137.94642857142856"/>
+        </scene>
+    </scenes>
+</document>

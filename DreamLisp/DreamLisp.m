@@ -435,7 +435,7 @@ static NSString *langVersion;
                         } @catch (NSException *exception) {
                             if ([xs count] > 2) {
                                 DLList *catchxs = (DLList *)[xs nth:2];
-                                if ([DLSymbol isSymbol:[catchxs first]] && [[(DLSymbol *)[catchxs first] value] isNotEqualTo:@"catch"]) {
+                                if ([DLSymbol isSymbol:[catchxs first]] && ![[(DLSymbol *)[catchxs first] value] isEqual:@"catch"]) {
                                     [[[DLError alloc] initWithData:[catchxs first]] throw];
                                 }
                                 DLEnv *catchEnv = [[DLEnv alloc] initWithEnv:env binds:[@[(DLSymbol *)[catchxs second]] mutableCopy]

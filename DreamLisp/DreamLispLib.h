@@ -6,8 +6,6 @@
 //  Copyright © 2019 DreamLisp. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
-
 //! Project version number for DreamLisp.
 FOUNDATION_EXPORT double DreamLispVersionNumber;
 

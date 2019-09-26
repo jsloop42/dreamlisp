@@ -10,7 +10,7 @@
 #import "DLTypes.h"
 #import "DLCacheTable.h"
 #import "DLState.h"
-#import <objc/objc-runtime.h>
+#import <objc/runtime.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

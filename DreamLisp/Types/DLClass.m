@@ -197,6 +197,10 @@
     @throw [DLError exceptionWithFormat:DLUnrecognizedSelectorError, _proxy, sel];
 }
 
+- (nonnull NSString *)className {
+    return NSStringFromClass([self class]);
+}
+
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     DLClass *cls = [DLClass new];
     cls.proxy = _proxy;
