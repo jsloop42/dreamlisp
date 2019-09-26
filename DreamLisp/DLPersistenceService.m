@@ -54,6 +54,28 @@ static NSString *_projDataDir;
 }
 
 /*!
+ Checks if prefix store exists, else copies the pre-build store from the bundle to the app support folder.
+ */
+- (void)initPersistence {
+    BOOL isPrefixStoreExists = [self checkIfPrefixStoreExists];
+    if (!isPrefixStoreExists) {
+        BOOL ret = [_fops copyFile:[self prefixStoreBundleURL] toURL:[self prefixStoreURL]];
+        if (!ret) {
+            [DLLog error:@"Error copying prefix store from bundle"];
+        }
+    }
+}
+
+/*!
+ Returns the prefix sqlite store bundle URL.
+ */
+- (NSURL *)prefixStoreBundleURL {
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *prefixStorePath = [bundle pathForResource:DLConst.prefixStoreName ofType:@"sqlite"];
+    return [[NSURL alloc] initFileURLWithPath:prefixStorePath];
+}
+
+/*!
  Generates the prefix store
  */
 - (void)initPrefixStore:(void (^)(void))callback {
@@ -117,7 +139,7 @@ static NSString *_projDataDir;
 }
 
 /*!
- Returns the prefix store URL. If the path to the store does not exist, it's created.
+ Returns the prefix store URL under app support folder. If the path to the store does not exist, it's created.
  */
 - (NSURL *)prefixStoreURL {
     NSURL *docURL = [_fops applicationSupportDirectory];

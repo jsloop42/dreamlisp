@@ -73,12 +73,13 @@ static NSString *langVersion;
     _core = [DLCore new];
     [_core setDelegate:self];
     _dbService = [DLPersistenceService new];
-    DreamLisp __weak *weakSelf = self;
-    [_dbService initPrefixStore:^{
-        DreamLisp *this = weakSelf;
-        [DLLog debug:@"Persistence store loaded callback"];
-        [this->_dbService updateStateWithPrefix:nil];
-    }];
+    [_dbService initPersistence];
+//    DreamLisp __weak *weakSelf = self;
+//    [_dbService initPrefixStore:^{
+//        DreamLisp *this = weakSelf;
+//        [DLLog debug:@"Persistence store loaded callback"];
+//        [this->_dbService updateStateWithPrefix:nil];
+//    }];
     //[DLUtils initializePrefixState];  /* Deserialize prefix state */
     _objc = [DLObjc new];
     _network = [DLNetwork new];

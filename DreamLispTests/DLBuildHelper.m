@@ -136,4 +136,16 @@ static BOOL _isDBServiceInitialized;
     XCTAssertTrue([fops isFileExists:dataPath]);
 }
 
+- (void)testI_initPersistence {
+    DLFileOps *fops = [DLFileOps new];
+    NSURL *prefixStoreURL = [_dbService prefixStoreURL];
+    NSString *prefixStorePath = [prefixStoreURL path];
+    if ([fops isFileExists:prefixStorePath]) {
+        [fops delete:prefixStorePath];
+    }
+    XCTAssertFalse([fops isFileExists:prefixStorePath]);
+    [_dbService initPersistence];
+    XCTAssertTrue([fops isFileExists:prefixStorePath]);
+}
+
 @end

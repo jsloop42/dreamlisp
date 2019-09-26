@@ -23,6 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, retain) NSManagedObjectContext *prefixMOC;
 + (instancetype)shared;
 - (BOOL)checkIfPrefixStoreExists;
+- (void)initPersistence;
+- (NSURL *)prefixStoreBundleURL;
 - (void)initPrefixStore:(void (^)(void))callback;
 - (NSURL *)prefixStoreURL;
 - (void)insertPrefixToStoreInBatch:(void(^)(BOOL))callback;
