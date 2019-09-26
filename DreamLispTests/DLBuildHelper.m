@@ -11,6 +11,8 @@
 
 static DLPersistenceService *_dbService;
 static BOOL _isDBServiceInitialized;
+static DLIOService *_ioService;
+static DLLogger *_logger;
 
 @interface DLBuildHelper : XCTestCase
 @end
@@ -26,6 +28,11 @@ static BOOL _isDBServiceInitialized;
     if (!_isDBServiceInitialized) {
         _dbService = [DLPersistenceService new];
         _isDBServiceInitialized = YES;
+        [DLLogger setIsDebug:YES];
+        _ioService = [DLIOService new];
+        _logger = [DLLogger new];
+        _ioService.stdIODelegate = _logger;
+        [DLLogger setIOService:_ioService];
     }
 }
 
@@ -37,20 +44,15 @@ static BOOL _isDBServiceInitialized;
 
 - (void)testB_InitPrefixStore {
     XCTestExpectation *exp = [[XCTestExpectation alloc] initWithDescription:@"Prefix Store Test Expectation"];
-    NSURL *url = [_dbService prefixStoreURL];
-    XCTAssertNotNil(url);
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSError *err;
-    if ([_dbService checkIfPrefixStoreExists]) {
-        [fm removeItemAtURL:url error:&err];
-    }
-    XCTAssertNil(err);
+    BOOL ret = [_dbService deletePrefixStore];
+    XCTAssertTrue(ret);
     XCTAssertFalse([_dbService checkIfPrefixStoreExists]);
     [_dbService initPrefixStore:^{
+        XCTAssertTrue([_dbService isPrefixStoreInitialized]);
         XCTAssertTrue([_dbService checkIfPrefixStoreExists]);
         [exp fulfill];
     }];
-    [self waitForExpectations:@[exp] timeout:5.0];
+    [self waitForExpectations:@[exp] timeout:10.0];
 }
 
 - (void)testC_LoadPrefixFromPList {
@@ -63,65 +65,83 @@ static BOOL _isDBServiceInitialized;
 
 - (void)testD_InsertPrefixesToStoreInBatch {
     XCTestExpectation *exp = [[XCTestExpectation alloc] initWithDescription:@"Insert prefix expectation"];
+    void (^process)(void) = ^void(void) {
+        XCTAssertTrue([_dbService isPrefixStoreInitialized]);
+        XCTAssertNotNil(_dbService.prefixContainer);
+        if (_dbService.prefixContainer) {
+            [_dbService insertPrefixToStoreInBatch:^(BOOL status) {
+                XCTAssertTrue(status);
+                [exp fulfill];
+            }];
+        } else {
+            [exp fulfill];
+        }
+    };
     if (!_dbService.prefixContainer) {
         [_dbService initPrefixStore:^{
-            XCTAssertNotNil(_dbService.prefixContainer);
-            if (_dbService.prefixContainer) {
-                [_dbService insertPrefixToStoreInBatch:^(BOOL status) {
-                    XCTAssertTrue(status);
-                    [exp fulfill];
-                }];
-            } else {
-                [exp fulfill];
-            }
+            process();
         }];
+    } else {
+        process();
     }
-    [self waitForExpectations:@[exp] timeout:15.0];
+    [self waitForExpectations:@[exp] timeout:30.0];
 }
 
 - (void)testE_GetPrefixes {
     XCTestExpectation *exp = [[XCTestExpectation alloc] initWithDescription:@"Get prefix expectation"];
+    void (^process)(void) = ^void(void) {
+        XCTAssertTrue([_dbService isPrefixStoreInitialized]);
+        XCTAssertNotNil(_dbService.prefixContainer);
+        if (_dbService.prefixContainer) {
+            [_dbService getPrefixes:^(NSArray<DLPrefix *> *prefixes) {
+                XCTAssertNotNil(prefixes);
+                XCTAssertTrue(prefixes.count == 61);
+                XCTAssertEqualObjects([[prefixes firstObject] name], @"ASCII");
+                [exp fulfill];
+            } isSort:YES];
+        } else {
+            [exp fulfill];
+        }
+    };
     if (!_dbService.prefixContainer) {
         [_dbService initPrefixStore:^{
-            XCTAssertNotNil(_dbService.prefixContainer);
-            if (_dbService.prefixContainer) {
-                [_dbService getPrefixes:^(NSArray<DLPrefix *> *prefixes) {
-                    XCTAssertNotNil(prefixes);
-                    XCTAssertTrue(prefixes.count == 61);
-                    XCTAssertEqualObjects([[prefixes firstObject] name], @"ASCII");
-                    [exp fulfill];
-                } isSort:YES];
-            } else {
-                [exp fulfill];
-            }
+            process();
         }];
+    } else {
+        process();
     }
-    [self waitForExpectations:@[exp] timeout:10.0];
+    [self waitForExpectations:@[exp] timeout:30.0];
 }
 
 - (void)testF_updateStateWithPrefix {
     XCTestExpectation *exp = [[XCTestExpectation alloc] initWithDescription:@"Get prefix expectation"];
+    void (^process)(void) = ^void(void) {
+        XCTAssertTrue([_dbService isPrefixStoreInitialized]);
+        XCTAssertNotNil(_dbService.prefixContainer);
+        if (_dbService.prefixContainer) {
+            [_dbService updateStateWithPrefix:^(BOOL status) {
+                XCTAssertTrue(status);
+                XCTAssertTrue(DLState.shared.prefixTree.children.count > 0);
+                [exp fulfill];
+            }];
+        } else {
+            [exp fulfill];
+        }
+    };
     if (!_dbService.prefixContainer) {
         [_dbService initPrefixStore:^{
-            XCTAssertNotNil(_dbService.prefixContainer);
-            if (_dbService.prefixContainer) {
-                [_dbService updateStateWithPrefix:^(BOOL status) {
-                    XCTAssertTrue(status);
-                    XCTAssertTrue(DLState.shared.prefixTree.children.count > 0);
-                    [exp fulfill];
-                }];
-            } else {
-                [exp fulfill];
-            }
+            process();
         }];
+    } else {
+        process();
     }
-    [self waitForExpectations:@[exp] timeout:10.0];
+    [self waitForExpectations:@[exp] timeout:30.0];
 }
 
 - (void)testG_prefixStoreProjectDataURL {
     NSURL *dataURL = [_dbService prefixStoreProjectDataURL];
     NSString *dataPath = [dataURL path];
-    XCTAssertEqualObjects(dataPath, @"/Users/jsloop/dev/DreamLisp/data/DLPrefixModel.sqlite");
+    XCTAssertEqualObjects(dataPath, @"/Users/jsloop/dev/DreamLisp/Data/DLPrefixModel.sqlite");
 }
 
 - (void)testH_copyPrefixToProject {
@@ -137,15 +157,24 @@ static BOOL _isDBServiceInitialized;
 }
 
 - (void)testI_initPersistence {
+    XCTestExpectation *exp = [[XCTestExpectation alloc] initWithDescription:@"Init persistence expectation."];
     DLFileOps *fops = [DLFileOps new];
     NSURL *prefixStoreURL = [_dbService prefixStoreURL];
     NSString *prefixStorePath = [prefixStoreURL path];
-    if ([fops isFileExists:prefixStorePath]) {
-        [fops delete:prefixStorePath];
-    }
+    XCTAssertTrue([_dbService deletePrefixStore]);
     XCTAssertFalse([fops isFileExists:prefixStorePath]);
-    [_dbService initPersistence];
-    XCTAssertTrue([fops isFileExists:prefixStorePath]);
+    [_dbService initPersistence:^(BOOL status) {
+        XCTAssertTrue(status);
+        XCTAssertTrue([_dbService isPrefixStoreInitialized]);
+        XCTAssertTrue([fops isFileExists:prefixStorePath]);
+        XCTAssertTrue(DLState.shared.prefixTree.children.count > 1);
+        [exp fulfill];
+    }];
+    [self waitForExpectations:@[exp] timeout:40.0];
+}
+
+- (void)testJ_lispCaseToPascalCase {
+    XCTAssertTrue(DLState.shared.prefixTree.children.count > 1);
 }
 
 @end

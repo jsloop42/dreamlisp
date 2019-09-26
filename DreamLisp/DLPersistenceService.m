@@ -18,12 +18,14 @@ static NSString *_projDataDir;
     NSManagedObjectContext *_prefixMOC;
     DLFileOps *_fops;
     NSFileManager *_fm;
+    BOOL _isPrefixStoreInitialized;
 }
 
 @synthesize prefixMOC = _prefixMOC;
 @synthesize prefixStoreCoordinator;
 @synthesize prefixStore;
 @synthesize prefixContainer;
+@synthesize isPrefixStoreInitialized = _isPrefixStoreInitialized;
 
 + (instancetype)shared {
     @synchronized (self) {
@@ -46,6 +48,7 @@ static NSString *_projDataDir;
     _fops = [DLFileOps new];
     _fm = [NSFileManager defaultManager];
     _projDataDir = @"Data";
+    _isPrefixStoreInitialized = NO;
 }
 
 - (BOOL)checkIfPrefixStoreExists {
@@ -53,10 +56,24 @@ static NSString *_projDataDir;
     return [_fm fileExistsAtPath:[url path]];
 }
 
+- (BOOL)deletePrefixStore {
+    NSError *err;
+    if ([self checkIfPrefixStoreExists]) {
+        NSURL *prefixStoreURL = [self prefixStoreURL];
+        NSURL *prefixStoreDir = [prefixStoreURL URLByDeletingLastPathComponent];
+        NSURL *walFile = [prefixStoreDir URLByAppendingPathComponent:[[NSString alloc] initWithFormat:@"%@.sqlite-wal", DLConst.prefixStoreName]];
+        NSURL *shmFile = [prefixStoreDir URLByAppendingPathComponent:[[NSString alloc] initWithFormat:@"%@.sqlite-shm", DLConst.prefixStoreName]];
+        [_fm removeItemAtURL:prefixStoreURL error:&err];
+        [_fm removeItemAtURL:walFile error:&err];
+        [_fm removeItemAtURL:shmFile error:&err];
+    }
+    return err == nil;
+}
+
 /*!
- Checks if prefix store exists, else copies the pre-build store from the bundle to the app support folder.
- */
-- (void)initPersistence {
+Checks if prefix store exists, else copies the pre-build store from the bundle to the app support folder. Invokes the given callback once done with the status.
+*/
+- (void)initPersistence:(void(^)(BOOL))callback {
     BOOL isPrefixStoreExists = [self checkIfPrefixStoreExists];
     if (!isPrefixStoreExists) {
         BOOL ret = [_fops copyFile:[self prefixStoreBundleURL] toURL:[self prefixStoreURL]];
@@ -64,6 +81,14 @@ static NSString *_projDataDir;
             [DLLog error:@"Error copying prefix store from bundle"];
         }
     }
+    [DLLog debug:@"in initPersistence method"];
+    [self initPrefixStore:^{
+        [DLLog debug:@"initPrefixStore callback"];
+        [self updateStateWithPrefix:^(BOOL status) {
+            [DLLog debug:@"updateStateWithPrefix callback"];
+            callback(status);
+        }];
+    }];
 }
 
 /*!
@@ -98,21 +123,24 @@ static NSString *_projDataDir;
 //        }
 //        callback();
 //    }];
-
+    if (_isPrefixStoreInitialized) callback();
+    [DLLog debug:@"in initPrefixStore method"];
     NSURL *prefixMOMD = [[NSBundle bundleForClass:[self class]] URLForResource:DLConst.prefixStoreName withExtension:@"momd"];
     if (!prefixMOMD) {
         [DLLog error:@"Prefix MOMD file not found"];
+        callback();
         return;
     }
     NSManagedObjectModel *mom = [[NSManagedObjectModel alloc] initWithContentsOfURL:prefixMOMD];
     if (!mom) {
         [DLLog error:@"Managed Object Model initialization failed"];
+        callback();
         return;
     }
 //    self.prefixStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
     _prefixMOC = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     [self.prefixMOC setPersistentStoreCoordinator:self.prefixStoreCoordinator];
-    self.prefixContainer = [[NSPersistentContainer alloc] initWithName:@"PrefixContainer" managedObjectModel:mom];
+    self.prefixContainer = [[NSPersistentContainer alloc] initWithName:DLConst.prefixStoreName managedObjectModel:mom];
     self.prefixStoreCoordinator = self.prefixContainer.persistentStoreCoordinator;
 //    NSURL *storeURL = [NSURL URLWithString:@"/Users/jsloop/temp/dlprefix.sqlite"];
 //    NSError *err;
@@ -128,11 +156,14 @@ static NSString *_projDataDir;
                                                                                                options:nil error:&err];
         if (!this.prefixStore) {
             [DLLog errorWithFormat:@"Failed to initialize prefix store: %@", err.description];
+            if (callback) dispatch_async(dispatch_get_main_queue(), ^{ callback(); });
             return;
         }
         [[self.prefixContainer viewContext] setAutomaticallyMergesChangesFromParent:YES];
+        this->_isPrefixStoreInitialized = YES;
         if (!callback) return;
         dispatch_async(dispatch_get_main_queue(), ^{
+            [DLLog debug:@"Prefix store initialized"];
             callback();
         });
     });
@@ -154,6 +185,9 @@ static NSString *_projDataDir;
     return [storeDirURL URLByAppendingPathComponent:[[NSString alloc] initWithFormat:@"%@.sqlite", DLConst.prefixStoreName]];
 }
 
+/*!
+ Inserts prefixes loaded from the plist into the core data store.
+ */
 - (void)insertPrefixToStoreInBatch:(void(^)(BOOL))callback {
     [self.prefixContainer performBackgroundTask:^(NSManagedObjectContext *bgMOC) {
         NSArray *prefixList = [self loadPrefixFromPList];
@@ -196,7 +230,11 @@ static NSString *_projDataDir;
     return [_fops copyFile:url toURL:[self prefixStoreProjectDataURL]];
 }
 
+/*!
+ Retrieves all prefixes from the Core Data store invoking the callback with the result once done.
+ */
 - (void)getPrefixes:(void(^)(NSArray<DLPrefix *> *))callback isSort:(BOOL)isSort {
+    [DLLog debug:@"in getPrefixes method"];
     [self.prefixContainer performBackgroundTask:^(NSManagedObjectContext * bgMOC) {
         NSFetchRequest *req = [NSFetchRequest new];
         if (isSort) {
@@ -209,22 +247,26 @@ static NSString *_projDataDir;
         if (err) {
             [DLLog errorWithFormat:@"Error fetching prefix from store: %@", err];
         }
+        [DLLog debugWithFormat:@"getPrefix prefixes count: %ld", prefixes.count];
         callback(prefixes);
     }];
 }
 
+/*!
+ Updates the state prefix trie with the prefixes loaded from the Core Data store.
+ */
 - (void)updateStateWithPrefix:(void(^ _Nullable)(BOOL))callback {
-    /*
-     1. Pre-req: Load the prefix store
-     2. Get all prefixes and update the trie
-     */
+    [DLLog debug:@"in updateStateWithPrefix method"];
     [self getPrefixes:^(NSArray<DLPrefix *> *prefixes) {
+        if (prefixes.count == 0 && callback) callback(false);
         [[[prefixes firstObject] managedObjectContext] performBlock:^{
             NSEnumerator *iter = [prefixes objectEnumerator];
             DLPrefix *prefix = nil;
+            [DLLog debug:@"updating prefix tree"];
             while ((prefix = [iter nextObject]) != nil) {
                 [DLState.shared.prefixTree insert:prefix.name];
             }
+            [DLLog debug:@"State data updated with prefixes"];
             if (callback) callback(YES);
         }];
     } isSort:NO];

@@ -13,7 +13,7 @@
  */
 @implementation DLTrieSearchResult {
     /*!
-     An array containing prefixes.
+     An array containing prefix words.
      */
     NSMutableArray *_prefixes;
     /*!

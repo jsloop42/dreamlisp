@@ -21,9 +21,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, retain) NSPersistentStore *prefixStore;
 @property (nonatomic, readwrite, retain) NSPersistentContainer *prefixContainer;
 @property (nonatomic, readonly, retain) NSManagedObjectContext *prefixMOC;
+@property (nonatomic, readonly, assign) BOOL isPrefixStoreInitialized;
 + (instancetype)shared;
 - (BOOL)checkIfPrefixStoreExists;
-- (void)initPersistence;
+- (BOOL)deletePrefixStore;
+- (void)initPersistence:(void(^)(BOOL))callback;
 - (NSURL *)prefixStoreBundleURL;
 - (void)initPrefixStore:(void (^)(void))callback;
 - (NSURL *)prefixStoreURL;
