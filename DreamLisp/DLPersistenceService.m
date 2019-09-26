@@ -58,8 +58,14 @@ static NSString *_projDataDir;
 
 - (BOOL)deletePrefixStore {
     NSError *err;
+    NSURL *prefixStoreURL = [self prefixStoreURL];
+    if (self.prefixStoreCoordinator) {
+        [self.prefixStoreCoordinator removePersistentStore:self.prefixStore error:&err];
+        if (err) [DLLog errorWithFormat:@"Error closing prefix store: %@", err];
+        [self.prefixStoreCoordinator destroyPersistentStoreAtURL:prefixStoreURL withType:NSSQLiteStoreType options:nil error:&err];
+        if (err) [DLLog errorWithFormat:@"Error removing prefix store: %@", err];
+    }
     if ([self checkIfPrefixStoreExists]) {
-        NSURL *prefixStoreURL = [self prefixStoreURL];
         NSURL *prefixStoreDir = [prefixStoreURL URLByDeletingLastPathComponent];
         NSURL *walFile = [prefixStoreDir URLByAppendingPathComponent:[[NSString alloc] initWithFormat:@"%@.sqlite-wal", DLConst.prefixStoreName]];
         NSURL *shmFile = [prefixStoreDir URLByAppendingPathComponent:[[NSString alloc] initWithFormat:@"%@.sqlite-shm", DLConst.prefixStoreName]];
@@ -67,6 +73,7 @@ static NSString *_projDataDir;
         [_fm removeItemAtURL:walFile error:&err];
         [_fm removeItemAtURL:shmFile error:&err];
     }
+    _isPrefixStoreInitialized = NO;
     return err == nil;
 }
 
@@ -84,6 +91,8 @@ Checks if prefix store exists, else copies the pre-build store from the bundle t
     [DLLog debug:@"in initPersistence method"];
     [self initPrefixStore:^{
         [DLLog debug:@"initPrefixStore callback"];
+        NSAssert(self.prefixStore, @"Prefix store should exist");
+        NSAssert(self.prefixStoreCoordinator, @"Prefix store coordinator should exist");
         [self updateStateWithPrefix:^(BOOL status) {
             [DLLog debug:@"updateStateWithPrefix callback"];
             callback(status);
@@ -115,15 +124,6 @@ Checks if prefix store exists, else copies the pre-build store from the bundle t
      5. Save the moc
      6. Copy the store to the project data dir
     */
-//    _prefixContainer = [[NSPersistentContainer alloc] initWithName:DLConst.prefixStoreName];
-//    [_prefixContainer loadPersistentStoresWithCompletionHandler:^(NSPersistentStoreDescription *description, NSError *err) {
-//        if (err) {
-//            [DLLog errorWithFormat:@"Failed to load prefix store: %@", err];
-//            return;
-//        }
-//        callback();
-//    }];
-    if (_isPrefixStoreInitialized) callback();
     [DLLog debug:@"in initPrefixStore method"];
     NSURL *prefixMOMD = [[NSBundle bundleForClass:[self class]] URLForResource:DLConst.prefixStoreName withExtension:@"momd"];
     if (!prefixMOMD) {
@@ -137,17 +137,7 @@ Checks if prefix store exists, else copies the pre-build store from the bundle t
         callback();
         return;
     }
-//    self.prefixStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
-    _prefixMOC = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-    [self.prefixMOC setPersistentStoreCoordinator:self.prefixStoreCoordinator];
     self.prefixContainer = [[NSPersistentContainer alloc] initWithName:DLConst.prefixStoreName managedObjectModel:mom];
-    self.prefixStoreCoordinator = self.prefixContainer.persistentStoreCoordinator;
-//    NSURL *storeURL = [NSURL URLWithString:@"/Users/jsloop/temp/dlprefix.sqlite"];
-//    NSError *err;
-    //NSPersistentStore *store = [coordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:nil options:nil error:&err];
-//    if (!store) {
-//        NSLog(@"error %@: ", err);
-//    }
     DLPersistenceService __weak *weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         DLPersistenceService *this = weakSelf;
@@ -160,6 +150,9 @@ Checks if prefix store exists, else copies the pre-build store from the bundle t
             return;
         }
         [[self.prefixContainer viewContext] setAutomaticallyMergesChangesFromParent:YES];
+        this->_prefixMOC = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+        this.prefixStoreCoordinator = self.prefixContainer.persistentStoreCoordinator;
+        [this.prefixMOC setPersistentStoreCoordinator:this.prefixStoreCoordinator];
         this->_isPrefixStoreInitialized = YES;
         if (!callback) return;
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -227,7 +220,12 @@ Checks if prefix store exists, else copies the pre-build store from the bundle t
  */
 - (BOOL)copyPrefixStoreToProject {
     NSURL *url = [self prefixStoreURL];
-    return [_fops copyFile:url toURL:[self prefixStoreProjectDataURL]];
+    NSURL *projDataURL = [self prefixStoreProjectDataURL];
+    NSString *projDataPath = [projDataURL path];
+    if ([_fops isFileExists:projDataPath]) {
+        [_fops delete:projDataPath];
+    }
+    return [_fops copyFile:url toURL:projDataURL];
 }
 
 /*!

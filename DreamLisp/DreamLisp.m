@@ -22,7 +22,6 @@ static NSString *langVersion;
     DLNetwork *_network;
     DLFileOps *_fileOps;
     DLIOService* _ioService;
-    DLPersistenceService *_dbService;
     DLObjc *_objc;
     BOOL _isQuasiquoteMode;
     NSUInteger _quasiquoteDepth;
@@ -42,6 +41,7 @@ static NSString *langVersion;
 @synthesize prompt = _prompt;
 @synthesize isDebug = _isDebug;
 @synthesize isVerbose = _isVerbose;
+@synthesize dbService = _dbService;
 
 + (void)initialize {
     hostLangVersion = [[NSString alloc] initWithFormat:@"%@ %.01f", @"Objective-C", (double)OBJC_API_VERSION];
@@ -73,7 +73,9 @@ static NSString *langVersion;
     _core = [DLCore new];
     [_core setDelegate:self];
     _dbService = [DLPersistenceService new];
-    [_dbService initPersistence];
+    [_dbService initPersistence:^(BOOL status) {
+
+    }];
 //    DreamLisp __weak *weakSelf = self;
 //    [_dbService initPrefixStore:^{
 //        DreamLisp *this = weakSelf;

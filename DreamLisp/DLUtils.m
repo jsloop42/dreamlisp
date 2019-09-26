@@ -417,9 +417,21 @@ static NSRegularExpression *_setterRegex;
     return str;
 }
 
+// ns-url-session -> NSURLSession (Here URL needs to be check from the prefix) (each work need a look up)
 + (NSString *)lispCaseToPascalCase:(NSString *)string {
-    
-    return @"";
+    NSArray *arr = [string componentsSeparatedByString:@"-"];
+    NSEnumerator *iter = [arr objectEnumerator];
+    NSString *word = nil;
+    NSMutableString *mstr = [NSMutableString new];
+    while ((word = [iter nextObject]) != nil) {
+        DLTrieSearchResult *res = [[DLState.shared prefixTree] search:[word uppercaseString] isResultInCaps:YES];
+        if (res.isExist) {  /* The whole word is uppercased */
+            [mstr appendString:[res.prefixes componentsJoinedByString:@""]];
+        } else {  /* => We only capitalize the word */
+            [mstr appendString:[word capitalizedString]];
+        }
+    }
+    return mstr;
 }
 
 /*! Converts the given pascal case string to lisp case.  */
@@ -465,6 +477,7 @@ static NSRegularExpression *_setterRegex;
      If there are more that two uppercase characters, then we check if it's in the prefixes list. If so, we convert them to lowercase, else, we convert the
      whole prefix into lowercase.
      */
+    // NSURLSession
     NSRange range;
     NSString *caps = nil;
     NSUInteger idx = 0;

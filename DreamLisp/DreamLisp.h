@@ -31,6 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, retain) NSString *prompt;
 @property (nonatomic, readwrite) BOOL isDebug;
 @property (nonatomic, readwrite) BOOL isVerbose;
+@property (nonatomic, readwrite, retain) DLPersistenceService *dbService;
 - (instancetype)init;
 - (instancetype)initWithoutREPL;
 - (void)bootstrap;

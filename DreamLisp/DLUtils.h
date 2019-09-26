@@ -57,6 +57,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSMutableArray *)stringToArray:(DLString *)string isNative:(BOOL)isNative;
 + (void)appendStringFromArray:(NSMutableArray *)array string:(DLString *)string;
 + (NSString *)promptWithModule:(NSString *)moduleName;
++ (NSString *)pascalCaseToCamelCase:(NSString *)string;
++ (NSString *)lispCaseToPascalCase:(NSString *)string;
 + (NSString *)lispCaseToCamelCase:(NSString *)string;
 + (NSString *)camelCaseToLispCase:(NSString *)string;
 + (NSMutableArray *)splitString:(NSString *)string;

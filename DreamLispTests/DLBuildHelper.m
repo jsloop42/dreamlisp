@@ -44,8 +44,20 @@ static DLLogger *_logger;
 
 - (void)testB_InitPrefixStore {
     XCTestExpectation *exp = [[XCTestExpectation alloc] initWithDescription:@"Prefix Store Test Expectation"];
-    BOOL ret = [_dbService deletePrefixStore];
-    XCTAssertTrue(ret);
+    NSFileManager *fm = [[NSFileManager alloc] init];
+    NSError *err;
+    if ([_dbService checkIfPrefixStoreExists]) {
+        NSURL *prefixStoreURL = [_dbService prefixStoreURL];
+        NSURL *prefixStoreDir = [prefixStoreURL URLByDeletingLastPathComponent];
+        NSURL *walFile = [prefixStoreDir URLByAppendingPathComponent:[[NSString alloc] initWithFormat:@"%@.sqlite-wal", DLConst.prefixStoreName]];
+        NSURL *shmFile = [prefixStoreDir URLByAppendingPathComponent:[[NSString alloc] initWithFormat:@"%@.sqlite-shm", DLConst.prefixStoreName]];
+        [fm removeItemAtURL:prefixStoreURL error:&err];
+        XCTAssertNil(err);
+        [fm removeItemAtURL:walFile error:&err];
+        XCTAssertNil(err);
+        [fm removeItemAtURL:shmFile error:&err];
+        XCTAssertNil(err);
+    }
     XCTAssertFalse([_dbService checkIfPrefixStoreExists]);
     [_dbService initPrefixStore:^{
         XCTAssertTrue([_dbService isPrefixStoreInitialized]);
@@ -122,6 +134,9 @@ static DLLogger *_logger;
             [_dbService updateStateWithPrefix:^(BOOL status) {
                 XCTAssertTrue(status);
                 XCTAssertTrue(DLState.shared.prefixTree.children.count > 0);
+                NSError *err;
+                [_dbService.prefixStoreCoordinator removePersistentStore:_dbService.prefixStore error:&err];
+                XCTAssertNil(err);
                 [exp fulfill];
             }];
         } else {
@@ -148,10 +163,10 @@ static DLLogger *_logger;
     NSURL *dataURL = [_dbService prefixStoreProjectDataURL];
     DLFileOps *fops = [DLFileOps new];
     NSString *dataPath = [dataURL path];
-    if ([fops isFileExists:dataPath]) {
-        [fops delete:dataPath];
-    }
-    XCTAssertFalse([fops isFileExists:dataPath]);
+//    if ([fops isFileExists:dataPath]) {
+//        [fops delete:dataPath];
+//    }
+    //XCTAssertFalse([fops isFileExists:dataPath]);
     [_dbService copyPrefixStoreToProject];
     XCTAssertTrue([fops isFileExists:dataPath]);
 }
@@ -161,8 +176,6 @@ static DLLogger *_logger;
     DLFileOps *fops = [DLFileOps new];
     NSURL *prefixStoreURL = [_dbService prefixStoreURL];
     NSString *prefixStorePath = [prefixStoreURL path];
-    XCTAssertTrue([_dbService deletePrefixStore]);
-    XCTAssertFalse([fops isFileExists:prefixStorePath]);
     [_dbService initPersistence:^(BOOL status) {
         XCTAssertTrue(status);
         XCTAssertTrue([_dbService isPrefixStoreInitialized]);
@@ -175,6 +188,8 @@ static DLLogger *_logger;
 
 - (void)testJ_lispCaseToPascalCase {
     XCTAssertTrue(DLState.shared.prefixTree.children.count > 1);
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-string"], @"NSString");
+    // TODO: NSURLRequest
 }
 
 @end
