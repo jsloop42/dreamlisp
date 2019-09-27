@@ -4,6 +4,7 @@
 <dict>
     <key>prefixes</key>
     <array>
+        <string>AK</string>
         <string>ASCII</string>
         <string>AV</string>
         <string>CDATA</string>
@@ -16,10 +17,12 @@
         <string>EXIF</string>
         <string>EXIFGPS</string>
         <string>FS</string>
+        <string>FTP</string>
         <string>GPS</string>
         <string>HTML</string>
         <string>HTTP</string>
         <string>ID</string>
+        <string>IS</string>
         <string>LTS</string>
         <string>LZFSE</string>
         <string>LZMA</string>
@@ -61,10 +64,12 @@
         <string>OT</string>
         <string>PCDATA</string>
         <string>PPC</string>
+        <string>SAX</string>
         <string>SOCKS</string>
         <string>SSL</string>
         <string>UI</string>
         <string>URL</string>
+        <string>XML</string>
     </array>
 </dict>
 </plist>

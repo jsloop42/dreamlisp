@@ -70,9 +70,9 @@ static DLLogger *_logger;
 - (void)testC_LoadPrefixFromPList {
     NSArray *prefixList = [_dbService loadPrefixFromPList];
     XCTAssertNotNil(prefixList);
-    XCTAssertTrue([prefixList count] == 61);
-    XCTAssertEqualObjects([prefixList firstObject], @"ASCII");
-    XCTAssertEqualObjects([prefixList lastObject], @"URL");
+    XCTAssertTrue([prefixList count] == 66);
+    XCTAssertEqualObjects([prefixList firstObject], @"AK");
+    XCTAssertEqualObjects([prefixList lastObject], @"XML");
 }
 
 - (void)testD_InsertPrefixesToStoreInBatch {
@@ -107,8 +107,8 @@ static DLLogger *_logger;
         if (_dbService.prefixContainer) {
             [_dbService getPrefixes:^(NSArray<DLPrefix *> *prefixes) {
                 XCTAssertNotNil(prefixes);
-                XCTAssertTrue(prefixes.count == 61);
-                XCTAssertEqualObjects([[prefixes firstObject] name], @"ASCII");
+                XCTAssertTrue(prefixes.count == 66);
+                XCTAssertEqualObjects([[prefixes firstObject] name], @"AK");
                 [exp fulfill];
             } isSort:YES];
         } else {
@@ -189,7 +189,21 @@ static DLLogger *_logger;
 - (void)testJ_lispCaseToPascalCase {
     XCTAssertTrue(DLState.shared.prefixTree.children.count > 1);
     XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-string"], @"NSString");
-    // TODO: NSURLRequest
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-url-request"], @"NSURLRequest");
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-ftp-url-handle"], @"NSFTPURLHandle");
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-rest-url-handle"], @"NSRestURLHandle");  /* Not a foundation class + REST prefix is not added */
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-stream-socks-proxy-version4"], @"NSStreamSOCKSProxyVersion4");
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-data-compression-algorithm-lzfse"], @"NSDataCompressionAlgorithmLZFSE");
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-url-bookmark-resolution-without-ui"], @"NSURLBookmarkResolutionWithoutUI");
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-xml-parser-cdata-not-finished-error"], @"NSXMLParserCDATANotFinishedError");
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-metadata-item-resolution-width-dpi-key"], @"NSMetadataItemResolutionWidthDPIKey");
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-script-command-description-more-i-vars"], @"NSScriptCommandDescriptionMoreIVars");
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-xml-ns-number-transformer-name"], @"NSXMLNSNumberTransformerName");
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-xml-sax-parser"], @"NSXMLSAXParser");
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-ak-serializer-stream"], @"NSAKSerializerStream");
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-layout-x-axis-anchor"], @"NSLayoutXAxisAnchor");
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-is-linear-expression"], @"NSISLinearExpression");
+    XCTAssertEqualObjects([DLUtils lispCaseToPascalCase:@"ns-cf-attributed-string"], @"NSCFAttributedString");
 }
 
 @end

@@ -1,4 +1,5 @@
 {:prefixes [
+  "AK",
   "ASCII",
   "AV",
   "CDATA",
@@ -11,10 +12,12 @@
   "EXIF",
   "EXIFGPS",
   "FS",
+  "FTP"
   "GPS",
   "HTML",
   "HTTP",
   "ID",
+  "IS",
   "LTS",
   "LZFSE",
   "LZMA",
@@ -56,7 +59,9 @@
   "OT",
   "PCDATA",
   "PPC",
+  "SAX",
   "SOCKS",
   "SSL",
   "UI",
-  "URL"]}
+  "URL",
+  "XML"]}
