@@ -37,7 +37,7 @@ int main(int argc, const char * argv[]) {
         }
     }
     DLTerminal *term = [DLTerminal new];
-    [dl setIsDebug:YES];
+    [dl setIsDebug:NO];
     [dl setIsREPL:YES];
     [dl bootstrap];
     [[dl ioService] setStdIODelegate:term];
