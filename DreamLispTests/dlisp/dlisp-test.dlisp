@@ -1,0 +1,16 @@
+(defmodule dlisp-test
+  (export all)
+  (import (from test (deftest n) (testing n) (is 2) (is 3) (run 1) (get-test-info 0))))
+
+(defun notif-handler (n)
+  (println "notif-handler")
+  (is (= true) (= n 42)))
+
+(deftest test-notification
+  "Testing notification"
+  (testing "Testing add-notification"
+    (is (= true) (add-notification :the-answer notif-handler/1))
+    (is (= true) (post-notification :the-answer 42))
+    (is (= true) (remove-notification :the-answer))))
+
+(run "dlisp-test")
