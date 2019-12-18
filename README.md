@@ -1,6 +1,6 @@
 ## Language Guide
 
-DreamLisp is a Lisp dialect that started out as an implementation of [MAL (Make a Lisp)](https://github.com/kanaka/mal/) and then diverged from the MAL language specification to include additional functionalities like modules, lazy collections and changes to some of the core functions, and is a Lisp-2 because we can have both variable and a function with the same name. DreamLisp is written in Objective-C and as such can be extended further to work with Objective-C runtime capabilites. See the experimental [objc-rt-1 branch](https://github.com/jsloop42/dreamlisp/tree/objc-rt-1). At present the language runs in interpreted mode.
+DreamLisp is a Lisp dialect that started out as an implementation of [MAL (Make a Lisp)](https://github.com/kanaka/mal/) and then diverged from the MAL language specification to include additional functionalities like modules, lazy collections and changes to some of the core functions, and is a Lisp-2 because we can have both variable and a function with the same name. DreamLisp is written in Objective-C and as such can be extended further to work with Objective-C runtime capabilities. See the experimental [objc-rt-1 branch](https://github.com/jsloop42/dreamlisp/tree/objc-rt-1). At present, the language runs in interpreted mode.
 
 ### Data Types
 
@@ -8,14 +8,14 @@ All data types in DreamLisp are immutable in nature.
 
 #### List
 
-Lists are the building blocks for any Lisp program. Lists unlike vector, which we will see later, has special semantics however, in general. The first element of the list is almost always considered as a function and the rest as the argument to that function.
+Lists are the building blocks for any Lisp program. Lists unlike vector, which we will see later, has special semantics in general. The first element of the list is almost always considered as a function and the rest as the argument to that function.
 
 ```
 λ user> (+ 1 2 3 4 5 6)
 21
 ```
 
-Here, `+` is a function and `1`, `2`, `3` are arguments. A list always evaluates the elements. To supress evaluation, we can quote the list.
+Here, `+` is a function and `1`, `2`, `3` are arguments. A list always evaluates the elements. To suppress evaluation, we can quote the list.
 
 ```
 λ user> (quote (list 1 2 3))
@@ -25,7 +25,7 @@ Here, `+` is a function and `1`, `2`, `3` are arguments. A list always evaluates
 (1 2 3)
 ```
 
-Here, both the expressions are same. The second expression is a short version which uses `'` quote symbol which has this special semantics, which being supress expression evaluation.
+Here, both expressions are the same. The second expression is a short version which uses `'` quote symbol which has this special semantics, which being suppress expression evaluation.
 
 ```
 λ user> (first (list 1 2 3))
@@ -41,11 +41,11 @@ Here, both the expressions are same. The second expression is a short version wh
 Here, the `(list 1 2 3)` produces a list. The first argument `list` is a function which creates a list out of the given elements. We then apply the result to the `first` function which returns the first element from the list.
 Note that, the inner expression is evaluated and the result is passed to the outer `first` function.
 
-The second expression uses list notation form. When using list as notation, the first argument is the number `1`, which is not a function. So if we did not quote the list, the list will be evaluated with `1` assumed as function with arguments `2`, `3`, `4`, which will fail, as in the thrid sample expression. So we supress the evaluation passing the list as such.
+The second expression uses the list notation form. When using the list as notation, the first argument is the number `1`, which is not a function. So if we did not quote the list, the list will be evaluated with `1` assumed as function with arguments `2`, `3`, `4`, which will fail, as in the third sample expression. So we suppress the evaluation passing the list as such.
 
 #### Vector
 
-Vectors are similar to lists, except that vectors does not evaluate the values like list does. So we can intuit it like a quoted list.
+Vectors are similar to lists, except that vectors do not evaluate the values like list does. So we can intuit it like a quoted list.
 
 ```
 λ user> [1 2 3]
@@ -58,11 +58,11 @@ Vectors are similar to lists, except that vectors does not evaluate the values l
 [2 3]
 ```
 
-The vector notation is `[]` squre braces. We can use the function `vector` to create a vector as well. The `rest` is a function that operates on sequences (`list`, `vector`, `string`) returning every element except the first. This is same as `head`, `tail`, or `car`, `cdr` functions one will encounter in other Lisp dialects.
+The vector notation is `[]` square braces. We can use the function `vector` to create a vector as well. The `rest` is a function that operates on sequences (`list`, `vector`, `string`) returning every element except the first. This is same as `head`, `tail`, or `car`, `cdr` functions one will encounter in other Lisp dialects.
 
 #### Hash Map
 
-Hash maps are dictionary collection which can have key value pair. The short notation for hash-map is `{}`.
+Hash maps are dictionary collection which can have key-value pair. The short notation for hash-map is `{}`.
 
 ```
 λ user> {"name" "Olive", "age" 42, "location" "Liestal"}
@@ -78,9 +78,9 @@ Hash maps are dictionary collection which can have key value pair. The short not
 "Doe"
 ```
 
-Hash map does not gurantee ordering of elements. Here the first expression uses strings as keys, where as the second one uses a keyword. Keywords has same sematics as that of Clojure keyword. We use `def` to bind a value to a variable. Here we bind the hash-map to the variable `person`. 
+Hash map does not guarantee ordering of elements. Here the first expression uses strings as keys, whereas the second one uses a keyword. Keywords have the same semantics as that of Clojure keyword. We use `def` to bind a value to a variable. Here we bind the hash-map to the variable `person`. 
 
-When using keyword in the function position of a list with argument as a hash-map, we get the value associated with that key in the hash-map if present, else `nil`. If we are using a different key type, we can use the `get` function to get the value associated with the key as in the last expression.
+When using keyword in the function position of a list with the argument as a hash-map, we get the value associated with that key in the hash-map if present, else `nil`. If we are using a different key type, we can use the `get` function to get the value associated with the key as in the last expression.
 
 #### Keyword
 
@@ -96,7 +96,7 @@ The last example shows a weekend variable which is a vector containing keywords.
 
 #### String
 
-String are anything within a double quotes. Most of the list functions also works on strings. 
+A string is anything within double-quotes. Most of the list functions also works on strings. 
 
 ```
 λ user> (first "Olive")
@@ -108,7 +108,7 @@ String are anything within a double quotes. Most of the list functions also work
 
 #### Atom
 
-Atoms are a container holding another value type where operations on the atom takes place atomically. At present DreamLisp is only single threaded from user's perspective, so this distinction does not hold much.
+Atoms are a container holding another value type where operations on the atom take place atomically. At present DreamLisp is only single threaded from user's perspective, so this distinction does not hold much.
 
 ```
 λ user> (atom {:count 2 :displayed? false})
@@ -117,7 +117,7 @@ Atoms are a container holding another value type where operations on the atom ta
 
 #### nil
 
-All functions returns value, the default being `nil`.
+All functions return a value, the default being `nil`.
 
 ```
 λ user> nil
@@ -138,7 +138,7 @@ A function represents a unit of computation with a set of expressions grouped to
   (- n 1))
 ```
 
-Here `inc/1` and `dec/1` are two functions which takes a argument `n` and increments or decrements by one. The string given after the argument is the doc string.
+Here `inc/1` and `dec/1` are two functions which take an argument `n` and increments or decrements by one. The string given after the argument is the docstring.
 
 Note: When using the REPL, on a line break the expression will be evaluated. We can define the function without line breaks or we can load from a file.
 
@@ -167,7 +167,7 @@ Here we define variables `name-xs` which is a vector of names and an anonymous f
 
 ### Macros
 
-Now to the best part, macros! Macros as the Lisp lore says are programs, that write programs. Macros are compile time only in the sense that when we apply a macro within some function, and later change the macro, the existing defined function does not change, because that code was already produced from the previous macro expansion when the function was defined. To make variable names to not have conflicts as the macros are unhygienic, we can make use of `gensym` which produces unique symbols through out.
+Now to the best part, macros! Macros, as the Lisp lore says are programs that write programs. Macros are compile time only in the sense that when we apply a macro within some function, and later change the macro, the existing defined function does not change, because that code was already produced from the previous macro expansion when the function was defined. To make variable names to not have conflicts as the macros are unhygienic, we can make use of `gensym` which produces unique symbols throughout.
 
 ```
 (defmacro when (x & form)
@@ -177,7 +177,7 @@ Now to the best part, macros! Macros as the Lisp lore says are programs, that wr
 
 Here we require a macro because we require conditional evaluation of arguments. If we use a function instead, all the arguments passed to the function will be first evaluated which is not what we want. The `when` macro evaluates the expression first and if it is `true`, it then executes the body. We use special reader macros that are available only within a macro definition. These have the standard Lisp semantics.
 
-The back tick, which is unquote \`, is used to write code as is. Within the unquote, using tilde `~`, which is unquote evaluates the variable that follows and replaces it with its value. If the variable is a list, we use splice-unquote `~@`. Invoking macro will then replace the call site with the code, which is called the macro expansion. Macros can be considered like templating in a sense, but it's not mere string substitution.
+The backtick, which is unquote \`, is used to write code as is. Within the unquote, using tilde `~`, which is unquote evaluates the variable that follows and replaces it with its value. If the variable is a list, we use splice-unquote `~@`. Invoking macro will then replace the call site with the code, which is called the macro expansion. Macros can be considered like templating in a sense, but it's not mere string substitution.
 
 ## Module
 
@@ -197,7 +197,7 @@ DreamLisp has a module system similar to that of Erlang or [LFE](https://lfe.git
     (conj acc n)))
 ```
 
-Say, this is the `utils.dlisp` file, which contains `collatz` function. The filename and module name needs to be the same as a convention. Here we define a module using `defmodule` followed by the module name and then the module exports. The exports are function name followed by arity. Similarly if we are importing from another module, we can use the `import` special form. Only exported functions and macros are visible to the other modules.
+Say, this is the `utils.dlisp` file, which contains `collatz` function. The filename and module name needs to be the same as a convention. Here we define a module using `defmodule` followed by the module name and then the module exports. The exports are function name followed by arity. Similarly, if we are importing from another module, we can use the `import` special form. Only exported functions and macros are visible to the other modules.
 
 ```
 (defmodule utils-test 
@@ -211,11 +211,11 @@ The default module is called `user` which is the module that the REPL initialize
 
 ## Lazy sequence
 
-Higher order collection functions like `map/n`, `foldl/3`, `foldr/3`, etc., by default produces a lazy sequence. The operations are deferred until we force evaluation either by applying other list functions over the lazy sequence like `first/1` or `take/2`, or using `doall/1`.
+Higher order collection functions like `map/n`, `foldl/3`, `foldr/3`, etc., by default, produces a lazy sequence. The operations are deferred until we force evaluation either by applying other list functions over the lazy sequence like `first/1` or `take/2`, or using `doall/1`.
 
 ## Core Functions
 
-DreamLisp has a set of built-in core functions which are natively implemented and helpers which are written in DreamLisp itself and loaded into the REPL during initialization. These core functions are in the module `core` and is availble to all other modules without having to explictly import them.
+DreamLisp has a set of built-in core functions which are natively implemented and helpers which are written in DreamLisp itself and loaded into the REPL during initialization. These core functions are in the module `core` and are available to all other modules without having to explicitly import them.
 
 ### Sequence Functions
 Sequence functions works on `list`, `vector` and `string` types.
@@ -444,7 +444,7 @@ Takes any nested collection and returns a lazy sequence which when realised retu
 
 #### foldl/3
 
-`foldl` takes a function, an initial value and a sequence, initialises the accumulator with the initial value, applies the function to each value in the collection with the result in the accumlator, returning the accumulator when done. The function application takes place from left to right.
+`foldl` takes a function, an initial value and a sequence, initialises the accumulator with the initial value, applies the function to each value in the collection with the result in the accumulator, returning the accumulator when done. The function application takes place from left to right.
 
 ```
 λ user> (foldl (fn (x acc) (str acc x)) "" ["a" 1 "b" 2 "c" 3])
@@ -511,7 +511,7 @@ To realise the value of the lazy sequence, we can use the `doall` function.
 
 #### partition/2
 
-Takes a predicate function and a collection, applies the function to each element in the collection and returns the resulting collection partitioned into two, where first one satisifies the pedicate and the second does not.
+Takes a predicate function and a collection, applies the function to each element in the collection and returns the resulting collection partitioned into two, where the first one satisfies the predicate and the second does not.
 
 ```
 λ user> (partition (fn (x) (> x 4)) [4 2 5 3 1 7])
@@ -520,7 +520,7 @@ Takes a predicate function and a collection, applies the function to each elemen
 
 #### take/2
 
-Takes `n` elements from the given sequence. If the sequence is lazy, this makes the elements of sequence to be evaluated as required.
+Takes `n` elements from the given sequence. If the sequence is lazy, this makes the elements of the sequence to be evaluated as required.
 
 ```
 λ user> (take 2 (map (fn (a) a) [1 2 3 4]))
@@ -542,7 +542,7 @@ Returns a lazy sequence which when realised reverse the elements in the given se
 
 #### sort/2
 
-Returns the collection sorted by the given criteria. The first argument depends on the data structure provided. It takes a keyword `:asc`, `:desc` for `list`, `vector` and `string` elements. For `hash-map`, it takes these in a `vector` with first element preferably the sort indicator `:key` or `:value`. The first argument can also take a comparison function which returns an integer value in case of the former data types. For `hash-map`, the function is passed as the second element in the `vector`.
+Returns the collection sorted by the given criteria. The first argument depends on the data structure provided. It takes a keyword `:asc`, `:desc` for `list`, `vector` and `string` elements. For `hash-map`, it takes these in a `vector` with first element preferably the sort indicator `:key` or `:value`. The first argument can also take a comparison function which returns an integer value in the case of the former data types. For `hash-map`, the function is passed as the second element in the `vector`.
 
 ```
 λ user> (sort :asc [3 5 2 4])
@@ -584,7 +584,7 @@ Takes a list, vector or a string and returns a list containing individual elemen
 
 ### Hash map functions
 
-Hash maps are dictionary based data structure.
+Hash maps are dictionary-based data structure.
 
 #### hash-map/n
 
@@ -612,7 +612,7 @@ false
 
 #### assoc/n
 
-Takes a hash map and key value pairs, add them to the hash map and return a resulting new hash map.
+Takes a hash map and key-value pairs, add them to the hash map and return a resulting new hash map.
 
 ```
 λ user> (assoc {:a 1} :b 2 :c 3)
@@ -683,7 +683,7 @@ Keywordize the given hash-map keys which are not a keyword already.
 
 #### if
 
-A conditional which evaluates the first expression if the condition expression is `true`, else evalutes the second expression if present.
+A conditional which evaluates the first expression if the condition expression is `true`, else evaluates the second expression if present.
 
 ```
 λ user> (if (> 1 0) ">" "<")
@@ -701,7 +701,7 @@ nil
 
 #### do
 
-`do` is used to group mutiple expression within a single expression.
+`do` is used to group multiple expression within a single expression.
 
 ```
 λ user> (if 1 (do (println "1") (println "2")) (println "-1"))
@@ -721,7 +721,7 @@ nil
 
 #### macroexpand
 
-Expands the given macroexpression.
+Expands the given macro expression.
 
 ```
 λ user> (macroexpand (or (= 1 1) (= 2 2)))
@@ -730,7 +730,7 @@ Expands the given macroexpression.
 
 #### quote
 
-Supresses evaluation of a list form.
+Suppresses evaluation of a list form.
 
 ```
 λ user> (quote (+ 1 2))
@@ -746,7 +746,7 @@ Miscellaneous functions
 
 #### atom/1
 
-Create an atom with the given element as its value. Basically, it acts as a container and has an atomic notion to it. However, DreamLisp is single threaded from user's perspective.
+Create an atom with the given element as its value. Basically, it acts as a container and has an atomic notion to it. However, DreamLisp is single-threaded from the user's perspective.
 
 ```
 λ user> (atom {:success 0})
@@ -924,7 +924,7 @@ Returns details of the given element.
 
 ### Lazy sequence functions
 
-Below are the functions that creates, works on lazy sequences.
+Below are the functions that create, works on lazy sequences.
 
 #### lazy-seq/1
 
@@ -961,9 +961,9 @@ true
 
 #### next/1
 
-Returns the next element in the lazy sequence if present, else throws an exception.
+Returns the next element in the lazy sequence if present else throws an exception.
 
-Following from the above example,
+Following the above example,
 
 ```
 λ user> (next lseq)
@@ -990,7 +990,7 @@ Applies the function associated with the lazy sequence to the next element if pr
 
 ### String functions
 
-Below are functions that works with strings.
+Below are functions that work with strings.
 
 #### string?/1
 
@@ -1043,7 +1043,7 @@ Returns a compiled regular expression.
 #### match/2
 
 Takes a string and a compiled regular expression or a pattern in string format and matches the occurrences of the pattern within the string globally.
-Following from the example above:
+Following the example above:
 
 ```
 λ user> (match "p3141i" pattern)
@@ -1064,7 +1064,7 @@ Split the given string by the path component.
 
 #### trim/1
 
-Removes spaces from start and end of the given string.
+Removes spaces from the start and end of the given string.
 
 ```
 λ user> (trim " life is lisp ")
@@ -1207,7 +1207,7 @@ Below are metadata related functions.
 
 #### with-meta/2
 
-Associates a metadata with the given element.
+Associates metadata with the given element.
 
 ```
 λ user> (def kwd (with-meta :apple 1)) ; The keyword :apple has meta as 1
@@ -1218,7 +1218,7 @@ Associates a metadata with the given element.
 #### meta/1
 
 Returns the metadata associated with the given element if present.
-Following from the example above:
+Following the example above:
 
 ```
 λ user> (meta kwd)
@@ -1252,7 +1252,7 @@ Takes an expression in string form, tokenizes it returning the expression.
 
 #### slurp/1
 
-Read content of a file as string. Should be used for smaller files only.
+Read the content of a file as a string. Should be used for smaller files only.
 
 ```
 ➜ cat inp.dlisp
@@ -1268,7 +1268,7 @@ Read content of a file as string. Should be used for smaller files only.
 
 ### IO
 
-Below are input output related functions.
+Below are input-output related functions.
 
 #### readline/1
 
@@ -1282,7 +1282,7 @@ Reads a line from the stdin with the given prompt displayed.
 
 #### write-file/2
 
-Writes the given string to the given file. If the file does not exists, a new file will be created. If the file exists, its contents will be overwritten.
+Writes the given string to the given file. If the file does not exist, a new file will be created. If the file exists, its contents will be overwritten.
 
 ```
 λ user> (write-file "string data" "/tmp/mytext.txt")
@@ -1304,7 +1304,7 @@ Below are module related functions.
 
 #### defmodule/3
 
-This is used to define a module, which can have `export` and `import` expressions with function name, arity tuples. Using `(export all)` exports all functions in the current module.
+This is used to define a module, which can have `export` and `import` expressions with the function name, arity tuples. Using `(export all)` exports all functions in the current module.
 
 ```
 λ user> (defmodule tree (export (create-tree 0) (right-node 1) (left-node 1)))
@@ -1474,7 +1474,7 @@ Evaluates the expression and if `true`, evaluates the corresponding form, else c
 
 #### or/n
 
-Evaluates expressions one at a time. If any expression returns `true`, the function returns with the result, else continues evaluation till the last expression is evaluated.
+Evaluates expressions one at a time. If any expression returns `true`, the function returns with the result, else continues evaluation until the last expression is evaluated.
 
 ```
 λ user> (or (= 1 2) (= 3 4))
@@ -1486,7 +1486,7 @@ true
 
 #### and/n
 
-Evaluates expressions one at a time. If any expression returns `false`, the function returns with the result, else continues evaluation till the last expression is evaluated.
+Evaluates expressions one at a time. If any expression returns `false`, the function returns with the result, else continues evaluation until the last expression is evaluated.
 
 ```
 λ user> (and (= [1] [1]) (= (+ 1 1) 2))
@@ -1540,7 +1540,7 @@ Returns the seconds element from the list.
 
 #### sort/1
 
-Sort the given collection in ascending order. If collection is `hash-map`, the keys are sorted.
+Sort the given collection in ascending order. If the collection is `hash-map`, the keys are sorted.
 
 ```
 λ user> (sort [10 -3 6 3 7])
