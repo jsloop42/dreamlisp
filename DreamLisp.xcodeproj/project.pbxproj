@@ -130,6 +130,7 @@
 		9E9B622B225BAA280060DA9A /* libedit.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E9B622A225BAA270060DA9A /* libedit.tbd */; };
 		9EBA29B8232921F20002FF2B /* DLNotificationData.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EBA29B6232921F10002FF2B /* DLNotificationData.h */; };
 		9EBA29B9232921F20002FF2B /* DLNotificationData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EBA29B7232921F10002FF2B /* DLNotificationData.m */; };
+		9EC9042D23AAAEA400E5DAC0 /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9EC9042C23AAAEA400E5DAC0 /* License.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -288,6 +289,7 @@
 		9E9B622A225BAA270060DA9A /* libedit.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libedit.tbd; path = usr/lib/libedit.tbd; sourceTree = SDKROOT; };
 		9EBA29B6232921F10002FF2B /* DLNotificationData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLNotificationData.h; sourceTree = "<group>"; };
 		9EBA29B7232921F10002FF2B /* DLNotificationData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DLNotificationData.m; sourceTree = "<group>"; };
+		9EC9042C23AAAEA400E5DAC0 /* License.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = License.txt; sourceTree = "<group>"; };
 		9ED5348A22B54E91004A2CB2 /* DLDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLDelegate.h; sourceTree = "<group>"; };
 		9ED5348E22B67FCA004A2CB2 /* DLCacheTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLCacheTable.h; sourceTree = "<group>"; };
 		9ED5348F22B67FCA004A2CB2 /* DLCacheTable.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLCacheTable.m; sourceTree = "<group>"; };
@@ -387,6 +389,7 @@
 		9E3A9D4122568AFC00348529 = {
 			isa = PBXGroup;
 			children = (
+				9EC9042C23AAAEA400E5DAC0 /* License.txt */,
 				9E30555C2261C4DC001D4597 /* build */,
 				9E281D02225A608D0038A5AF /* test */,
 				9E7942D022C12A310086A47F /* DreamLisp */,
@@ -745,6 +748,7 @@
 			files = (
 				9E741EC922C1325C009680E8 /* test.dlisp in Resources */,
 				9E741EC822C13257009680E8 /* core.dlisp in Resources */,
+				9EC9042D23AAAEA400E5DAC0 /* License.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

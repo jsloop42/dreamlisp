@@ -1640,3 +1640,13 @@ true
 
 λ user> {"ip" "127.0.0.1" "Get Notifications" "https://jsonip.com/notify" "about" "https://jsonip.com/about" "Pro!" "http://getjsonip.com"}
 ```
+
+## Test Module
+
+This module contains functions and macros for writing unit tests.
+
+A test module can be written like any other module with test functions defined using `deftest`. To run all test functions, we use the macro `(run "test-module-name")`.
+
+Check the test cases under [DreamLispTests/dlisp](https://github.com/jsloop42/dreamlisp/tree/master/DreamLispTests/dlisp).
+
+Furthermore, there are extensive tests for the language implementation itself under [DreamLispTests](https://github.com/jsloop42/dreamlisp/tree/master/DreamLispTests).
