@@ -2313,7 +2313,7 @@ double dmod(double a, double n) {
             return [[DLString alloc] initWithString:[fops currentDirectoryPath]];
         }
     };
-    fn = [[DLFunction alloc] initWithFn:currentWorkingDirectory argCount:1 name:@"cwd/0"];
+    fn = [[DLFunction alloc] initWithFn:currentWorkingDirectory argCount:0 name:@"cwd/0"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"cwd" moduleName:[DLConst coreModuleName]]];
 }
 
