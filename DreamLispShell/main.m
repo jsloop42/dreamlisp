@@ -45,10 +45,9 @@ int main(int argc, const char * argv[]) {
     [[dl ioService] writeOutput:[DLShellConst shellVersion]];
     NSString *inp;
     NSString *ret;
-    const char *prompt = [[dl prompt] UTF8String];
     while (true) {
         @try {
-            inp = [term readlineWithPrompt:prompt];
+            inp = [term readlineWithPrompt:[[[NSString alloc] initWithFormat:@"λ %@> ", [DLState currentModuleName]] UTF8String]];
             if (inp && [inp isNotEmpty]) {
                 ret = [dl rep:inp];
                 [inp release];
