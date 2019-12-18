@@ -1,6 +1,6 @@
 ## Language Guide
 
-DreamLisp is a Lisp dialect that started out as an implementation of [MAL (Make a Lisp)](https://github.com/kanaka/mal/) and then diverged from the MAL language specification to include additional functionalities like modules, lazy collections and changes to some of the core functions, and is a Lisp-2 because we can have both variable and functions with the same name. DreamLisp is written in Objective-C and as such can be extended further to work with Objective-C runtime capabilites. At present the language runs in interpreted mode.
+DreamLisp is a Lisp dialect that started out as an implementation of [MAL (Make a Lisp)](https://github.com/kanaka/mal/) and then diverged from the MAL language specification to include additional functionalities like modules, lazy collections and changes to some of the core functions, and is a Lisp-2 because we can have both variable and a function with the same name. DreamLisp is written in Objective-C and as such can be extended further to work with Objective-C runtime capabilites. See the experimental [objc-rt-1 branch](https://github.com/jsloop42/dreamlisp/tree/objc-rt-1). At present the language runs in interpreted mode.
 
 ### Data Types
 
@@ -679,6 +679,18 @@ Keywordize the given hash-map keys which are not a keyword already.
 {:name "finder" :location "mac"}
 ```
 
+### Special forms
+
+#### do
+
+#### if
+
+#### fn
+
+#### macroexpand
+
+#### quote
+
 ### Misc
 
 Miscellaneous functions
@@ -692,7 +704,7 @@ Create an atom with the given element as its value. Basically, it acts as a cont
 (atom {:success 0})
 ```
 
-### atom?/1
+#### atom?/1
 
 A predicate which checks if the given element is an atom.
 
@@ -801,7 +813,7 @@ Takes a function and a list of arguments, invokes the function with the elements
 
 #### throw/1
 
-Throws an exception with the given data as its value.
+Throws an exception with the given data as its value. A `try` `catch` is used to handle exceptions.
 
 ```
 λ user> (try (throw {:err "oops"}) (catch e e))
@@ -927,3 +939,618 @@ Applies the function associated with the lazy sequence to the next element if pr
 [4 5 6]
 ```
 
+### String functions
+
+Below are functions that works with strings.
+
+#### string?/1
+
+This is a predicate function which checks if the given element is a string.
+
+```
+λ user> (string? :info)
+false
+
+λ user> (string? "strange")
+true
+```
+
+#### uppercase/1
+
+Returns the string in uppercase format.
+
+```
+λ user> (uppercase "lisp")
+"LISP"
+```
+
+#### lowercase/1
+
+Returns the string in lowercase format.
+
+```
+λ user> (lowercase "LISP")
+"lisp"
+```
+
+#### substring/3
+
+Returns the substring within the given indices inclusive.
+
+```
+λ user> (substring 0 7 "Run free and dive into the sky")
+"Run free"
+```
+
+#### regex/1
+
+Returns a compiled regular expression.
+
+```
+λ user> (def pattern (regex "\d+"))
+<regex <NSRegularExpression: 0x604000063f50> \d+ 0x0>
+```
+
+#### match/2
+
+Takes a string and a compiled regular expression or a pattern in string format and matches the occurrences of the pattern within the string globally.
+Following from the example above:
+
+```
+λ user> (match "p3141i" pattern)
+[["3141"]]
+
+λ user> (match "p31i41p" "\d+")
+[["31"] ["41"]]
+```
+
+#### split/2
+
+Split the given string by the path component.
+
+```
+λ user> (split "lisp-is-life" "-")
+["lisp" "is" "life"]
+```
+
+#### trim/1
+
+Removes spaces from start and end of the given string.
+
+```
+λ user> (trim " life is lisp ")
+"life is lisp"
+```
+
+### Predicates
+
+Below are predicates which conditional functions.
+
+#### nil?/1
+
+Checks if the given value is `nil`.
+
+```
+λ user> (nil? nil)
+true
+
+λ user> (nil? 42)
+false
+```
+
+#### true?/1
+
+Checks if the given element evaluates to `true`.
+
+```
+λ user> (true? true)
+true
+
+λ user> (true? (> 3 3.1))
+false
+```
+
+#### false?/1
+
+Checks if the given element evaluates to `false`.
+
+```
+λ user> (false? (> 3.1 3))
+false
+
+λ user> (false? (> 3 3.1))
+true
+```
+
+#### number?/1
+
+Checks if the given element is a number.
+
+```
+λ user> (number? 42.24)
+true
+
+λ user> (number? "12.13")
+false
+```
+
+#### fn?/1
+
+Checks if the given element is a function.
+
+```
+λ user> (fn? core:inc/1)
+true
+
+λ user> (fn? core:apply/n)
+true
+```
+
+#### macro?/1
+
+Checks if the given element is a macro.
+
+```
+λ user> (macro? core:cond/n)
+true
+
+λ user> (macro? core:or/n)
+true
+
+λ user> (macro? core:macro?/1)
+false
+```
+
+#### zero?/1
+
+Checks if the given element is zero.
+
+```
+λ user> (zero? 0.0)
+true
+
+λ user> (zero? (/ 3.14 3.14))
+false
+```
+
+#### coll?/1
+
+Checks if the given element is a collection. Sequences except `string` and hash-maps are collections.
+
+```
+λ user> (coll? {:planet "earth"})
+true
+
+λ user> (coll? [2 4])
+true
+
+λ user> (coll? "prime")
+false
+```
+
+#### even?/1
+
+Checks if the given number is even.
+
+```
+λ user> (even? 84)
+true
+
+λ user> (even? 13)
+false
+```
+
+#### odd?/1
+
+Checks if the given number is odd.
+
+```
+λ user> (odd? 13)
+true
+
+λ user> (odd? 26)
+false
+```
+
+### Meta
+
+Below are metadata related functions.
+
+#### with-meta/2
+
+Associates a metadata with the given element.
+
+```
+λ user> (def kwd (with-meta :apple 1)) ; The keyword :apple has meta as 1
+:apple
+
+```
+
+#### meta/1
+
+Returns the metadata associated with the given element if present.
+Following from the example above:
+
+```
+λ user> (meta kwd)
+1
+```
+
+### Eval
+
+Methods that are related to the runtime evaluation of code are given below.
+
+#### eval/1
+
+Evaluates the given expression
+
+```
+λ user> (def z "zero")
+"zero"
+
+λ user> (eval (symbol "user:z"))
+"zero"
+```
+
+#### read-string/1
+
+Takes an expression in string form, tokenizes it returning the expression.
+
+```
+λ user> (read-string "(+ 2 3)")
+(user:+ 2 3)
+```
+
+#### slurp/1
+
+Read content of a file as string. Should be used for smaller files only.
+
+```
+➜ cat inp.dlisp
+(println "Greetings!")
+
+
+```
+
+```
+λ user> (slurp "inp.dlisp")
+"(println \"Greetings!\")\n\n"
+```
+
+### IO
+
+Below are input output related functions.
+
+#### readline/1
+
+Reads a line from the stdin with the given prompt displayed.
+
+```
+λ user> (readline "> ")
+> There there
+"There there\n"
+```
+
+#### write-file/2
+
+Writes the given string to the given file. If the file does not exists, a new file will be created. If the file exists, its contents will be overwritten.
+
+```
+λ user> (write-file "string data" "/tmp/mytext.txt")
+true
+```
+
+#### cwd/0
+
+Get the current working directory.
+
+```
+λ user> (cwd)
+"/Users/jsloop/bin/dreamlisp"
+```
+
+### Module
+
+Below are module related functions.
+
+#### defmodule/3
+
+This is used to define a module, which can have `export` and `import` expressions with function name, arity tuples. Using `(export all)` exports all functions in the current module.
+
+```
+λ user> (defmodule tree (export (create-tree 0) (right-node 1) (left-node 1)))
+tree
+```
+
+```
+λ user> (defmodule stage (export (greet 0)) (export all) (import (from player (sum 1))))
+stage
+```
+
+#### in-module/1
+
+Changes the current module to the given module.
+
+```
+λ user> (in-module "core")
+"core"
+
+λ core> 
+```
+
+#### remove-module/1
+
+Removes a loaded module from the module table.
+
+```
+λ user> (defmodule fairy (export all))
+fairy
+
+λ fairy> (remove-module "fairy")
+nil
+
+λ user>
+```
+
+#### current-module-name/0
+
+Returns the current module name.
+
+```
+λ user> (current-module-name)
+"user"
+```
+
+#### module-info/1
+
+Returns the module info which contains the imports, exports, and other metadata.
+
+```
+λ user> (module-info "test")
+{:description "A module to work with unit tests." :imports [] :internal [] :name "test" :exports [test:get-test-info/0 test:dec/1 test:inc/1 test:inc-test-count/0 test:is/3 test:update-test-info/1 test:deftest/n test:testing/n test:is/2 test:run/1]}
+```
+
+#### module-exist?/1
+
+Checks if the given module is loaded.
+
+```
+λ user> (module-exist? "test")
+true
+
+λ user> (module-exist? "spaceship")
+false
+```
+
+#### all-modules/0
+
+Returns all the loaded modules.
+
+```
+λ user> (all-modules)
+["core" "test" "user" "network"]
+```
+
+### Async using notifications
+
+Uses notification as a way of passing messages between different entities. This is also used as a callback (or delegate) when working with network related APIs. Internally, dreamlisp makes use of `NSNotification`.
+
+#### add-notification/2
+
+Listen to a notification given by a keyword, with a handler function.
+
+```
+λ user> (defun pong (x) (println "pong" x))
+user:pong/1
+
+λ user> (add-notification :pong pong/1)
+true
+```
+
+#### post-notification/2
+
+Send a message with a notification key. If a handler was registered, the function will be invoked with the given data as argument.
+
+```
+λ user> (post-notification :pong "psi")
+pong psi
+true
+```
+
+#### remove-notification/1
+
+Removes all handlers for the given notification.
+
+```
+λ user> (remove-notification :pong)
+true
+```
+
+### JSON
+
+Below are functions to work with JSON data.
+
+#### encode-json/1
+
+Encodes the given hash-map to json string.
+
+```
+λ user> (encode-json {:first-name "Jane" :last-name "Doe"})
+"{\"first-name\":\"Jane\",\"last-name\":\"Doe\"}"
+```
+
+#### decode-json/1
+
+Decodes the JSON string to a hash-map.
+
+```
+λ user> (decode-json "{\"first-name\":\"Jane\",\"last-name\":\"Doe\"}")
+{"last-name" "Doe" "first-name" "Jane"}
+```
+
+### Functions, macros implemented in DreamLisp
+
+Below are functions, macros that are implemented in DreamLisp itself and loaded during bootstrap.
+
+#### defun/n
+
+Is a macro which is used for defining functions.
+
+#### not/1
+
+Negates the given expression that evaluates to a boolean value.
+
+```
+λ user> (not true)
+false
+
+λ user> (not (> 2 3))
+true
+```
+
+#### cond/n
+
+Evaluates the expression and if `true`, evaluates the corresponding form, else continues with the next expression.
+
+```
+λ user> (let (a 2 b 4) (cond (= a b) 0 (> a b) 1 (< a b) -1))
+-1
+
+λ user> (let (a 2 b 2) (cond (= a b) 0 (> a b) 1 (< a b) -1))
+0
+
+λ user> (let (a 4 b 2) (cond (= a b) 0 (> a b) 1 (< a b) -1))
+1
+```
+
+#### or/n
+
+Evaluates expressions one at a time. If any expression returns `true`, the function returns with the result, else continues evaluation till the last expression is evaluated.
+
+```
+λ user> (or (= 1 2) (= 3 4))
+false
+
+λ user> (or (= 1 2) (< 3 4))
+true
+```
+
+#### and/n
+
+Evaluates expressions one at a time. If any expression returns `false`, the function returns with the result, else continues evaluation till the last expression is evaluated.
+
+```
+λ user> (and (= [1] [1]) (= (+ 1 1) 2))
+true
+
+λ user> (and (= [1] [1]) (= (+ 1 2) 2))
+false
+```
+
+#### when/n
+
+Evaluates the first expression and if `true`, evaluates the body.
+
+```
+λ user> (when (= 2 (+ 1 1)) "match")
+"match"
+
+λ user> (when (= 2 (- 1 1)) "match")
+nil
+```
+
+#### when-not/n
+
+Evaluates the first expression and if `false`, evaluates the body.
+
+```
+λ user> (when-not (= 2 (- 1 1)) "not-match")
+"not-match"
+```
+
+#### not=/n
+
+Negates the result of applying `=` on the given form.
+
+```
+λ user> (not= [1] [3])
+true
+
+λ user> (not= 1.5 1.5 1.5)
+false
+```
+
+#### second/1
+
+Returns the seconds element from the list.
+
+```
+λ user> (second [0 1 2 3])
+1
+```
+
+#### sort/1
+
+Sort the given collection in ascending order. If collection is `hash-map`, the keys are sorted.
+
+```
+λ user> (sort [10 -3 6 3 7])
+[-3 3 6 7 10]
+
+λ user> (sort {10 3 -3 7 4 9})
+[-3 4 10]
+```
+
+#### ->/n
+
+Thread first macro, which takes an expression, evaluates it and inserts the result as the second element of the second expression and so on.
+
+```
+λ user> (-> [1 2 3] (count))
+3
+```
+
+#### <-/n
+
+Thread last macro, which takes an expression, evaluates it and inserts the result as the last element of the second expression and so on.
+
+```
+λ user> (<- [1 4] (concat [2 3]))
+[2 3 1 4]
+```
+
+#### inc/1
+
+Increments the given number by one.
+
+```
+λ user> (inc 41)
+42
+```
+
+#### dec/1
+
+Decrements the given number by one.
+
+```
+λ user> (dec 14)
+13
+```
+
+#### identity/1
+
+Takes an element and returns the same element.
+
+```
+λ user> (identity -3.1415)
+-3.1415
+```
+
+#### exit/0
+
+Exits the REPL.
+
+```
+λ user> (exit)
+Bye
+```
