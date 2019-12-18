@@ -1443,7 +1443,27 @@ Below are functions, macros that are implemented in DreamLisp itself and loaded 
 
 #### defun/n
 
-Is a macro which is used for defining functions.
+Is a macro which is used for defining functions. Functions with same name and different arity are treated as different functions.
+
+```
+λ user> (defun prn-args () "zero")
+user:prn-args/0
+
+λ user> (defun prn-args (x) "one")
+user:prn-args/1
+
+λ user> (defun prn-args (x y) "two")
+user:prn-args/2
+
+λ user> (prn-args)
+"zero"
+
+λ user> (prn-args 1)
+"one"
+
+λ user> (prn-args 1 2)
+"two"
+```
 
 #### not/1
 
