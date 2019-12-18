@@ -25,7 +25,7 @@ Here, `+` is a function and `1`, `2`, `3` are arguments. A list always evaluates
 (1 2 3)
 ```
 
-Here both the expressions are same. The second expression is a short version which uses `'` quote symbol which has this special semantics, which being supress expression evaluation.
+Here, both the expressions are same. The second expression is a short version which uses `'` quote symbol which has this special semantics, which being supress expression evaluation.
 
 ```
 λ user> (first (list 1 2 3))
@@ -38,7 +38,7 @@ Here both the expressions are same. The second expression is a short version whi
 [error] Expected 'function' but obtained 'number'
 ```
 
-Here the `(list 1 2 3)` produces a list. The first argument `list` is a function which creates a list out of the given elements. We then apply the result to the `first` function which returns the first element from the list.
+Here, the `(list 1 2 3)` produces a list. The first argument `list` is a function which creates a list out of the given elements. We then apply the result to the `first` function which returns the first element from the list.
 Note that, the inner expression is evaluated and the result is passed to the outer `first` function.
 
 The second expression uses list notation form. When using list as notation, the first argument is the number `1`, which is not a function. So if we did not quote the list, the list will be evaluated with `1` assumed as function with arguments `2`, `3`, `4`, which will fail, as in the thrid sample expression. So we supress the evaluation passing the list as such.
@@ -681,15 +681,64 @@ Keywordize the given hash-map keys which are not a keyword already.
 
 ### Special forms
 
+#### if
+
+A conditional which evaluates the first expression if the condition expression is `true`, else evalutes the second expression if present.
+
+```
+λ user> (if (> 1 0) ">" "<")
+">"
+
+λ user> (if (> 1 0) ">")
+">"
+
+λ user> (if (< 1 0) ">")
+nil
+
+λ user> (if (< 1 0) ">" "<")
+"<"
+```
+
 #### do
 
-#### if
+`do` is used to group mutiple expression within a single expression.
+
+```
+λ user> (if 1 (do (println "1") (println "2")) (println "-1"))
+1
+2
+nil
+```
 
 #### fn
 
+`fn` form is used for defining anonymous functions.
+
+```
+λ user> ((fn [x] (* x 3.14)) 3.14)
+9.8596
+```
+
 #### macroexpand
 
+Expands the given macroexpression.
+
+```
+λ user> (macroexpand (or (= 1 1) (= 2 2)))
+(core:if (user:= 1 1) (user:= 1 1) (core:or (user:= 2 2)))
+```
+
 #### quote
+
+Supresses evaluation of a list form.
+
+```
+λ user> (quote (+ 1 2))
+(user:+ 1 2)
+
+λ user> '(+ 1 2)
+(user:+ 1 2)
+```
 
 ### Misc
 
