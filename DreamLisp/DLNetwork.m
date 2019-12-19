@@ -82,7 +82,9 @@ static NSString *_description = @"The network module.";
                 [comp setQueryItems:queryItems];
                 NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[comp URL]];
                 [req setHTTPMethod:@"GET"];
-                [req setAllHTTPHeaderFields:[[DLUtils convertKeywordKeysToString:headers] value]];
+                DLHashMap *hm = [DLUtils convertKeywordKeysToString:headers];
+                NSMutableDictionary *headersDict = [DLUtils mapTableToDictionary:[hm value]];
+                [req setAllHTTPHeaderFields:headersDict];
                 NSURLSessionDataTask *task = [this->_urlSession dataTaskWithRequest:req];
                 DLNotificationData *notifData = [this->_notifTable notification:aNotifKey];
                 notifData.identifier = [[NSNumber alloc] initWithInteger:task.taskIdentifier];
@@ -92,7 +94,9 @@ static NSString *_description = @"The network module.";
                 NSURL *url = [NSURL URLWithString:[urlString value]];
                 NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
                 [req setHTTPMethod:[DLUtils httpMethodTypeToString:methodType]];
-                [req setAllHTTPHeaderFields:[[DLUtils convertKeywordKeysToString:headers] value]];
+                DLHashMap *hm = [DLUtils convertKeywordKeysToString:headers];
+                NSMutableDictionary *headersDict = [DLUtils mapTableToDictionary:[hm value]];
+                [req setAllHTTPHeaderFields:headersDict];
                 if (data && [data count] > 0) {
                     NSMutableDictionary *dict = [DLUtils hashMapToFoundationType:data]; /* Convert to Foundation type */
                     NSData *jsonData = [DLUtils encodeDictionaryToJSONData:dict];  /* JSON encode */

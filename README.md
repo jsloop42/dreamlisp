@@ -213,7 +213,7 @@ The default module is called `user` which is the module that the REPL initialize
 
 Higher order collection functions like `map/n`, `foldl/3`, `foldr/3`, etc., by default, produces a lazy sequence. The operations are deferred until we force evaluation either by applying other list functions over the lazy sequence like `first/1` or `take/2`, or using `doall/1`.
 
-## Core Functions
+## Core Module
 
 DreamLisp has a set of built-in core functions which are natively implemented and helpers which are written in DreamLisp itself and loaded into the REPL during initialization. These core functions are in the module `core` and are available to all other modules without having to explicitly import them.
 
@@ -1622,4 +1622,21 @@ Exits the REPL.
 ```
 λ user> (exit)
 Bye
+```
+
+## Network Module
+
+This module has network related functions which can be used with REST verbs `:get`, `:post`, `:put`, `:patch` and `:delete`. First we set up a notification handler and use the message key in the `network:http-request` function. Once the response if obtained, the notification with the data will be send the handler function asynchronously.
+
+```
+λ user> (defun on-download (x) (prn (decode-json (:data x))))
+user:on-download/1
+
+λ user> (add-notification :on-download on-download/1)
+true
+
+λ user> (network:http-request :get :on-download "https://jsonip.com" {} {:content-type "application/json"})
+true
+
+λ user> {"ip" "127.0.0.1" "Get Notifications" "https://jsonip.com/notify" "about" "https://jsonip.com/about" "Pro!" "http://getjsonip.com"}
 ```

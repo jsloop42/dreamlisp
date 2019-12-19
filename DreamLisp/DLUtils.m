@@ -285,6 +285,16 @@ static BOOL _isCacheEnabled;
     return dict;
 }
 
++ (NSMutableDictionary *)mapTableToDictionary:(NSMapTable *)table {
+    NSMutableDictionary *dict = [NSMutableDictionary new];
+    NSString *key = nil;
+    NSArray *allKeys = [table allKeys];
+    for (key in allKeys) {
+        [dict setObject:[(DLString *)[table objectForKey:key] value] forKey:key];
+    }
+    return dict;
+}
+
 + (id)convertFromDLTypeToFoundationType:(id<DLDataProtocol>)value {
     Protocol *dlDataProtocol = objc_getProtocol("DLDataProtocol");
     id val = @"";

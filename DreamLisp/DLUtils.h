@@ -41,6 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (DLHashMap *)convertKeywordKeysToString:(DLHashMap *)hashmap;
 + (DLHashMap *)errorToHashMap:(NSError *)error;
 + (NSMutableDictionary *)dictionaryFromHashMap:(DLHashMap *)hashMap;
++ (NSMutableDictionary *)mapTableToDictionary:(NSMapTable *)table;
 + (id)convertFromDLTypeToFoundationType:(id<DLDataProtocol>)value;
 + (NSMutableDictionary *)hashMapToFoundationType:(DLHashMap *)hashMap;
 + (BOOL)isBoolNumber:(NSNumber *)num;
