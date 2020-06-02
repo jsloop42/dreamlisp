@@ -152,7 +152,7 @@ Note: When using the REPL, on a line break the expression will be evaluated. We 
 `let` is used for local binding within an expression. The variables defined within `let` is only visible within its lexical scope and also available within a closure.
 
 ```
-(let [name-xs ["Olive" "Jane" "Chole"] 
+(let [name-xs ["Olive" "Eva" "Jane"] 
       greet (fn (n)
               (doall (map (fn (x) (println "Hello" x)) n)))]
   (greet name-xs) 
