@@ -49,14 +49,10 @@
 		9E4E10AD232AD5E30027C2F5 /* DLObjcMethodAttr.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E4E10AB232AD5E30027C2F5 /* DLObjcMethodAttr.h */; };
 		9E4E10AE232AD5E30027C2F5 /* DLObjcMethodAttr.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4E10AC232AD5E30027C2F5 /* DLObjcMethodAttr.m */; };
 		9E4F69C22339455B007B3B49 /* DreamLisp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E7942CF22C12A310086A47F /* DreamLisp.framework */; };
-		9E4F69D023396992007B3B49 /* DLPrefix+CoreDataClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E4F69CF23396992007B3B49 /* DLPrefix+CoreDataClass.h */; };
-		9E4F69D42339699D007B3B49 /* DLPrefix+CoreDataProperties.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F69D22339699C007B3B49 /* DLPrefix+CoreDataProperties.m */; };
-		9E4F69D52339699D007B3B49 /* DLPrefix+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4F69D12339699C007B3B49 /* DLPrefix+CoreDataClass.m */; };
 		9E5545D423366829005D7AA6 /* DLTrieTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5545D323366829005D7AA6 /* DLTrieTests.m */; };
 		9E5545E22336AA98005D7AA6 /* DLResultTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E5545E12336AA98005D7AA6 /* DLResultTypes.h */; };
 		9E5739EF233912BD0057BCE7 /* DLPersistenceService.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E5739ED233912BC0057BCE7 /* DLPersistenceService.h */; };
 		9E5739F0233912BD0057BCE7 /* DLPersistenceService.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5739EE233912BC0057BCE7 /* DLPersistenceService.m */; };
-		9E5739F7233927F50057BCE7 /* DLPrefixModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9E5739F5233927F50057BCE7 /* DLPrefixModel.xcdatamodeld */; };
 		9E5D7B4B225B947E00970453 /* DLTerminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* DLTerminal.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E5D7B4C225B947E00970453 /* DLTerminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* DLTerminal.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E67D32E23290D5500807F3E /* DLAlgorithm.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E67D32D23290D5300807F3E /* DLAlgorithm.h */; };
@@ -173,6 +169,11 @@
 		9EE413CB232CED4400CECE0D /* NSMutableArray+DLCat.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EE413C1232CED4400CECE0D /* NSMutableArray+DLCat.h */; };
 		9EE413CC232CED4400CECE0D /* NSMapTable+DLCat.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EE413C2232CED4400CECE0D /* NSMapTable+DLCat.h */; };
 		9EE413CD232CED4400CECE0D /* NSMapTable+DLCat.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EE413C3232CED4400CECE0D /* NSMapTable+DLCat.m */; };
+		9EFD568624B8EAC700EAE3F6 /* DLPrefix+CoreDataProperties.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EFD568024B8EAC700EAE3F6 /* DLPrefix+CoreDataProperties.m */; };
+		9EFD568724B8EAC700EAE3F6 /* DLPrefix+CoreDataClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EFD568124B8EAC700EAE3F6 /* DLPrefix+CoreDataClass.h */; };
+		9EFD568824B8EAC700EAE3F6 /* DLPrefix+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EFD568224B8EAC700EAE3F6 /* DLPrefix+CoreDataClass.m */; };
+		9EFD568924B8EAC700EAE3F6 /* DLPrefix+CoreDataProperties.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EFD568324B8EAC700EAE3F6 /* DLPrefix+CoreDataProperties.h */; };
+		9EFD568A24B8EAC700EAE3F6 /* DLPrefixModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9EFD568424B8EAC700EAE3F6 /* DLPrefixModel.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -344,16 +345,11 @@
 		9E4E10AC232AD5E30027C2F5 /* DLObjcMethodAttr.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLObjcMethodAttr.m; sourceTree = "<group>"; };
 		9E4F02D52291A1E80064081F /* DLFault.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLFault.h; sourceTree = "<group>"; };
 		9E4F02D62291A1E80064081F /* DLFault.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLFault.m; sourceTree = "<group>"; };
-		9E4F69CF23396992007B3B49 /* DLPrefix+CoreDataClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DLPrefix+CoreDataClass.h"; sourceTree = "<group>"; };
-		9E4F69D12339699C007B3B49 /* DLPrefix+CoreDataClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "DLPrefix+CoreDataClass.m"; path = "/Users/jsloop/dev/DreamLisp/DreamLisp/Model/DLPrefix+CoreDataClass.m"; sourceTree = "<absolute>"; };
-		9E4F69D22339699C007B3B49 /* DLPrefix+CoreDataProperties.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "DLPrefix+CoreDataProperties.m"; path = "/Users/jsloop/dev/DreamLisp/DreamLisp/Model/DLPrefix+CoreDataProperties.m"; sourceTree = "<absolute>"; };
-		9E4F69D32339699D007B3B49 /* DLPrefix+CoreDataProperties.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "DLPrefix+CoreDataProperties.h"; path = "/Users/jsloop/dev/DreamLisp/DreamLisp/Model/DLPrefix+CoreDataProperties.h"; sourceTree = "<absolute>"; };
 		9E5545D2233664A3005D7AA6 /* DreamLispAll.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = DreamLispAll.xctestplan; sourceTree = "<group>"; };
 		9E5545D323366829005D7AA6 /* DLTrieTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLTrieTests.m; sourceTree = "<group>"; };
 		9E5545E12336AA98005D7AA6 /* DLResultTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLResultTypes.h; sourceTree = "<group>"; };
 		9E5739ED233912BC0057BCE7 /* DLPersistenceService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLPersistenceService.h; sourceTree = "<group>"; };
 		9E5739EE233912BC0057BCE7 /* DLPersistenceService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLPersistenceService.m; sourceTree = "<group>"; };
-		9E5739F6233927F50057BCE7 /* DLPrefixModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DLPrefixModel.xcdatamodel; sourceTree = "<group>"; };
 		9E5D7B49225B947E00970453 /* DLTerminal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLTerminal.h; sourceTree = "<group>"; };
 		9E5D7B4A225B947E00970453 /* DLTerminal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLTerminal.m; sourceTree = "<group>"; };
 		9E67D32D23290D5300807F3E /* DLAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLAlgorithm.h; sourceTree = "<group>"; };
@@ -426,6 +422,11 @@
 		9EE413C1232CED4400CECE0D /* NSMutableArray+DLCat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableArray+DLCat.h"; sourceTree = "<group>"; };
 		9EE413C2232CED4400CECE0D /* NSMapTable+DLCat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMapTable+DLCat.h"; sourceTree = "<group>"; };
 		9EE413C3232CED4400CECE0D /* NSMapTable+DLCat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMapTable+DLCat.m"; sourceTree = "<group>"; };
+		9EFD568024B8EAC700EAE3F6 /* DLPrefix+CoreDataProperties.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "DLPrefix+CoreDataProperties.m"; sourceTree = "<group>"; };
+		9EFD568124B8EAC700EAE3F6 /* DLPrefix+CoreDataClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DLPrefix+CoreDataClass.h"; sourceTree = "<group>"; };
+		9EFD568224B8EAC700EAE3F6 /* DLPrefix+CoreDataClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "DLPrefix+CoreDataClass.m"; sourceTree = "<group>"; };
+		9EFD568324B8EAC700EAE3F6 /* DLPrefix+CoreDataProperties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DLPrefix+CoreDataProperties.h"; sourceTree = "<group>"; };
+		9EFD568524B8EAC700EAE3F6 /* DLPrefixModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DLPrefixModel.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -672,11 +673,11 @@
 		9E5739F1233915A90057BCE7 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				9E4F69CF23396992007B3B49 /* DLPrefix+CoreDataClass.h */,
-				9E4F69D12339699C007B3B49 /* DLPrefix+CoreDataClass.m */,
-				9E4F69D32339699D007B3B49 /* DLPrefix+CoreDataProperties.h */,
-				9E4F69D22339699C007B3B49 /* DLPrefix+CoreDataProperties.m */,
-				9E5739F5233927F50057BCE7 /* DLPrefixModel.xcdatamodeld */,
+				9EFD568124B8EAC700EAE3F6 /* DLPrefix+CoreDataClass.h */,
+				9EFD568224B8EAC700EAE3F6 /* DLPrefix+CoreDataClass.m */,
+				9EFD568324B8EAC700EAE3F6 /* DLPrefix+CoreDataProperties.h */,
+				9EFD568024B8EAC700EAE3F6 /* DLPrefix+CoreDataProperties.m */,
+				9EFD568424B8EAC700EAE3F6 /* DLPrefixModel.xcdatamodeld */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -837,7 +838,7 @@
 				9E3538B3232CD79B00A37AB8 /* DLProxyProtocol.h in Headers */,
 				9E4E10A9232ACE530027C2F5 /* DLMethod.h in Headers */,
 				9E1E697E22C53EAB00E52162 /* DLIOService.h in Headers */,
-				9E4F69D023396992007B3B49 /* DLPrefix+CoreDataClass.h in Headers */,
+				9EFD568724B8EAC700EAE3F6 /* DLPrefix+CoreDataClass.h in Headers */,
 				9E741EB422C12DBA009680E8 /* DLSymbol.h in Headers */,
 				9E741EAB22C12DBA009680E8 /* DLDataProtocol.h in Headers */,
 				9E741EC222C12DCE009680E8 /* DLReader.h in Headers */,
@@ -864,6 +865,7 @@
 				9E28ABB42324293D00133494 /* DLData.h in Headers */,
 				9E741EAD22C12DBA009680E8 /* DLFunction.h in Headers */,
 				9EE413CC232CED4400CECE0D /* NSMapTable+DLCat.h in Headers */,
+				9EFD568924B8EAC700EAE3F6 /* DLPrefix+CoreDataProperties.h in Headers */,
 				9E741EB022C12DBA009680E8 /* DLList.h in Headers */,
 				9E741EBE22C12DCE009680E8 /* DLDelegate.h in Headers */,
 				9E96593A23194F9000B695ED /* DreamLisp.h in Headers */,
@@ -1196,7 +1198,7 @@
 				9EE413CA232CED4400CECE0D /* NSString+DLCat.m in Sources */,
 				9EE413C5232CED4400CECE0D /* NSMutableArray+DLCat.m in Sources */,
 				9E8FEB5B22D243FD00717127 /* DLAlgorithm.m in Sources */,
-				9E5739F7233927F50057BCE7 /* DLPrefixModel.xcdatamodeld in Sources */,
+				9EFD568624B8EAC700EAE3F6 /* DLPrefix+CoreDataProperties.m in Sources */,
 				9E741E8222C12C23009680E8 /* DLAtom.m in Sources */,
 				9EBA29D523295DB70002FF2B /* DLObject.m in Sources */,
 				9EBA29BF23295BFD0002FF2B /* DLObjc.m in Sources */,
@@ -1208,7 +1210,6 @@
 				9E741E9822C12C38009680E8 /* DLPrinter.m in Sources */,
 				9E741E8922C12C23009680E8 /* DLNil.m in Sources */,
 				9EBA29B9232921F20002FF2B /* DLNotificationData.m in Sources */,
-				9E4F69D52339699D007B3B49 /* DLPrefix+CoreDataClass.m in Sources */,
 				9EE413CD232CED4400CECE0D /* NSMapTable+DLCat.m in Sources */,
 				9E741E8B22C12C23009680E8 /* DLString.m in Sources */,
 				9EE413C6232CED4400CECE0D /* NSNumber+DLCat.m in Sources */,
@@ -1224,17 +1225,18 @@
 				9EBA29C423295C140002FF2B /* DLInvocation.m in Sources */,
 				9E28ABB52324293D00133494 /* DLData.m in Sources */,
 				9E741E8C22C12C23009680E8 /* DLSymbol.m in Sources */,
+				9EFD568824B8EAC700EAE3F6 /* DLPrefix+CoreDataClass.m in Sources */,
 				9E326C9822C8C5D300B456A2 /* DLLazyFunction.m in Sources */,
 				9E741E8622C12C23009680E8 /* DLHashMap.m in Sources */,
 				9E9E9D0A2330197000308606 /* DLTrie.m in Sources */,
 				9E741E9522C12C38009680E8 /* DreamLisp.m in Sources */,
-				9E4F69D42339699D007B3B49 /* DLPrefix+CoreDataProperties.m in Sources */,
 				9E741E8322C12C23009680E8 /* DLBool.m in Sources */,
 				9EE413C7232CED4400CECE0D /* NSArray+DLCat.m in Sources */,
 				9E741E9322C12C38009680E8 /* DLFileOps.m in Sources */,
 				9E69232223255DFF00B12A65 /* DLNetwork.m in Sources */,
 				9E28ABA12323FE9A00133494 /* DLRegex.m in Sources */,
 				9E741E9C22C12C38009680E8 /* DLUtils.m in Sources */,
+				9EFD568A24B8EAC700EAE3F6 /* DLPrefixModel.xcdatamodeld in Sources */,
 				9E1E697F22C53EAB00E52162 /* DLIOService.m in Sources */,
 				9E5739F0233912BD0057BCE7 /* DLPersistenceService.m in Sources */,
 			);
@@ -1864,12 +1866,12 @@
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};
-		9E5739F5233927F50057BCE7 /* DLPrefixModel.xcdatamodeld */ = {
+		9EFD568424B8EAC700EAE3F6 /* DLPrefixModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				9E5739F6233927F50057BCE7 /* DLPrefixModel.xcdatamodel */,
+				9EFD568524B8EAC700EAE3F6 /* DLPrefixModel.xcdatamodel */,
 			);
-			currentVersion = 9E5739F6233927F50057BCE7 /* DLPrefixModel.xcdatamodel */;
+			currentVersion = 9EFD568524B8EAC700EAE3F6 /* DLPrefixModel.xcdatamodel */;
 			path = DLPrefixModel.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
