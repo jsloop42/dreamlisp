@@ -2634,7 +2634,7 @@ double dmod(double a, double n) {
     #pragma mark current-module-name
     id<DLDataProtocol>(^currentModuleName)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
-            return [[DLString alloc] initWithString:[DLState.shared currentModuleName]];
+            return [[DLString alloc] initWithString:[DLState currentModuleName]];
         }
     };
     fn = [[DLFunction alloc] initWithFn:currentModuleName argCount:0 name:@"current-module-name/0"];

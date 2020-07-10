@@ -48,7 +48,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (DLHashMap *)errorToHashMap:(NSError *)error;
 + (NSMutableDictionary *)dictionaryFromHashMap:(DLHashMap *)hashMap;
 + (NSMutableDictionary *)mapTableToDictionary:(NSMapTable *)table;
-+ (id)convertFromDLTypeToFoundationType:(id<DLDataProtocol>)value;
 + (NSMutableDictionary *)hashMapToFoundationType:(DLHashMap *)hashMap;
 + (DLHashMap *)dictionaryToDLType:(NSMutableDictionary *)dict;
 + (DLHashMap *)decodeJSON:(DLString *)string;

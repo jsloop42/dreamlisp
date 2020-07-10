@@ -9,6 +9,7 @@
 #import "DLState.h"
 
 static DLState *_state;
+static NSString *_currentModuleName;
 
 @implementation DLState {
     NSUInteger _genSymCounter;
@@ -24,6 +25,16 @@ static DLState *_state;
             _state = [DLState new];
         }
         return _state;
+    }
+}
+
++ (NSString *)currentModuleName {
+    return _currentModuleName;
+}
+
++ (void)setCurrentModuleName:(NSString *)name {
+    @synchronized (self) {
+        _currentModuleName = name;
     }
 }
 

@@ -173,6 +173,8 @@
 		9EFD568824B8EAC700EAE3F6 /* DLPrefix+CoreDataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EFD568224B8EAC700EAE3F6 /* DLPrefix+CoreDataClass.m */; };
 		9EFD568924B8EAC700EAE3F6 /* DLPrefix+CoreDataProperties.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EFD568324B8EAC700EAE3F6 /* DLPrefix+CoreDataProperties.h */; };
 		9EFD568A24B8EAC700EAE3F6 /* DLPrefixModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9EFD568424B8EAC700EAE3F6 /* DLPrefixModel.xcdatamodeld */; };
+		9EFD568D24B8F18400EAE3F6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9EFD568B24B8F18400EAE3F6 /* README.md */; };
+		9EFD568E24B8F18400EAE3F6 /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9EFD568C24B8F18400EAE3F6 /* License.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -425,6 +427,8 @@
 		9EFD568224B8EAC700EAE3F6 /* DLPrefix+CoreDataClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "DLPrefix+CoreDataClass.m"; sourceTree = "<group>"; };
 		9EFD568324B8EAC700EAE3F6 /* DLPrefix+CoreDataProperties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DLPrefix+CoreDataProperties.h"; sourceTree = "<group>"; };
 		9EFD568524B8EAC700EAE3F6 /* DLPrefixModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DLPrefixModel.xcdatamodel; sourceTree = "<group>"; };
+		9EFD568B24B8F18400EAE3F6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
+		9EFD568C24B8F18400EAE3F6 /* License.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = License.txt; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -617,6 +621,8 @@
 				9E30555C2261C4DC001D4597 /* build */,
 				9E281D02225A608D0038A5AF /* test */,
 				9E7942D022C12A310086A47F /* DreamLisp */,
+				9EFD568C24B8F18400EAE3F6 /* License.txt */,
+				9EFD568B24B8F18400EAE3F6 /* README.md */,
 				9E7942DB22C12A310086A47F /* DreamLispTests */,
 				9E3A9D4C22568AFC00348529 /* DreamLispShell */,
 				9E3A9D5922568B1300348529 /* DreamLispShellTests */,
@@ -696,7 +702,6 @@
 				9E741ECD22C139B1009680E8 /* i.test.dlisp */,
 				9E741ECE22C139B9009680E8 /* module-test.dlisp */,
 				9E741ECF22C139BC009680E8 /* scope.dlisp */,
-				9E1380F523A9A02700D2D39C /* dlisp-test.dlisp */,
 			);
 			path = dlisp;
 			sourceTree = "<group>";
@@ -1106,9 +1111,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E741EC922C1325C009680E8 /* test.dlisp in Resources */,
+				9EFD568E24B8F18400EAE3F6 /* License.txt in Resources */,
 				9E0117CD233BF62C0087621C /* DLPrefixModel.sqlite in Resources */,
+				9EFD568D24B8F18400EAE3F6 /* README.md in Resources */,
 				9E741EC822C13257009680E8 /* core.dlisp in Resources */,
-				9EC9042D23AAAEA400E5DAC0 /* License.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1117,7 +1123,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E741ED022C13A13009680E8 /* collatz.dlisp in Resources */,
-				9E1380F623A9A02700D2D39C /* dlisp-test.dlisp in Resources */,
 				9E741ED122C13A13009680E8 /* i.test.dlisp in Resources */,
 				9E741ED222C13A13009680E8 /* module-test.dlisp in Resources */,
 				9E741ED322C13A13009680E8 /* scope.dlisp in Resources */,

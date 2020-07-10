@@ -95,7 +95,7 @@
     if ([arityStr isNotEmpty]) {
         arity = [arityStr isEqual:@"n"] ? -1 : [arityStr integerValue];
     }
-    sym = [[DLSymbol alloc] initWithName:symName moduleName:[DLState.shared currentModuleName]];
+    sym = [[DLSymbol alloc] initWithName:symName moduleName:[DLState currentModuleName]];
     [sym setInitialArity:arity];
     [sym resetArity];
     // Fully qualified symbol with module name included
@@ -145,7 +145,7 @@
 
 - (instancetype)initWithName:(NSString *)name {
     self = [self initWithName:name moduleName:_moduleName];
-    _moduleName = [DLState.shared currentModuleName];
+    _moduleName = [DLState currentModuleName];
     _initialModuleName = _moduleName;
     return self;
 }
@@ -194,7 +194,7 @@
         _arity = arity;
         _position = position;
         _hasNArity = [symbol hasNArity];
-        _moduleName = [symbol moduleName] ? [symbol moduleName] : [DLState.shared currentModuleName];
+        _moduleName = [symbol moduleName] ? [symbol moduleName] : [DLState currentModuleName];
         _initialModuleName = [symbol initialModuleName];
         _isQualified = [symbol isQualified];
         _isImported = [symbol isImported];
@@ -215,7 +215,7 @@
 }
 
 - (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position string:(NSString *)string {
-    return [self initWithArity:arity position:position string:string moduleName:[DLState.shared currentModuleName]];
+    return [self initWithArity:arity position:position string:string moduleName:[DLState currentModuleName]];
 }
 
 - (instancetype)initWithArity:(NSInteger)arity position:(NSInteger)position string:(NSString *)string moduleName:(NSString *)moduleName {
@@ -243,7 +243,7 @@
         _hasNArity = [symbol hasNArity];
         _position = [symbol position];
         _meta = meta;
-        _moduleName = [symbol moduleName] ? [symbol moduleName] : [DLState.shared currentModuleName];
+        _moduleName = [symbol moduleName] ? [symbol moduleName] : [DLState currentModuleName];
         _initialModuleName = [symbol initialModuleName];
         _isQualified = [symbol isQualified];
         _isImported = [symbol isImported];
@@ -257,7 +257,7 @@
         [self bootstrap];
         _name = name;
         _meta = meta;
-        _moduleName = [DLState.shared currentModuleName];
+        _moduleName = [DLState currentModuleName];
         _initialModuleName = _moduleName;
         _isQualified = NO;
         [self updateArity];
@@ -333,7 +333,7 @@
 
 - (void)bootstrap {
     _position = -1;
-    _moduleName = [DLState.shared currentModuleName];
+    _moduleName = [DLState currentModuleName];
     _initialModuleName = _moduleName;
     _isQualified = NO;
     _fnName = @"";

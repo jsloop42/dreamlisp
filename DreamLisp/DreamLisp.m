@@ -87,7 +87,7 @@ static NSString *langVersion;
     _network = [DLNetwork new];
     _env = [[DLEnv alloc] initWithModuleName:DLConst.defaultModuleName isUserDefined:NO];
     [_env setModuleDescription:[DLConst defaultModuleDescription]];
-    [DLState.shared setCurrentModuleName:[_env moduleName]];
+    [DLState setCurrentModuleName:[_env moduleName]];
     // Add modules to module table
     [self addModule:_env];  // default module
     [self addModule:[_core env]];  // core module
@@ -99,7 +99,7 @@ static NSString *langVersion;
     _repQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     [self setLoadFileToREPL];
     [self setEvalToREPL];
-    if (_isREPL) _prompt = [DLUtils promptWithModule:[DLState.shared currentModuleName]];
+    if (_isREPL) _prompt = [DLUtils promptWithModule:[DLState currentModuleName]];
 }
 
 - (void)setIsDebug:(BOOL)isDebug {
@@ -650,7 +650,7 @@ static NSString *langVersion;
     NSString *modName = [modSym value];
     DLEnv *modEnv = [[DLEnv alloc] initWithModuleName:modName isUserDefined:YES];
     [self addModule:modEnv];
-    [DLState.shared setCurrentModuleName:[modEnv moduleName]];
+    [DLState setCurrentModuleName:[modEnv moduleName]];
     _env = modEnv; // change env to current module
     [self updateModuleName:modName];
     // The third element onwards are imports and exports
@@ -786,7 +786,7 @@ static NSString *langVersion;
         if (modEnv) {
             _env = modEnv;
         } else {
-            [[self reader] setModuleName:[DLState.shared currentModuleName]];
+            [[self reader] setModuleName:[DLState currentModuleName]];
             [[[DLError alloc] initWithFormat:DLModuleNotFound, modName] throw];
         }
     }
@@ -797,7 +797,7 @@ static NSString *langVersion;
 /** Changes the prompt if in REPL and updates the @c currentModuleName */
 - (void)updateModuleName:(NSString *)moduleName {
     if (_isREPL) _prompt = [DLUtils promptWithModule:moduleName];
-    [DLState.shared setCurrentModuleName:moduleName];
+    [DLState setCurrentModuleName:moduleName];
     [[self reader] setModuleName:moduleName];
 }
 
@@ -808,7 +808,7 @@ static NSString *langVersion;
         return;
     }
     [self setEnv:env];
-    [DLState.shared setCurrentModuleName:moduleName];
+    [DLState setCurrentModuleName:moduleName];
     [[self reader] setModuleName:moduleName];
     if (_isREPL) _prompt = [DLUtils promptWithModule:moduleName];
 }

@@ -22,10 +22,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (atomic, readonly) NSUInteger genSymCounter;
 @property (atomic, readonly) NSUInteger currentGenSymCount;
 @property (nonatomic, readwrite, assign) BOOL isVerbose;
-@property (atomic, readwrite, retain) NSString *currentModuleName;
 @property (atomic, readonly) NSUInteger assocObjectCounter;
 @property (atomic, readonly) NSUInteger currentAssocObjectCount;
 + (instancetype)shared;
++ (NSString *)currentModuleName;
++ (void)setCurrentModuleName:(NSString *)name;
 - (void)addPrefix:(NSString *)prefix;
 - (void)removePrefix:(NSString *)prefix;
 - (void)initPrefixes:(NSArray *)prefixes;

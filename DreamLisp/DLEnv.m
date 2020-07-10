@@ -337,7 +337,7 @@ static NSMapTable<NSString *, DLEnv *> *_modules;
         elem = [[env exportTable] objectForSymbol:sym];
         if (elem) return elem;
     } else {
-        if ([[DLState.shared currentModuleName] isEqual:modName]) {
+        if ([[DLState currentModuleName] isEqual:modName]) {
             elem = [[env internalTable] objectForSymbol:sym];
             if (elem) return elem;
         } else {
@@ -345,7 +345,7 @@ static NSMapTable<NSString *, DLEnv *> *_modules;
             if (elem) return elem;
         }
     }
-    if ([[DLState.shared currentModuleName] isEqual:modName]) {
+    if ([[DLState currentModuleName] isEqual:modName]) {
         elem = [[env importTable] objectForSymbol:key];
         if (elem) return elem;
     }
@@ -372,7 +372,7 @@ static NSMapTable<NSString *, DLEnv *> *_modules;
 }
 
 - (void)setObject:(id<DLDataProtocol>)obj forKey:(DLSymbol *)key {
-    [obj setModuleName:[DLState.shared currentModuleName]];
+    [obj setModuleName:[DLState currentModuleName]];
     if (_isExportAll || [_moduleName isEqual:DLConst.defaultModuleName] || [_moduleName isEqual:DLConst.coreModuleName]) {
         [_exportTable setObject:obj forKey:key];
     } else {
