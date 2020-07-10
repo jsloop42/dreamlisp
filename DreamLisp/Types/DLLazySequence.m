@@ -233,7 +233,9 @@
 - (void)apply {
     DLLazySequenceFn *lfn = nil;
     NSMutableArray *args = [NSMutableArray new];
-    if (!_fns) [_acc addObject:[self next]];
+    if ([_fns isEmpty]) {
+        [_acc addObject:[self next]];
+    }
     for (lfn in _fns) {
         if ([lfn fn]) {
             if (_isNative) {

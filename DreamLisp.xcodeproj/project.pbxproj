@@ -60,7 +60,6 @@
 		9E69232323255DFF00B12A65 /* DLNetwork.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E69232123255DFE00B12A65 /* DLNetwork.h */; };
 		9E69232623255FA900B12A65 /* DLNetworkSessionTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E69232423255FA900B12A65 /* DLNetworkSessionTable.h */; };
 		9E69232723255FA900B12A65 /* DLNetworkSessionTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E69232523255FA900B12A65 /* DLNetworkSessionTable.m */; };
-		9E69232D2325A31C00B12A65 /* dlisp-test.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E69232C2325A31C00B12A65 /* dlisp-test.dlisp */; };
 		9E70861A22ACF2A200ADD464 /* test.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E70861922ACF29600ADD464 /* test.dlisp */; };
 		9E741E8222C12C23009680E8 /* DLAtom.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AACC2275791300A6EB98 /* DLAtom.m */; };
 		9E741E8322C12C23009680E8 /* DLBool.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E33AAD42275799200A6EB98 /* DLBool.m */; };
@@ -357,7 +356,6 @@
 		9E69232123255DFE00B12A65 /* DLNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLNetwork.h; sourceTree = "<group>"; };
 		9E69232423255FA900B12A65 /* DLNetworkSessionTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLNetworkSessionTable.h; sourceTree = "<group>"; };
 		9E69232523255FA900B12A65 /* DLNetworkSessionTable.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLNetworkSessionTable.m; sourceTree = "<group>"; };
-		9E69232C2325A31C00B12A65 /* dlisp-test.dlisp */ = {isa = PBXFileReference; lastKnownFileType = text; path = "dlisp-test.dlisp"; sourceTree = "<group>"; };
 		9E6F444722578E5600777A24 /* DreamLisp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DreamLisp.m; sourceTree = "<group>"; };
 		9E70861922ACF29600ADD464 /* test.dlisp */ = {isa = PBXFileReference; lastKnownFileType = text; path = test.dlisp; sourceTree = "<group>"; };
 		9E741ECB22C139AA009680E8 /* collatz.dlisp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = collatz.dlisp; sourceTree = "<group>"; };
@@ -698,7 +696,7 @@
 				9E741ECD22C139B1009680E8 /* i.test.dlisp */,
 				9E741ECE22C139B9009680E8 /* module-test.dlisp */,
 				9E741ECF22C139BC009680E8 /* scope.dlisp */,
-				9E69232C2325A31C00B12A65 /* dlisp-test.dlisp */,
+				9E1380F523A9A02700D2D39C /* dlisp-test.dlisp */,
 			);
 			path = dlisp;
 			sourceTree = "<group>";
@@ -1110,6 +1108,7 @@
 				9E741EC922C1325C009680E8 /* test.dlisp in Resources */,
 				9E0117CD233BF62C0087621C /* DLPrefixModel.sqlite in Resources */,
 				9E741EC822C13257009680E8 /* core.dlisp in Resources */,
+				9EC9042D23AAAEA400E5DAC0 /* License.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1118,7 +1117,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E741ED022C13A13009680E8 /* collatz.dlisp in Resources */,
-				9E69232D2325A31C00B12A65 /* dlisp-test.dlisp in Resources */,
+				9E1380F623A9A02700D2D39C /* dlisp-test.dlisp in Resources */,
 				9E741ED122C13A13009680E8 /* i.test.dlisp in Resources */,
 				9E741ED222C13A13009680E8 /* module-test.dlisp in Resources */,
 				9E741ED322C13A13009680E8 /* scope.dlisp in Resources */,
@@ -1666,7 +1665,7 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 12;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 7S7UE44956;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1707,7 +1706,7 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 12;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 7S7UE44956;
 				DYLIB_COMPATIBILITY_VERSION = 1;

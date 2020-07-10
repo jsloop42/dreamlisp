@@ -1,8 +1,8 @@
-(defmodule dlisp-test 
+(defmodule dlisp-test
   (export all)
   (import (from test (deftest n) (testing n) (is 2) (is 3) (run 1) (get-test-info 0))))
 
-(defun notif-handler (n) 
+(defun notif-handler (n)
   (println "notif-handler")
   (is (= true) (= n 42)))
 

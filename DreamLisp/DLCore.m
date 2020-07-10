@@ -878,7 +878,7 @@ double dmod(double a, double n) {
     /**
      Returns the collection sorted by the given criteria. The first argument depends on the data structure provided. It takes a keyword @c :asc, @c :desc for
      @c list, @vector and @string elements. For @c hash-map, it takes these in a @c vector with first element preferably the sort indicator, @c :key or @c
-     value. The first argument can also take a comparison function which returns an integer value, in case of the former data types. For @c hash-map, the
+     :value. The first argument can also take a comparison function which returns an integer value, in case of the former data types. For @c hash-map, the
      function is passed as the second element in the @c vector.
 
      (sort :asc [3 5 2 4])  ; [2 3 4 5]
@@ -1517,8 +1517,8 @@ double dmod(double a, double n) {
     /**
      Takes a key, a hash map and returns the value associated with the key if present else nil.
 
-     (get {:a 1 :b 2 :c 3} :b) ; 2
-     (get {:a 1 :b 2 :c 3} :v) ; nil
+     (get :b {:a 1 :b 2 :c 3}) ; 2
+     (get :v {:a 1 :b 2 :c 3}) ; nil
      */
     id<DLDataProtocol>(^get)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
@@ -1884,7 +1884,8 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"dorun" moduleName:[DLConst coreModuleName]]];
 
     #pragma mark doall
-    /** Returns the next element in the lazy sequence if present, else throws an exception. */
+    /** Applies the function associated with the lazy sequence to the next element if present as required to realise the
+     elements in the sequence. */
     id<DLDataProtocol>(^doAll)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
             [DLTypeUtils checkArity:xs arity:1];
@@ -2306,7 +2307,7 @@ double dmod(double a, double n) {
             return [[DLString alloc] initWithString:[fops currentDirectoryPath]];
         }
     };
-    fn = [[DLFunction alloc] initWithFn:currentWorkingDirectory argCount:1 name:@"cwd/0"];
+    fn = [[DLFunction alloc] initWithFn:currentWorkingDirectory argCount:0 name:@"cwd/0"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"cwd" moduleName:[DLConst coreModuleName]]];
 }
 

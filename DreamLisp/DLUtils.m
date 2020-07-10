@@ -292,6 +292,51 @@ static NSRegularExpression *_setterRegex;
     return dict;
 }
 
++ (NSMutableDictionary *)mapTableToDictionary:(NSMapTable *)table {
+    NSMutableDictionary *dict = [NSMutableDictionary new];
+    NSString *key = nil;
+    NSArray *allKeys = [table allKeys];
+    for (key in allKeys) {
+        [dict setObject:[(DLString *)[table objectForKey:key] value] forKey:key];
+    }
+    return dict;
+}
+
++ (id)convertFromDLTypeToFoundationType:(id<DLDataProtocol>)value {
+    Protocol *dlDataProtocol = objc_getProtocol("DLDataProtocol");
+    id val = @"";
+    if ([DLNil isNil:value]) {
+        val = @"";
+    } else if ([DLKeyword isKeyword:value]) {
+        val = [(DLKeyword *)value string];
+    } else if ([DLHashMap isHashMap:value]) {
+        val = [self hashMapToFoundationType:value];
+    } else if ([DLList isKindOfList:value]) {
+        NSMutableArray *xs = [(DLList *)value value];
+        id<DLDataProtocol> elem = nil;
+        NSMutableArray *list = [NSMutableArray new];
+        for (elem in xs) {
+            [list addObject:[self convertFromDLTypeToFoundationType:elem]];
+        }
+        val = list;
+    } else if ([DLAtom isAtom:value]) {
+        val = [self convertFromDLTypeToFoundationType:[(DLAtom *)value value]];
+    } else if ([DLNumber isNumber:value]) {
+        DLNumber *num = (DLNumber *)value;
+        val = [num value];
+    } else if ([DLBool isBool:value]) {
+        BOOL flag = (BOOL)[value value];
+        val = flag ? @YES : @NO;
+    } else if ([DLString isString:value]) {
+        val = [value value];
+    } else if ([value conformsToProtocol:dlDataProtocol]) {
+        val = [value value];
+    } else {
+        val = value;
+    }
+    return val;
+}
+
 /** Converts the given hash map to Foundation data type, useful for JSON encoding. */
 + (NSMutableDictionary *)hashMapToFoundationType:(DLHashMap *)hashMap {
     NSMutableDictionary *dict = [NSMutableDictionary new];

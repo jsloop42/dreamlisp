@@ -1766,8 +1766,6 @@
     XCTAssertEqualObjects([dl rep:@"(symbol? 'abc)"], @"true");
     XCTAssertEqualObjects([dl rep:@"(symbol? \"abc\")"], @"false");
     XCTAssertEqualObjects([dl rep:@"(symbol? :abc)"], @"false");
-    XCTAssertEqualObjects([dl rep:@"(symbol? 'abc)"], @"true");
-    XCTAssertEqualObjects([dl rep:@"(symbol? \"abc\")"], @"false");
     XCTAssertEqualObjects([dl rep:@"(symbol? (symbol \"abc\"))"], @"true");
     // keyword?
     XCTAssertEqualObjects([dl rep:@"(keyword? :abc)"], @"true");
