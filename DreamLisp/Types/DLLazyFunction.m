@@ -2,8 +2,8 @@
 //  DLLazyFunction.m
 //  DreamLisp
 //
-//  Created by jsloop on 30/06/19.
-//  Copyright © 2019 DreamLisp. All rights reserved.
+//  Created by Jaseem V V on 30/06/19.
+//  Copyright © 2019 Jaseem V V. All rights reserved.
 //
 
 #import "DLLazyFunction.h"

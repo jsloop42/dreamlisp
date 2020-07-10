@@ -2,8 +2,8 @@
 //  DLTable.h
 //  DreamLisp
 //
-//  Created by jsloop on 08/09/19.
-//  Copyright © 2019 jsloop. All rights reserved.
+//  Created by Jaseem V V on 08/09/19.
+//  Copyright © 2019 Jaseem V V. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

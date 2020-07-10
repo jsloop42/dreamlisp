@@ -2,8 +2,8 @@
 //  DLReader.h
 //  DreamLisp
 //
-//  Created by jsloop on 05/04/19.
-//  Copyright © 2019 DreamLisp. All rights reserved.
+//  Created by Jaseem V V on 05/04/19.
+//  Copyright © 2019 Jaseem V V. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
