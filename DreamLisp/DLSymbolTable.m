@@ -115,7 +115,7 @@
 
 /**
  Returns an appropriate symbol with arity for the given key. If the given symbol exists, it is returned. Else symbol with arity -2 is returned if present,
- else a function symbol with the largest arity is returned if present. If non is found, nil is returned. */
+ else a function symbol with the largest arity is returned if present. If none is found, nil is returned. */
 - (id<DLDataProtocol> _Nullable)symbolForKey:(DLSymbol *)key {
     NSMutableArray *arr = [self arrayForKey:[DLSymbolKey fromSymbol:key]];
     if (!arr) return nil;

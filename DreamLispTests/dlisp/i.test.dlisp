@@ -1,5 +1,5 @@
 (defmodule i.test
-  "A module which is used check the test module functionality."
+  "A test module which is used check the test module functionality."
   (export all) 
   (import (from test (deftest n) (testing n) (is 2) (is 3) (run 1))))
 

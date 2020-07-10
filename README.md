@@ -1,6 +1,6 @@
 ## Language Guide
 
-DreamLisp is a Lisp dialect that started out as an implementation of [MAL (Make a Lisp)](https://github.com/kanaka/mal/) and then diverged from the MAL language specification to include additional functionalities like modules, lazy collections and changes to some of the core functions, and is a Lisp-2 because we can have both variable and a function with the same name. DreamLisp is written in Objective-C and as such can be extended further to work with Objective-C runtime capabilities. See the experimental [objc-rt-1 branch](https://github.com/jsloop42/dreamlisp/tree/objc-rt-1). At present, the language runs in interpreted mode.
+DreamLisp is a Lisp dialect with modules, lazy collections and is a Lisp-2 with an unhygienic macro system. DreamLisp interpreter is implemented in Objective-C and as such can run on macOS and iOS. It is tail recursive, uses ARC instead of garbage collection, has asynchronous communication using notifications taking advantage of the underlying Objective-C runtime and Foundation library. In the experimental version [objc-rt-1 branch](https://github.com/jsloop42/dreamlisp/tree/objc-rt-1), we can define classes and create objects at runtime from the REPL. At present, the language runs in interpreted mode.
 
 ### Data Types
 
@@ -535,6 +535,7 @@ Returns a lazy sequence which when realised reverse the elements in the given se
 
 ```
 λ user> (doall (reverse "apple"))
+elppa
 
 λ user> (doall (reverse [11 121 1221]))
 [1221 121 11]
@@ -1073,7 +1074,7 @@ Removes spaces from the start and end of the given string.
 
 ### Predicates
 
-Below are predicates which conditional functions.
+Below are predicates which are conditional functions.
 
 #### nil?/1
 
@@ -1252,7 +1253,7 @@ Takes an expression in string form, tokenizes it returning the expression.
 
 #### slurp/1
 
-Read the content of a file as a string. Should be used for smaller files only.
+Read the content of a file as a string. This should be used for smaller files only.
 
 ```
 ➜ cat inp.dlisp
@@ -1650,3 +1651,8 @@ A test module can be written like any other module with test functions defined u
 Check the test cases under [DreamLispTests/dlisp](https://github.com/jsloop42/dreamlisp/tree/master/DreamLispTests/dlisp).
 
 Furthermore, there are extensive tests for the language implementation itself under [DreamLispTests](https://github.com/jsloop42/dreamlisp/tree/master/DreamLispTests).
+
+## References
+
+[MAL (Make a Lisp)](https://github.com/kanaka/mal/)
+[Lisp Flavoured Erlang (LFE)](https://github.com/rvirding/lfe)
