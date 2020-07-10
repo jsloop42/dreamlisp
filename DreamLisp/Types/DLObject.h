@@ -2,8 +2,8 @@
 //  DLObject.h
 //  DreamLisp
 //
-//  Created by jsloop on 01/09/19.
-//  Copyright © 2019 DreamLisp. All rights reserved.
+//  Created by Jaseem V V on 01/09/19.
+//  Copyright © 2019 Jaseem V V. All rights reserved.
 //
 
 #import "DLProxyProtocol.h"

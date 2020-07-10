@@ -2,8 +2,8 @@
 //  DLTrieTests.m
 //  DreamLispTests
 //
-//  Created by jsloop on 21/09/19.
-//  Copyright © 2019 DreamLisp. All rights reserved.
+//  Created by Jaseem V V on 21/09/19.
+//  Copyright © 2019 Jaseem V V. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
