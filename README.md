@@ -1654,5 +1654,5 @@ Furthermore, there are extensive tests for the language implementation itself un
 
 ## References
 
-[MAL (Make a Lisp)](https://github.com/kanaka/mal/)
-[Lisp Flavoured Erlang (LFE)](https://github.com/rvirding/lfe)
+[MAL (Make a Lisp)](https://github.com/kanaka/mal/)  
+[Lisp Flavoured Erlang (LFE)](https://github.com/rvirding/lfe)  
