@@ -294,6 +294,7 @@
 		9ED5348E22B67FCA004A2CB2 /* DLCacheTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLCacheTable.h; sourceTree = "<group>"; };
 		9ED5348F22B67FCA004A2CB2 /* DLCacheTable.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLCacheTable.m; sourceTree = "<group>"; };
 		9ED5349222B6991A004A2CB2 /* DLCacheTableTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLCacheTableTests.m; sourceTree = "<group>"; };
+		9EF8159B2B69A5C000F05F9E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -389,6 +390,7 @@
 		9E3A9D4122568AFC00348529 = {
 			isa = PBXGroup;
 			children = (
+				9EF8159B2B69A5C000F05F9E /* README.md */,
 				9EC9042C23AAAEA400E5DAC0 /* License.txt */,
 				9E30555C2261C4DC001D4597 /* build */,
 				9E281D02225A608D0038A5AF /* test */,
