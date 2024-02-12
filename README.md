@@ -65,11 +65,11 @@ The vector notation is `[]` square braces. We can use the function `vector` to c
 Hash maps are dictionary collection which can have key-value pair. The short notation for hash-map is `{}`.
 
 ```
-λ user> {"name" "Olive", "age" 42, "location" "Liestal"}
+λ user> {"name" "Olive", "age" 42, "location" "Boston"}
 {"name" "Olive" "age" 42}
 
-λ user> (def person {:first-name "Jane" :last-name "Doe" :location "Montreux"})
-{:first-name "Jane" :last-name "Doe" :location "Montreux"}
+λ user> (def person {:first-name "Jane" :last-name "Doe" :location "Boston"})
+{:first-name "Jane" :last-name "Doe" :location "Boston"}
 
 λ user> (:first-name person)
 "Jane"
@@ -225,8 +225,8 @@ Sequence functions works on `list`, `vector` and `string` types.
 Create a new list.
 
 ```
-λ user> (list "Coleridge" "Frost" "Hardy")
-("Coleridge" "Frost" "Hardy")
+λ user> (list "Common Lisp" "Clojure" "LFE")
+("Common Lisp" "Clojure" "LFE")
 ```
 
 #### list?/1
@@ -237,7 +237,7 @@ Create a new list.
 λ user> (list? [1 2 3])
 false
 
-λ user> (list? '("beauty" "and" "the" "beast"))
+λ user> (list? '("mojave" "catalina" "big sur" "monterey"))
 true
 ```
 
@@ -246,8 +246,8 @@ true
 Create a new vector.
 
 ```
-λ user> (vector "Austen" "Brontë" "Woolf")  ;; create a vector
-["Austen" "Brontë" "Woolf"]
+λ user> (vector "Jan" "Feb" "Mar")  ;; create a vector
+["Jan" "Feb" "Mar"]
 ```
 
 #### vector?/1
@@ -279,13 +279,13 @@ The `first` function returns the first element of a sequence if present or `nil`
 The `rest` function takes a sequence and returns another sequence with all elements except the first one or an empty sequence if no element are present.
 
 ```
-λ user> (def uni "York")
-"York"
+λ user> (def name "Swift")
+"Swift"
 
-λ user> (rest ["Manchester" uni "Oxford" "Cambridge"])
-["York" "Oxford" "Cambridge"]
+λ user> (rest ["Objective-C" name "C" "C++"])
+["Swift" "C" "C++"]
 
-λ user>(rest "amnesia")
+λ user> (rest "amnesia")
 ["m" "n" "e" "s" "i" "a"]
 ```
 
@@ -309,8 +309,8 @@ nil
 λ user> (drop 1 '(1 2 3))
 (2 3)
 
-λ user> (drop -2 ["Belgium" "Ibiza", "Miami", "Chicago"])
-["Belgium" "Ibiza"]
+λ user> (drop -2 ["Paris" "Tokyo", "California", "Chicago"])
+["Paris" "Tokyo"]
 ```
 
 #### empty?/1
@@ -342,11 +342,11 @@ Returns the count of the given sequence.
 λ user> (count '("a" "e" "i" "o" "u"))
 5
 
-λ user> (count ["Luna" "Hermione" "Harry"])
+λ user> (count ["Apple" "Orange" "Banana"])
 3
 
-λ user> (count "opposite opposite")
-17
+λ user> (count "hello world")
+11
 ```
 
 #### cons/2
@@ -372,8 +372,8 @@ Takes a list of sequences and combines them into one sequence.
 λ user> (concat ["hello"] ["world"])
 ["hello" "world"]
 
-λ user> (concat "Bul" "bul")
-"Bulbul"
+λ user> (concat "Eternal" " " "September")
+"Eternal September"
 
 λ user> (concat "After" [1 2 "B"] "C")
 "After12BC"
@@ -426,7 +426,7 @@ Takes a start, an end index, a sequence and returns a sub-sequence within the gi
 
 #### filter/2
 
-Takes a filter predicate function and a collection, and returns a lazy sequence which when realised applies the function to each element in the collection and returns the resulting filtered collection.
+Takes a filter predicate function and a collection, and returns a lazy sequence which when realized applies the function to each element in the collection and returns the resulting filtered collection.
 
 ```
 λ user> (doall (filter (fn (x) (< x 0)) '(-1 4 0 -4 -5 2)))
@@ -435,7 +435,7 @@ Takes a filter predicate function and a collection, and returns a lazy sequence 
 
 #### flatten/1
 
-Takes any nested collection and returns a lazy sequence which when realised return its contents as a single collection.
+Takes any nested collection and returns a lazy sequence which when realized return its contents as a single collection.
 
 ```
 λ user> (doall (flatten [[1] [2 [3]] [[[4]]] [5]]))
@@ -444,7 +444,7 @@ Takes any nested collection and returns a lazy sequence which when realised retu
 
 #### foldl/3
 
-`foldl` takes a function, an initial value and a sequence, initialises the accumulator with the initial value, applies the function to each value in the collection with the result in the accumulator, returning the accumulator when done. The function application takes place from left to right.
+`foldl` takes a function, an initial value and a sequence, initializes the accumulator with the initial value, applies the function to each value in the collection with the result in the accumulator, returning the accumulator when done. The function application takes place from left to right.
 
 ```
 λ user> (foldl (fn (x acc) (str acc x)) "" ["a" 1 "b" 2 "c" 3])
@@ -502,7 +502,7 @@ Take any element and a sequence or collection, joins, the element at each interm
 #<lazy-seq [1 2 3]>
 ```
 
-To realise the value of the lazy sequence, we can use the `doall` function.
+To realize the value of the lazy sequence, we can use the `doall` function.
 
 ```
 λ user> (doall (map (fn (a) (* 2 a)) [1 2 3]))
@@ -531,7 +531,7 @@ Takes `n` elements from the given sequence. If the sequence is lazy, this makes 
 
 #### reverse/1
 
-Returns a lazy sequence which when realised reverse the elements in the given sequence.
+Returns a lazy sequence which when realized reverse the elements in the given sequence.
 
 ```
 λ user> (doall (reverse "apple"))
@@ -982,7 +982,7 @@ false
 
 #### doall/1
 
-Applies the function associated with the lazy sequence to the next element if present as required to realise the elements in the sequence.
+Applies the function associated with the lazy sequence to the next element if present as required to realize the elements in the sequence.
 
 ```
 λ user> (doall (map (fn (x) (+ x 3)) [1 2 3]))
@@ -1654,5 +1654,6 @@ Furthermore, there are extensive tests for the language implementation itself un
 
 ## References
 
+[Clojure](https://clojure.org)
 [MAL (Make a Lisp)](https://github.com/kanaka/mal/)  
 [Lisp Flavoured Erlang (LFE)](https://github.com/rvirding/lfe)  
