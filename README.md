@@ -1654,6 +1654,6 @@ Furthermore, there are extensive tests for the language implementation itself un
 
 ## References
 
-[Clojure](https://clojure.org)
+[Clojure](https://clojure.org)  
 [MAL (Make a Lisp)](https://github.com/kanaka/mal/)  
 [Lisp Flavoured Erlang (LFE)](https://github.com/rvirding/lfe)  
