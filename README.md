@@ -1267,6 +1267,21 @@ Read the content of a file as a string. This should be used for smaller files on
 "(println \"Greetings!\")\n\n"
 ```
 
+#### load-file/1
+
+Loads a dlisp file and evaluates the code. Path can be relative to the current interpreter location or can be absolute.
+
+```
+λ user> (load-file "DreamLispTests/dlisp/dlisp-test.dlisp")
+
+Testing notification
+Testing add-notification
+notif-handler
+
+{:fail 0 :count 1 :success 1}
+[:ok "dlisp-test.dlisp"]
+```
+
 ### IO
 
 Below are input-output related functions.

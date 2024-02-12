@@ -29,7 +29,7 @@
 
 (defmacro testing (desc & form)
   "A macro to evaluate individual test cases. Takes a description string and expressions."
-  `(do (print (str "\n" ~desc)) ~@form))
+  `(do (print (str "\n" ~desc "\n")) ~@form))
 
 (defmacro is (exp res)
   `(is ~exp ~res ""))
