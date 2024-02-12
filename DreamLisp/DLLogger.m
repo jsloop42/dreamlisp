@@ -2,8 +2,8 @@
 //  DLLogger.m
 //  DreamLisp
 //
-//  Created by jsloop on 12/04/19.
-//  Copyright © 2019 DreamLisp. All rights reserved.
+//  Created by Jaseem V V on 12/04/19.
+//  Copyright © 2019 Jaseem V V. All rights reserved.
 //
 
 #import "DLLogger.h"

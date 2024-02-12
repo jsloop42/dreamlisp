@@ -18,3 +18,5 @@ xcuserdata/
 Pods/
 bin
 *.log
+docs_priv
+
