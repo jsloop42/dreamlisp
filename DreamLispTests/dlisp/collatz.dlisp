@@ -7,3 +7,5 @@
       (collatz (/ n 2) (conj acc n))
       (collatz (+ (* 3 n) 1) (conj acc n)))
     (conj acc n)))
+
+(println (collatz 100000000))

@@ -1,4 +1,4 @@
-(defmodule fact
+(defmodule factorial
   (export all))
 
 (defun fact (n acc)
@@ -6,4 +6,7 @@
     acc
     (fact (- n 1) (* n acc))))
 
-(println (fact 100 1))
+(defun fact (n)
+  (fact n 1))
+
+(println (fact 100))
