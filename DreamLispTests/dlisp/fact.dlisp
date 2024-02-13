@@ -1,0 +1,9 @@
+(defmodule fact
+  (export all))
+
+(defun fact (n acc)
+  (if (= n 0)
+    acc
+    (fact (- n 1) (* n acc))))
+
+(println (fact 100 1))

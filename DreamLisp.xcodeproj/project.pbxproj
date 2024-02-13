@@ -12,6 +12,7 @@
 		9E1E697B22C5395500E52162 /* DLStdIOServiceDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E1E697A22C5395400E52162 /* DLStdIOServiceDelegate.h */; };
 		9E1E697E22C53EAB00E52162 /* DLIOService.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E1E697C22C53EAB00E52162 /* DLIOService.h */; };
 		9E1E697F22C53EAB00E52162 /* DLIOService.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1E697D22C53EAB00E52162 /* DLIOService.m */; };
+		9E20DEFA2B7B01ED001F26CA /* fact.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E20DEF92B7B01ED001F26CA /* fact.dlisp */; };
 		9E281CF8225A4C790038A5AF /* libreadline.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E281CF7225A4C790038A5AF /* libreadline.tbd */; };
 		9E28ABA02323FE9A00133494 /* DLRegex.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E28AB9E2323FE9A00133494 /* DLRegex.h */; };
 		9E28ABA12323FE9A00133494 /* DLRegex.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E28AB9F2323FE9A00133494 /* DLRegex.m */; };
@@ -168,6 +169,7 @@
 		9E1E697A22C5395400E52162 /* DLStdIOServiceDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLStdIOServiceDelegate.h; sourceTree = "<group>"; };
 		9E1E697C22C53EAB00E52162 /* DLIOService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLIOService.h; sourceTree = "<group>"; };
 		9E1E697D22C53EAB00E52162 /* DLIOService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLIOService.m; sourceTree = "<group>"; };
+		9E20DEF92B7B01ED001F26CA /* fact.dlisp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fact.dlisp; sourceTree = "<group>"; };
 		9E2491E8226C39CA00B9E21C /* NSMutableDictionary+DLHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSMutableDictionary+DLHashMap.h"; sourceTree = "<group>"; };
 		9E2491E9226C39CA00B9E21C /* NSMutableDictionary+DLHashMap.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+DLHashMap.m"; sourceTree = "<group>"; };
 		9E250CEA22886ED500EDADEF /* DLModuleTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLModuleTable.h; sourceTree = "<group>"; };
@@ -451,6 +453,7 @@
 			isa = PBXGroup;
 			children = (
 				9E741ECB22C139AA009680E8 /* collatz.dlisp */,
+				9E20DEF92B7B01ED001F26CA /* fact.dlisp */,
 				9E741ECD22C139B1009680E8 /* i.test.dlisp */,
 				9E741ECE22C139B9009680E8 /* module-test.dlisp */,
 				9E741ECF22C139BC009680E8 /* scope.dlisp */,
@@ -758,6 +761,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E20DEFA2B7B01ED001F26CA /* fact.dlisp in Resources */,
 				9E741ED022C13A13009680E8 /* collatz.dlisp in Resources */,
 				9E1380F623A9A02700D2D39C /* dlisp-test.dlisp in Resources */,
 				9E741ED122C13A13009680E8 /* i.test.dlisp in Resources */,
