@@ -2,6 +2,13 @@
 
 DreamLisp is a Lisp dialect with modules, lazy collections and is a Lisp-2 with an unhygienic macro system. DreamLisp interpreter is implemented in Objective-C and as such can run on macOS and iOS. It is tail recursive, uses ARC instead of garbage collection, has asynchronous communication using notifications taking advantage of the underlying Objective-C runtime and Foundation library. In the experimental version [objc-rt-1 branch](https://github.com/jsloop42/dreamlisp/tree/objc-rt-1), we can define classes and create objects at runtime from the REPL. At present, the language runs in interpreted mode.
 
+### Version
+
+```
+DreamLisp v3.4 (12) [Objective-C 2.0]
+Shell v1.1 (4)
+```
+
 ### Data Types
 
 All data types in DreamLisp are immutable in nature.
@@ -1655,6 +1662,27 @@ true
 true
 
 λ user> {"ip" "127.0.0.1" "Get Notifications" "https://jsonip.com/notify" "about" "https://jsonip.com/about" "Pro!" "http://getjsonip.com"}
+```
+
+## Run script from command line
+
+The `dlisp` interpreter can be used to execute a `dlisp` file from the Terminal directly.
+
+```
+% dlisp DreamLispTests/dlisp/i.test.dlisp
+
+Testing test-1 test case
+test-1 case 1
+
+Testing groups
+test c - case 1
+
+test c - case 2
+
+Testing a success case
+success
+
+{:fail 2 :count 3 :success 1}
 ```
 
 ## Test Module
