@@ -905,7 +905,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = NO;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -966,7 +966,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1000,7 +1000,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.estoapps.dreamlisp.dlispshell;
+				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.dreamlisp.dlispshell;
 				PRODUCT_NAME = dlisp;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -1021,7 +1021,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.estoapps.dreamlisp.dlispshell;
+				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.dreamlisp.dlispshell;
 				PRODUCT_NAME = dlisp;
 				SWIFT_VERSION = 5.0;
 			};
@@ -1041,7 +1041,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.dreamlisp.dlisp.DreamLispShellTests;
+				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.dreamlisp.DreamLispShellTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -1062,7 +1062,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.dreamlisp.dlisp.DreamLispShellTests;
+				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.dreamlisp.DreamLispShellTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -1093,7 +1093,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.estoapps.dreamlisp.dlisplib;
+				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.dreamlisp.dlisplib;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1115,6 +1115,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				ENABLE_STRICT_OBJC_MSGSEND = NO;
 				FRAMEWORK_VERSION = A;
+				GCC_OPTIMIZATION_LEVEL = s;
 				INFOPLIST_FILE = "$(SRCROOT)/DreamLisp/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1122,7 +1123,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.estoapps.dreamlisp.dlisplib;
+				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.dreamlisp.dlisplib;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1147,7 +1148,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.dreamlisp.dlisp.DreamLispTests;
+				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.dreamlisp.DreamLispTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1165,7 +1166,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.dreamlisp.dlisp.DreamLispTests;
+				PRODUCT_BUNDLE_IDENTIFIER = net.jsloop.dreamlisp.DreamLispTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

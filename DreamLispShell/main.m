@@ -14,11 +14,14 @@
 int main(int argc, const char * argv[]) {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     DreamLisp *dl = [[DreamLisp alloc] init];
+    DLTerminal *term = [DLTerminal new];
     if (argc > 1) {
         @try {
             [dl setIsREPL:NO];
             [dl bootstrap];
+            [[dl ioService] setStdIODelegate:term];
             [dl loadDLModuleLibs];
+            [dl printVersion];
             NSString *dlFile = [[NSString alloc] initWithCString:argv[1] encoding:NSUTF8StringEncoding];
             NSMutableArray *arr = [NSMutableArray new];
             NSUInteger i = 0;
@@ -36,7 +39,6 @@ int main(int argc, const char * argv[]) {
             exit(-1);
         }
     }
-    DLTerminal *term = [DLTerminal new];
     [dl setIsREPL:YES];
     [dl bootstrap];
     [[dl ioService] setStdIODelegate:term];
