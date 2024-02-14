@@ -30,4 +30,4 @@ jobs:
       #     file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
       #     xcodebuild clean build analyze -scheme "$scheme" -"$filetype_parameter" "$file_to_build" | xcpretty && exit ${PIPESTATUS[0]}
       - name: build and test
-        run: xcodebuild clean test -scheme 'DreamLispAll' -showBuildTimingSummary | xcpretty && exit ${PIPESTATUS[0]}
+        run: xcodebuild clean test CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO -workspace DreamLisp.xcworkspace -scheme DreamLispAll -showBuildTimingSummary | xcpretty && exit ${PIPESTATUS[0]}
