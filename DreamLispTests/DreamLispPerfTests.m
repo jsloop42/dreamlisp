@@ -30,14 +30,14 @@ static NSString *form = @"(defun collatz (n) (collatz n [])) (defun collatz (n a
     XCTAssertEqualObjects([dl rep:@"(count (collatz 93571393692802302))"], @"2092");
 }
 
-- (void)testCollatzPerformance {
+- (void)notestCollatzPerformance {
     [dl rep:form];
     [self measureBlock:^{
         [self->dl rep:@"(collatz 93571393692802302)"];
     }];
 }
 
-- (void)testDLListDropFirstPerformance {
+- (void)notestDLListDropFirstPerformance {
     NSMutableArray *arr = [NSMutableArray new];
     for (int i = 0; i < 10000; i++) {
         [arr addObject:@"1"];

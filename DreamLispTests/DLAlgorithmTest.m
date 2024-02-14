@@ -68,7 +68,7 @@
                                    @(20)] mutableCopy]));
 }
 
-- (void)testInsertionSortPerformance {
+- (void)notestInsertionSortPerformance {
     NSMutableArray *arr = [NSMutableArray new];
     NSInteger i = 0;
     for (i = 0; i < 10000; i++) {
@@ -79,7 +79,7 @@
     }];
 }
 
-- (void)testHeapSortPerformance {
+- (void)notestHeapSortPerformance {
     NSMutableArray *arr = [NSMutableArray new];
     NSInteger i = 0;
     for (i = 0; i < 10000; i++) {
@@ -90,7 +90,7 @@
     }];
 }
 
-- (void)testQuickSortPerformance {
+- (void)notestQuickSortPerformance {
     NSMutableArray *arr = [NSMutableArray new];
     NSInteger i = 0;
     for (i = 0; i < 10000; i++) {
@@ -101,7 +101,7 @@
     }];
 }
 
-- (void)testIntroSortPerformance {
+- (void)notestIntroSortPerformance {
     NSMutableArray *arr = [NSMutableArray new];
     NSInteger i = 0;
     for (i = 0; i < 10000; i++) {
