@@ -1,4 +1,4 @@
-name: DreamLisp Build and Test
+name: DreamLisp CI
 
 on:
   push:
