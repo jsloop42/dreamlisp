@@ -28,10 +28,10 @@
 		9E326C9322C7891800B456A2 /* DLLazySequence.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C9122C7891800B456A2 /* DLLazySequence.m */; };
 		9E326C9722C8C5D300B456A2 /* DLLazyFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E326C9522C8C5D100B456A2 /* DLLazyFunction.h */; };
 		9E326C9822C8C5D300B456A2 /* DLLazyFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C9622C8C5D200B456A2 /* DLLazyFunction.m */; };
-		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3F324B227B694400B56B6A /* core.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.dlisp */; };
-		9E5D7B4B225B947E00970453 /* DLTerminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* DLTerminal.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		9E5D7B4C225B947E00970453 /* DLTerminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* DLTerminal.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		9E5D7B4B225B947E00970453 /* DLTerminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* DLTerminal.m */; };
+		9E5D7B4C225B947E00970453 /* DLTerminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* DLTerminal.m */; };
 		9E67D32E23290D5500807F3E /* DLAlgorithm.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E67D32D23290D5300807F3E /* DLAlgorithm.h */; };
 		9E69232223255DFF00B12A65 /* DLNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E69232023255DFD00B12A65 /* DLNetwork.m */; };
 		9E69232323255DFF00B12A65 /* DLNetwork.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E69232123255DFE00B12A65 /* DLNetwork.h */; };
@@ -65,7 +65,7 @@
 		9E741E9322C12C38009680E8 /* DLFileOps.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E9B6227225B9FC20060DA9A /* DLFileOps.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		9E741E9422C12C38009680E8 /* DLError.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30555F2262633E001D4597 /* DLError.m */; };
 		9E741E9522C12C38009680E8 /* DreamLisp.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E6F444722578E5600777A24 /* DreamLisp.m */; };
-		9E741E9622C12C38009680E8 /* DLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553A2260FA8F001D4597 /* DLLogger.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		9E741E9622C12C38009680E8 /* DLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30553A2260FA8F001D4597 /* DLLogger.m */; };
 		9E741E9722C12C38009680E8 /* DLModuleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E250CEB22886ED500EDADEF /* DLModuleTable.m */; };
 		9E741E9822C12C38009680E8 /* DLPrinter.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7022568DB100348529 /* DLPrinter.m */; };
 		9E741E9922C12C38009680E8 /* DLReader.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D7422568DBD00348529 /* DLReader.m */; };
@@ -123,6 +123,10 @@
 		9E741EE422C150DA009680E8 /* DLShellConst.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E741EE222C150DA009680E8 /* DLShellConst.m */; };
 		9E7942D822C12A310086A47F /* DreamLisp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E7942CF22C12A310086A47F /* DreamLisp.framework */; };
 		9E7942DF22C12A320086A47F /* DreamLispLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E7942D122C12A310086A47F /* DreamLispLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9E7B3E4F2C00FD6D0092DEE1 /* DLStack.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E7B3E4E2C00FD6D0092DEE1 /* DLStack.m */; };
+		9E7B3E502C00FD7C0092DEE1 /* DLStack.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E7B3E4E2C00FD6D0092DEE1 /* DLStack.m */; };
+		9E7B3E532C00FEC00092DEE1 /* DLShellInput.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E7B3E512C00FEC00092DEE1 /* DLShellInput.m */; };
+		9E7B3E542C00FEC00092DEE1 /* DLShellInput.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E7B3E512C00FEC00092DEE1 /* DLShellInput.m */; };
 		9E8FEB5722D1223F00717127 /* DLAlgorithmTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8FEB5622D1223F00717127 /* DLAlgorithmTest.m */; };
 		9E8FEB5B22D243FD00717127 /* DLAlgorithm.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8FEB5922D243FD00717127 /* DLAlgorithm.m */; };
 		9E96593823194F5700B695ED /* DLError.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E96593723194F5600B695ED /* DLError.h */; };
@@ -202,7 +206,6 @@
 		9E30554F2261A10F001D4597 /* NSArray+DLDataProtocol.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSArray+DLDataProtocol.m"; sourceTree = "<group>"; };
 		9E3055522261A162001D4597 /* DLTypeUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLTypeUtils.h; sourceTree = "<group>"; };
 		9E3055532261A162001D4597 /* DLTypeUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLTypeUtils.m; sourceTree = "<group>"; };
-		9E30555C2261C4DC001D4597 /* build */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build; sourceTree = "<group>"; };
 		9E30555F2262633E001D4597 /* DLError.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLError.m; sourceTree = "<group>"; };
 		9E326C8A22C7524900B456A2 /* DLMockStdIOService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLMockStdIOService.h; sourceTree = "<group>"; };
 		9E326C8B22C7524900B456A2 /* DLMockStdIOService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLMockStdIOService.m; sourceTree = "<group>"; };
@@ -277,6 +280,10 @@
 		9E7942D222C12A310086A47F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9E7942D722C12A310086A47F /* DreamLispTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DreamLispTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E7942DE22C12A320086A47F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9E7B3E4D2C00FD6D0092DEE1 /* DLStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLStack.h; sourceTree = "<group>"; };
+		9E7B3E4E2C00FD6D0092DEE1 /* DLStack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DLStack.m; sourceTree = "<group>"; };
+		9E7B3E512C00FEC00092DEE1 /* DLShellInput.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DLShellInput.m; sourceTree = "<group>"; };
+		9E7B3E522C00FEC00092DEE1 /* DLShellInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLShellInput.h; sourceTree = "<group>"; };
 		9E8FEB5622D1223F00717127 /* DLAlgorithmTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLAlgorithmTest.m; sourceTree = "<group>"; };
 		9E8FEB5922D243FD00717127 /* DLAlgorithm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLAlgorithm.m; sourceTree = "<group>"; };
 		9E9458542274EB4400A3D449 /* NSMapTable+DLHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSMapTable+DLHashMap.h"; sourceTree = "<group>"; };
@@ -394,7 +401,6 @@
 			children = (
 				9EF8159B2B69A5C000F05F9E /* README.md */,
 				9EC9042C23AAAEA400E5DAC0 /* License.txt */,
-				9E30555C2261C4DC001D4597 /* build */,
 				9E281D02225A608D0038A5AF /* test */,
 				9E7942D022C12A310086A47F /* DreamLisp */,
 				9E7942DB22C12A310086A47F /* DreamLispTests */,
@@ -422,6 +428,10 @@
 				9E3A9D4D22568AFC00348529 /* main.m */,
 				9E741EE122C150DA009680E8 /* DLShellConst.h */,
 				9E741EE222C150DA009680E8 /* DLShellConst.m */,
+				9E7B3E522C00FEC00092DEE1 /* DLShellInput.h */,
+				9E7B3E512C00FEC00092DEE1 /* DLShellInput.m */,
+				9E7B3E4D2C00FD6D0092DEE1 /* DLStack.h */,
+				9E7B3E4E2C00FD6D0092DEE1 /* DLStack.m */,
 				9E5D7B49225B947E00970453 /* DLTerminal.h */,
 				9E5D7B4A225B947E00970453 /* DLTerminal.m */,
 				9E741ED622C141B2009680E8 /* Info.plist */,
@@ -779,6 +789,8 @@
 			files = (
 				9E5D7B4B225B947E00970453 /* DLTerminal.m in Sources */,
 				9E741EE322C150DA009680E8 /* DLShellConst.m in Sources */,
+				9E7B3E4F2C00FD6D0092DEE1 /* DLStack.m in Sources */,
+				9E7B3E532C00FEC00092DEE1 /* DLShellInput.m in Sources */,
 				9E3A9D4E22568AFC00348529 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -789,8 +801,10 @@
 			files = (
 				9E741EDC22C14556009680E8 /* DLShellTests.m in Sources */,
 				9E741EE422C150DA009680E8 /* DLShellConst.m in Sources */,
+				9E7B3E502C00FD7C0092DEE1 /* DLStack.m in Sources */,
 				9E5D7B4C225B947E00970453 /* DLTerminal.m in Sources */,
 				9E326C8F22C7598F00B456A2 /* DLMockStdIOService.m in Sources */,
+				9E7B3E542C00FEC00092DEE1 /* DLShellInput.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

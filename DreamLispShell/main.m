@@ -12,7 +12,7 @@
 
 /** The main entry point. */
 int main(int argc, const char * argv[]) {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    // NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     DreamLisp *dl = [[DreamLisp alloc] init];
     DLTerminal *term = [DLTerminal new];
     if (argc > 1) {
@@ -52,10 +52,10 @@ int main(int argc, const char * argv[]) {
             inp = [term readlineWithPrompt:[[[NSString alloc] initWithFormat:@"λ %@> ", [DLState currentModuleName]] UTF8String]];
             if (inp && [inp isNotEmpty]) {
                 ret = [dl rep:inp];
-                [inp release];
+                // [inp release];
                 if (ret) {
                     [[dl ioService] writeOutput:ret];
-                    [ret release];
+                    // [ret release];
                 }
                 ret = nil;
                 inp = nil;
@@ -64,6 +64,6 @@ int main(int argc, const char * argv[]) {
             [dl printException:exception log:YES readably:YES];
         }
     }
-    [pool drain];
+    // [pool drain];
     return 0;
 }

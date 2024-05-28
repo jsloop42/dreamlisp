@@ -10,6 +10,7 @@
 #import "DLShellConst.h"
 #import "NSString+DLDataProtocol.h"
 #import "DLMockStdIOService.h"
+#import "DLTerminal.h"
 #import <DreamLisp/DreamLispLib.h>
 
 @interface DLShellTests : XCTestCase
@@ -54,6 +55,25 @@
     ret = [dl rep:@"(readline \"=> \")"];
     [[dl ioService] writeOutput:ret];
     XCTAssertEqualObjects([stdIOService output], @"\"(/ 21 2)\"");
+}
+
+- (void)testShouldEvaluate {
+    DLTerminal *term = [[DLTerminal alloc] init];
+    BOOL ret = [term shouldEvaluate:@"(defun foo () 1)\n"];
+    XCTAssertTrue(ret);
+    [term.stack reset];
+    ret = [term shouldEvaluate:@"(defun foo ()\n"];
+    XCTAssertFalse(ret);
+    [term.stack reset];
+    ret = [term shouldEvaluate:@"(defun foo ()\n \"123)\""];
+    XCTAssertFalse(ret);
+    [term.stack reset];
+    ret = [term shouldEvaluate:@"(defun foo ()\n \"1\\\"23)\""];
+    XCTAssertFalse(ret);
+    [term.stack reset];
+    ret = [term shouldEvaluate:@"(defun foo ()\n \"1\\\"23)\")"];
+    XCTAssertTrue(ret);
+    [term.stack reset];
 }
 
 @end

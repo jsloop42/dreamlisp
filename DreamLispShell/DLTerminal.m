@@ -7,9 +7,14 @@
 //
 
 #import "DLTerminal.h"
+#import "DLStack.h"
 
 static NSString *_appHome = @"/.dlisp";
 static NSString *_historyFile = @"/dlisp-history";
+
+@interface DLTerminal ()
+// @property (nonatomic, strong) DLStack *stack;
+@end
 
 @implementation DLTerminal {
     DLFileOps *_fops;
@@ -35,6 +40,7 @@ static NSString *_historyFile = @"/dlisp-history";
     _appHomeDir = [_homeDir stringByAppendingString:_appHome];
     _historyPath = [_appHomeDir stringByAppendingString:_historyFile];
     _prompt = [self promptWithModule:DLConst.defaultModuleName];
+    _stack = [[DLStack alloc] init];
     [self checkPath];
     [self loadHistoryFile:_historyPath];
 }
@@ -56,7 +62,7 @@ static NSString *_historyFile = @"/dlisp-history";
         while([_fops hasNext]) {
             NSString *line = [_fops readLine];
             if ([line length] > 0) add_history([line cStringUsingEncoding:NSUTF8StringEncoding]);
-            [line release];
+            //[line release];
         }
     } @catch (NSException *exception) {
         [self writeOutput:exception.description];
@@ -77,10 +83,58 @@ static NSString *_historyFile = @"/dlisp-history";
     if (input) {
         if (_isHistoryEnabled) add_history(input);
         exp = [NSString stringWithFormat:@"%s\n", input];
+        [self shouldEvaluate:exp];
         free(input);
         [_fops append:exp];
     }
     return exp;
+}
+
+- (BOOL)shouldEvaluate:(NSString *)line {
+    BOOL shouldEval = YES;
+    NSUInteger i = 0, len = [line count];
+    for (i = 0; i < len; i++) {
+        unichar charCode = [line characterAtIndex:i];
+        /*
+         (defun greet () "hello")  ->  "hello"
+         (defun greet () "(hello)")  ->  "(hello)"
+         (defun greet () "\"(hello)\"")  ->  "\"(hello)\""
+         (defun greet () "\\(hello\\)")  ->  "\\(hello\\)"
+         
+         
+         1. Found: ( -> push
+         2. Found: )
+            2.1. Check if in string mode.
+            2.2. If in string mode, ignore
+            2.3  Else, pop all till ( is encountered
+         3. Found: "
+            3.1 If not in string mode, enable string mode flag
+            3.2 If in string mode, pop " which will be on top and exit string mode
+         */
+        switch (charCode) {
+            case 40:  /* ( */
+                if (![self.stack isInStringMode]) {
+                    [self.stack push:@"("];
+                }
+                shouldEval = NO;
+                break;
+            case 41:  /* ) */
+                if (![self.stack isInStringMode]) {
+                    [self.stack popTill:@"("];
+                }
+                shouldEval = [self.stack isEmpty];
+                break;
+            case 34:  /* " */
+                if (i > 0) {
+                    unichar prevElem = [line characterAtIndex:i-1];
+                    if (prevElem != 92) {  // not string escape
+                        [self.stack setIsInStringMode:![self.stack isInStringMode]];
+                    }
+                }
+                break;
+        }
+    }
+    return shouldEval;
 }
 
 #pragma mark - StdIOServiceDelegate

@@ -44,7 +44,7 @@ static DLIOService *_ioService;
     NSString *message = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
     [_ioService writeOutput:[NSString stringWithFormat:@"[info] %@", message]];
-    [message release];
+    // [message release];
 }
 
 + (void)debug:(NSString *)message {
@@ -58,7 +58,7 @@ static DLIOService *_ioService;
         NSString *message = [[NSString alloc] initWithFormat:format arguments:args];
         va_end(args);
         [_ioService writeOutput:[NSString stringWithFormat:@"[debug] %@", message]];
-        [message release];
+        // [message release];
     }
 }
 
@@ -72,7 +72,7 @@ static DLIOService *_ioService;
     NSString *message = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
     [_ioService writeOutput:[NSString stringWithFormat:@"[error] %@", message]];
-    [message release];
+    // [message release];
 }
 
 + (void)verbose:(NSString *)message {
@@ -86,7 +86,7 @@ static DLIOService *_ioService;
         NSString *message = [[NSString alloc] initWithFormat:format arguments:args];
         va_end(args);
         [_ioService writeOutput:[NSString stringWithFormat:@"[verbose] %@", message]];
-        [message release];
+        // [message release];
     }
 }
 
