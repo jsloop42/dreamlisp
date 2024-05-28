@@ -7,14 +7,9 @@
 //
 
 #import "DLTerminal.h"
-#import "DLStack.h"
 
 static NSString *_appHome = @"/.dlisp";
 static NSString *_historyFile = @"/dlisp-history";
-
-@interface DLTerminal ()
-// @property (nonatomic, strong) DLStack *stack;
-@end
 
 @implementation DLTerminal {
     DLFileOps *_fops;
@@ -59,10 +54,13 @@ static NSString *_historyFile = @"/dlisp-history";
 - (void)loadHistoryFile:(NSString *)path {
     @try {
         [_fops openFileForAppending:path];
+        NSString *line;
         while([_fops hasNext]) {
-            NSString *line = [_fops readLine];
-            if ([line length] > 0) add_history([line cStringUsingEncoding:NSUTF8StringEncoding]);
-            //[line release];
+            line = [_fops readLine];
+            if ([line length] > 0) {
+                add_history([line cStringUsingEncoding:NSUTF8StringEncoding]);
+                line = @"";
+            }
         }
     } @catch (NSException *exception) {
         [self writeOutput:exception.description];
