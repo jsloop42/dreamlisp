@@ -21,7 +21,7 @@ typedef NS_ENUM(NSUInteger, DLFileMode) {
 
 @interface DLFileResult : NSObject
 @property (nonatomic, readonly) NSUInteger index;
-@property (nonatomic, readonly, assign) NSString *content;
+@property (nonatomic, readonly) NSString *content;
 @end
 
 @interface DLFileOps : NSObject

@@ -19,10 +19,6 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 @synthesize index = _index;
 @synthesize content = _content;
 
-- (void)dealloc {
-    [super dealloc];
-}
-
 -(void)setIndex:(NSUInteger)index {
     _index = index;
 }
@@ -39,7 +35,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 @implementation DLFileOps {
     NSString *_path;
     NSURL *_filePath;
-    /*! Holds the file content which is used for files which are opened for reading line by line or in appending mode. This is an autoreleased object. */
+    /*! Holds the file content which is used for files which are opened for reading line by line or in appending mode. */
     NSData *_fileData;
     NSFileHandle *_fileHandle;
     NSData *_delim;
@@ -63,7 +59,6 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 
 - (void)dealloc {
     if (!_isFileClosed) [self closeFile];
-    [super dealloc];
 }
 
 - (void)bootstrap {
@@ -94,7 +89,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     NSError *err = nil;
     BOOL ret = NO;
     ret = [_fm createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&err];
-    if (!ret || err) [[[[DLError alloc] initWithUserInfo:[err userInfo]] autorelease] throw];
+    if (!ret || err) [[[DLError alloc] initWithUserInfo:[err userInfo]] throw];
 }
 
 /*!
@@ -106,11 +101,11 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     _path = path;
     _filePath = [NSURL fileURLWithPath:_path];
     _fileData = [NSData dataWithContentsOfURL:_filePath];
-    if (!_fileData) @throw [[[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil] autorelease];
+    if (!_fileData) @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
     NSError *err = nil;
     _readFileHandle = [NSFileHandle fileHandleForReadingFromURL:_filePath error:&err];
     if (!_readFileHandle && err) {
-        @throw [[[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil] autorelease];
+        @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
     }
     _isFileClosed = NO;
     _buff = [_fileData length];
@@ -121,11 +116,11 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     _path = path;
     _filePath = [NSURL fileURLWithPath:_path];
     _fileData = [NSData dataWithContentsOfURL:_filePath];
-    if (!_fileData) @throw [[[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil] autorelease];
+    if (!_fileData) @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
     NSError *err = nil;
     _appendFileHandle = [NSFileHandle fileHandleForUpdatingURL:_filePath error:&err];
     if (!_appendFileHandle && err) {
-        @throw [[[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil] autorelease];
+        @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
     }
     _isFileClosed = NO;
     _buff = [_fileData length];
@@ -137,7 +132,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
     NSError *err = nil;
     _writeFileHandle = [NSFileHandle fileHandleForWritingToURL:fileURL error:&err];
     if (!_writeFileHandle && err) {
-        @throw [[[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil] autorelease];
+        @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
     }
     _isFileClosed = NO;
 }
@@ -165,14 +160,14 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
   @return contents An array containing @c FileResult objects.
  */
 - (NSMutableArray<DLFileResult *> *)loadFileFromPath:(NSMutableArray *)locations isConcurrent:(BOOL)isConcurrent isLookup:(BOOL)isLookup {
-    NSMutableArray<DLFileResult *> *contents = [[NSMutableArray new] autorelease];
+    NSMutableArray<DLFileResult *> *contents = [NSMutableArray new];
     NSUInteger len = [locations count];
     NSUInteger i = 0;
     NSString *path = nil;
     for (i = 0; i < len; i++) {
         path = locations[i];
         if ([_fm fileExistsAtPath:path]) {
-            DLFileResult *result = [[DLFileResult new] autorelease];
+            DLFileResult *result = [DLFileResult new];
             [result setIndex:i];
             [result setContent:[NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil]];
             if (isLookup && [contents count] == 0) {
@@ -222,7 +217,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
         [fileHandle seekToFileOffset:_buff];
         _start = _buff;
     }
-    return [[[NSString alloc] initWithData:line encoding:NSUTF8StringEncoding] autorelease];
+    return [[NSString alloc] initWithData:line encoding:NSUTF8StringEncoding];
 }
 
 - (void)append:(NSString *)string {
@@ -231,11 +226,10 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
         NSData *data = [[NSData alloc] initWithBytes:[string cStringUsingEncoding:NSUTF8StringEncoding] length:[string count]];
         if (data) {
             [_appendFileHandle writeData:data];
-            [data release];
             data = nil;
         }
     } else {
-        @throw [[[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil] autorelease];
+        @throw [[NSException alloc] initWithName:READ_ERROR reason:READ_ERROR_MSG userInfo:nil];
     }
 }
 
@@ -255,7 +249,7 @@ NSString * const READ_ERROR_MSG = @"Error reading file.";
 #pragma mark - FileIOServiceDelegate
 
 - (NSString *)readFile:(NSString *)path {
-    DLFileResult *res = [[self loadFileFromPath:[[@[path] mutableCopy] autorelease] isConcurrent:NO isLookup:NO] first];
+    DLFileResult *res = [[self loadFileFromPath:[@[path] mutableCopy] isConcurrent:NO isLookup:NO] first];
     return [res content];
 }
 
