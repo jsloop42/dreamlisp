@@ -9,10 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "DLTerminal.h"
 #import "DLShellConst.h"
+#import "DLShellInput.h"
 
 /** The main entry point. */
 int main(int argc, const char * argv[]) {
-    // NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     DreamLisp *dl = [[DreamLisp alloc] init];
     DLTerminal *term = [DLTerminal new];
     if (argc > 1) {
@@ -45,25 +45,34 @@ int main(int argc, const char * argv[]) {
     [dl printVersion];
     [dl loadDLModuleLibs];
     [[dl ioService] writeOutput:[DLShellConst shellVersion]];
-    NSString *inp;
+    
+    DLShellInput *inp;
+    NSString *prompt = [[NSString alloc] init];
+    NSMutableString *expr = [[NSMutableString alloc] init];
+    NSString *line = [[NSString alloc] init];
     NSString *ret;
+    
     while (true) {
         @try {
-            inp = [term readlineWithPrompt:[[[NSString alloc] initWithFormat:@"λ %@> ", [DLState currentModuleName]] UTF8String]];
-            if (inp && [inp isNotEmpty]) {
-                ret = [dl rep:inp];
-                // [inp release];
-                if (ret) {
-                    [[dl ioService] writeOutput:ret];
-                    // [ret release];
+            prompt = [NSString stringWithFormat:@"λ %@> ", [DLState currentModuleName]];
+            inp = [term readlineWithPrompt:[prompt UTF8String]];
+            if ([inp shouldEvaluate]) {
+                line = [inp expr];
+                if (line != nil && [line isNotEmpty] && [line isNotEqualTo: @"\n"]) {
+                    [expr appendString:[inp expr]];
+                    ret = [dl rep:expr];
+                    if (ret) {
+                        [[dl ioService] writeOutput:ret];
+                    }
+                    ret = nil;
+                    inp = nil;
                 }
-                ret = nil;
-                inp = nil;
+            } else {
+                [expr appendString:[inp expr]];
             }
         } @catch (NSException *exception) {
             [dl printException:exception log:YES readably:YES];
         }
     }
-    // [pool drain];
     return 0;
 }

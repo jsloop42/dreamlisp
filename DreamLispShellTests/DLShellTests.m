@@ -74,6 +74,8 @@
     ret = [term shouldEvaluate:@"(defun foo ()\n \"1\\\"23)\")"];
     XCTAssertTrue(ret);
     [term.stack reset];
+    ret = [term shouldEvaluate:@"(defun greet ()\n \"(hello)\")"];
+    XCTAssertTrue(ret);
 }
 
 @end

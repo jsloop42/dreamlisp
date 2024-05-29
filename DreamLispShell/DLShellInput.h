@@ -16,6 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) BOOL shouldEvaluate;
 /** The current line */
 @property (nonatomic, strong) NSString *expr;
+/** Clear state. */
+- (void)reset;
 @end
 
 NS_ASSUME_NONNULL_END

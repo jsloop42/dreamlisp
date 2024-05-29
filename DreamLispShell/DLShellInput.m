@@ -17,4 +17,17 @@
     return self;
 }
 
+- (void)reset {
+    _shouldEvaluate = YES;
+    _expr = @"";
+}
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"DLShellInput\nshouldEvaluate: %hhd\nexpr: %@", _shouldEvaluate, _expr];
+}
+
+- (NSString *)debugDescription {
+    return [NSString stringWithFormat:@"DLShellInput\nshouldEvaluate: %hhd\nexpr: %@", _shouldEvaluate, _expr];
+}
+
 @end

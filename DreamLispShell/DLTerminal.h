@@ -7,6 +7,7 @@
 //
 
 #import "DLStack.h"
+#import "DLShellInput.h"
 #import <Foundation/Foundation.h>
 #import <readline/readline.h>
 #import <DreamLisp/DreamLispLib.h>
@@ -17,8 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite, assign) const char *prompt;
 @property (nonatomic, strong) DLStack *stack;
 - (instancetype)init;
-- (NSString *)readline;
-- (NSString * _Nullable)readlineWithPrompt:(const char *)prompt;
+- (DLShellInput *)readline;
+- (DLShellInput * _Nullable)readlineWithPrompt:(const char *)prompt;
 - (void)loadHistoryFile:(NSString *)path;
 - (void)disableHistory:(BOOL)flag;
 - (const char *)promptWithModule:(NSString *)moduleName;

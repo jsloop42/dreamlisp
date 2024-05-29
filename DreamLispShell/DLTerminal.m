@@ -17,6 +17,7 @@ static NSString *_historyFile = @"/dlisp-history";
     NSString *_historyPath;
     NSString *_homeDir;
     NSString *_appHomeDir;
+    DLShellInput *inp;
     const char *_prompt;
 }
 
@@ -36,6 +37,7 @@ static NSString *_historyFile = @"/dlisp-history";
     _historyPath = [_appHomeDir stringByAppendingString:_historyFile];
     _prompt = [self promptWithModule:DLConst.defaultModuleName];
     _stack = [[DLStack alloc] init];
+    inp = [[DLShellInput alloc] init];
     [self checkPath];
     [self loadHistoryFile:_historyPath];
 }
@@ -71,21 +73,23 @@ static NSString *_historyFile = @"/dlisp-history";
     _isHistoryEnabled = flag;
 }
 
-- (NSString *)readline {
+- (DLShellInput *)readline {
     return [self readlineWithPrompt:_prompt];
 }
 
-- (NSString * _Nullable)readlineWithPrompt:(const char *)prompt {
-    NSString *exp = nil;
+- (DLShellInput * _Nullable)readlineWithPrompt:(const char *)prompt {
+    NSString *line = [[NSString alloc] init];
     char *input = readline(prompt);
     if (input) {
+        [inp reset];
         if (_isHistoryEnabled) add_history(input);
-        exp = [NSString stringWithFormat:@"%s\n", input];
-        [self shouldEvaluate:exp];
+        line = [NSString stringWithFormat:@"%s\n", input];
+        if (_isHistoryEnabled) [_fops append:line];
+        [inp setExpr:line];
+        [inp setShouldEvaluate:[self shouldEvaluate:line]];
         free(input);
-        [_fops append:exp];
     }
-    return exp;
+    return inp;
 }
 
 - (BOOL)shouldEvaluate:(NSString *)line {
@@ -128,6 +132,8 @@ static NSString *_historyFile = @"/dlisp-history";
                     if (prevElem != 92) {  // not string escape
                         [self.stack setIsInStringMode:![self.stack isInStringMode]];
                     }
+                } else {
+                    [self.stack setIsInStringMode:YES];
                 }
                 break;
         }
@@ -137,11 +143,11 @@ static NSString *_historyFile = @"/dlisp-history";
 
 #pragma mark - StdIOServiceDelegate
 
-- (NSString *)readInput {
+- (DLShellInput *)readInput {
     return [self readline];
 }
 
-- (NSString *)readInputWithPrompt:(NSString *)prompt {
+- (DLShellInput *)readInputWithPrompt:(NSString *)prompt {
     return [self readlineWithPrompt:[prompt UTF8String]];
 }
 

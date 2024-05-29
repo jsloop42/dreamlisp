@@ -60,11 +60,11 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"Stack: %@", self.arr];
+    return [NSString stringWithFormat:@"Stack: %@\nisInStringMode: %hhd", self.arr, self.isInStringMode];
 }
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"Stack: %@", self.arr];
+    return [NSString stringWithFormat:@"Stack: %@\nisInStringMode: %hhd", self.arr, self.isInStringMode];
 }
 
 @end
