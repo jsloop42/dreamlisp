@@ -53,25 +53,33 @@ int main(int argc, const char * argv[]) {
     NSString *ret;
     
     while (true) {
-        @try {
-            prompt = [NSString stringWithFormat:@"λ %@> ", [DLState currentModuleName]];
-            inp = [term readlineWithPrompt:[prompt UTF8String]];
-            if ([inp shouldEvaluate]) {
-                line = [inp expr];
-                if (line != nil && [line isNotEmpty] && [line isNotEqualTo: @"\n"]) {
-                    [expr appendString:[inp expr]];
-                    ret = [dl rep:expr];
-                    if (ret) {
-                        [[dl ioService] writeOutput:ret];
+        @autoreleasepool {
+            @try {
+                prompt = [NSString stringWithFormat:@"λ %@> ", [DLState currentModuleName]];
+                inp = [term readlineWithPrompt:[prompt UTF8String]];
+                if ([inp shouldEvaluate]) {
+                    line = [inp expr];
+                    if (line != nil && [line isNotEmpty] && [line isNotEqualTo: @"\n"]) {
+                        [expr appendString:[inp expr]];
+                        ret = [dl rep:expr];
+                        if (ret) {
+                            [[dl ioService] writeOutput:ret];
+                        }
+                        ret = nil;
+                        inp = nil;
+                        [expr setString:@""];
                     }
-                    ret = nil;
-                    inp = nil;
+                    line = nil;
+                } else {
+                    [expr appendString:[inp expr]];
                 }
-            } else {
-                [expr appendString:[inp expr]];
+            } @catch (NSException *exception) {
+                [dl printException:exception log:YES readably:YES];
+                ret = nil;
+                inp = nil;
+                line = nil;
+                [expr setString:@""];
             }
-        } @catch (NSException *exception) {
-            [dl printException:exception log:YES readably:YES];
         }
     }
     return 0;
