@@ -387,15 +387,30 @@ static NSString *langVersion;
                         };
                         return [[DLFunction alloc] initWithAst:form params:[(DLList *)[xs second] value] env:env macro:NO meta:nil fn:fn];
                     } else if ([[sym value] isEqual:@"let"]) {
+                        // let supports two style of binding, LFE with parenthesis and Clojure with square brackets
                         @autoreleasepool {
                             DLEnv *letEnv = [[DLEnv alloc] initWithEnv:env];
-                            NSMutableArray *bindings = [DLVector isVector:[xs second]] ? [(DLVector *)[xs second] value] : [(DLList *)[xs second] value];
+                            NSMutableArray *bindings;
+                            BOOL isListForm = YES;
+                            NSUInteger step = 1;
+                            if ([DLVector isVector:[xs second]]) {  // (let [x 0 y 1] (+ x y))
+                                isListForm = NO;
+                                bindings = [(DLVector *)[xs second] value];
+                                step = 2;
+                            } else {  // (let ((x 0) (y 1)) (+ x y))
+                                bindings = [(DLList *)[xs second] value];
+                            }
                             NSUInteger len = [bindings count];
                             NSUInteger i = 0;
                             id<DLDataProtocol> val = nil;
-                            for (i = 0; i < len; i += 2) {
-                                val = [self eval:[bindings nth: i + 1] withEnv:letEnv];
-                                [letEnv setObject:val forKey:[DLSymbol symbolWithArityCheck:[bindings nth:i] withObject:val]];
+                            for (i = 0; i < len; i += step) {
+                                if (isListForm) {
+                                    val = [self eval:[(DLList *)[bindings nth:i] second] withEnv:letEnv];
+                                    [letEnv setObject:val forKey:[DLSymbol symbolWithArityCheck:[(DLList *)[bindings nth:i] first] withObject:val]];
+                                } else {
+                                    val = [self eval:[bindings nth: i + 1] withEnv:letEnv];
+                                    [letEnv setObject:val forKey:[DLSymbol symbolWithArityCheck:[bindings nth:i] withObject:val]];
+                                }
                             }
                             ast = [self toDoForm:[xs drop:2]];
                             env = letEnv;

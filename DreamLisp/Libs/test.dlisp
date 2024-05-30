@@ -35,11 +35,11 @@
   `(is ~exp ~res ""))
 
 (defmacro is (exp res msg)
-  "A macro to evaluate the given expression, `exp` and checks if the result is same as the given `res`. If the test fails `msg` is printed if given, else the
-   result is printed."
-  (let (ret (gensym) body (gensym))
-    `(let (~ret ~exp
-           ~body (quote ~exp))
+  "A macro to evaluate the given expression, `exp` and checks if the result is same as the given 
+   `res`. If the test fails `msg` is printed if given, else the result is printed."
+  (let ((ret (gensym)) (body (gensym)))
+    `(let ((~ret ~exp)
+           (~body (quote ~exp)))
       (if (not (= ~ret ~res))
         (do
           (reset! status :fail)
@@ -49,14 +49,17 @@
           (reset! status :success)))))
 
 (defmacro run (module-name)
-  "A test runner function which takes a string, `module-name` as its argument and executes all test functions found in the module."
-  (let (info (gensym) runner (gensym) f (gensym) fn-meta (gensym) xs (gensym) stat (gensym))
+  "A test runner function which takes a string, `module-name` as its argument and executes all test
+   functions found in the module."
+  (let ((info (gensym)) (runner (gensym)) (f (gensym)) (fn-meta (gensym)) (xs (gensym)) 
+        (stat (gensym)))
     `(do
       (let (~info (:exports (module-info ~module-name))
             ~runner (fn (~xs)
                       (when-not (empty? ~xs)
                         (let (~f (first ~xs) ~fn-meta (meta ~f))
-                          (when (and (not (nil? ~fn-meta)) (vector? ~fn-meta) (= (first ~fn-meta) :test-case))
+                          (when (and (not (nil? ~fn-meta)) 
+                                     (vector? ~fn-meta) (= (first ~fn-meta) :test-case))
                             (print (str "\n" (nth 1 ~fn-meta)))
                             (inc-test-count)
                             ((eval ~f))

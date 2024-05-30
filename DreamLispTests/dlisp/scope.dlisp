@@ -4,7 +4,7 @@
 
 (def f1 (fn (a b)
   (+ a b c (deref d))
-  (let (x 6 z (+ a c) f (fn (x) (* x x)))
+  (let ((x 6) (z (+ a c)) (f (fn (x) (* x x))))
     (* x z))))
 
 ; (f1 4 6) ;30

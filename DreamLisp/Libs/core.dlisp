@@ -7,7 +7,8 @@
   (if a false true))
 
 (defmacro cond (& xs)
-  "Evaluates the expression and if `true`, evaluates the corresponding form, else continues with the next expression."
+  "Evaluates the expression and if `true`, evaluates the corresponding form, else continues with the
+   next expression."
   (if (> (count xs) 0)
    `(if ~(first xs)
      ~(if (> (count xs) 1)
@@ -18,16 +19,16 @@
 (defmacro or () nil)
 (defmacro or (x) x)
 (defmacro or (x & more) 
-  "Evaluates expressions one at a time. If any expression returns `true`, the function returns with the result, else continues evaluation until the last
-   expression is evaluated."
-  (let (res x) `(if ~res ~res (or ~@more))))
+  "Evaluates expressions one at a time. If any expression returns `true`, the function returns with
+   the result, else continues evaluation until the last expression is evaluated."
+  (let ((res x)) `(if ~res ~res (or ~@more))))
 
 (defmacro and () nil)
 (defmacro and (x) x)
 (defmacro and (x & more) 
-  "Evaluates expressions one at a time. If any expression returns `false`, the function returns with the result, else continues evaluation until the last
-   expression is evaluated."
-  (let (res x) `(if (not ~res) ~res (or ~@more))))
+  "Evaluates expressions one at a time. If any expression returns `false`, the function returns with
+   the result, else continues evaluation until the last expression is evaluated."
+  (let ((res x)) `(if (not ~res) ~res (or ~@more))))
 
 (defmacro when (x & form)
   "Evaluates the first expression and if `true`, evaluates the body."
@@ -52,26 +53,28 @@
     (sort :asc xs)))
 
 (defmacro -> (x & form)
-  "Thread first macro, which takes an expression, evaluates it and inserts the result as the second element of the second expression and so on."
+  "Thread first macro, which takes an expression, evaluates it and inserts the result as the second
+   element of the second expression and so on."
   (if (empty? form)
     x
-    (let (head (first form) tail (rest form))
+    (let ((head (first form)) (tail (rest form)))
       (if (empty? tail)
         (if (list? head)
           `(~(first head) ~x ~@(rest head))
           (list head x))
         `(-> (-> ~x ~head) ~@tail)))))
 
-(defmacro <- (x & form)
-  "Thread last macro, which takes an expression, evaluates it and inserts the result as the last element of the second expression and so on."
+(defmacro ->> (x & form)
+  "Thread last macro, which takes an expression, evaluates it and inserts the result as the last
+   element of the second expression and so on."
   (if (empty? form)
     x
-    (let (head (first form) tail (rest form))
+    (let ((head (first form)) (tail (rest form)))
       (if (empty? tail)
         (if (list? head)
           `(~(first head) ~@(rest head) ~x)
           (list head x))
-        `(<- (<- ~x ~head) ~@tail)))))
+        `(->> (->> ~x ~head) ~@tail)))))
 
 (defun inc (n) 
   "Increments the given number by 1."

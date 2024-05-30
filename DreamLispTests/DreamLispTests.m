@@ -762,25 +762,25 @@
     XCTAssertThrows([dl rep:@"(def w (abc))"], @"Symbol not found");
     XCTAssertEqualObjects([dl rep:@"w"], @"123");
     // let form
-    XCTAssertEqualObjects([dl rep:@"(let (z (+ 2 3)) (+ 1 z))"], @"6");
+    XCTAssertEqualObjects([dl rep:@"(let ((z (+ 2 3))) (+ 1 z))"], @"6");
     XCTAssertEqualObjects([dl rep:@"(let [z 9] z)"], @"9");
-    XCTAssertEqualObjects([dl rep:@"(let (x 9) x)"], @"9");
+    XCTAssertEqualObjects([dl rep:@"(let ((x 9)) x)"], @"9");
     XCTAssertEqualObjects([dl rep:@"x"], @"4");
-    XCTAssertEqualObjects([dl rep:@"(let (z (+ 2 3)) (+ 1 z))"], @"6");
-    XCTAssertEqualObjects([dl rep:@"(let (p (+ 2 3) q (+ 2 p)) (+ p q))"], @"12");
-    XCTAssertEqualObjects([dl rep:@"(def y (let (z 7) z))"], @"7");
+    XCTAssertEqualObjects([dl rep:@"(let ((z (+ 2 3))) (+ 1 z))"], @"6");
+    XCTAssertEqualObjects([dl rep:@"(let ((p (+ 2 3)) (q (+ 2 p))) (+ p q))"], @"12");
+    XCTAssertEqualObjects([dl rep:@"(def y (let ((z 7)) z))"], @"7");
     XCTAssertEqualObjects([dl rep:@"y"], @"7");
-    XCTAssertEqualObjects([dl rep:@"(let (x (or nil \"yes\")) x)"], @"\"yes\"");
+    XCTAssertEqualObjects([dl rep:@"(let ((x (or nil \"yes\"))) x)"], @"\"yes\"");
     // outer env
     XCTAssertEqualObjects([dl rep:@"(def a 4)"], @"4");
-    XCTAssertEqualObjects([dl rep:@"(let (q 9) q)"], @"9");
-    XCTAssertEqualObjects([dl rep:@"(let (q 9) a)"], @"4");
-    XCTAssertEqualObjects([dl rep:@"(let (z 2) (let (q 9) a))"], @"4");
+    XCTAssertEqualObjects([dl rep:@"(let ((q 9)) q)"], @"9");
+    XCTAssertEqualObjects([dl rep:@"(let ((q 9)) a)"], @"4");
+    XCTAssertEqualObjects([dl rep:@"(let ((z 2)) (let ((q 9)) a))"], @"4");
     // let with vector binding
     XCTAssertEqualObjects([dl rep:@"(let [z 9] z)"], @"9");
     XCTAssertEqualObjects([dl rep:@"(let [p (+ 2 3) q (+ 2 p)] (+ p q))"], @"12");
     // vector evaluation
-    XCTAssertEqualObjects([dl rep:@"(let (a 5 b 6) [3 4 a [b 7] 8])"], @"[3 4 5 [6 7] 8]");
+    XCTAssertEqualObjects([dl rep:@"(let ((a 5) (b 6)) [3 4 a [b 7] 8])"], @"[3 4 5 [6 7] 8]");
 }
 
 /** Test core forms with do */
@@ -791,8 +791,8 @@
     XCTAssertEqualObjects([dl rep:@"(def sum (fn (n) (reset! a n) (reset! a (+ @a 1))))"], @"user:sum/1");
     XCTAssertEqualObjects([dl rep:@"(sum 5)"], @"6");
     // Test let
-    XCTAssertEqualObjects([dl rep:@"(let (x 1 y 2) (reset! a x) (reset! a (+ x y)))"], @"3");
-    XCTAssertEqualObjects([dl rep:@"(let (a 11 b (fn (n) (+ n 1)) c (atom 0)) (reset! c (+ a 10)) (b @c))"], @"22");
+    XCTAssertEqualObjects([dl rep:@"(let ((x 1) (y 2)) (reset! a x) (reset! a (+ x y)))"], @"3");
+    XCTAssertEqualObjects([dl rep:@"(let ((a 11) (b (fn (n) (+ n 1))) (c (atom 0))) (reset! c (+ a 10)) (b @c))"], @"22");
     XCTAssertEqualObjects([dl rep:@"(try (reset! a 10) (reset! a (+ @a 2)))"], @"12");
     XCTAssertEqualObjects([dl rep:@"(try (throw \"foo\") (catch e (reset! a 1) (reset! a (+ @a 10))))"], @"11");
 }
@@ -842,7 +842,7 @@
     XCTAssertEqualObjects([dl rep:@"(apply (fn (a & more) (list? more)) [1])"], @"true");
     XCTAssertEqualObjects([dl rep:@"(apply (fn (& form) (count form)) [1 2])"], @"2");
     // test bindings
-    [dl rep:@"(def a (fn (x) (let (y x z (* x x)) (+ y z))))"];
+    [dl rep:@"(def a (fn (x) (let ((y x) (z (* x x))) (+ y z))))"];
     XCTAssertEqualObjects([dl rep:@"(a 10)"], @"110");
     // test anonymous function print
     XCTAssertEqualObjects([dl rep:@"(fn (& more) 1)"], @"#<fn/n>");
@@ -858,9 +858,9 @@
     XCTAssertEqualObjects([dl rep:@"(identity (fn (x y) 1))"], @"#<fn/2>");
     XCTAssertEqualObjects([dl rep:@"(fn? (identity (fn (x y) 1)))"], @"true");
     // multi-arity
-    XCTAssertEqualObjects([dl rep:@"((fn (x) (let (x (fn (a b) (+ a b))) (x 1))) (fn (y) y))"], @"1");
-    XCTAssertEqualObjects([dl rep:@"((fn (x) (let (x (fn (a b) (+ a b))) (x 1 2))) (fn (y) y))"], @"3");
-    XCTAssertEqualObjects([dl rep:@"((fn (x) (let (x (fn (a b) (+ a b))) (+ (x 1) (x 2 3)))) (fn (y) y))"], @"6");
+    XCTAssertEqualObjects([dl rep:@"((fn (x) (let ((x (fn (a b) (+ a b)))) (x 1))) (fn (y) y))"], @"1");
+    XCTAssertEqualObjects([dl rep:@"((fn (x) (let ((x (fn (a b) (+ a b)))) (x 1 2))) (fn (y) y))"], @"3");
+    XCTAssertEqualObjects([dl rep:@"((fn (x) (let ((x (fn (a b) (+ a b)))) (+ (x 1) (x 2 3)))) (fn (y) y))"], @"6");
 }
 
 - (void)testMultiArityFunctions {
@@ -1455,19 +1455,19 @@
     [dl rep:@"(defmacro two () 2)"];
     XCTAssertEqualObjects([dl rep:@"(two)"], @"2");
     [dl rep:@"(defmacro identity (x) x)"];
-    XCTAssertEqualObjects([dl rep:@"(let (a 123) (identity a))"], @"123");
+    XCTAssertEqualObjects([dl rep:@"(let ((a 123)) (identity a))"], @"123");
     [dl rep:@"(defmacro foo (& more) `(count (list ~@more)))"];
     XCTAssertEqualObjects([dl rep:@"(foo 1 2 3)"], @"3");
     // macro with hash-map
     [dl rep:@"(defmacro hm (k v) `(hash-map ~k ~v))"];
     XCTAssertEqualObjects([dl rep:@"(hm 1 '(3 4 5))"], @"{1 (3 4 5)}");
-    [dl rep:@"(defmacro hm1 (k v) `(let (x ~v) (hash-map ~k (first x))))"];
+    [dl rep:@"(defmacro hm1 (k v) `(let ((x ~v)) (hash-map ~k (first x))))"];
     XCTAssertEqualObjects([dl rep:@"(hm1 1 '(3 4 5))"], @"{1 3}");
-    [dl rep:@"(defmacro p (x) `(let (z ~x) (list z 4 5 6 7)))"];
+    [dl rep:@"(defmacro p (x) `(let ((z ~x)) (list z 4 5 6 7)))"];
     XCTAssertEqualObjects([dl rep:@"(p 3)"], @"(3 4 5 6 7)");
     XCTAssertEqualObjects([dl rep:@"(hm 2 (p 3))"], @"{2 (3 4 5 6 7)}");
     XCTAssertEqualObjects([dl rep:@"(hm1 2 (p 3))"], @"{2 3}");
-    [dl rep:@"(defmacro p (x) `(let (z (atom 3)) (list z 4 5 6 7)))"];
+    [dl rep:@"(defmacro p (x) `(let ((z (atom 3))) (list z 4 5 6 7)))"];
     XCTAssertEqualObjects([dl rep:@"(hm :b @(first(p 3)))"], @"{:b 3}");
     XCTAssertEqualObjects([dl rep:@"(hm1 :a (p 5))"], @"{:a (atom 3)}");
     // test macro definition print
@@ -1478,15 +1478,15 @@
     XCTAssertEqualObjects([dl rep:@"(defmacro apply1 (x) `(apply inc/1 ~x))"], @"user:apply1/1");
     XCTAssertEqualObjects([dl rep:@"(apply1 [3])"], @"4");
     // vector binding in let
-    XCTAssertEqualObjects([dl rep:@"(defmacro foo1 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(first xs) 10)))"], @"user:foo1/0");
+    XCTAssertEqualObjects([dl rep:@"(defmacro foo1 () `(let ((xs (vector (atom (fn (n) (+ n 1)))) (atom (fn (n) (+ n 2))))) (@(first xs) 10)))"], @"user:foo1/0");
     XCTAssertEqualObjects([dl rep:@"(foo1)"], @"11");
-    XCTAssertEqualObjects([dl rep:@"(defmacro foo2 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(nth 1 xs) 10)))"], @"user:foo2/0");
+    XCTAssertEqualObjects([dl rep:@"(defmacro foo2 () `(let ((xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))))) (@(nth 1 xs) 10)))"], @"user:foo2/0");
     XCTAssertEqualObjects([dl rep:@"(foo2)"], @"12");
 }
 
 - (void)testMacroGensym {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
-    XCTAssertEqualObjects([dl rep:@"(defmacro double (n) (let (x (gensym)) `(let (~x ~n) (+ ~x ~n))))"], @"user:double/1");
+    XCTAssertEqualObjects([dl rep:@"(defmacro double (n) (let ((x (gensym))) `(let ((~x ~n)) (+ ~x ~n))))"], @"user:double/1");
     XCTAssertEqualObjects([dl rep:@"(double 1)"], @"2");
     XCTAssertEqualObjects([dl rep:@"(double -1)"], @"-2");
     XCTAssertEqualObjects([dl rep:@"(double 0)"], @"0");
@@ -1505,15 +1505,15 @@
     XCTAssertEqualObjects([dl rep:@"(cond false 7 false 8 false 9)"], @"nil");
     XCTAssertEqualObjects([dl rep:@"(= (gensym) (gensym))"], @"false");
     XCTAssertEqualObjects([dl rep:@"(let [or_FIXME 23] (or false (+ or_FIXME 100)))"], @"123");
-    [dl rep:@"(defmacro pow2 (a) (let (x 2) `(* ~a ~x)))"];
+    [dl rep:@"(defmacro pow2 (a) (let ((x 2)) `(* ~a ~x)))"];
     [dl rep:@"(defun inc2 (x) (pow2 x))"];
     XCTAssertEqualObjects([dl rep:@"(inc2 5)"], @"10");
-    [dl rep:@"(defmacro p1 (a) (let (x 10) `(* ~a ~x)))"];
-    [dl rep:@"(defmacro p2 (a) (let (x 2) `(p1 (* ~a ~x))))"];
+    [dl rep:@"(defmacro p1 (a) (let ((x 10)) `(* ~a ~x)))"];
+    [dl rep:@"(defmacro p2 (a) (let ((x 2)) `(p1 (* ~a ~x))))"];
     XCTAssertEqualObjects([dl rep:@"(def n (fn (x) (p2 x)))"], @"user:n/1");
     XCTAssertEqualObjects([dl rep:@"(n 4)"], @"80");
     XCTAssertEqualObjects([dl rep:@"(n 10)"], @"200");
-    [dl rep:@"(defmacro p3 (a) (let (x 5) `(p2 (* ~a ~x))))"];
+    [dl rep:@"(defmacro p3 (a) (let ((x 5)) `(p2 (* ~a ~x))))"];
     [dl rep:@"(def n (fn (x) (p3 x)))"];
     XCTAssertEqualObjects([dl rep:@"(n 4)"], @"400");
     XCTAssertEqualObjects([dl rep:@"(n 5)"], @"500");
@@ -1522,11 +1522,11 @@
 
 - (void)testVectorBasedMacros {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
-    XCTAssertEqualObjects([dl rep:@"(defmacro foo1 () `(let (xs [(atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))]) (@(first xs) 10)))"], @"user:foo1/0");
-    XCTAssertEqualObjects([dl rep:@"(defmacro foo1 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(first xs) 10)))"], @"user:foo1/0");
+    XCTAssertEqualObjects([dl rep:@"(defmacro foo1 () `(let ((xs [(atom (fn (n) (+ n 1)))) (atom (fn (n) (+ n 2)))]) (@(first xs) 10)))"], @"user:foo1/0");
+    XCTAssertEqualObjects([dl rep:@"(defmacro foo1 () `(let ((xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))))) (@(first xs) 10)))"], @"user:foo1/0");
     XCTAssertEqualObjects([dl rep:@"(foo1)"], @"11");
-    XCTAssertEqualObjects([dl rep:@"(defmacro foo2 () `(let (xs [(atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))]) (@(nth 1 xs) 10)))"], @"user:foo2/0");
-    XCTAssertEqualObjects([dl rep:@"(defmacro foo2 () `(let (xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2))))) (@(nth 1 xs) 10)))"], @"user:foo2/0");
+    XCTAssertEqualObjects([dl rep:@"(defmacro foo2 () `(let ((xs [(atom (fn (n) (+ n 1)))) (atom (fn (n) (+ n 2)))]) (@(nth 1 xs) 10)))"], @"user:foo2/0");
+    XCTAssertEqualObjects([dl rep:@"(defmacro foo2 () `(let ((xs (vector (atom (fn (n) (+ n 1))) (atom (fn (n) (+ n 2)))))) (@(nth 1 xs) 10)))"], @"user:foo2/0");
     XCTAssertEqualObjects([dl rep:@"(foo2)"], @"12");
 }
 
@@ -1723,7 +1723,7 @@
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
     // testing eval does not use local environment
     XCTAssertEqualObjects([dl rep:@"(def a 1)"], @"1");
-    XCTAssertEqualObjects([dl rep:@"(let (a 2) (eval (read-string \"a\")))"], @"1");
+    XCTAssertEqualObjects([dl rep:@"(let ((a 2)) (eval (read-string \"a\")))"], @"1");
 }
 
 - (void)testPredicate {
@@ -1945,7 +1945,7 @@
     XCTAssertEqualObjects([dl rep:@"(def a 4)"], @"4");
     XCTAssertEqualObjects([dl rep:@"(def c 1)"], @"1");
     XCTAssertEqualObjects([dl rep:@"(def d (atom 3))"], @"(atom 3)");
-    [dl rep:@"(def f1 (fn (a b) (do (+ a b c (deref d)) (let (x 6 z (+ a c) f (fn (x) (* x x))) (* x z)))))"];
+    [dl rep:@"(def f1 (fn (a b) (do (+ a b c (deref d)) (let ((x 6) (z (+ a c)) (f (fn (x) (* x x)))) (* x z)))))"];
     XCTAssertEqualObjects([dl rep:@"(f1 4 6)"], @"30");
 }
 
@@ -2362,9 +2362,9 @@
     XCTAssertEqualObjects([dl rep:@"(-> [1 2 3] (count))"], @"3");
     XCTAssertEqualObjects([dl rep:@"(-> \"abc\" (concat \"xyz\"))"], @"\"abcxyz\"");
     XCTAssertEqualObjects([dl rep:@"(-> [1 4] (concat [2 3]))"], @"[1 4 2 3]");
-    // thread last <-
-    XCTAssertEqualObjects([dl rep:@"(<- \"abc\" (concat \"xyz\"))"], @"\"xyzabc\"");
-    XCTAssertEqualObjects([dl rep:@"(<- [1 4] (concat [2 3]))"], @"[2 3 1 4]");
+    // thread last ->>
+    XCTAssertEqualObjects([dl rep:@"(->> \"abc\" (concat \"xyz\"))"], @"\"xyzabc\"");
+    XCTAssertEqualObjects([dl rep:@"(->> [1 4] (concat [2 3]))"], @"[2 3 1 4]");
 }
 
 - (void)testCoreLibFunctions {
