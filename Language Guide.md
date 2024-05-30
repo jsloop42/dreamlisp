@@ -1,6 +1,6 @@
 # DreamLisp Programming Language Guide
 
-v3.2
+v1.0
 
 ### Data Types
 
@@ -152,6 +152,21 @@ Note: When using the REPL, on a line break the expression will be evaluated. We 
 `let` is used for local binding within an expression. The variables defined within `let` is only visible within its lexical scope and also available within a closure.
 
 ```
+(let ((name-xs ["Olive" "Eva" "Jane"])
+      (greet (fn (n)
+               (doall (map (fn (x) (println "Hello" x)) n)))))
+  (greet name-xs)
+  nil)
+    
+; Hello Olive
+; Hello Eva
+; Hello Jane
+; nil
+```
+
+`let` binding can take vector form like in Clojure. The same example with vector bindings can written like below. The traditional style of binding with parenthesis is preferred.
+
+```
 (let [name-xs ["Olive" "Eva" "Jane"] 
       greet (fn (n)
               (doall (map (fn (x) (println "Hello" x)) n)))]
@@ -163,7 +178,7 @@ Note: When using the REPL, on a line break the expression will be evaluated. We 
 ; Hello Jane
 ; nil
 ```
-Here we define variables `name-xs` which is a vector of names and an anonymous function `greet` that takes a list of names and print a message to the console. 
+Here we define variables `name-xs` which is a list of names and an anonymous function `greet` that takes a list of names and prints a message to the console. 
 
 ### Macros
 
@@ -203,7 +218,7 @@ Say, this is the `utils.dlisp` file, which contains `collatz` function. The file
 (defmodule utils-test 
   (export all)
   (import (from test (deftest n) (testing n) (is 2) (is 3) (run 1))))
-``` 
+```
 
 Here we are importing `deftest` which takes a variable number of arguments which is represented by `n`. `is` takes only two arguments, so its arity is `2`.
 
@@ -1256,7 +1271,7 @@ Takes an expression in string form, tokenizes it returning the expression.
 Read the content of a file as a string. This should be used for smaller files only.
 
 ```
-➜ cat inp.dlisp
+% cat inp.dlisp
 (println "Greetings!")
 
 
@@ -1348,10 +1363,10 @@ Changes the current module to the given module.
 Removes a loaded module from the module table.
 
 ```
-λ user> (defmodule fairy (export all))
-fairy
+λ user> (defmodule tree (export all))
+tree
 
-λ fairy> (remove-module "fairy")
+λ tree> (remove-module "tree")
 nil
 
 λ user>
@@ -1481,6 +1496,12 @@ user:prn-args/2
 "two"
 ```
 
+Functions can have LFE, the traditional Lisp style parenthesis for arguments or Clojure style which uses vectors. The traditional style is preferred.
+
+```
+λ user> (defun greet [name] (println "Hello" name))
+```
+
 #### not/1
 
 Negates the given expression that evaluates to a boolean value.
@@ -1498,13 +1519,13 @@ true
 Evaluates the expression and if `true`, evaluates the corresponding form, else continues with the next expression.
 
 ```
-λ user> (let (a 2 b 4) (cond (= a b) 0 (> a b) 1 (< a b) -1))
+λ user> (let ((a 2) (b 4)) (cond (= a b) 0 (> a b) 1 (< a b) -1))
 -1
 
-λ user> (let (a 2 b 2) (cond (= a b) 0 (> a b) 1 (< a b) -1))
+λ user> (let ((a 2) (b 2)) (cond (= a b) 0 (> a b) 1 (< a b) -1))
 0
 
-λ user> (let (a 4 b 2) (cond (= a b) 0 (> a b) 1 (< a b) -1))
+λ user> (let ((a 4) (b 2)) (cond (= a b) 0 (> a b) 1 (< a b) -1))
 1
 ```
 
@@ -1595,12 +1616,12 @@ Thread first macro, which takes an expression, evaluates it and inserts the resu
 3
 ```
 
-#### <-/n
+#### ->>/n
 
 Thread last macro, which takes an expression, evaluates it and inserts the result as the last element of the second expression and so on.
 
 ```
-λ user> (<- [1 4] (concat [2 3]))
+λ user> (->> [1 4] (concat [2 3]))
 [2 3 1 4]
 ```
 

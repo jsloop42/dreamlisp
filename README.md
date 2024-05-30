@@ -8,11 +8,9 @@ advantage of the underlying Objective-C runtime and Foundation library.
 
 #### Version
 
-`dlisp v0.1.0`
-
 ```
-DreamLisp v3.4 (12) [Objective-C 2.0]
-Shell v1.1 (4)
+DreamLisp v1.0 (13) [Objective-C 2.0]
+Shell v1.2 (5)
 ```
 ## Language Guide
 
