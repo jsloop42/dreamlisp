@@ -111,7 +111,7 @@ static NSString *_historyFile = @"/dlisp-history";
             2.3  Else, pop all till ( is encountered
          3. Found: "
             3.1 If not in string mode, enable string mode flag
-            3.2 If in string mode, pop " which will be on top and exit string mode
+            3.2 If in string mode and not escaped, pop " which will be on top and exit string mode
          */
         switch (charCode) {
             case 40:  /* ( */

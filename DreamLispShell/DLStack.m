@@ -23,7 +23,6 @@
 }
 
 - (void)push:(NSString *)elem {
-    if (elem)
     [self.arr addObject:elem];
 }
 

@@ -3,7 +3,7 @@
 //  DreamLispShell
 //
 //  Created by Jaseem V V on 18.05.2024.
-//  Copyright © 2024 DreamLisp. All rights reserved.
+//  Copyright © 2024 Jaseem V V. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
