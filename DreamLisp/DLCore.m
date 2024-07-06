@@ -207,7 +207,14 @@ double dmod(double a, double n) {
             NSUInteger len = [args count];
             if (len >= 2) {
                 for (i = 0; i < len - 1; i++) {
-                    ret = (BOOL)objc_msgSend([(DLNumber *)args[i] value], sel, [(DLNumber *)args[i + 1] value]);
+                    NSMethodSignature *methodSig = [[NSDecimalNumber class] instanceMethodSignatureForSelector:sel];
+                    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:methodSig];
+                    [invocation setSelector:sel];
+                    [invocation setTarget:[(DLNumber *)args[i] value]];
+                    NSNumber *num = [(DLNumber *)args[i + 1] value];
+                    [invocation setArgument:&num atIndex:2];
+                    [invocation invoke];
+                    [invocation getReturnValue:&ret];
                     if (!ret) { break; }
                 }
             } else if (len == 0) {
