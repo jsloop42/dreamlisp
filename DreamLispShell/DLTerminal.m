@@ -93,7 +93,7 @@ static NSString *_historyFile = @"/dlisp-history";
 }
 
 - (BOOL)shouldEvaluate:(NSString *)line {
-    BOOL shouldEval = YES;
+    BOOL shouldEval = [self.stack isEmpty];
     NSUInteger i = 0, len = [line count];
     for (i = 0; i < len; i++) {
         unichar charCode = [line characterAtIndex:i];
