@@ -399,7 +399,7 @@ Takes a list of sequences and combines them into one sequence.
 Takes a vector and n elements, appends the elements to the vector and return resulting new vector. If a list is given the elements are appended to the head of the list giving a reversed list.
 
 ```
-λ user> (conj '(1) 2 3 4) ; (4 3 2 1)
+λ user> (conj '(1) 2 3 4)
 (4 3 2 1)
 
 λ user> (conj [1 2 3] 4 5 6)
