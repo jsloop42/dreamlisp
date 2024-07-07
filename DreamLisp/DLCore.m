@@ -491,7 +491,6 @@ double dmod(double a, double n) {
                     } else if ([DLString isString:elem]) {
                         [str append:elem];
                     } else {
-    //                    [str appendString:[elem description]];
                         [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, @"concat/n", @"'sequence'", i + 1, [elem dataTypeName]] throw];
                     }
                 }
@@ -655,22 +654,36 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"rest" moduleName:[DLConst coreModuleName]]];
 
     #pragma mark map
+    /**
+     Takes a function and variable number of lists with the same length with the function applied with arguments interleaved from the lists
+     at the same position.
+     
+     (map (fn (x) (+ x 1)) [1 2 3])  ; [2 3 4]
+     (map (fn (x y z) [x y z]) [1 2] [3 4] [5 6])  ; [[1 3 5] [2 4 6]]
+     */
     id<DLDataProtocol>(^map)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
-            [DLTypeUtils checkArity:xs arity:2];
             DLFunction *fn = [DLFunction dataToFunction:[xs first] position:1];
-            id<DLDataProtocol> second = [xs second];
+            NSMutableArray *rest = [xs rest];
             NSMutableArray *acc = [[NSMutableArray alloc] init];
-            NSMutableArray *arr = [(DLList *)second value];
             NSMutableArray *arg = [[NSMutableArray alloc] init];
-            id elem = nil;
-            for (elem in arr) {
+            NSUInteger i = 0, j = 0;
+            NSUInteger argsLen = [rest count];
+            NSUInteger arrLen = 0;
+            BOOL isVector = NO;
+            if (argsLen > 0) {
+                arrLen = [rest[0] count];
+                isVector = [DLVector isVector:rest[0]];
+            }
+            for (i = 0; i < arrLen; i++) {
                 [arg removeAllObjects];
-                [arg addObject:elem];
+                for (j = 0; j < argsLen; j++) {
+                    NSMutableArray *col = [(DLList *)rest[j] value];
+                    [arg addObject:col[i]];
+                }
                 [acc addObject:[fn apply:arg]];
             }
-            return [DLVector isVector:second] ? [[DLVector alloc] initWithArray:acc]
-                                              : [[DLList alloc] initWithArray:acc];
+            return isVector ? [[DLVector alloc] initWithArray:acc] : [[DLList alloc] initWithArray:acc];
         }
     };
     
@@ -935,58 +948,40 @@ double dmod(double a, double n) {
     /**
      Takes a filter predicate function and a collection, applies the function to each element in the collection and returns the resulting filtered collection.
      */
-    void (^filter)(DLLazySequence *seq, NSMutableArray *xs) = ^void(DLLazySequence *seq, NSMutableArray *xs) {
-        @autoreleasepool {
-            [DLTypeUtils checkArity:xs arity:2];
-            DLFunction *fn = [DLFunction dataToFunction:[xs first] position:1 fnName:@"filter/2"];
-            NSMutableArray *rest = [xs rest];
-            id<DLDataProtocol> elem = [rest first];
-            DLBool *res = [fn apply:rest];
+    id<DLDataProtocol>(^filter)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        [DLTypeUtils checkArity:xs arity:2];
+        DLFunction *fn = [DLFunction dataToFunction:[xs first] position:1];
+        id<DLDataProtocol> second = [xs second];
+        NSMutableArray *acc = [[NSMutableArray alloc] init];
+        NSMutableArray *arg = [[NSMutableArray alloc] init];
+        NSMutableArray *arr = [[NSMutableArray alloc] init];
+        id elem;
+        DLBool *res;
+        if ([DLList isKindOfList:second]) {
+            arr = [(DLList *)second value];
+        } else if ([DLHashMap isHashMap:second]) {
+            DLHashMap *hm = (DLHashMap *)second;
+            NSArray *allKeys = [hm allKeys];
+            id<DLDataProtocol> key = nil;
+            for (key in allKeys) {
+                NSMutableArray *kv = [[NSMutableArray alloc] init];
+                [kv addObject:key];
+                [kv addObject:[hm objectForKey:key]];
+                [arr addObject:[[DLVector alloc] initWithArray:kv]];
+            }
+        }
+        for (elem in arr) {
+            [arg removeAllObjects];
+            [arg addObject:elem];
+            res = [fn apply:arg];
             if ([res value]) {
-                if ([seq sequenceType] == SequenceTypeHashMap) {
-                    DLHashMap *acc = [[seq acc] first];
-                    if (acc) {
-                        DLHashMap *hm = (DLHashMap *)elem;
-                        NSArray *allKeys = [hm allKeys];
-                        id<DLDataProtocol> key = nil;
-                        for (key in allKeys) {
-                            [acc setObject:[hm objectForKey:key] forKey:key];
-                        }
-                    } else {
-                        [[seq acc] addObject:elem];
-                    }
-                } else {
-                    [[seq acc] addObject:elem];
-                }
+                [acc addObject:elem];
             }
         }
+        return [DLList isList:second] ? [[DLList alloc] initWithArray:acc]
+                                      : [[DLVector alloc] initWithArray:acc];
     };
-
-    #pragma mark lazy filter
-    id<DLDataProtocol>(^lazyFilter)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            [DLTypeUtils checkArity:xs arity:2];
-            DLFunction *fn = [DLFunction dataToFunction:[xs first] position:1 fnName:@"filter/2"];
-            id<DLDataProtocol> second = [xs second];
-            DLLazySequence *seq = [DLLazySequence new];
-            DLLazyFunction *lfn = [[DLLazyFunction alloc] initWithFn:filter name:@""];
-            [seq addLazyFunction:lfn fn:fn];
-            if ([DLList isList:second]) {
-                [seq setSequenceType:SequenceTypeList];
-                [seq setValue:[(DLList *)second value]];
-            } else if ([DLVector isVector:second]) {
-                [seq setSequenceType:SequenceTypeVector];
-                [seq setValue:[(DLVector *)second value]];
-            } else if ([DLHashMap isHashMap:second]) {
-                [seq setSequenceType:SequenceTypeHashMap];
-                [seq setValue:[DLUtils hashMapToHashMapArray:second]];
-            } else {
-                [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, @"filter/2", @"'collection'", 2, [first dataTypeName]] throw];
-            }
-            return seq;
-        }
-    };
-    fn = [[DLFunction alloc] initWithFn:lazyFilter argCount:2 name:@"filter/2"];
+    fn = [[DLFunction alloc] initWithFn:filter argCount:2 name:@"filter/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"filter" moduleName:[DLConst coreModuleName]]];
 
     #pragma mark partition

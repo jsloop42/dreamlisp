@@ -177,7 +177,15 @@ static BOOL _isCacheEnabled;
 + (DLHashMap *)addObjectsToHashMap:(DLHashMap *)hashMap fromList:(DLList *)list {
     @autoreleasepool {
         DLHashMap *hm = [hashMap copy];
-        [hm fromArray:[list value]];
+        id<DLDataProtocol> elem;
+        NSMutableArray *arr = [list value];
+        for (elem in arr) {
+            if (![DLList isKindOfList:elem]) {
+                [[[DLError alloc] initWithFormat:DLDataTypeMismatch, @"'sequence'", [elem dataTypeName]] throw];
+                break;
+            }
+            [hm fromArray:[elem value]];
+        }
         return hm;
     }
 }
