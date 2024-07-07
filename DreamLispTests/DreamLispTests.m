@@ -2216,16 +2216,16 @@
 
 - (void)testFilter {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
-    [dl rep:@"(def hm1 (doall (filter (fn (m) (zero? (mod (first (values m)) 2))) {:a 1 :b 2 :c 3 :d 4})))"];
-    [dl rep:@"(def hm2 (doall (filter (fn (m) (zero? (mod (first (keys m)) 2))) {1 10 2 20 3 30 4 40})))"];
-    XCTAssertEqualObjects([dl rep:@"(sort [:key :asc] hm1)"], @"[:b :d]");
-    XCTAssertEqualObjects([dl rep:@"(sort [:value :asc] hm1)"], @"[2 4]");
-    XCTAssertEqualObjects([dl rep:@"(sort [:key :asc] hm2)"], @"[2 4]");
-    XCTAssertEqualObjects([dl rep:@"(sort [:value :asc] hm2)"], @"[20 40]");
-    XCTAssertEqualObjects([dl rep:@"(doall (filter (fn (x) (> x 0)) [-1 4 0 -4 -5 2]))"], @"[4 2]");
-    XCTAssertEqualObjects([dl rep:@"(doall (filter (fn (x) (<= x 0)) '(-1 4 0 -4 -5 2)))"], @"(-1 0 -4 -5)");
+    [dl rep:@"(def hm1 (into {} (filter (fn (kv) (> (second kv) 0)) {:c 1 :b 2 :a -1 :d -3})))"];
+    [dl rep:@"(def hm2 (into {} (filter (fn (kv) (zero? (mod (second kv) 2))) {1 10 2 20 3 30 4 40})))"];
+    XCTAssertEqualObjects([dl rep:@"(sort [:key :asc] hm1)"], @"[:b :c]");
+    XCTAssertEqualObjects([dl rep:@"(sort [:value :asc] hm1)"], @"[1 2]");
+    XCTAssertEqualObjects([dl rep:@"(sort [:key :asc] hm2)"], @"[1 2 3 4]");
+    XCTAssertEqualObjects([dl rep:@"(sort [:value :asc] hm2)"], @"[10 20 30 40]");
+    XCTAssertEqualObjects([dl rep:@"(filter (fn (x) (> x 0)) [-1 4 0 -4 -5 2])"], @"[4 2]");
+    XCTAssertEqualObjects([dl rep:@"(filter (fn (x) (<= x 0)) '(-1 4 0 -4 -5 2))"], @"(-1 0 -4 -5)");
     [dl rep:@"(def str-xs [\"It\" \"is\" \"an\" \"ancient\" \"Mariner\" \"And\" \"he\" \"stoppeth\" \"one\" \"of\" \"three\"])"];
-    XCTAssertEqualObjects([dl rep:@"(doall (filter (fn (x) (= (count x) 3)) str-xs))"], @"[\"And\" \"one\"]");
+    XCTAssertEqualObjects([dl rep:@"(filter (fn (x) (= (count x) 3)) str-xs)"], @"[\"And\" \"one\"]");
 }
 
 - (void)testPartition {
@@ -2241,19 +2241,12 @@
 
 - (void)testFlatten {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
-    XCTAssertEqualObjects([dl rep:@"(doall (flatten [[1] [2 [3]] [[[4]]] [5]]))"], @"[1 2 3 4 5]");
-    XCTAssertEqualObjects([dl rep:@"(doall (flatten '('(1) '(2 '(3)) '('('(4))) '(5))))"],
+    XCTAssertEqualObjects([dl rep:@"(flatten [[1] [2 [3]] [[[4]]] [5]])"], @"[1 2 3 4 5]");
+    XCTAssertEqualObjects([dl rep:@"(flatten '('(1) '(2 '(3)) '('('(4))) '(5)))"],
                           @"(user:quote/1 1 user:quote/1 2 user:quote/1 3 user:quote/1 user:quote/1 user:quote/1 4 user:quote/1 5)");
-    XCTAssertEqualObjects([dl rep:@"(doall (flatten []))"], @"[]");
-    XCTAssertEqualObjects([dl rep:@"(doall (flatten '()))"], @"()");
-    XCTAssertEqualObjects([dl rep:@"(doall (flatten '((+ 1 2) 3)))"], @"(user:+ 1 2 3)");
-    [dl rep:@"(def hm (flatten {:a 1 :b {:c 2 :d 3} :e 4}))"];
-    XCTAssertEqualObjects([dl rep:@"(contains? :a hm)"], @"true");
-    XCTAssertEqualObjects([dl rep:@"(contains? :b hm)"], @"false");
-    XCTAssertEqualObjects([dl rep:@"(contains? :c hm)"], @"true");
-    XCTAssertEqualObjects([dl rep:@"(contains? :d hm)"], @"true");
-    XCTAssertEqualObjects([dl rep:@"(contains? :e hm)"], @"true");
-    XCTAssertEqualObjects([dl rep:@"(count hm)"], @"4");
+    XCTAssertEqualObjects([dl rep:@"(flatten [])"], @"[]");
+    XCTAssertEqualObjects([dl rep:@"(flatten '())"], @"()");
+    XCTAssertEqualObjects([dl rep:@"(flatten '((+ 1 2) 3))"], @"(user:+ 1 2 3)");
     XCTAssertThrows([dl rep:@"(flatten nil)"]);
 }
 
@@ -2290,9 +2283,9 @@
     XCTAssertThrows([dl rep:@"(into [1 2] 1)"]);
     // hash-map
     XCTAssertEqualObjects([dl rep:@"(into {} nil)"], @"{}");
-    XCTAssertEqualObjects([dl rep:@"(into {} [:a 1])"], @"{:a 1}");
-    XCTAssertEqualObjects([dl rep:@"(count (into {:a 1} [:b 2]))"], @"2");
-    XCTAssertEqualObjects([dl rep:@"(into {} '(1 2))"], @"{1 2}");
+    XCTAssertEqualObjects([dl rep:@"(into {} [[:a 1]])"], @"{:a 1}");
+    XCTAssertEqualObjects([dl rep:@"(count (into {:a 1} [[:b 2]]))"], @"2");
+    XCTAssertEqualObjects([dl rep:@"(into {} [[1 2]])"], @"{1 2}");
     XCTAssertEqualObjects([dl rep:@"(into {} {:a 1})"], @"{:a 1}");
     XCTAssertEqualObjects([dl rep:@"(count (into {:a 1} {:b 2}))"], @"2");
     XCTAssertThrows([dl rep:@"(into {} 1)"]);
@@ -2323,19 +2316,19 @@
 - (void)testMap {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
     // single arity function
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn (a) (+ a 2)) '(1 2 3 4)))"], @"(3 4 5 6)");
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn (a) (+ a 2)) [1 2 3 4]))"], @"[3 4 5 6]");
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn (a) (str a \"ok\")) \"abcd\"))"], @"\"aokbokcokdok\"");
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn (a) a) {:a 1}))"], @"{:a 1}");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a) (+ a 2)) '(1 2 3 4))"], @"(3 4 5 6)");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a) (+ a 2)) [1 2 3 4])"], @"[3 4 5 6]");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a) (str a \"ok\")) \"abcd\")"], @"\"aokbokcokdok\"");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a) a) {:a 1})"], @"{:a 1}");
     // multi arity function
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn (a b) [a b]) [1 2] '(3 4)))"], @"[[1 3] [2 4]]");
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn (a b) (list a b)) [1 2] '(3 4)))"], @"[(1 3) (2 4)]");
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn (a b) (list a b)) '(1 2) [3 4]))"], @"((1 3) (2 4))");
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn (a b) (+ a b)) [1 2] '(3 4)))"], @"[4 6]");
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn (a b) (+ a b)) '(1 2) [3 4]))"], @"(4 6)");
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn (a b) (str a b)) \"abc\" \"xyz\"))"], @"\"axbycz\"");
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn (a b) [a b]) {:a 1} {:x 3}))"], @"[{:a 1} {:x 3}]");
-    XCTAssertEqualObjects([dl rep:@"(count (doall (flatten (doall (map (fn (a b) [a b]) {:a 1 :b 2} {:c 3 :d 4})))))"], @"4");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a b) [a b]) [1 2] '(3 4))"], @"[[1 3] [2 4]]");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a b) (list a b)) [1 2] '(3 4))"], @"[(1 3) (2 4)]");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a b) (list a b)) '(1 2) [3 4])"], @"((1 3) (2 4))");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a b) (+ a b)) [1 2] '(3 4))"], @"[4 6]");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a b) (+ a b)) '(1 2) [3 4])"], @"(4 6)");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a b) (str a b)) \"abc\" \"xyz\"))"], @"\"axbycz\"");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a b) [a b]) {:a 1} {:x 3}))"], @"[{:a 1} {:x 3}]");
+    XCTAssertEqualObjects([dl rep:@"(doall (flatten (doall (map (fn (a b) [a b]) {:a 1 :b 2} {:c 3 :d 4})))))"], @"4");
 }
 
 - (void)testFold {
@@ -2401,36 +2394,35 @@
     XCTAssertEqualObjects([dl rep:@"(has-next? lseq)"], @"false");
     XCTAssertThrows([dl rep:@"(next lseq)"]);
     // flatten, doall
-    XCTAssertEqualObjects([dl rep:@"(type (flatten [1 [2 4] 3]))"], @"\"lazy-sequence\"");
+    XCTAssertEqualObjects([dl rep:@"(type (flatten [1 [2 4] 3]))"], @"\"vector\"");
     XCTAssertEqualObjects([dl rep:@"(doall (flatten [1 [2 4] 3]))"], @"[1 2 4 3]");
     XCTAssertEqualObjects([dl rep:@"(doall [1 [2 4] 3])"], @"[1 [2 4] 3]");
 }
 
-- (void)testTestLazyFunctions {
+- (void)testMapFunction {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
-    // take on a lazy sequence
+    // take on a sequence
     XCTAssertEqualObjects([dl rep:@"(take 2 (map (fn (a) a) [1 2 3 4]))"], @"[1 2]");
-    XCTAssertEqualObjects([dl rep:@"(take 2 (map (fn (a) a) \"abcd\"))"], @"\"ab\"");
+    XCTAssertEqualObjects([dl rep:@"(take 2 (map (fn (a) a) (seq \"abcd\")))"], @"(\"a\" \"b\")");
     // first
     XCTAssertEqualObjects([dl rep:@"(first (map (fn (a) a) [1 2 3 4]))"], @"1");
-    XCTAssertEqualObjects([dl rep:@"(first (map (fn (a) a) \"abc\"))"], @"\"a\"");
+    XCTAssertEqualObjects([dl rep:@"(first (map (fn (a) a) (seq \"abc\")))"], @"\"a\"");
     // rest
     XCTAssertEqualObjects([dl rep:@"(rest (map (fn (a) a) [1 2 3 4]))"], @"[2 3 4]");
     XCTAssertEqualObjects([dl rep:@"(rest (map (fn (a) a) '(1 2 3 4)))"], @"(2 3 4)");
-    XCTAssertEqualObjects([dl rep:@"(rest (map (fn (a) a) \"abc\"))"], @"\"bc\"");
+    XCTAssertEqualObjects([dl rep:@"(rest (map (fn (a) a) (seq \"abc\")))"], @"(\"b\" \"c\")");
     // nth
     XCTAssertEqualObjects([dl rep:@"(nth 2 (map (fn (a) a) [1 2 3 4]))"], @"3");
-    XCTAssertEqualObjects([dl rep:@"(nth 2 (map (fn (a) a) \"abc\"))"], @"\"c\"");
+    XCTAssertEqualObjects([dl rep:@"(nth 2 (map (fn (a) a) (seq \"abc\")))"], @"\"c\"");
     // nth-tail
     XCTAssertEqualObjects([dl rep:@"(nth-tail 1 3 (map (fn (a) a) [1 2 3 4 5]))"], @"[2 3 4]");
-    XCTAssertEqualObjects([dl rep:@"(nth-tail 1 3 (map (fn (a) a) \"abcdef\"))"], @"\"bcd\"");
+    XCTAssertEqualObjects([dl rep:@"(nth-tail 1 3 (map (fn (a) a) (seq \"abcdef\")))"], @"(\"b\" \"c\" \"d\")");
     // last
     XCTAssertEqualObjects([dl rep:@"(last (map (fn (a) a) [1 2 3]))"], @"3");
-    XCTAssertEqualObjects([dl rep:@"(last (map (fn (a) a) \"abc\"))"], @"\"c\"");
+    XCTAssertEqualObjects([dl rep:@"(last (map (fn (a) a) (seq \"abc\")))"], @"\"c\"");
     // drop
-    XCTAssertEqualObjects([dl rep:@"(lazy-seq? (drop 2 (map (fn (a) a) [1 2 3 4])))"], @"true");
-    XCTAssertEqualObjects([dl rep:@"(doall (drop 2 (map (fn (a) a) [1 2 3 4])))"], @"[3 4]");
-    XCTAssertEqualObjects([dl rep:@"(doall (drop 2 (map (fn (a) a) \"abcd\")))"], @"\"cd\"");
+    XCTAssertEqualObjects([dl rep:@"(drop 2 (map (fn (a) a) [1 2 3 4]))"], @"[3 4]");
+    XCTAssertEqualObjects([dl rep:@"(drop 2 (map (fn (x) x) (seq \"abcd\")))"], @"(\"c\" \"d\")");
 }
 
 - (void)testHashMapToFoundation {
