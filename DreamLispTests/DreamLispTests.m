@@ -972,13 +972,10 @@
     XCTAssertEqualObjects([dl rep:@"(drop -1 \"abc\")"], @"\"\"");
     XCTAssertEqualObjects([dl rep:@"(type (drop 2 \"abc\"))"], @"\"string\"");
     // reverse
-    XCTAssertEqualObjects([dl rep:@"(lazy-seq? (reverse \"abc\"))"], @"true");
-    XCTAssertEqualObjects([dl rep:@"(doall (reverse \"abc\"))"], @"\"cba\"");
-    XCTAssertEqualObjects([dl rep:@"(doall (reverse \"a\"))"], @"\"a\"");
-    XCTAssertEqualObjects([dl rep:@"(doall (reverse \"\"))"], @"\"\"");
-    XCTAssertEqualObjects([dl rep:@"(doall (reverse \"1234\"))"], @"\"4321\"");
-    XCTAssertEqualObjects([dl rep:@"(doall (reverse \"[1 2 3 4]\"))"], @"\"]4 3 2 1[\"");
-    XCTAssertEqualObjects([dl rep:@"(type (doall (reverse \"abc\")))"], @"\"string\"");
+    XCTAssertEqualObjects([dl rep:@"(reverse (seq \"abc\"))"], @"\(\"c\" \"b\" \"a\")");
+    XCTAssertEqualObjects([dl rep:@"(reverse (seq \"a\"))"], @"(\"a\")");
+    XCTAssertEqualObjects([dl rep:@"(reverse [3 1 4 1 5 9])"], @"[9 5 1 4 1 3]");
+    XCTAssertEqualObjects([dl rep:@"(reverse (seq \"[1 2 3 4]\"))"], @"(\"]\" \"4\" \" \" \"3\" \" \" \"2\" \" \" \"1\" \"[\")");
     // nth-tail
     XCTAssertEqualObjects([dl rep:@"(nth-tail 0 0 \"abcd\")"], @"\"a\"");
     XCTAssertEqualObjects([dl rep:@"(nth-tail 0 2 \"abcd\")"], @"\"abc\"");
@@ -1287,9 +1284,9 @@
     XCTAssertEqualObjects([dl rep:@"(drop -1 '(1 2 3))"], @"(1 2)");
     XCTAssertEqualObjects([dl rep:@"(drop 0 '(1 2 3))"], @"(1 2 3)");
     // reverse
-    XCTAssertEqualObjects([dl rep:@"(lazy-seq? (reverse '()))"], @"true");
-    XCTAssertEqualObjects([dl rep:@"(doall (reverse '()))"], @"()");
-    XCTAssertEqualObjects([dl rep:@"(doall (reverse '(1 2 3)))"], @"(3 2 1)");
+    XCTAssertEqualObjects([dl rep:@"(reverse '())"], @"()");
+    XCTAssertEqualObjects([dl rep:@"(reverse '(1 2 3))"], @"(3 2 1)");
+    XCTAssertEqualObjects([dl rep:@"(reverse [1 2 3])"], @"[3 2 1]");
     XCTAssertThrows([dl rep:@"(doall (reverse {:a 1 :b 2}))"]);
     // nth-tail
     XCTAssertEqualObjects([dl rep:@"(nth-tail 0 0 '(0))"], @"(0)");

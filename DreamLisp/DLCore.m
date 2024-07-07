@@ -839,31 +839,24 @@ double dmod(double a, double n) {
 
     #pragma mark reverse
     /** Returns the reverse of the given sequence. */
-    void (^reverse)(DLLazySequence *seq, NSMutableArray *xs) = ^void(DLLazySequence *seq, NSMutableArray *xs) {
-        [[seq acc] addObject:[xs first]];
-    };
-
-    id<DLDataProtocol>(^lazyReverse)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+    id<DLDataProtocol>(^reverse)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
             [DLTypeUtils checkArity:xs arity:1];
             id<DLDataProtocol> first = [xs first];
-            DLLazySequence *seq = [DLLazySequence new];
-            [seq setIsReverseEnumerate:YES];
-            [seq addLazyFunction:[[DLLazyFunction alloc] initWithFn:reverse name:@""]];
             if ([DLList isKindOfList:first]) {
-                [seq setSequenceType:[DLVector isVector:first] ? SequenceTypeVector : SequenceTypeList];
-                [seq setValue:[(DLList *)first value]];
-            } else if ([DLString isString:first]) {
-                [seq setSequenceType:SequenceTypeString];
-                [seq setValue:[DLUtils toArray:first isNative:YES]];
-            } else {
-                [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, @"reverse/1", @"'sequence'", 1, [first dataTypeName]] throw];
+                NSMutableArray *res = [[first value] reverse];
+                if ([DLVector isVector:first]) {
+                    return [[DLVector alloc] initWithArray:res];
+                }
+                if ([DLList isList:first]) {
+                    return [[DLList alloc] initWithArray:res];
+                }
             }
-            [seq updateEnumerator];
-            return seq;
+            [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, @"reverse/1", @"'sequence'", 1, [first dataTypeName]] throw];
+            return [[DLNil alloc] init];
         }
     };
-    fn = [[DLFunction alloc] initWithFn:lazyReverse argCount:1 name:@"reverse/1"];
+    fn = [[DLFunction alloc] initWithFn:reverse argCount:1 name:@"reverse/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"reverse" moduleName:[DLConst coreModuleName]]];
 
     #pragma mark sort
