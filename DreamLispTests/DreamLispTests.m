@@ -2226,6 +2226,7 @@
     XCTAssertEqualObjects([dl rep:@"(filter (fn (x) (<= x 0)) '(-1 4 0 -4 -5 2))"], @"(-1 0 -4 -5)");
     [dl rep:@"(def str-xs [\"It\" \"is\" \"an\" \"ancient\" \"Mariner\" \"And\" \"he\" \"stoppeth\" \"one\" \"of\" \"three\"])"];
     XCTAssertEqualObjects([dl rep:@"(filter (fn (x) (= (count x) 3)) str-xs)"], @"[\"And\" \"one\"]");
+    XCTAssertEqualObjects([dl rep:@"(filter (fn (a) true) {:a 1 :b 2})"], @"[[:a 1] [:b 2]]");
 }
 
 - (void)testPartition {
@@ -2284,6 +2285,7 @@
     // hash-map
     XCTAssertEqualObjects([dl rep:@"(into {} nil)"], @"{}");
     XCTAssertEqualObjects([dl rep:@"(into {} [[:a 1]])"], @"{:a 1}");
+    XCTAssertEqualObjects([dl rep:@"(into {} [[:a 1] [:b 2]])"], @"{:a 1 :b 2}");
     XCTAssertEqualObjects([dl rep:@"(count (into {:a 1} [[:b 2]]))"], @"2");
     XCTAssertEqualObjects([dl rep:@"(into {} [[1 2]])"], @"{1 2}");
     XCTAssertEqualObjects([dl rep:@"(into {} {:a 1})"], @"{:a 1}");
@@ -2318,17 +2320,19 @@
     // single arity function
     XCTAssertEqualObjects([dl rep:@"(map (fn (a) (+ a 2)) '(1 2 3 4))"], @"(3 4 5 6)");
     XCTAssertEqualObjects([dl rep:@"(map (fn (a) (+ a 2)) [1 2 3 4])"], @"[3 4 5 6]");
-    XCTAssertEqualObjects([dl rep:@"(map (fn (a) (str a \"ok\")) \"abcd\")"], @"\"aokbokcokdok\"");
-    XCTAssertEqualObjects([dl rep:@"(map (fn (a) a) {:a 1})"], @"{:a 1}");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a) (str a \"ok\")) (seq \"abcd\"))"], @"(\"aok\" \"bok\" \"cok\" \"dok\")");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a) a) {:a 1})"], @"([:a 1])");
+    XCTAssertEqualObjects([dl rep:@"(map (fn [a] [a]) {:a 1 :b 2})"], @"([[:a 1]] [[:b 2]])");
     // multi arity function
     XCTAssertEqualObjects([dl rep:@"(map (fn (a b) [a b]) [1 2] '(3 4))"], @"[[1 3] [2 4]]");
     XCTAssertEqualObjects([dl rep:@"(map (fn (a b) (list a b)) [1 2] '(3 4))"], @"[(1 3) (2 4)]");
     XCTAssertEqualObjects([dl rep:@"(map (fn (a b) (list a b)) '(1 2) [3 4])"], @"((1 3) (2 4))");
     XCTAssertEqualObjects([dl rep:@"(map (fn (a b) (+ a b)) [1 2] '(3 4))"], @"[4 6]");
     XCTAssertEqualObjects([dl rep:@"(map (fn (a b) (+ a b)) '(1 2) [3 4])"], @"(4 6)");
-    XCTAssertEqualObjects([dl rep:@"(map (fn (a b) (str a b)) \"abc\" \"xyz\"))"], @"\"axbycz\"");
-    XCTAssertEqualObjects([dl rep:@"(map (fn (a b) [a b]) {:a 1} {:x 3}))"], @"[{:a 1} {:x 3}]");
-    XCTAssertEqualObjects([dl rep:@"(doall (flatten (doall (map (fn (a b) [a b]) {:a 1 :b 2} {:c 3 :d 4})))))"], @"4");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a b) (str a b)) (seq \"abc\") (seq \"xyz\"))"], @"(\"ax\" \"by\" \"cz\")");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a b) [a b]) {:a 1} {:x 3})"], @"([[:a 1] [:x 3]])");
+    XCTAssertEqualObjects([dl rep:@"(flatten (map (fn (a b) [a b]) {:a 1 :b 2} {:c 3 :d 4}))"], @"(:a 1 :c 3 :b 2 :d 4)");
+    XCTAssertEqualObjects([dl rep:@"(map (fn [a b] [a b]) {:a 1 :b 2} [3 4])"], @"([[:a 1] 3] [[:b 2] 4])");
 }
 
 - (void)testFold {

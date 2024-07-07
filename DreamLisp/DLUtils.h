@@ -37,7 +37,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)appendObjectsToHashMap:(DLHashMap *)hashMap fromHashMap:(DLHashMap *)aHashMap;
 + (DLList *)hashMapToList:(DLHashMap *)hashMap;
 + (DLVector *)hashMapToVector:(DLHashMap *)hashMap;
++ (NSMutableArray *)hashMapToArray:(DLHashMap *)hashMap;
 + (NSMutableArray *)hashMapToHashMapArray:(DLHashMap *)hashMap;
++ (NSMutableArray *)hashMapToVectorArray:(DLHashMap *)hashMap;
 + (DLHashMap *)convertKeywordKeysToString:(DLHashMap *)hashmap;
 + (DLHashMap *)errorToHashMap:(NSError *)error;
 + (NSMutableDictionary *)dictionaryFromHashMap:(DLHashMap *)hashMap;

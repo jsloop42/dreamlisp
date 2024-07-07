@@ -660,6 +660,7 @@ double dmod(double a, double n) {
      
      (map (fn (x) (+ x 1)) [1 2 3])  ; [2 3 4]
      (map (fn (x y z) [x y z]) [1 2] [3 4] [5 6])  ; [[1 3 5] [2 4 6]]
+     (map (fn (a b) [a b]) {:a 1 :b 2} [3 4])  ; ([[:a 1] 3] [[:b 2] 4])
      */
     id<DLDataProtocol>(^map)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
@@ -678,7 +679,12 @@ double dmod(double a, double n) {
             for (i = 0; i < arrLen; i++) {
                 [arg removeAllObjects];
                 for (j = 0; j < argsLen; j++) {
-                    NSMutableArray *col = [(DLList *)rest[j] value];
+                    NSMutableArray *col;
+                    if ([DLList isKindOfList:rest[j]]) {
+                        col = [(DLList *)rest[j] value];
+                    } else if ([DLHashMap isHashMap:rest[j]]) {
+                        col = [DLUtils hashMapToVectorArray:rest[j]];
+                    }
                     [arg addObject:col[i]];
                 }
                 [acc addObject:[fn apply:arg]];

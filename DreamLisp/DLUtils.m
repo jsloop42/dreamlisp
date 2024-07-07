@@ -229,7 +229,7 @@ static BOOL _isCacheEnabled;
     DLVector *xs = [DLVector new];
     id<DLDataProtocol> key = nil;
     for (key in allKeys) {
-        [xs addObject:[[DLVector alloc] initWithArray:[@[key, [hashMap objectForKey:key]] mutableCopy]]];
+        xs = (DLVector *)[xs addObject:[[DLVector alloc] initWithArray:[@[key, [hashMap objectForKey:key]] mutableCopy]]];
     }
     return xs;
 }
@@ -255,6 +255,16 @@ static BOOL _isCacheEnabled;
     NSMutableArray *ret = [NSMutableArray new];
     for (key in allKeys) {
         [ret addObject:[[DLHashMap alloc] initWithArray:[@[key, [hashMap objectForKey:key]] mutableCopy]]];
+    }
+    return ret;
+}
+
++ (NSMutableArray *)hashMapToVectorArray:(DLHashMap *)hashMap {
+    NSArray *allKeys = [hashMap allKeys];
+    id<DLDataProtocol> key = nil;
+    NSMutableArray *ret = [NSMutableArray new];
+    for (key in allKeys) {
+        [ret addObject:[[DLVector alloc] initWithArray:[@[key, [hashMap objectForKey:key]] mutableCopy]]];
     }
     return ret;
 }
