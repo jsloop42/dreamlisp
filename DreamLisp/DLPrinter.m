@@ -76,8 +76,6 @@
         return [[fn name] isNotEmpty] ? [fn name] : @"#fn";
     } else if ([DLFault isFault:data]) {
         return [NSString stringWithFormat:@"#<fault %@>", [(DLFault *)data value]];
-    } else if ([DLLazySequence isLazySequence:data]) {
-        return [NSString stringWithFormat:@"#<lazy-seq %@>", [(DLLazySequence *)data description]];
     } else if ([DLData isData:data]) {
         return [NSString stringWithFormat:@"#<data %@>", [(DLData *)data value]];
     } else if ([DLRegex isRegex:data]) {

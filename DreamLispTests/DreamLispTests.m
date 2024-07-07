@@ -1287,7 +1287,7 @@
     XCTAssertEqualObjects([dl rep:@"(reverse '())"], @"()");
     XCTAssertEqualObjects([dl rep:@"(reverse '(1 2 3))"], @"(3 2 1)");
     XCTAssertEqualObjects([dl rep:@"(reverse [1 2 3])"], @"[3 2 1]");
-    XCTAssertThrows([dl rep:@"(doall (reverse {:a 1 :b 2}))"]);
+    XCTAssertThrows([dl rep:@"(reverse {:a 1 :b 2})"]);
     // nth-tail
     XCTAssertEqualObjects([dl rep:@"(nth-tail 0 0 '(0))"], @"(0)");
     XCTAssertEqualObjects([dl rep:@"(nth-tail 2 4 '(0 1 2 3 4))"], @"(2 3 4)");
@@ -1311,8 +1311,8 @@
 
 - (void)testVectorCoreFunctions {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn (a) (* 2 a)) [1 2 3]))"], @"[2 4 6]");
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn [& args] (list? args)) [1 2]))"], @"[true true]");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (a) (* 2 a)) [1 2 3])"], @"[2 4 6]");
+    XCTAssertEqualObjects([dl rep:@"(map (fn [& args] (list? args)) [1 2])"], @"[true true]");
     XCTAssertEqualObjects([dl rep:@"(vector? [10 11])"], @"true");
     XCTAssertEqualObjects([dl rep:@"(vector? '(12 13))"], @"false");
     XCTAssertEqualObjects([dl rep:@"(vector 3 4 5)"], @"[3 4 5]");
@@ -1354,8 +1354,8 @@
     XCTAssertEqualObjects([dl rep:@"(drop -1 [1 2 3])"], @"[1 2]");
     XCTAssertEqualObjects([dl rep:@"(drop 0 [1 2 3])"], @"[1 2 3]");
     // reverse
-    XCTAssertEqualObjects([dl rep:@"(doall (reverse []))"], @"[]");
-    XCTAssertEqualObjects([dl rep:@"(doall (reverse [1 2 3]))"], @"[3 2 1]");
+    XCTAssertEqualObjects([dl rep:@"(reverse [])"], @"[]");
+    XCTAssertEqualObjects([dl rep:@"(reverse [1 2 3])"], @"[3 2 1]");
     // nth-tail
     XCTAssertEqualObjects([dl rep:@"(nth-tail 0 0 [0])"], @"[0]");
     XCTAssertEqualObjects([dl rep:@"(nth-tail 2 4 [0 1 2 3 4])"], @"[2 3 4]");
@@ -1544,7 +1544,7 @@
     XCTAssertEqualObjects([stdIOService output], @"\"exc is:\" \"'user:abc/2' not found\"");
     XCTAssertEqualObjects([dl rep:@"(try (nth 1 []) (catch exc (prn \"exc is:\" exc)))"], @"nil");
     XCTAssertEqualObjects([stdIOService output], @"\"exc is:\" \"Index 1 is out of bound for length 0\"");
-    XCTAssertEqualObjects([dl rep:@"(try (doall (map throw/1 (list \"my err\"))) (catch exc exc))"], @"\"my err\"");
+    XCTAssertEqualObjects([dl rep:@"(try (map throw/1 (list \"my err\")) (catch exc exc))"], @"\"my err\"");
     XCTAssertEqualObjects([dl rep:@"(try (throw [\"data\" \"foo\"]) (catch exc (do (prn \"exc is:\" exc) 7)))"], @"7");
     XCTAssertEqualObjects([stdIOService output], @"\"exc is:\" [\"data\" \"foo\"]");
     XCTAssertThrows([dl rep:@"(try xyz)"], @"'xyz' not found");
@@ -1757,9 +1757,9 @@
     XCTAssertEqualObjects([dl rep:@"(def nums (list 1 2 3))"], @"(1 2 3)");
     [dl rep:@"(def double (fn (a) (* 2 a)))"];
     XCTAssertEqualObjects([dl rep:@"(double 3)"], @"6");
-    XCTAssertEqualObjects([dl rep:@"(doall (map double/1 nums))"], @"(2 4 6)");
+    XCTAssertEqualObjects([dl rep:@"(map double/1 nums)"], @"(2 4 6)");
     // symbol?
-    XCTAssertEqualObjects([dl rep:@"(doall (map (fn (x) (symbol? x)) (list 1 (quote two) \"three\")))"], @"(false true false)");
+    XCTAssertEqualObjects([dl rep:@"(map (fn (x) (symbol? x)) (list 1 (quote two) \"three\"))"], @"(false true false)");
     XCTAssertEqualObjects([dl rep:@"(symbol? 'abc)"], @"true");
     XCTAssertEqualObjects([dl rep:@"(symbol? \"abc\")"], @"false");
     XCTAssertEqualObjects([dl rep:@"(symbol? :abc)"], @"false");
@@ -2376,30 +2376,6 @@
     XCTAssertEqualObjects([dl rep:@"(identity [1 2 3])"], @"[1 2 3]");
 }
 
-- (void)testLazySequenceCoreFunctions {
-    DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
-    // lazy-seq
-    [dl rep:@"(def lseq (lazy-seq [1 2 3]))"];
-    XCTAssertEqualObjects([dl rep:@"(type lseq)"], @"\"lazy-sequence\"");
-    XCTAssertEqualObjects([dl rep:@"(type (lazy-seq '(1 2 3)))"], @"\"lazy-sequence\"");
-    XCTAssertEqualObjects([dl rep:@"(type (lazy-seq \"abc\"))"], @"\"lazy-sequence\"");
-    XCTAssertThrows([dl rep:@"(lazy-seq 1)"]);
-    // lazy-seq?
-    XCTAssertEqualObjects([dl rep:@"(lazy-seq? lseq)"], @"true");
-    XCTAssertEqualObjects([dl rep:@"(lazy-seq? [1 2 3])"], @"false");
-    // has-next?, next
-    XCTAssertEqualObjects([dl rep:@"(has-next? lseq)"], @"true");
-    XCTAssertEqualObjects([dl rep:@"(next lseq)"], @"1");
-    XCTAssertEqualObjects([dl rep:@"(next lseq)"], @"2");
-    XCTAssertEqualObjects([dl rep:@"(next lseq)"], @"3");
-    XCTAssertEqualObjects([dl rep:@"(has-next? lseq)"], @"false");
-    XCTAssertThrows([dl rep:@"(next lseq)"]);
-    // flatten, doall
-    XCTAssertEqualObjects([dl rep:@"(type (flatten [1 [2 4] 3]))"], @"\"vector\"");
-    XCTAssertEqualObjects([dl rep:@"(doall (flatten [1 [2 4] 3]))"], @"[1 2 4 3]");
-    XCTAssertEqualObjects([dl rep:@"(doall [1 [2 4] 3])"], @"[1 [2 4] 3]");
-}
-
 - (void)testMapFunction {
     DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
     // take on a sequence
@@ -2476,7 +2452,7 @@
     XCTAssertEqualObjects([dl rep:@"(match \"Emily Bronte\" \"[a-zA-Z]+\")"], @"[[\"Emily\"] [\"Bronte\"]]");
     // split
     NSString *toCaps = @"(let [str-xs (split \"init-with-name\" \"-\") s1 (first str-xs) capitalize (fn (s) (let [xs (seq s)] (apply str/1 (cons \
-    (uppercase (first xs)) (rest xs)))))] (apply str/1 (cons (capitalize (first str-xs)) (doall (map capitalize/1 (rest str-xs))))))";
+    (uppercase (first xs)) (rest xs)))))] (apply str/1 (cons (capitalize (first str-xs)) (map capitalize/1 (rest str-xs)))))";
     XCTAssertEqualObjects([dl rep:toCaps], @"\"InitWithName\"");
     // trim
     XCTAssertEqualObjects([dl rep:@"(trim \"  nanana batman  \")"], @"\"nanana batman\"");

@@ -15,8 +15,6 @@
 		9E281CF8225A4C790038A5AF /* libreadline.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E281CF7225A4C790038A5AF /* libreadline.tbd */; };
 		9E28ABA02323FE9A00133494 /* DLRegex.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E28AB9E2323FE9A00133494 /* DLRegex.h */; };
 		9E28ABA12323FE9A00133494 /* DLRegex.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E28AB9F2323FE9A00133494 /* DLRegex.m */; };
-		9E28ABA8232413F400133494 /* DLNotificationTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E28ABA6232413F200133494 /* DLNotificationTable.h */; };
-		9E28ABA9232413F400133494 /* DLNotificationTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E28ABA7232413F300133494 /* DLNotificationTable.m */; };
 		9E28ABB42324293D00133494 /* DLData.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E28ABB22324293D00133494 /* DLData.h */; };
 		9E28ABB52324293D00133494 /* DLData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E28ABB32324293D00133494 /* DLData.m */; };
 		9E28E33F232450410024A414 /* DLTableProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E28E33D232450400024A414 /* DLTableProtocol.h */; };
@@ -24,19 +22,11 @@
 		9E28E344232451030024A414 /* DLTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E28E342232451030024A414 /* DLTable.m */; };
 		9E326C8C22C7524900B456A2 /* DLMockStdIOService.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C8B22C7524900B456A2 /* DLMockStdIOService.m */; };
 		9E326C8F22C7598F00B456A2 /* DLMockStdIOService.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C8E22C7598F00B456A2 /* DLMockStdIOService.m */; };
-		9E326C9222C7891800B456A2 /* DLLazySequence.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E326C9022C7891800B456A2 /* DLLazySequence.h */; };
-		9E326C9322C7891800B456A2 /* DLLazySequence.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C9122C7891800B456A2 /* DLLazySequence.m */; };
-		9E326C9722C8C5D300B456A2 /* DLLazyFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E326C9522C8C5D100B456A2 /* DLLazyFunction.h */; };
-		9E326C9822C8C5D300B456A2 /* DLLazyFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E326C9622C8C5D200B456A2 /* DLLazyFunction.m */; };
 		9E3A9D4E22568AFC00348529 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E3A9D4D22568AFC00348529 /* main.m */; };
 		9E3F324B227B694400B56B6A /* core.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E3F324A227B694300B56B6A /* core.dlisp */; };
 		9E5D7B4B225B947E00970453 /* DLTerminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* DLTerminal.m */; };
 		9E5D7B4C225B947E00970453 /* DLTerminal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5D7B4A225B947E00970453 /* DLTerminal.m */; };
 		9E67D32E23290D5500807F3E /* DLAlgorithm.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E67D32D23290D5300807F3E /* DLAlgorithm.h */; };
-		9E69232223255DFF00B12A65 /* DLNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E69232023255DFD00B12A65 /* DLNetwork.m */; };
-		9E69232323255DFF00B12A65 /* DLNetwork.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E69232123255DFE00B12A65 /* DLNetwork.h */; };
-		9E69232623255FA900B12A65 /* DLNetworkSessionTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E69232423255FA900B12A65 /* DLNetworkSessionTable.h */; };
-		9E69232723255FA900B12A65 /* DLNetworkSessionTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E69232523255FA900B12A65 /* DLNetworkSessionTable.m */; };
 		9E70861A22ACF2A200ADD464 /* test.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E70861922ACF29600ADD464 /* test.dlisp */; };
 		9E741E7B22C12C00009680E8 /* NSArray+DLDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554F2261A10F001D4597 /* NSArray+DLDataProtocol.m */; };
 		9E741E7C22C12C07009680E8 /* NSDecimalNumber+DLDataProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E30554B2261A094001D4597 /* NSDecimalNumber+DLDataProtocol.m */; };
@@ -132,8 +122,6 @@
 		9E96593823194F5700B695ED /* DLError.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E96593723194F5600B695ED /* DLError.h */; };
 		9E96593A23194F9000B695ED /* DreamLisp.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E96593923194F9000B695ED /* DreamLisp.h */; };
 		9E9B622B225BAA280060DA9A /* libedit.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E9B622A225BAA270060DA9A /* libedit.tbd */; };
-		9EBA29B8232921F20002FF2B /* DLNotificationData.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EBA29B6232921F10002FF2B /* DLNotificationData.h */; };
-		9EBA29B9232921F20002FF2B /* DLNotificationData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EBA29B7232921F10002FF2B /* DLNotificationData.m */; };
 		9EC9042D23AAAEA400E5DAC0 /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9EC9042C23AAAEA400E5DAC0 /* License.txt */; };
 		9EFCBA6C2B7CB52200619CB9 /* factorial.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9EFCBA6B2B7CB52200619CB9 /* factorial.dlisp */; };
 /* End PBXBuildFile section */
@@ -185,8 +173,6 @@
 		9E281D02225A608D0038A5AF /* test */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = test; sourceTree = "<group>"; };
 		9E28AB9E2323FE9A00133494 /* DLRegex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLRegex.h; sourceTree = "<group>"; };
 		9E28AB9F2323FE9A00133494 /* DLRegex.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLRegex.m; sourceTree = "<group>"; };
-		9E28ABA6232413F200133494 /* DLNotificationTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLNotificationTable.h; sourceTree = "<group>"; };
-		9E28ABA7232413F300133494 /* DLNotificationTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DLNotificationTable.m; sourceTree = "<group>"; };
 		9E28ABB22324293D00133494 /* DLData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLData.h; sourceTree = "<group>"; };
 		9E28ABB32324293D00133494 /* DLData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLData.m; sourceTree = "<group>"; };
 		9E28E33D232450400024A414 /* DLTableProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLTableProtocol.h; sourceTree = "<group>"; };
@@ -211,10 +197,6 @@
 		9E326C8B22C7524900B456A2 /* DLMockStdIOService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLMockStdIOService.m; sourceTree = "<group>"; };
 		9E326C8D22C7598F00B456A2 /* DLMockStdIOService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLMockStdIOService.h; sourceTree = "<group>"; };
 		9E326C8E22C7598F00B456A2 /* DLMockStdIOService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DLMockStdIOService.m; sourceTree = "<group>"; };
-		9E326C9022C7891800B456A2 /* DLLazySequence.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLLazySequence.h; sourceTree = "<group>"; };
-		9E326C9122C7891800B456A2 /* DLLazySequence.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLLazySequence.m; sourceTree = "<group>"; };
-		9E326C9522C8C5D100B456A2 /* DLLazyFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLLazyFunction.h; sourceTree = "<group>"; };
-		9E326C9622C8C5D200B456A2 /* DLLazyFunction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DLLazyFunction.m; sourceTree = "<group>"; };
 		9E33AAAF2275767800A6EB98 /* DLDataProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLDataProtocol.h; sourceTree = "<group>"; };
 		9E33AAB32275775800A6EB98 /* DLString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLString.h; sourceTree = "<group>"; };
 		9E33AAB42275775800A6EB98 /* DLString.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLString.m; sourceTree = "<group>"; };
@@ -261,10 +243,6 @@
 		9E5D7B49225B947E00970453 /* DLTerminal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLTerminal.h; sourceTree = "<group>"; };
 		9E5D7B4A225B947E00970453 /* DLTerminal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLTerminal.m; sourceTree = "<group>"; };
 		9E67D32D23290D5300807F3E /* DLAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLAlgorithm.h; sourceTree = "<group>"; };
-		9E69232023255DFD00B12A65 /* DLNetwork.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DLNetwork.m; sourceTree = "<group>"; };
-		9E69232123255DFE00B12A65 /* DLNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLNetwork.h; sourceTree = "<group>"; };
-		9E69232423255FA900B12A65 /* DLNetworkSessionTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLNetworkSessionTable.h; sourceTree = "<group>"; };
-		9E69232523255FA900B12A65 /* DLNetworkSessionTable.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLNetworkSessionTable.m; sourceTree = "<group>"; };
 		9E6F444722578E5600777A24 /* DreamLisp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DreamLisp.m; sourceTree = "<group>"; };
 		9E70861922ACF29600ADD464 /* test.dlisp */ = {isa = PBXFileReference; lastKnownFileType = text; path = test.dlisp; sourceTree = "<group>"; };
 		9E741ECB22C139AA009680E8 /* collatz.dlisp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = collatz.dlisp; sourceTree = "<group>"; };
@@ -295,8 +273,6 @@
 		9E9B6226225B9FC20060DA9A /* DLFileOps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLFileOps.h; sourceTree = "<group>"; };
 		9E9B6227225B9FC20060DA9A /* DLFileOps.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLFileOps.m; sourceTree = "<group>"; };
 		9E9B622A225BAA270060DA9A /* libedit.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libedit.tbd; path = usr/lib/libedit.tbd; sourceTree = SDKROOT; };
-		9EBA29B6232921F10002FF2B /* DLNotificationData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLNotificationData.h; sourceTree = "<group>"; };
-		9EBA29B7232921F10002FF2B /* DLNotificationData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DLNotificationData.m; sourceTree = "<group>"; };
 		9EC9042C23AAAEA400E5DAC0 /* License.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = License.txt; sourceTree = "<group>"; };
 		9ED5348A22B54E91004A2CB2 /* DLDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLDelegate.h; sourceTree = "<group>"; };
 		9ED5348E22B67FCA004A2CB2 /* DLCacheTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLCacheTable.h; sourceTree = "<group>"; };
@@ -371,10 +347,6 @@
 				9E94585A2274F04F00A3D449 /* DLHashMap.m */,
 				9E33AAB7227577C000A6EB98 /* DLKeyword.h */,
 				9E33AAB8227577C000A6EB98 /* DLKeyword.m */,
-				9E326C9522C8C5D100B456A2 /* DLLazyFunction.h */,
-				9E326C9622C8C5D200B456A2 /* DLLazyFunction.m */,
-				9E326C9022C7891800B456A2 /* DLLazySequence.h */,
-				9E326C9122C7891800B456A2 /* DLLazySequence.m */,
 				9E33AABF2275786D00A6EB98 /* DLList.h */,
 				9E33AAC02275786D00A6EB98 /* DLList.m */,
 				9E33AACF2275796300A6EB98 /* DLNil.h */,
@@ -505,14 +477,6 @@
 				9E30553A2260FA8F001D4597 /* DLLogger.m */,
 				9E250CEA22886ED500EDADEF /* DLModuleTable.h */,
 				9E250CEB22886ED500EDADEF /* DLModuleTable.m */,
-				9E69232123255DFE00B12A65 /* DLNetwork.h */,
-				9E69232023255DFD00B12A65 /* DLNetwork.m */,
-				9E69232423255FA900B12A65 /* DLNetworkSessionTable.h */,
-				9E69232523255FA900B12A65 /* DLNetworkSessionTable.m */,
-				9EBA29B6232921F10002FF2B /* DLNotificationData.h */,
-				9EBA29B7232921F10002FF2B /* DLNotificationData.m */,
-				9E28ABA6232413F200133494 /* DLNotificationTable.h */,
-				9E28ABA7232413F300133494 /* DLNotificationTable.m */,
 				9E3A9D6F22568DB100348529 /* DLPrinter.h */,
 				9E3A9D7022568DB100348529 /* DLPrinter.m */,
 				9E3A9D7322568DBD00348529 /* DLReader.h */,
@@ -573,11 +537,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E741EBB22C12DCE009680E8 /* DLEnv.h in Headers */,
-				9E69232323255DFF00B12A65 /* DLNetwork.h in Headers */,
 				9E741EAE22C12DBA009680E8 /* DLHashMap.h in Headers */,
-				9EBA29B8232921F20002FF2B /* DLNotificationData.h in Headers */,
 				9E741EA222C12D9E009680E8 /* NSArray+DLDataProtocol.h in Headers */,
-				9E326C9722C8C5D300B456A2 /* DLLazyFunction.h in Headers */,
 				9E741EAC22C12DBA009680E8 /* DLFault.h in Headers */,
 				9E741EB122C12DBA009680E8 /* DLNil.h in Headers */,
 				9E1E697B22C5395500E52162 /* DLStdIOServiceDelegate.h in Headers */,
@@ -602,7 +563,6 @@
 				9E741EBA22C12DCE009680E8 /* DLCore.h in Headers */,
 				9E741EAA22C12DBA009680E8 /* DLBool.h in Headers */,
 				9E741EA922C12DBA009680E8 /* DLAtom.h in Headers */,
-				9E326C9222C7891800B456A2 /* DLLazySequence.h in Headers */,
 				9E741EB522C12DBA009680E8 /* DLVector.h in Headers */,
 				9E28E343232451030024A414 /* DLTable.h in Headers */,
 				9E741EB922C12DCE009680E8 /* DLConst.h in Headers */,
@@ -616,9 +576,7 @@
 				9E741EBE22C12DCE009680E8 /* DLDelegate.h in Headers */,
 				9E741EA722C12DAB009680E8 /* NSNumber+DLDataProtocol.h in Headers */,
 				9E96593A23194F9000B695ED /* DreamLisp.h in Headers */,
-				9E69232623255FA900B12A65 /* DLNetworkSessionTable.h in Headers */,
 				9E28ABA02323FE9A00133494 /* DLRegex.h in Headers */,
-				9E28ABA8232413F400133494 /* DLNotificationTable.h in Headers */,
 				9E741EB322C12DBA009680E8 /* DLString.h in Headers */,
 				9E741EA622C12DAB009680E8 /* NSMutableDictionary+DLHashMap.h in Headers */,
 				9E741EA522C12DAB009680E8 /* NSMutableArray+DLList.h in Headers */,
@@ -815,7 +773,6 @@
 			files = (
 				9E741E7C22C12C07009680E8 /* NSDecimalNumber+DLDataProtocol.m in Sources */,
 				9E741E8A22C12C23009680E8 /* DLNumber.m in Sources */,
-				9E69232723255FA900B12A65 /* DLNetworkSessionTable.m in Sources */,
 				9E741E7D22C12C12009680E8 /* NSMapTable+DLHashMap.m in Sources */,
 				9E741E9A22C12C38009680E8 /* DLState.m in Sources */,
 				9E741E8822C12C23009680E8 /* DLList.m in Sources */,
@@ -835,7 +792,6 @@
 				9E741E8922C12C23009680E8 /* DLNil.m in Sources */,
 				9E741E7B22C12C00009680E8 /* NSArray+DLDataProtocol.m in Sources */,
 				9E741E8122C12C12009680E8 /* NSString+DLDataProtocol.m in Sources */,
-				9EBA29B9232921F20002FF2B /* DLNotificationData.m in Sources */,
 				9E741E7F22C12C12009680E8 /* NSMutableDictionary+DLHashMap.m in Sources */,
 				9E741E8B22C12C23009680E8 /* DLString.m in Sources */,
 				9E741E9122C12C38009680E8 /* DLCore.m in Sources */,
@@ -843,18 +799,14 @@
 				9E741E9622C12C38009680E8 /* DLLogger.m in Sources */,
 				9E741E9722C12C38009680E8 /* DLModuleTable.m in Sources */,
 				9E741E8722C12C23009680E8 /* DLKeyword.m in Sources */,
-				9E326C9322C7891800B456A2 /* DLLazySequence.m in Sources */,
 				9E741E8F22C12C38009680E8 /* DLCacheTable.m in Sources */,
-				9E28ABA9232413F400133494 /* DLNotificationTable.m in Sources */,
 				9E28ABB52324293D00133494 /* DLData.m in Sources */,
 				9E741E8C22C12C23009680E8 /* DLSymbol.m in Sources */,
-				9E326C9822C8C5D300B456A2 /* DLLazyFunction.m in Sources */,
 				9E741E8622C12C23009680E8 /* DLHashMap.m in Sources */,
 				9E741E8022C12C12009680E8 /* NSNumber+DLDataProtocol.m in Sources */,
 				9E741E9522C12C38009680E8 /* DreamLisp.m in Sources */,
 				9E741E8322C12C23009680E8 /* DLBool.m in Sources */,
 				9E741E9322C12C38009680E8 /* DLFileOps.m in Sources */,
-				9E69232223255DFF00B12A65 /* DLNetwork.m in Sources */,
 				9E28ABA12323FE9A00133494 /* DLRegex.m in Sources */,
 				9E741E9C22C12C38009680E8 /* DLUtils.m in Sources */,
 				9E1E697F22C53EAB00E52162 /* DLIOService.m in Sources */,

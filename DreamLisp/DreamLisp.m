@@ -19,7 +19,6 @@ static NSString *langVersion;
     /** Current env */
     DLEnv *_env;
     DLCore *_core;
-    DLNetwork *_network;
     DLFileOps *_fileOps;
     DLIOService* _ioService;
     BOOL _isQuasiquoteMode;
@@ -66,14 +65,12 @@ static NSString *langVersion;
     _printer = [DLPrinter new];
     _core = [DLCore new];
     [_core setDelegate:self];
-    _network = [DLNetwork new];
     _env = [[DLEnv alloc] initWithModuleName:DLConst.defaultModuleName isUserDefined:NO];
     [_env setModuleDescription:[DLConst defaultModuleDescription]];
     [DLState setCurrentModuleName:[_env moduleName]];
     // Add modules to module table
     [self addModule:_env];  // default module
     [self addModule:[_core env]];  // core module
-    [self addModule:[_network env]];
     _globalEnv = _env;
     _isQuasiquoteMode = NO;
     _quasiquoteDepth = 0;

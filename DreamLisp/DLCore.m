@@ -17,7 +17,6 @@ static NSString *_description = @"The core module.";
     DLPrinter *_printer;
     id<DLDelegate> __weak _delegate;
     NSData *_allModuleSortHint;
-    DLNotificationTable *_notifTable;
 }
 
 @synthesize delegate = _delegate;
@@ -35,7 +34,6 @@ static NSString *_description = @"The core module.";
     [_env setIsUserDefined:NO];
     _reader = [DLReader new];
     _printer = [DLPrinter new];
-    _notifTable = DLNotificationTable.shared;
     [self addArithmeticFunctions];
     [self addComparisonFunctions];
     [self addPrintFunctions];
@@ -43,7 +41,6 @@ static NSString *_description = @"The core module.";
     [self addEvalFunctions];
     [self addAtomFunctions];
     [self addInvokeFunctions];
-    [self addLazyFunctions];
     [self addStringFunctions];
     [self addPredicateFunctions];
     [self addSymbolFunctions];
@@ -51,7 +48,6 @@ static NSString *_description = @"The core module.";
     [self addVectorFunctions];
     [self addHashMapFunctions];
     [self addIOFunctions];
-    [self addNotificationFunctions];
     [self addJSONFunctions];
     [self addMetaFunctions];
     [self addMiscFunctions];
@@ -520,19 +516,9 @@ double dmod(double a, double n) {
             DLNumber *num = [DLNumber dataToNumber:first position:1 fnName:@"nth/2"];
             NSUInteger n = [num integerValue];
             id <DLDataProtocol> ret = nil;
-            if ([DLLazySequence isLazySequence:second]) {
-                DLLazySequence *seq = (DLLazySequence *)second;
-                NSUInteger index = [num integerValue];
-                if (index >= [seq length]) return [DLNil new];
-                seq.index = index;
-                [seq apply];
-                ret = [[seq acc] firstObject];
-
-            } else {
-                NSMutableArray *seq = [DLUtils toArray:second isNative:YES];
-                [DLTypeUtils checkIndexBounds:seq index:n];
-                ret = [seq nth:n];
-            }
+            NSMutableArray *seq = [DLUtils toArray:second isNative:YES];
+            [DLTypeUtils checkIndexBounds:seq index:n];
+            ret = [seq nth:n];
             return ret ? ret : [DLNil new];
         }
     };
@@ -550,21 +536,7 @@ double dmod(double a, double n) {
             NSInteger start = [[DLNumber dataToNumber:[xs first] position:1 fnName:fnName] integerValue];
             NSInteger end = [[DLNumber dataToNumber:[xs second] position:2 fnName:fnName] integerValue];;
             NSUInteger count = 0;
-            if ([DLLazySequence isLazySequence:data]) {
-                DLLazySequence *seq = (DLLazySequence *)data;
-                if (end >= [seq length]) return [DLNil new];
-                seq.index = start;
-                NSUInteger idx = start;
-                while (idx <= end) {
-                    [seq apply];
-                    idx++;
-                }
-                NSMutableArray *ret = [seq acc];
-                if (!ret) return [DLNil new];
-                if ([seq sequenceType] == SequenceTypeList) return [[DLList alloc] initWithArray:ret];
-                if ([seq sequenceType] == SequenceTypeVector) return [[DLVector alloc] initWithArray:ret];
-                if ([seq sequenceType] == SequenceTypeString) return [[DLString alloc] initWithArray:ret];
-            } else if ([DLString isString:data]) {
+            if ([DLString isString:data]) {
                 DLString *str = (DLString *)data;
                 return [[DLString alloc] initWithString:[str substringFrom:start to:end]];
             }
@@ -596,13 +568,6 @@ double dmod(double a, double n) {
             } else if ([DLString isString:elem]) {
                 DLString *str = (DLString *)elem;
                 if (![str isEmpty]) first = [[DLString alloc] initWithString:[(DLString *)elem substringFrom:0 count:1]];
-            } else if ([DLLazySequence isLazySequence:elem]) {
-                DLLazySequence *seq = (DLLazySequence *)elem;
-                if ([seq hasNext]) {
-                    [seq apply];
-                }
-                id <DLDataProtocol> ret = [[seq acc] first];
-                return ret ? ret : [DLNil new];
             } else {
                 [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, @"first/1", @"'sequence'", 1, [elem dataTypeName]] throw];
             }
@@ -627,24 +592,6 @@ double dmod(double a, double n) {
                 NSMutableArray *arr = [DLUtils stringToArray:(DLString *)data isNative:YES];
                 if (![arr isEmpty]) [arr removeObjectAtIndex:0];
                 return [[DLVector alloc] initWithArray:arr];
-            } else if ([DLLazySequence isLazySequence:data]) {
-                DLLazySequence *seq = (DLLazySequence *)data;
-                if ([seq length] == 0) return [DLNil new];
-                seq.index = 1;
-                while ([seq hasNext]) {
-                    @autoreleasepool {
-                        [seq apply];
-                    }
-                }
-                id <DLDataProtocol> ret = nil;
-                if ([seq sequenceType] == SequenceTypeList) {
-                    ret = [[DLList alloc] initWithArray:[seq acc]];
-                } else if ([seq sequenceType] == SequenceTypeVector) {
-                    ret = [[DLVector alloc] initWithArray:[seq acc]];
-                } else if ([seq sequenceType] == SequenceTypeString) {
-                    ret = [[DLString alloc] initWithArray:[seq acc]];
-                }
-                return ret ? ret : [DLNil new];
             }
             [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"rest/1", @"'sequence'", [data dataTypeName]] throw];
             return [DLList new];
@@ -788,15 +735,6 @@ double dmod(double a, double n) {
                 NSUInteger len = [str count];
                 if (len == 0) return [DLNil new];
                 last = [[DLString alloc] initWithString:[(DLString *)seq substringFrom:len - 1 count:1]];
-            } else if ([DLLazySequence isLazySequence:seq]) {
-                DLLazySequence *lseq = (DLLazySequence *)seq;
-                NSUInteger len = [lseq length];
-                if (len == 0) return [DLNil new];
-                lseq.index = len - 1;
-                if ([lseq hasNext]) {
-                    id <DLDataProtocol> ret = [lseq next];
-                    return ret ? ret : [DLNil new];
-                }
             } else {
                 [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, @"last/1", @"'sequence'", 1, [list dataTypeName]] throw];
             }
@@ -821,14 +759,6 @@ double dmod(double a, double n) {
                 return [(DLVector *)second drop:n];
             } else if ([DLString isString:second]) {
                 return [[DLString alloc] initWithString:[(DLString *)second substringFrom:n]];
-            } else if ([DLLazySequence isLazySequence:second]) {
-                DLLazySequence *seq = (DLLazySequence *)second;
-                if (n < [seq length]) {
-                    [[seq value] removeObjectsInRange:NSMakeRange(0, n)];
-                    [seq updateEnumerator];
-                    return seq;
-                }
-                return seq;
             }
             [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, @"drop/2", @"'sequence'", 2, [second dataTypeName]] throw];
             return nil;
@@ -1051,23 +981,6 @@ double dmod(double a, double n) {
             id<DLDataProtocol> first = [xs first];
             id<DLDataProtocol> second = [xs second];
             DLNumber *num = [DLNumber dataToNumber:first position:1 fnName:@"take/2"];
-            if ([DLLazySequence isLazySequence:second]) {
-                DLLazySequence *seq = (DLLazySequence *)second;
-                NSUInteger i = 0;
-                NSUInteger len = [num integerValue];
-                for (i = 0; i < len; i++) {
-                    if ([seq hasNext]) {
-                        [seq apply];
-                    }
-                }
-                if ([seq sequenceType] == SequenceTypeList) {
-                    return [[DLList alloc] initWithArray:[seq acc]];
-                }
-                if ([seq sequenceType] == SequenceTypeVector) {
-                    return [[DLVector alloc] initWithArray:[seq acc]];
-                }
-                return [[DLString alloc] initWithArray:[seq acc]];
-            }
             if ([DLString isString:second]) return [[DLString alloc] initWithString:[(DLString *)second substringFrom:0 count:[num integerValue]]];
             NSMutableArray *list = [[DLVector dataToList:second position:2 fnName:@"take/2"] value];
             NSUInteger n = [num integerValue];
@@ -1754,112 +1667,6 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"keyword?" moduleName:[DLConst coreModuleName]]];
 }
 
-#pragma mark - Lazy
-
-- (void)addLazyFunctions {
-    DLFunction *fn = nil;
-
-    #pragma mark lazy-seq
-    /** Takes a sequence and returns a lazy-sequence object. */
-    id<DLDataProtocol>(^lazySeq)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            [DLTypeUtils checkArity:xs arity:1];
-            id<DLDataProtocol> first = [xs first];
-            if ([DLString isString:first]) {
-                return [[DLLazySequence alloc] initWithArray:[DLUtils toArray:first isNative:YES] sequenceType:SequenceTypeString];
-            } else if ([DLList isKindOfList:first]) {
-                return [[DLLazySequence alloc] initWithArray:[(DLList *)first value]
-                                                sequenceType:[DLVector isVector:first] ? SequenceTypeVector : SequenceTypeList];
-            }
-            [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"lazy-seq/1", @"sequence", [first dataTypeName]] throw];
-            return [DLNil new];
-        }
-    };
-    fn = [[DLFunction alloc] initWithFn:lazySeq argCount:1 name:@"lazy-seq/1"];
-    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"lazy-seq" moduleName:[DLConst coreModuleName]]];
-
-    #pragma mark lazy-seq?
-    /** Checks if the given element is a lazy sequence. */
-    id<DLDataProtocol>(^lazySeqp)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            [DLTypeUtils checkArity:xs arity:1];
-            return [[DLBool alloc] initWithBool:[DLLazySequence isLazySequence:[xs first]]];
-        }
-    };
-    fn = [[DLFunction alloc] initWithFn:lazySeqp argCount:1 name:@"lazy-seq?/1"];
-    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"lazy-seq?" moduleName:[DLConst coreModuleName]]];
-
-    #pragma mark has-next?
-    /** Returns whether the lazy sequence has elements which are not realised. */
-    id<DLDataProtocol>(^hasNext)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            [DLTypeUtils checkArity:xs arity:1];
-            DLLazySequence *seq = [DLLazySequence dataToLazySequence:[xs first] fnName:@"has-next?/1"];
-            return [[DLBool alloc] initWithBool:[seq hasNext]];
-        }
-    };
-    fn = [[DLFunction alloc] initWithFn:hasNext argCount:1 name:@"has-next?/1"];
-    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"has-next?" moduleName:[DLConst coreModuleName]]];
-
-    #pragma mark next
-    /** Returns the next element in the lazy sequence if present, else throws an exception. */
-    id<DLDataProtocol>(^next)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            [DLTypeUtils checkArity:xs arity:1];
-            DLLazySequence *seq = [DLLazySequence dataToLazySequence:[xs first] fnName:@"next/1"];
-            if (![seq hasNext]) [[[DLError alloc] initWithFormat:DLIndexOutOfBounds, [seq index], [seq length]] throw];
-            return [seq next];
-        }
-    };
-    fn = [[DLFunction alloc] initWithFn:next argCount:1 name:@"next/1"];
-    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"next" moduleName:[DLConst coreModuleName]]];
-
-    #pragma mark dorun
-    /** Returns the next element in the lazy sequence if present, else throws an exception. */
-    id<DLDataProtocol>(^doRun)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            [DLTypeUtils checkArity:xs arity:1];
-            DLLazySequence *seq = [DLLazySequence dataToLazySequence:[xs first] fnName:@"dorun/1"];
-            while ([seq hasNext]) {
-                @autoreleasepool {
-                    [seq apply];
-                }
-            }
-            return [DLNil new];
-        }
-    };
-    fn = [[DLFunction alloc] initWithFn:doRun argCount:1 name:@"dorun/1"];
-    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"dorun" moduleName:[DLConst coreModuleName]]];
-
-    #pragma mark doall
-    /** Applies the function associated with the lazy sequence to the next element if present as required to realise the
-     elements in the sequence. */
-    id<DLDataProtocol>(^doAll)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            [DLTypeUtils checkArity:xs arity:1];
-            id<DLDataProtocol> first = [xs first];
-            if ([DLList isKindOfList:first] || [DLString isString:first]) return first;
-            DLLazySequence *seq = [DLLazySequence dataToLazySequence:first fnName:@"doall/1"];
-            while ([seq hasNext]) {
-                @autoreleasepool {
-                    [seq apply];
-                }
-            }
-            if ([seq sequenceType] == SequenceTypeList) {
-                return [[DLList alloc] initWithArray:[seq acc]];
-            } else if ([seq sequenceType] == SequenceTypeVector) {
-                return [[DLVector alloc] initWithArray:[seq acc]];
-            } else if ([seq sequenceType] == SequenceTypeHashMap) {
-                if ([[seq acc] count] == 1) return [[seq acc] first];
-                return [[DLVector alloc] initWithArray:[seq acc]];
-            }
-            return [[DLString alloc] initWithArray:[seq acc]];
-        }
-    };
-    fn = [[DLFunction alloc] initWithFn:doAll argCount:1 name:@"doall/1"];
-    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"doall" moduleName:[DLConst coreModuleName]]];
-}
-
 #pragma mark - String
 
 - (void)addStringFunctions {
@@ -2257,99 +2064,6 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:currentWorkingDirectory argCount:0 name:@"cwd/0"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"cwd" moduleName:[DLConst coreModuleName]]];
-}
-
-#pragma mark - Notification
-
-- (void)addNotificationFunctions {
-    DLCore * __weak weakSelf = self;
-    DLFunction *fn = nil;
-
-    #pragma mark add-notification
-    /**
-     Subscribe to a notification.
-     (defun data-did-download (data) ..)
-     (add-notification :data-did-download data-did-download/1)
-     */
-    id<DLDataProtocol>(^addNotification)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            DLCore *this = weakSelf;
-            [DLTypeUtils checkArity:xs arity:2];
-            NSString *fnName = @"add-notification/2";
-            DLKeyword *aNotifKey = [DLKeyword dataToKeyword:[xs first] position:0 fnName:fnName];
-            DLFunction *notifFn = [DLFunction dataToFunction:[xs second] position:1 fnName:fnName];
-            DLNotificationData *notifData = [DLNotificationData new];
-            notifData.notificationKey = aNotifKey;
-            notifData.notificationHandler = notifFn;
-            [this->_notifTable setNotification:notifData];
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notificationDidReceive:) name:(NSString *)[aNotifKey value] object:nil];
-            return [[DLBool alloc] initWithBool:YES];
-        }
-    };
-    fn = [[DLFunction alloc] initWithFn:addNotification argCount:2 name:@"add-notification/2"];
-    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"add-notification" moduleName:[DLConst coreModuleName]]];
-
-    #pragma mark post-notification
-    /**
-     Send a notification with the given notification key and optional data.
-     (post-notification :data-did-download {:status true :data [..]})
-     */
-    id<DLDataProtocol>(^postNotification)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            NSString *fnName = @"post-notification/2";
-            DLKeyword *aNotifKey = [DLKeyword dataToKeyword:[xs first] position:0 fnName:fnName];
-            NSUInteger len = [xs count];
-            id<DLDataProtocol> data = nil;
-            if (len == 2) {
-                data = [xs second];
-            } else if (len > 2) {
-                [[[DLError alloc] initWithFormat:DLArityLessThanOrEqualError, 2, len] throw];
-            }
-            NSMutableArray *args = [NSMutableArray new];
-            if (data) {
-                [args addObject:data];
-            }
-            [[NSNotificationCenter defaultCenter] postNotificationName:[aNotifKey value] object:self
-                                                              userInfo:@{@"notifKey": aNotifKey, @"args": args}];
-            return [[DLBool alloc] initWithBool:YES];
-        }
-    };
-    fn = [[DLFunction alloc] initWithFn:postNotification argCount:2 name:@"post-notification/2"];
-    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"post-notification" moduleName:[DLConst coreModuleName]]];
-
-    #pragma mark remove-notification
-    /**
-     Remove a notification subscription if present.
-     (remove-notification :data-did-download)
-     */
-    id<DLDataProtocol>(^removeNotification)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            DLCore *this = weakSelf;
-            [DLTypeUtils checkArity:xs arity:1];
-            NSString *fnName = @"remove-notification/1";
-            DLKeyword *aNotifKey = [DLKeyword dataToKeyword:[xs first] position:0 fnName:fnName];
-            DLNotificationData *notifData = [this->_notifTable notification:aNotifKey];
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:(NSString *)[notifData.notificationKey value] object:nil];
-            return [[DLBool alloc] initWithBool:YES];
-        }
-    };
-    fn = [[DLFunction alloc] initWithFn:removeNotification argCount:1 name:@"remove-notification/1"];
-    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"remove-notification" moduleName:[DLConst coreModuleName]]];
-}
-
-- (void)notificationDidReceive:(NSNotification *)notif {
-    NSDictionary *userInfo = [notif userInfo];
-    DLKeyword *notifKey = [userInfo objectForKey:DLConst.keyForNotificationKey];
-    /*
-     For user defined functions, this reflect the fn args array. For in-built function, we could specify the method signature (for eg: in data-did-download,
-     it is kind of like delegates)
-     */
-    NSMutableArray *args = [userInfo objectForKey:DLConst.keyForNotificationValue];
-    DLNotificationData *notifData = [_notifTable notification:notifKey];
-    DLFunction *fn = notifData.notificationHandler;
-    if (fn) {
-        [fn apply:args];
-    }
 }
 
 #pragma mark - JSON
