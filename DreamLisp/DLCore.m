@@ -655,60 +655,26 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"rest" moduleName:[DLConst coreModuleName]]];
 
     #pragma mark map
-    void(^map)(DLLazySequence *seq, NSMutableArray *xs) = ^void(DLLazySequence *seq, NSMutableArray *xs) {
+    id<DLDataProtocol>(^map)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
-            DLFunction *fn = [DLFunction dataToFunction:[xs first] position:1 fnName:@"map/n"];
-            id<DLDataProtocol> res = [fn apply:[xs rest]];
-            [[seq acc] addObject:res];
-        }
-    };
-
-    #pragma mark lazy map
-    id<DLDataProtocol>(^lazyMap)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            id<DLDataProtocol> first = (id<DLDataProtocol>)[xs first];
-            DLLazySequence *seq = [DLLazySequence new];
-            DLFunction *fn = [DLFunction dataToFunction:[xs first] position:1 fnName:@"map/n"];
-            [seq addLazyFunction:[[DLLazyFunction alloc] initWithFn:map name:@""] fn:fn];
-            if ([DLLazySequence isLazySequence:first]) {
-                seq = (DLLazySequence *)first;
-                [seq addLazyFunction:[[DLLazyFunction alloc] initWithFn:map name:@""] fn:fn];
-            } else {
-                id<DLDataProtocol> second = [xs second];
-                BOOL isList = [DLList isList:second];
-                if (isList) [seq setSequenceType:SequenceTypeList];
-                if ([xs count] > 2) {
-                    NSMutableArray *rest = [xs rest];
-                    [seq setIsNative:NO];
-                    id<DLDataProtocol> elem = nil;
-                    for (elem in rest) {
-                        if ([DLList isKindOfList:elem]) {
-                            [[seq value] addObject:[(DLList *)elem value]];
-                        } else if ([DLHashMap isHashMap:elem]) {
-                            [[seq value] addObject:[DLUtils hashMapToHashMapArray:elem]];
-                            [seq setSequenceType:SequenceTypeHashMap];
-                        } else if ([DLString isString:elem]) {
-                            [[seq value] addObject:[DLUtils toArray:elem isNative:YES]];
-                            [seq setSequenceType:SequenceTypeString];
-                        }
-                    }
-                } else {
-                    if ([DLList isKindOfList:second]) {
-                        [seq setValue:[(DLList *)second value]];
-                    } else if ([DLHashMap isHashMap:second]) {
-                        [seq setValue:[DLUtils hashMapToHashMapArray:second]];
-                        [seq setSequenceType:SequenceTypeHashMap];
-                    } else if ([DLString isString:second]) {
-                        [seq setValue:[DLUtils toArray:second isNative:YES]];
-                        [seq setSequenceType:SequenceTypeString];
-                    }
-                }
-                [seq updateEnumerator];
+            [DLTypeUtils checkArity:xs arity:2];
+            DLFunction *fn = [DLFunction dataToFunction:[xs first] position:1];
+            id<DLDataProtocol> second = [xs second];
+            NSMutableArray *acc = [[NSMutableArray alloc] init];
+            NSMutableArray *arr = [(DLList *)second value];
+            NSMutableArray *arg = [[NSMutableArray alloc] init];
+            id elem = nil;
+            for (elem in arr) {
+                [arg removeAllObjects];
+                [arg addObject:elem];
+                [acc addObject:[fn apply:arg]];
             }
-            return seq;
+            return [DLVector isVector:second] ? [[DLVector alloc] initWithArray:acc]
+                                              : [[DLList alloc] initWithArray:acc];
         }
     };
-    fn = [[DLFunction alloc] initWithFn:lazyMap argCount:-1 name:@"map/n"];
+    
+    fn = [[DLFunction alloc] initWithFn:map argCount:-1 name:@"map/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"map" moduleName:[DLConst coreModuleName]]];
 
     #pragma mark conj
