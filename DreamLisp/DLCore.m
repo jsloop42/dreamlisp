@@ -1029,50 +1029,25 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"partition" moduleName:[DLConst coreModuleName]]];
 
     #pragma mark flatten
-    /** Takes any nested collection and returns its contents as a single collection. */
-    void(^flatten)(DLLazySequence *seq, NSMutableArray *xs) = ^void(DLLazySequence *seq, NSMutableArray *xs) {
+    /** Takes any nested sequence and returns its contents as a single collection. */
+    id<DLDataProtocol>(^flatten)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
             [DLTypeUtils checkArity:xs arity:1];
             id<DLDataProtocol> first = (id<DLDataProtocol>)[xs first];
-            NSMutableArray *acc = [NSMutableArray new];
+            NSMutableArray *acc = [[NSMutableArray alloc] init];
             if ([DLList isKindOfList:first]) {
                 [self flatten:(DLList *)first acc:acc];
-                [[seq acc] addObjectsFromArray:acc];
-            } else if ([DLHashMap isHashMap:first]) {
-                [[seq acc] addObject:[self flattenHashMap:first acc:[NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
-                                                                                          valueOptions:NSMapTableStrongMemory]]];
-            } else {
-                [[seq acc] addObject:first];
+                if ([DLVector isVector:first]) {
+                    return [[DLVector alloc] initWithArray:acc];
+                }
+                return [[DLList alloc] initWithArray:acc];
             }
+            [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"flatten/1", @"'sequence'", [first dataTypeName]] throw];
+            return [DLNil new];
         }
     };
-
-    #pragma mark lazy flatten
-    id<DLDataProtocol>(^lazyFlatten)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
-        @autoreleasepool {
-            [DLTypeUtils checkArity:xs arity:1];
-            id<DLDataProtocol> first = (id<DLDataProtocol>)[xs first];
-            DLLazySequence *seq = [DLLazySequence new];
-            [seq addLazyFunction:[[DLLazyFunction alloc] initWithFn:flatten name:@""]];
-            if ([DLLazySequence isLazySequence:first]) {
-                seq = (DLLazySequence *)first;
-                [seq addLazyFunction:[[DLLazyFunction alloc] initWithFn:flatten name:@""]];
-            } else if ([DLList isList:first]) {
-                [seq setValue:[(DLList *)first value]];
-                [seq setSequenceType:SequenceTypeList];
-            } else if ([DLVector isVector:first]) {
-                [seq setValue:[(DLVector *)first value]];
-                [seq setSequenceType:SequenceTypeVector];
-            } else if ([DLHashMap isHashMap:first]) {
-                return [[DLHashMap alloc] initWithMapTable:[self flattenHashMap:first acc:[NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory
-                                                                                                                valueOptions:NSMapTableStrongMemory]]];
-            } else {
-                [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"flatten/1", @"'collection'", [first dataTypeName]] throw];
-            }
-            return seq;
-        }
-    };
-    fn = [[DLFunction alloc] initWithFn:lazyFlatten argCount:1 name:@"flatten/1"];
+    
+    fn = [[DLFunction alloc] initWithFn:flatten argCount:1 name:@"flatten/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"flatten" moduleName:[DLConst coreModuleName]]];
 
     #pragma mark take
@@ -1369,7 +1344,7 @@ double dmod(double a, double n) {
 
 - (NSMutableArray *)flatten:(DLList *)xs acc:(NSMutableArray *)acc {
     @autoreleasepool {
-        if (!acc) acc = [NSMutableArray new];
+        if (!acc) acc = [[NSMutableArray alloc] init];
         NSUInteger len = [xs count];
         NSUInteger i = 0;
         id<DLDataProtocol> elem = nil;
