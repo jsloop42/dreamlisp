@@ -1885,6 +1885,7 @@
     a = [s copy];
     [a setModuleName:@"b"];
     XCTAssertNotEqualObjects([s moduleName], @"s");
+    XCTAssertNotNil([dl rep:@"(rand 21)"]);
 }
 
 - (void)testTypeFunction {

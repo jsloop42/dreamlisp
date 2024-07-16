@@ -113,6 +113,11 @@ static BOOL _isCacheEnabled;
     return res;
 }
 
++ (DLNumber *)rand:(DLNumber *)upperBound {
+    uint32_t n = [upperBound intValue] + 1;
+    return [[DLNumber alloc] initWithInt:arc4random_uniform(n)];
+}
+
 #pragma mark - List
 
 + (DLList *)addObjectsToList:(DLList *)list fromList:(DLList *)aList {

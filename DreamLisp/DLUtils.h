@@ -24,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (double)timestamp;
 + (NSMutableArray *)toArray:(id<DLDataProtocol>)object;
 + (NSMutableArray *)toArray:(id<DLDataProtocol>)object isNative:(BOOL)isNative;
++ (DLNumber *)rand:(DLNumber *)upperBound;
 #pragma mark - List
 + (DLList *)addObjectsToList:(DLList *)list fromList:(DLList *)aList;
 + (DLList *)addObjectsToList:(DLList *)list fromHashMap:(DLHashMap *)hashMap;

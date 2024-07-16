@@ -2261,6 +2261,15 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:info argCount:1 name:@"info/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"info" moduleName:[DLConst coreModuleName]]];
+    
+    #pragma mark rand
+    /** Returns a random number in the given range inclusive. */
+    id<DLDataProtocol>(^rand)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        [DLTypeUtils checkArityCount:[xs count] arity:1 fnName:@"rand/1"];
+        return [DLUtils rand:(DLNumber *)[xs first]];
+    };
+    fn = [[DLFunction alloc] initWithFn:rand argCount:1 name:@"rand/1"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"rand" moduleName:[DLConst coreModuleName]]];
 }
 
 #pragma mark - Module
