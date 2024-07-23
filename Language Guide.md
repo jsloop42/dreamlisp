@@ -65,11 +65,11 @@ The vector notation is `[]` square braces. We can use the function `vector` to c
 Hash maps are dictionary collection which can have key-value pair. The short notation for hash-map is `{}`.
 
 ```
-λ user> {"name" "Olive", "age" 42, "location" "Boston"}
-{"name" "Olive" "age" 42}
+λ user> {"name" "Jane", "age" 42, "location" "PlanetEarth"}
+{"name" "Jane" "age" 42}
 
-λ user> (def person {:first-name "Jane" :last-name "Doe" :location "Boston"})
-{:first-name "Jane" :last-name "Doe" :location "Boston"}
+λ user> (def person {:first-name "Jane" :last-name "Doe" :location "Planet Earth"})
+{:first-name "Jane" :last-name "Doe" :location "Planet Earth"}
 
 λ user> (:first-name person)
 "Jane"
@@ -99,8 +99,8 @@ The last example shows a weekend variable which is a vector containing keywords.
 A string is anything within double-quotes. Most of the list functions also works on strings. 
 
 ```
-λ user> (first "Olive")
-"O"
+λ user> (first "Alice")
+"A"
 
 λ user> (concat "Jane" " " "Doe")
 "Jane Doe"
@@ -152,14 +152,14 @@ Note: When using the REPL, on a line break the expression will be evaluated. We 
 `let` is used for local binding within an expression. The variables defined within `let` is only visible within its lexical scope and also available within a closure.
 
 ```
-(let ((name-xs ["Olive" "Eva" "Jane"])
+(let ((name-xs ["Alice" "Bob" "Jane"])
       (greet (fn (n)
                (doall (map (fn (x) (println "Hello" x)) n)))))
   (greet name-xs)
   nil)
     
-; Hello Olive
-; Hello Eva
+; Hello Alice
+; Hello Bob
 ; Hello Jane
 ; nil
 ```
@@ -167,14 +167,14 @@ Note: When using the REPL, on a line break the expression will be evaluated. We 
 `let` binding can take vector form like in Clojure. The same example with vector bindings can written like below. The traditional style of binding with parenthesis is preferred.
 
 ```
-(let [name-xs ["Olive" "Eva" "Jane"] 
+(let [name-xs ["Alice" "Bob" "Jane"] 
       greet (fn (n)
               (doall (map (fn (x) (println "Hello" x)) n)))]
   (greet name-xs) 
   nil)
     
-; Hello Olive
-; Hello Eva
+; Hello Alice
+; Hello Bob
 ; Hello Jane
 ; nil
 ```
@@ -223,10 +223,6 @@ Say, this is the `utils.dlisp` file, which contains `collatz` function. The file
 Here we are importing `deftest` which takes a variable number of arguments which is represented by `n`. `is` takes only two arguments, so its arity is `2`.
 
 The default module is called `user` which is the module that the REPL initializes into. REPL also loads one other module which is the `core`.
-
-## Lazy sequence
-
-Higher order collection functions like `map/n`, `foldl/3`, `foldr/3`, etc., by default, produces a lazy sequence. The operations are deferred until we force evaluation either by applying other list functions over the lazy sequence like `first/1` or `take/2`, or using `doall/1`.
 
 ## Core Module
 
@@ -441,7 +437,7 @@ Takes a start, an end index, a sequence and returns a sub-sequence within the gi
 
 #### filter/2
 
-Takes a filter predicate function and a collection, and returns a lazy sequence which when realized applies the function to each element in the collection and returns the resulting filtered collection.
+Takes a filter predicate function and a collection, and returns a sequence which applies the function to each element in the collection and returns the resulting filtered collection.
 
 ```
 λ user> (doall (filter (fn (x) (< x 0)) '(-1 4 0 -4 -5 2)))
@@ -450,7 +446,7 @@ Takes a filter predicate function and a collection, and returns a lazy sequence 
 
 #### flatten/1
 
-Takes any nested collection and returns a lazy sequence which when realized return its contents as a single collection.
+Takes any nested collection and returns a sequence with its contents as a single collection.
 
 ```
 λ user> (doall (flatten [[1] [2 [3]] [[[4]]] [5]]))
@@ -510,18 +506,18 @@ Take any element and a sequence or collection, joins, the element at each interm
 
 #### map/n
 
-`map` is a higher order function which takes a function and a sequence and applies the function to each element in the sequence. Built-in higher order function returns a lazy sequence by default.
+`map` is a higher order function which takes a function and a sequence and applies the function to each element in the sequence.
 
 ```
 λ user> (map (fn (a) (* 2 a)) [1 2 3])
-#<lazy-seq [1 2 3]>
-```
-
-To realize the value of the lazy sequence, we can use the `doall` function.
-
-```
-λ user> (doall (map (fn (a) (* 2 a)) [1 2 3]))
 [2 4 6]
+```
+
+`map` takes variadic arguments and invokes the functions with arguments interleaved.
+
+```
+λ user> (map (fn (a b) [a b]) [1 2 3] [4 5 6])
+[[1 4] [2 5] [3 6]]
 ```
 
 #### partition/2
@@ -535,7 +531,7 @@ Takes a predicate function and a collection, applies the function to each elemen
 
 #### take/2
 
-Takes `n` elements from the given sequence. If the sequence is lazy, this makes the elements of the sequence to be evaluated as required.
+Takes `n` elements from the given sequence.
 
 ```
 λ user> (take 2 (map (fn (a) a) [1 2 3 4]))
@@ -546,7 +542,7 @@ Takes `n` elements from the given sequence. If the sequence is lazy, this makes 
 
 #### reverse/1
 
-Returns a lazy sequence which when realized reverse the elements in the given sequence.
+Returns a sequence with elements reversed.
 
 ```
 λ user> (doall (reverse "apple"))
@@ -938,70 +934,22 @@ Returns details of the given element.
 {:type "function" :module "core" :position 0 :arity -1 :macro? true :imported? false :name "core:or/n" :arguments [core:x core:& core:more]}
 ```
 
-### Lazy sequence functions
+### rand/1
 
-Below are the functions that create, works on lazy sequences.
-
-#### lazy-seq/1
-
-Creates a lazy sequence from the given sequence.
+Returns a random number within the specified upper bound inclusive.
 
 ```
-λ user> (lazy-seq [1 2 3])
-#<lazy-seq [1 2 3]>
+λ user> (rand 31)
+24
 ```
 
-#### lazy-seq?/1
+### shuffle/1
 
-A predicate function which checks if the given sequence is lazy.
-
-```
-λ user> (lazy-seq? (lazy-seq [1 2 3]))
-true
-
-λ user> (lazy-seq? [1 2 3])
-false
-```
-
-#### has-next?/1
-
-Returns whether the lazy sequence has elements which are not realised.
+Shuffles the given sequence using Fisher–Yates algorithm with uniform random distribution.
 
 ```
-λ user> (def lseq (lazy-seq [1 2]))
-#<lazy-seq [1 2]>
-
-λ user> (has-next? lseq)
-true
-```
-
-#### next/1
-
-Returns the next element in the lazy sequence if present else throws an exception.
-
-Following the above example,
-
-```
-λ user> (next lseq)
-1
-
-λ user> (next lseq)
-2
-
-λ user> (next lseq)
-[error] Index 2 is out of bound for length 2
-
-λ user> (has-next? lseq)
-false
-```
-
-#### doall/1
-
-Applies the function associated with the lazy sequence to the next element if present as required to realize the elements in the sequence.
-
-```
-λ user> (doall (map (fn (x) (+ x 3)) [1 2 3]))
-[4 5 6]
+λ user> (shuffle [1 2 3 4 5])
+[5 3 2 4 1]
 ```
 
 ### String functions
@@ -1287,14 +1235,9 @@ Read the content of a file as a string. This should be used for smaller files on
 Loads a dlisp file and evaluates the code. Path can be relative to the current interpreter location or can be absolute.
 
 ```
-λ user> (load-file "DreamLispTests/dlisp/dlisp-test.dlisp")
-
-Testing notification
-Testing add-notification
-notif-handler
-
-{:fail 0 :count 1 :success 1}
-[:ok "dlisp-test.dlisp"]
+λ user> (load-file "DreamLispTests/dlisp/collatz.dlisp")
+[100000000 ... 13 40 20 10 5 16 8 4 2 1]
+[:ok "collatz.dlisp"]
 ```
 
 ### IO
@@ -1409,41 +1352,6 @@ Returns all the loaded modules.
 ```
 λ user> (all-modules)
 ["core" "test" "user" "network"]
-```
-
-### Async using notifications
-
-Uses notification as a way of passing messages between different entities. This is also used as a callback (or delegate) when working with network related APIs. Internally, dreamlisp makes use of `NSNotification`.
-
-#### add-notification/2
-
-Listen to a notification given by a keyword, with a handler function.
-
-```
-λ user> (defun pong (x) (println "pong" x))
-user:pong/1
-
-λ user> (add-notification :pong pong/1)
-true
-```
-
-#### post-notification/2
-
-Send a message with a notification key. If a handler was registered, the function will be invoked with the given data as argument.
-
-```
-λ user> (post-notification :pong "psi")
-pong psi
-true
-```
-
-#### remove-notification/1
-
-Removes all handlers for the given notification.
-
-```
-λ user> (remove-notification :pong)
-true
 ```
 
 ### JSON
@@ -1659,23 +1567,6 @@ Exits the REPL.
 ```
 λ user> (exit)
 Bye
-```
-
-## Network Module
-
-This module has network related functions which can be used with REST verbs `:get`, `:post`, `:put`, `:patch` and `:delete`. First we set up a notification handler and use the message key in the `network:http-request` function. Once the response if obtained, the notification with the data will be send the handler function asynchronously.
-
-```
-λ user> (defun on-download (x) (prn (decode-json (:data x))))
-user:on-download/1
-
-λ user> (add-notification :on-download on-download/1)
-true
-
-λ user> (network:http-request :get :on-download "https://jsonip.com" {} {:content-type "application/json"})
-true
-
-λ user> {"ip" "127.0.0.1" "Get Notifications" "https://jsonip.com/notify" "about" "https://jsonip.com/about" "Pro!" "http://getjsonip.com"}
 ```
 
 ## Run script from command line

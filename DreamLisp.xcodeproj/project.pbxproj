@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9E1380F623A9A02700D2D39C /* dlisp-test.dlisp in Resources */ = {isa = PBXBuildFile; fileRef = 9E1380F523A9A02700D2D39C /* dlisp-test.dlisp */; };
 		9E1E697722C5377E00E52162 /* DLFileIOServiceDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E1E697522C5377E00E52162 /* DLFileIOServiceDelegate.h */; };
 		9E1E697B22C5395500E52162 /* DLStdIOServiceDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E1E697A22C5395400E52162 /* DLStdIOServiceDelegate.h */; };
 		9E1E697E22C53EAB00E52162 /* DLIOService.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E1E697C22C53EAB00E52162 /* DLIOService.h */; };
@@ -156,7 +155,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		9E1380F523A9A02700D2D39C /* dlisp-test.dlisp */ = {isa = PBXFileReference; lastKnownFileType = text; path = "dlisp-test.dlisp"; sourceTree = "<group>"; };
 		9E1E697522C5377E00E52162 /* DLFileIOServiceDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLFileIOServiceDelegate.h; sourceTree = "<group>"; };
 		9E1E697A22C5395400E52162 /* DLStdIOServiceDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLStdIOServiceDelegate.h; sourceTree = "<group>"; };
 		9E1E697C22C53EAB00E52162 /* DLIOService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DLIOService.h; sourceTree = "<group>"; };
@@ -439,7 +437,6 @@
 				9E741ECD22C139B1009680E8 /* i.test.dlisp */,
 				9E741ECE22C139B9009680E8 /* module-test.dlisp */,
 				9E741ECF22C139BC009680E8 /* scope.dlisp */,
-				9E1380F523A9A02700D2D39C /* dlisp-test.dlisp */,
 			);
 			path = dlisp;
 			sourceTree = "<group>";
@@ -732,7 +729,6 @@
 			files = (
 				9E741ED022C13A13009680E8 /* collatz.dlisp in Resources */,
 				9EFCBA6C2B7CB52200619CB9 /* factorial.dlisp in Resources */,
-				9E1380F623A9A02700D2D39C /* dlisp-test.dlisp in Resources */,
 				9E741ED122C13A13009680E8 /* i.test.dlisp in Resources */,
 				9E741ED222C13A13009680E8 /* module-test.dlisp in Resources */,
 				9E741ED322C13A13009680E8 /* scope.dlisp in Resources */,
