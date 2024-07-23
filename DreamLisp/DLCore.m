@@ -2280,7 +2280,7 @@ double dmod(double a, double n) {
             [[[DLError alloc] initWithFormat:DLDataTypeMismatch, @"'sequence'", [elem dataTypeName]] throw];
             return [DLNil new];
         }
-        NSMutableArray *arr = [elem value];
+        NSMutableArray *arr = [(DLList *)[elem mutableCopyWithZone:nil] value];
         NSUInteger len = [arr count];
         for (NSUInteger i = len; i > 1; i--) {
             [arr exchangeObjectAtIndex:i - 1 withObjectAtIndex:arc4random_uniform((u_int32_t)i)];
