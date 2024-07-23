@@ -2270,6 +2270,25 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:rand argCount:1 name:@"rand/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"rand" moduleName:[DLConst coreModuleName]]];
+    
+    #pragma mark shuffle
+    /** Returns the given list shuffled using Fisher-Yates shuffle. */
+    id<DLDataProtocol>(^shuffle)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        [DLTypeUtils checkArityCount:[xs count] arity:1 fnName:@"shuffle/1"];
+        id<DLDataProtocol> elem = [xs first];
+        if (![DLList isKindOfList:elem]) {
+            [[[DLError alloc] initWithFormat:DLDataTypeMismatch, @"'sequence'", [elem dataTypeName]] throw];
+            return [DLNil new];
+        }
+        NSMutableArray *arr = [elem value];
+        NSUInteger len = [arr count];
+        for (NSUInteger i = len; i > 1; i--) {
+            [arr exchangeObjectAtIndex:i - 1 withObjectAtIndex:arc4random_uniform((u_int32_t)i)];
+        }
+        return [DLVector isVector:elem] ? [[DLVector alloc] initWithArray:arr] : [[DLList alloc] initWithArray:arr];
+    };
+    fn = [[DLFunction alloc] initWithFn:shuffle argCount:1 name:@"shuffle/1"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"shuffle" moduleName:[DLConst coreModuleName]]];
 }
 
 #pragma mark - Module
