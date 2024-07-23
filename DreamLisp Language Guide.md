@@ -936,7 +936,7 @@ Returns details of the given element.
 
 ### rand/1
 
-Returns a random number within the specified upper bound inclusive.
+Returns a random number based on uniform random distribution within the specified upper bound inclusive.
 
 ```
 λ user> (rand 31)
