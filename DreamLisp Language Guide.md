@@ -154,7 +154,7 @@ Note: When using the REPL, on a line break the expression will be evaluated. We 
 ```
 (let ((name-xs ["Alice" "Bob" "Jane"])
       (greet (fn (n)
-               (doall (map (fn (x) (println "Hello" x)) n)))))
+               (map (fn (x) (println "Hello" x)) n))))
   (greet name-xs)
   nil)
     
@@ -169,7 +169,7 @@ Note: When using the REPL, on a line break the expression will be evaluated. We 
 ```
 (let [name-xs ["Alice" "Bob" "Jane"] 
       greet (fn (n)
-              (doall (map (fn (x) (println "Hello" x)) n)))]
+              (map (fn (x) (println "Hello" x)) n))]
   (greet name-xs) 
   nil)
     
@@ -440,7 +440,7 @@ Takes a start, an end index, a sequence and returns a sub-sequence within the gi
 Takes a filter predicate function and a collection, and returns a sequence which applies the function to each element in the collection and returns the resulting filtered collection.
 
 ```
-λ user> (doall (filter (fn (x) (< x 0)) '(-1 4 0 -4 -5 2)))
+λ user> (filter (fn (x) (< x 0)) '(-1 4 0 -4 -5 2))
 (-1 -4 -5)
 ```
 
@@ -449,7 +449,7 @@ Takes a filter predicate function and a collection, and returns a sequence which
 Takes any nested collection and returns a sequence with its contents as a single collection.
 
 ```
-λ user> (doall (flatten [[1] [2 [3]] [[[4]]] [5]]))
+λ user> (flatten [[1] [2 [3]] [[[4]]] [5]])
 [1 2 3 4 5]
 ```
 
@@ -545,10 +545,10 @@ Takes `n` elements from the given sequence.
 Returns a sequence with elements reversed.
 
 ```
-λ user> (doall (reverse "apple"))
+λ user> (reverse "apple")
 elppa
 
-λ user> (doall (reverse [11 121 1221]))
+λ user> (reverse [11 121 1221])
 [1221 121 11]
 ```
 
@@ -868,7 +868,7 @@ Takes a function and a list of arguments, invokes the function with the elements
 λ user> (apply str/1 ["d" "r" "e" "a" "m"])
 "dream"
 
-λ user> (apply (fn (& more) (doall (map odd?/1 more))) [0 3 13 31])
+λ user> (apply (fn (& more) (map odd?/1 more)) [0 3 13 31])
 (false true true true)
 ```
 
