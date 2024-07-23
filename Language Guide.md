@@ -65,7 +65,7 @@ The vector notation is `[]` square braces. We can use the function `vector` to c
 Hash maps are dictionary collection which can have key-value pair. The short notation for hash-map is `{}`.
 
 ```
-λ user> {"name" "Jane", "age" 42, "location" "PlanetEarth"}
+λ user> {"name" "Jane", "age" 42, "location" "Planet Earth"}
 {"name" "Jane" "age" 42}
 
 λ user> (def person {:first-name "Jane" :last-name "Doe" :location "Planet Earth"})
