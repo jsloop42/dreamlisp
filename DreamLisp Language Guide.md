@@ -934,7 +934,7 @@ Returns details of the given element.
 {:type "function" :module "core" :position 0 :arity -1 :macro? true :imported? false :name "core:or/n" :arguments [core:x core:& core:more]}
 ```
 
-### rand/1
+#### rand/1
 
 Returns a random number based on uniform random distribution within the specified upper bound inclusive.
 
@@ -943,7 +943,7 @@ Returns a random number based on uniform random distribution within the specifie
 24
 ```
 
-### shuffle/1
+#### shuffle/1
 
 Shuffles the given sequence using Fisher–Yates algorithm with uniform random distribution.
 
