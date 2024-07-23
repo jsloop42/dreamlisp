@@ -1886,7 +1886,9 @@
     [a setModuleName:@"b"];
     XCTAssertNotEqualObjects([s moduleName], @"s");
     XCTAssertNotNil([dl rep:@"(rand 21)"]);
-    XCTAssertNotNil([dl rep:@"(shuffle [1 2 3])"]);
+    [dl rep:@"(def xs [1 2 3 4 5])"];
+    XCTAssertNotNil([dl rep:@"(shuffle xs)"]);
+    XCTAssertEqualObjects([dl rep:@"xs"], @"[1 2 3 4 5]");
 }
 
 - (void)testTypeFunction {
