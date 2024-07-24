@@ -95,6 +95,14 @@
     return first;
 }
 
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    return [[NSArray alloc] initWithArray:self];
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [[NSMutableArray alloc] initWithArray:self];
+}
+
 - (NSString *)description {
     NSMutableString *str = [NSMutableString new];
     NSUInteger len = [self count];

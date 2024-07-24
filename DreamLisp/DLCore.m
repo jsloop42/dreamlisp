@@ -1156,6 +1156,28 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:append argCount:3 name:@"append/3"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"append" moduleName:[DLConst coreModuleName]]];
+    
+    #pragma mark remove
+    /** Remove an element from the list or set. */
+    id<DLDataProtocol>(^remove)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        [DLTypeUtils checkArity:xs arity:2];
+        id<DLDataProtocol> elem = [xs first];
+        id<DLDataProtocol> data = [xs second];
+        if ([DLList isKindOfList:data]) {
+            NSMutableArray *arr = [(DLList *)data removeImmutable:elem];
+            if ([DLVector isVector:data]) {
+                return [[DLVector alloc] initWithArray:arr];
+            }
+            return [[DLList alloc] initWithArray:arr];
+        } else if ([DLSet isSet:data]) {
+            return [[DLSet alloc] initWithSet:[(DLSet *)data removeImmutable:elem]];
+        } else {
+            [[[DLError alloc] initWithFormat:DLDataTypeMismatch, @"'sequence' or 'set'", [elem dataTypeName]] throw];
+        }
+        return [DLNil new];
+    };
+    fn = [[DLFunction alloc] initWithFn:remove argCount:2 name:@"remove/2"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"remove" moduleName:[DLConst coreModuleName]]];
 }
 
 - (id<DLDataProtocol>)fold:(NSMutableArray *)xs isRight:(BOOL)isRight {

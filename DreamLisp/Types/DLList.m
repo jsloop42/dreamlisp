@@ -155,6 +155,12 @@
     [_array removeObject:object];
 }
 
+- (NSMutableArray *)removeImmutable:(id<DLDataProtocol>)object {
+    NSMutableArray *arr = [_array mutableCopyWithZone:nil];
+    [arr removeObject:object];
+    return arr;
+}
+
 - (void)removeAtIndex:(NSUInteger)index {
     [_array removeObjectAtIndex:index];
 }

@@ -152,6 +152,12 @@
     return [_set member:object] != nil;
 }
 
+- (NSMutableSet *)removeImmutable:(id<DLDataProtocol>)object {
+    NSMutableSet *set = [_set mutableCopyWithZone:nil];
+    [set removeObject:object];
+    return set;
+}
+
 - (NSUInteger)hash {
     return [_set hash];
 }

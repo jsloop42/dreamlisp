@@ -14,4 +14,12 @@
     return [self count] == 0;
 }
 
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    return [[NSSet alloc] initWithSet:self];
+}
+
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone {
+    return [[NSMutableSet alloc] initWithSet:self];
+}
+
 @end

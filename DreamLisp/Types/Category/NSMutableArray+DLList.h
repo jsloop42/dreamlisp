@@ -24,6 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSMutableArray *)reverse;
 - (NSMutableArray *)drop:(NSInteger)n;
 - (id _Nullable)drop;
+- (nonnull id)copyWithZone:(nullable NSZone *)zone;
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone;
 @end
 
 NS_ASSUME_NONNULL_END

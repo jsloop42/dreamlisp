@@ -12,6 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NSMutableSet (DLSet)
 - (BOOL)isEmpty;
+- (nonnull id)copyWithZone:(nullable NSZone *)zone;
+- (nonnull id)mutableCopyWithZone:(nullable NSZone *)zone;
 @end
 
 NS_ASSUME_NONNULL_END

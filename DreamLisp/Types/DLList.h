@@ -29,6 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)addObjectsFromList:(DLList *)list;
 - (void)update:(id<DLDataProtocol>)object atIndex:(NSUInteger)index;
 - (void)remove:(id<DLDataProtocol>)object;
+/** Returns a new list with the given element removed. */
+- (NSMutableArray *)removeImmutable:(id<DLDataProtocol>)object;
 - (void)removeAtIndex:(NSUInteger)index;
 - (NSUInteger)count;
 - (id<DLDataProtocol>)first;
