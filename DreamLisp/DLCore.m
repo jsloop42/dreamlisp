@@ -47,6 +47,7 @@ static NSString *_description = @"The core module.";
     [self addKeywordFunctions];
     [self addVectorFunctions];
     [self addHashMapFunctions];
+    [self addSetFunctions];
     [self addIOFunctions];
     [self addJSONFunctions];
     [self addMetaFunctions];
@@ -1480,6 +1481,20 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:keywordize argCount:1 name:@"keywordize/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"keywordize" moduleName:[DLConst coreModuleName]]];
+}
+
+#pragma mark - Set
+
+- (void)addSetFunctions {
+    DLFunction *fn = nil;
+    
+    #pragma mark set
+    /** Create a set with given elements. */
+    id<DLDataProtocol>(^set)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        return [[DLSet alloc] initWithArray:xs];
+    };
+    fn = [[DLFunction alloc] initWithFn:set argCount:-1 name:@"set/n"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"set" moduleName:[DLConst coreModuleName]]];
 }
 
 #pragma mark - Atom

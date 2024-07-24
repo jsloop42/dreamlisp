@@ -144,6 +144,10 @@
     return [_set count];
 }
 
+- (BOOL)isEmpty {
+    return [_set isEmpty];
+}
+
 - (NSUInteger)hash {
     return [_set hash];
 }
@@ -171,7 +175,7 @@
     for (id elem in _set) {
         [arr addObject:[elem description]];
     }
-    return [NSString stringWithFormat:@"(set %@)", [arr componentsJoinedByString:@" "]];
+    return [arr isEmpty] ? @"(set nil)" : [NSString stringWithFormat:@"(set %@)", [arr componentsJoinedByString:@" "]];
 }
 
 - (NSString *)debugDescription {

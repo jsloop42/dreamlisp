@@ -59,10 +59,12 @@
         for (i = 0; i < len; i++) {
             id key = keys[i];
             [xs addObject:[[NSString alloc] initWithFormat:@"%@ %@",
-                                [self printStringFor:(id<DLDataProtocol>)key readably:readably],
-                                [self printStringFor:(id<DLDataProtocol>)[hm objectForKey:key] readably:readably]]];
+                           [self printStringFor:(id<DLDataProtocol>)key readably:readably],
+                           [self printStringFor:(id<DLDataProtocol>)[hm objectForKey:key] readably:readably]]];
         }
         return [[NSString alloc] initWithFormat:@"{%@}", [xs componentsJoinedByString:@" "]];
+    } else if ([DLSet isSet:data]) {
+        return [data description];
     } else if ([DLKeyword isKeyword:data]) {
         return [(DLKeyword *)data value];
     } else if ([DLAtom isAtom:data]) {

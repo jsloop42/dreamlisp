@@ -118,6 +118,8 @@
 		9E7B3E502C00FD7C0092DEE1 /* DLStack.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E7B3E4E2C00FD6D0092DEE1 /* DLStack.m */; };
 		9E7B3E532C00FEC00092DEE1 /* DLShellInput.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E7B3E512C00FEC00092DEE1 /* DLShellInput.m */; };
 		9E7B3E542C00FEC00092DEE1 /* DLShellInput.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E7B3E512C00FEC00092DEE1 /* DLShellInput.m */; };
+		9E7BF4A32C510AF4004223BB /* NSMutableSet+DLSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E7BF4A12C510AF4004223BB /* NSMutableSet+DLSet.h */; };
+		9E7BF4A42C510AF4004223BB /* NSMutableSet+DLSet.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E7BF4A22C510AF4004223BB /* NSMutableSet+DLSet.m */; };
 		9E8FEB5722D1223F00717127 /* DLAlgorithmTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8FEB5622D1223F00717127 /* DLAlgorithmTest.m */; };
 		9E8FEB5B22D243FD00717127 /* DLAlgorithm.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8FEB5922D243FD00717127 /* DLAlgorithm.m */; };
 		9E96593823194F5700B695ED /* DLError.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E96593723194F5600B695ED /* DLError.h */; };
@@ -264,6 +266,8 @@
 		9E7B3E4E2C00FD6D0092DEE1 /* DLStack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DLStack.m; sourceTree = "<group>"; };
 		9E7B3E512C00FEC00092DEE1 /* DLShellInput.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DLShellInput.m; sourceTree = "<group>"; };
 		9E7B3E522C00FEC00092DEE1 /* DLShellInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DLShellInput.h; sourceTree = "<group>"; };
+		9E7BF4A12C510AF4004223BB /* NSMutableSet+DLSet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSMutableSet+DLSet.h"; sourceTree = "<group>"; };
+		9E7BF4A22C510AF4004223BB /* NSMutableSet+DLSet.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSMutableSet+DLSet.m"; sourceTree = "<group>"; };
 		9E8FEB5622D1223F00717127 /* DLAlgorithmTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLAlgorithmTest.m; sourceTree = "<group>"; };
 		9E8FEB5922D243FD00717127 /* DLAlgorithm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DLAlgorithm.m; sourceTree = "<group>"; };
 		9E9458542274EB4400A3D449 /* NSMapTable+DLHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSMapTable+DLHashMap.h"; sourceTree = "<group>"; };
@@ -524,6 +528,8 @@
 				9E30553E22612AF0001D4597 /* NSMutableArray+DLList.m */,
 				9E2491E8226C39CA00B9E21C /* NSMutableDictionary+DLHashMap.h */,
 				9E2491E9226C39CA00B9E21C /* NSMutableDictionary+DLHashMap.m */,
+				9E7BF4A12C510AF4004223BB /* NSMutableSet+DLSet.h */,
+				9E7BF4A22C510AF4004223BB /* NSMutableSet+DLSet.m */,
 				9E30554622619F3F001D4597 /* NSNumber+DLDataProtocol.h */,
 				9E30554722619F3F001D4597 /* NSNumber+DLDataProtocol.m */,
 				9E30554222612C34001D4597 /* NSString+DLDataProtocol.h */,
@@ -547,6 +553,7 @@
 				9E1E697B22C5395500E52162 /* DLStdIOServiceDelegate.h in Headers */,
 				9E741EB722C12DBA009680E8 /* DLTypeUtils.h in Headers */,
 				9E741EC322C12DCE009680E8 /* DLState.h in Headers */,
+				9E7BF4A32C510AF4004223BB /* NSMutableSet+DLSet.h in Headers */,
 				9E28E33F232450410024A414 /* DLTableProtocol.h in Headers */,
 				9E741EC422C12DCE009680E8 /* DLSymbolTable.h in Headers */,
 				9E741EAF22C12DBA009680E8 /* DLKeyword.h in Headers */,
@@ -780,6 +787,7 @@
 				9E741E9A22C12C38009680E8 /* DLState.m in Sources */,
 				9E741E8822C12C23009680E8 /* DLList.m in Sources */,
 				9E741E8422C12C23009680E8 /* DLFault.m in Sources */,
+				9E7BF4A42C510AF4004223BB /* NSMutableSet+DLSet.m in Sources */,
 				9E3AC8052C508DA900A1BA84 /* DLSet.m in Sources */,
 				9E741E9922C12C38009680E8 /* DLReader.m in Sources */,
 				9E741E9022C12C38009680E8 /* DLConst.m in Sources */,

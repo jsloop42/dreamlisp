@@ -12,6 +12,7 @@
 #import "DLLogger.h"
 #import "DLConst.h"
 #import "DLTypeUtils.h"
+#import "NSMutableSet+DLSet.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -24,6 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithArray:(NSArray *)array;
 - (instancetype)initWithMeta:(id<DLDataProtocol>)meta set:(DLSet *)hashSet;
 - (NSUInteger)count;
+- (BOOL)isEmpty;
 @end
 
 NS_ASSUME_NONNULL_END

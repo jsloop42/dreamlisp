@@ -273,7 +273,7 @@ true
 false
 ```
 
-### first/1
+#### first/1
 
 The `first` function returns the first element of a sequence if present or `nil`.
 

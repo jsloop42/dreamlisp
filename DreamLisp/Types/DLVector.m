@@ -32,7 +32,6 @@
  @param fnName The calling function name
  @return A list object.
  */
-
 + (DLList *)dataToList:(id<DLDataProtocol>)data fnName:(NSString *)fnName {
     return [self dataToList:data position:-1 fnName:fnName];
 }
