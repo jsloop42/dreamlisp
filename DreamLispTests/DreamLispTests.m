@@ -18,11 +18,11 @@
 @implementation DLTests
 
 - (void)setUp {
-
+    
 }
 
 - (void)tearDown {
-
+    
 }
 
 - (void)testNSMapTable {
@@ -65,7 +65,7 @@
     XCTAssertEqual([list count], 2);
     list = [[DLList alloc] initWithArray: [@[[[DLString alloc] initWithString:@"1"], [[DLString alloc] initWithString:@"2"],
                                              [[DLString alloc] initWithString:@"3"], [[DLString alloc] initWithString:@"4"]] mutableCopy]];
-
+    
     XCTAssertEqualObjects([(DLString *)[[list reverse] first] value], @"4");
     XCTAssertEqualObjects([(DLString *)[list first] value], @"1");
 }
@@ -260,7 +260,7 @@
     DLPrinter *prn = [DLPrinter new];
     // Function
     DLFunction *fn = [[DLFunction alloc] initWithAst:[DLNil new] params:[NSMutableArray new]
-                      env:[DLEnv new] macro:false meta:[DLNil new] fn:^id(id arg) { return nil; } name:@"nil-fn/0"];
+                                                 env:[DLEnv new] macro:false meta:[DLNil new] fn:^id(id arg) { return nil; } name:@"nil-fn/0"];
     XCTAssertEqualObjects([prn printStringFor:fn readably:true], @"nil-fn/0");
     // Symbol
     DLSymbol *sym = [[DLSymbol alloc] initWithName:@"greet"];
@@ -367,6 +367,21 @@
     aRet = [hm objectForKey:aKeys[0]];
     XCTAssertNotNil(aRet);
     XCTAssertEqualObjects([aRet dataType], @"DLNumber");
+}
+
+- (void)testDLSet {
+    DLNumber *n1 = [[DLNumber alloc] initWithInt:1];
+    DLNumber *n2 = [[DLNumber alloc] initWithInt:2];
+    DLNumber *n3 = [[DLNumber alloc] initWithInt:3];
+    DLNumber *n4 = [[DLNumber alloc] initWithInt:1];
+    DLNumber *n5 = [[DLNumber alloc] initWithInt:5];
+    DLSet *set = [[DLSet alloc] initWithArray:@[n1, n2, n3, n4]];
+    XCTAssertEqual([set count], 3);
+    XCTAssertTrue([set contains:n1]);
+    XCTAssertTrue([set contains:n2]);
+    XCTAssertTrue([set contains:n3]);
+    XCTAssertTrue([set contains:n4]);  // hash is the same as n1 but count is 3
+    XCTAssertFalse([set contains:n5]);
 }
 
 - (void)testDLListRest {
@@ -700,6 +715,14 @@
     XCTAssertEqualObjects([dl rep:@"(def tag :success)"], @":success");
     XCTAssertEqualObjects([dl rep:@"(def hm (atom {:success 0}))"], @"(atom {:success 0})");
     XCTAssertEqualObjects([dl rep:@"(reset! hm (assoc @hm tag (+ (get tag @hm) 1)))"], @"{:success 1}");
+}
+
+- (void)testSet {
+    DreamLisp *dl = [[DreamLisp alloc] initWithoutREPL];
+    XCTAssertNotNil([dl rep:@"(def s (set 1 2 3))"]);
+    XCTAssertEqualObjects([dl rep:@"(set)"], @"#{}");
+    XCTAssertEqualObjects([dl rep:@"(contains? 3 s)"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(contains? 0 s)"], @"false");
 }
 
 - (void)testEnv {

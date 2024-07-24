@@ -1419,6 +1419,8 @@ double dmod(double a, double n) {
                 isExists = [(DLHashMap *)data containsKey:elem];
             } else if ([DLList isKindOfList:data]) {
                 isExists = [[(DLList *)data value] containsObject:elem];
+            } else if ([DLSet isSet:data]) {
+                isExists = [(DLSet *)data contains:elem];
             } else if ([DLString isString:data]) {
                 isExists = [(NSString *)[(DLString *)data value] containsString:[elem description]];
             } else {
@@ -1495,6 +1497,26 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:set argCount:-1 name:@"set/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"set" moduleName:[DLConst coreModuleName]]];
+    
+    #pragma mark union
+    /** Returns a new a set which is a union of all the given sets.. */
+    id<DLDataProtocol>(^unionSet)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        id<DLDataProtocol> elem;
+        NSMutableSet *set = [[NSMutableSet alloc] init];
+        for (elem in xs) {
+            // Ignoring other data types instead of throwing error so that set and lists can be
+            // mixed together in the presence of other types.
+            if ([DLSet isSet:elem]) {
+                [set unionSet:[(DLSet *)elem value]];
+            } else if ([DLList isKindOfList:elem]) {
+                NSSet *aSet = [[NSSet alloc] initWithArray:[(DLList *)elem value]];
+                [set unionSet:aSet];
+            }
+        }
+        return [[DLSet alloc] initWithSet:set];
+    };
+    fn = [[DLFunction alloc] initWithFn:unionSet argCount:-1 name:@"union/n"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"union" moduleName:[DLConst coreModuleName]]];
 }
 
 #pragma mark - Atom
@@ -1810,7 +1832,7 @@ double dmod(double a, double n) {
     fn = [[DLFunction alloc] initWithFn:trim argCount:1 name:@"trim/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"trim" moduleName:[DLConst coreModuleName]]];
 
-    #pragma mark trim
+    #pragma mark replace
     /**
      Replaces all occurrences of the search string with the target string in the given string and returns the newly obtained string.
      (replace "123" "+" "he123llo wo123rld")

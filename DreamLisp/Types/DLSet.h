@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithMeta:(id<DLDataProtocol>)meta set:(DLSet *)hashSet;
 - (NSUInteger)count;
 - (BOOL)isEmpty;
+/** Checks if the given object is a member of the set. */
+- (BOOL)contains:(id<DLDataProtocol>)object;
 @end
 
 NS_ASSUME_NONNULL_END

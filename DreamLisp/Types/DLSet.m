@@ -148,6 +148,10 @@
     return [_set isEmpty];
 }
 
+- (BOOL)contains:(id<DLDataProtocol>)object {
+    return [_set member:object] != nil;
+}
+
 - (NSUInteger)hash {
     return [_set hash];
 }
