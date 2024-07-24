@@ -311,6 +311,7 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"prn" moduleName:[DLConst coreModuleName]]];
     
     #pragma mark print
+    /** Prints without any space separator added between the strings. Useful when new line strings needs to be aligned to the leading. */
     id<DLDataProtocol>(^print)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
             DLCore *this = weakSelf;
@@ -320,11 +321,11 @@ double dmod(double a, double n) {
             for (i = 0; i < len; i++) {
                 [ret addObject:[this->_printer printStringFor:[xs nth:i] readably:false]];
             }
-            [[this->_delegate ioService] writeOutput:[ret componentsJoinedByString:@" "] terminator:@""];
+            [[this->_delegate ioService] writeOutput:[ret componentsJoinedByString:@""] terminator:@""];
             return nil;
         }
     };
-    // prints to stdout without newline and  without returning nil
+    // prints to stdout without newline and without returning nil
     fn = [[DLFunction alloc] initWithFn:print argCount:-1 name:@"print/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"print" moduleName:[DLConst coreModuleName]]];
     
