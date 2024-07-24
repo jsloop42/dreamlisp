@@ -64,7 +64,7 @@ double dmod(double a, double n) {
 /** Arithmetic functions takes variadic arguments. If no arguments are given, default identities are returned if present, @c 0 for @c (+) and @c 1 @c (*). */
 - (void)addArithmeticFunctions {
     DLFunction *fn = nil;
-
+    
     id<DLDataProtocol>(^calc)(NSMutableArray *args, SEL sel) = ^id<DLDataProtocol>(NSMutableArray *args, SEL sel) {
         @autoreleasepool {
             NSDecimalNumber *num = [NSDecimalNumber new];
@@ -98,7 +98,7 @@ double dmod(double a, double n) {
             return [[DLNumber alloc] initWithNumber:num];
         }
     };
-
+    
     #pragma mark add
     DLFunction *add = [[DLFunction alloc] initWithFn:^id<DLDataProtocol>(NSMutableArray *args) {
         @autoreleasepool {
@@ -108,7 +108,7 @@ double dmod(double a, double n) {
     } name:@"+/n"];
     [add setArgsCount:-1];
     [_env setObject:add forKey:[[DLSymbol alloc] initWithFunction:add name:@"+" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark subtract
     DLFunction *subtract = [[DLFunction alloc] initWithFn:^id<DLDataProtocol>(NSMutableArray *args) {
         @autoreleasepool {
@@ -127,7 +127,7 @@ double dmod(double a, double n) {
     } name:@"-/n"];
     [subtract setArgsCount:-1];
     [_env setObject:subtract forKey:[[DLSymbol alloc] initWithFunction:subtract name:@"-" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark multiply
     DLFunction *multiply = [[DLFunction alloc] initWithFn:^id<DLDataProtocol>(NSMutableArray *args) {
         @autoreleasepool {
@@ -137,7 +137,7 @@ double dmod(double a, double n) {
     } name:@"*/n"];
     [multiply setArgsCount:-1];
     [_env setObject:multiply forKey:[[DLSymbol alloc] initWithFunction:multiply name:@"*" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark divide
     DLFunction *divide = [[DLFunction alloc] initWithFn:^id<DLDataProtocol>(NSMutableArray *args) {
         @autoreleasepool {
@@ -147,7 +147,7 @@ double dmod(double a, double n) {
     } name:@"//n"];
     [divide setArgsCount:-1];
     [_env setObject:divide forKey:[[DLSymbol alloc] initWithFunction:divide name:@"/" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark mod
     id<DLDataProtocol>(^mod)(NSMutableArray *args) = ^id<DLDataProtocol>(NSMutableArray *args) {
         @autoreleasepool {
@@ -219,35 +219,35 @@ double dmod(double a, double n) {
             return [[DLBool alloc] initWithBool:ret];
         }
     };
-
+    
     #pragma mark <
     DLFunction *lessThan = [[DLFunction alloc] initWithFn:^id<DLDataProtocol>(NSMutableArray *args) {
         return compare(args, @selector(isLessThan:));
     } name:@"</n"];
     [lessThan setArgsCount:-1];
     [_env setObject:lessThan forKey:[[DLSymbol alloc] initWithFunction:lessThan name:@"<" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark >
     DLFunction *greaterThan = [[DLFunction alloc] initWithFn:^id<DLDataProtocol>(NSMutableArray *args) {
         return compare(args, @selector(isGreaterThan:));
     } name:@">/n"];
     [greaterThan setArgsCount:-1];
     [_env setObject:greaterThan forKey:[[DLSymbol alloc] initWithFunction:greaterThan name:@">" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark <=
     DLFunction *lessThanOrEqualTo = [[DLFunction alloc] initWithFn:^id<DLDataProtocol>(NSMutableArray *args) {
         return compare(args, @selector(isLessThanOrEqualTo:));
     } name:@"<=/n"];
     [lessThanOrEqualTo setArgsCount:-1];
     [_env setObject:lessThanOrEqualTo forKey:[[DLSymbol alloc] initWithFunction:lessThanOrEqualTo name:@"<=" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark >=
     DLFunction *greaterThanOrEqualTo = [[DLFunction alloc] initWithFn:^id<DLDataProtocol>(NSMutableArray *args) {
         return compare(args, @selector(isGreaterThanOrEqualTo:));
     } name:@">=/n"];
     [greaterThanOrEqualTo setArgsCount:-1];
     [_env setObject:greaterThanOrEqualTo forKey:[[DLSymbol alloc] initWithFunction:greaterThanOrEqualTo name:@">=" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark =
     DLFunction *equalTo = [[DLFunction alloc] initWithFn:^id<DLDataProtocol>(NSMutableArray *args) {
         @autoreleasepool {
@@ -275,7 +275,7 @@ double dmod(double a, double n) {
 - (void)addPrintFunctions {
     DLCore * __weak weakSelf = self;
     DLFunction *fn = nil;
-
+    
     #pragma mark println
     id<DLDataProtocol>(^println)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
@@ -292,7 +292,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:println argCount:-1 name:@"println/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"println" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark prn
     id<DLDataProtocol>(^prn)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
@@ -309,7 +309,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:prn argCount:-1 name:@"prn/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"prn" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark print
     id<DLDataProtocol>(^print)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
@@ -327,7 +327,7 @@ double dmod(double a, double n) {
     // prints to stdout without newline and  without returning nil
     fn = [[DLFunction alloc] initWithFn:print argCount:-1 name:@"print/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"print" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark pr-str
     id<DLDataProtocol>(^prstr)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
@@ -344,7 +344,7 @@ double dmod(double a, double n) {
     // returns escaped strings (pr-str "a") -> "\"a\""
     fn = [[DLFunction alloc] initWithFn:prstr argCount:-1 name:@"pr-str/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"pr-str" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark str
     id<DLDataProtocol>(^str)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
@@ -367,7 +367,7 @@ double dmod(double a, double n) {
 
 - (void)addListFunctions {
     DLFunction *fn = nil;
-
+    
     #pragma mark list
     /** Create a list from the given elements. */
     id<DLDataProtocol>(^list)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -377,7 +377,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:list argCount:-1 name:@"list/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"list" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark list?
     /** Checks if the given element is a list */
     id<DLDataProtocol>(^listp)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -388,7 +388,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:listp argCount:1 name:@"list?/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"list?" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark empty?
     /** Checks if the given list contains no elements. */
     id<DLDataProtocol>(^emptyp)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -402,7 +402,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:emptyp argCount:1 name:@"empty?/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"empty?" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark count
     /** Returns the number of elements in the given list. */
     id<DLDataProtocol>(^count)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -426,11 +426,11 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:count argCount:1 name:@"count/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"count" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark cons
     /**
      Takes any element and adds it to the first of the given list.
-
+     
      (cons 1 '(2 3 4)) ; (1 2 3 4)
      (cons '(1) '(2 3 4)) ; ((1) 2 3 4)
      */
@@ -445,11 +445,11 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:cons argCount:2 name:@"cons/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"cons" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark concat
     /**
      Takes a list of sequences and combines them into one sequence.
-
+     
      (concat '(-2 -1 0) '(1 2 3 4)) ; (-2 -1 0 1 2 3 4)
      (concat ["a"] ["b"]) ; ["a" "b"]
      (concat "a" "b") ; "ab"
@@ -499,11 +499,11 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:concat argCount:-1 name:@"concat/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"concat" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark nth
     /**
      Returns the nth element from the sequence.
-
+     
      (nth 2 [1 2 3]) ; 3
      (nth 0 [1 2 3]) ; 1
      (nth 3 "abcd") ; "d"
@@ -524,7 +524,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:nth argCount:2 name:@"nth/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"nth" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark nth-tail
     /** Takes a start, end index, a sequence and returns a sub-sequence within the given indices inclusive. */
     id<DLDataProtocol>(^nthTail)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -554,7 +554,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:nthTail argCount:3 name:@"nth-tail/3"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"nth-tail" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark first
     /** Returns the first element of the list. If the list is empty, this returns nil. */
     id<DLDataProtocol>(^first)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -576,7 +576,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:first argCount:1 name:@"first/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"first" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark rest
     /** Returns a sequence without the first element. If the list is empty, then the list is returned. */
     id<DLDataProtocol>(^rest)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -599,7 +599,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:rest argCount:1 name:@"rest/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"rest" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark map
     /**
      Takes a function and variable number of lists with the same length with the function applied with arguments interleaved from the lists
@@ -642,12 +642,12 @@ double dmod(double a, double n) {
     
     fn = [[DLFunction alloc] initWithFn:map argCount:-1 name:@"map/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"map" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark conj
     /**
      Takes a vector and n elements, appends the elements to the vector and return resulting new vector. The original vector remains unchanged.
      If a list is given the elements are appended to the head of the list giving a reversed list.
-
+     
      (conj [1] 2 3 4) ; [1 2 3 4]
      (conj '(1) 2 3 4) ; (4 3 2 1)
      */
@@ -665,7 +665,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:conj argCount:-1 name:@"conj/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"conj" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark seq?
     /** Checks if the given element is iteratable, which is a list, vector or string. */
     id<DLDataProtocol>(^seqp)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -677,11 +677,11 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:seqp argCount:1 name:@"seq?/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"seq?" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark seq
     /**
      Takes a list, vector or a string and returns a list containing individual elements that can be iterated.
-
+     
      (seq '(1 2 3)) ; (1 2 3)
      (seq [1 2 3]) ; (1 2 3)
      (seq "abc") ; ("a" "b" "c")
@@ -720,7 +720,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:seq argCount:1 name:@"seq/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"seq" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark last
     /** Returns the last element of the list. If the list is empty, this returns nil. */
     id<DLDataProtocol>(^last)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -743,7 +743,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:last argCount:1 name:@"last/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"last" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark drop
     /** Returns the element of the list after removing n elements. */
     id<DLDataProtocol>(^drop)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -766,7 +766,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:drop argCount:2 name:@"drop/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"drop" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark reverse
     /** Returns the reverse of the given sequence. */
     id<DLDataProtocol>(^reverse)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -788,14 +788,14 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:reverse argCount:1 name:@"reverse/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"reverse" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark sort
     /**
      Returns the collection sorted by the given criteria. The first argument depends on the data structure provided. It takes a keyword @c :asc, @c :desc for
      @c list, @vector and @string elements. For @c hash-map, it takes these in a @c vector with first element preferably the sort indicator, @c :key or @c
      :value. The first argument can also take a comparison function which returns an integer value, in case of the former data types. For @c hash-map, the
      function is passed as the second element in the @c vector.
-
+     
      (sort :asc [3 5 2 4])  ; [2 3 4 5]
      (sort :desc '(3 5 2 4))  ; (5 4 3 2)
      (sort :asc "Magic")  ; "Macgi"
@@ -872,7 +872,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:sort argCount:2 name:@"sort/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"sort" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark filter
     /**
      Takes a filter predicate function and a collection, applies the function to each element in the collection and returns the resulting filtered collection.
@@ -908,11 +908,11 @@ double dmod(double a, double n) {
             }
         }
         return [DLList isList:second] ? [[DLList alloc] initWithArray:acc]
-                                      : [[DLVector alloc] initWithArray:acc];
+        : [[DLVector alloc] initWithArray:acc];
     };
     fn = [[DLFunction alloc] initWithFn:filter argCount:2 name:@"filter/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"filter" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark partition
     /**
      Takes a predicate function and a collection, applies the function to each element in the collection and returns the resulting collection partitioned into
@@ -951,7 +951,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:parition argCount:2 name:@"partition/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"partition" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark flatten
     /** Takes any nested sequence and returns its contents as a single collection. */
     id<DLDataProtocol>(^flatten)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -973,7 +973,7 @@ double dmod(double a, double n) {
     
     fn = [[DLFunction alloc] initWithFn:flatten argCount:1 name:@"flatten/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"flatten" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark take
     id<DLDataProtocol>(^take)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
@@ -992,11 +992,11 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:take argCount:2 name:@"take/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"take" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark join
     /**
      Take any element and a sequence or collection, joins, the element at each intermediate position, returning a sequence.
-
+     
      (join "a" [1 2 3])  ; [1 "a" 2 "a" 3]
      (join "bc" "xyz")  ; "xbcybcz"
      (join {:a 1} {:b 2 :c 3})  ; [[:c 3] [[:a 1]] [:b 2]]  For hash-maps order is not maintained
@@ -1034,7 +1034,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:join argCount:2 name:@"join/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"join" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark into
     id<DLDataProtocol>(^into)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
@@ -1086,7 +1086,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:into argCount:2 name:@"into/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"into" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark index-of
     id<DLDataProtocol>(^indexOf)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         @autoreleasepool {
@@ -1108,21 +1108,21 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:indexOf argCount:2 name:@"index-of/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"index-of" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark foldl
     id<DLDataProtocol>(^foldl)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         return [self fold:xs isRight:NO];
     };
     fn = [[DLFunction alloc] initWithFn:foldl argCount:3 name:@"foldl/3"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"foldl" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark foldr
     id<DLDataProtocol>(^foldr)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         return [self fold:xs isRight:YES];
     };
     fn = [[DLFunction alloc] initWithFn:foldr argCount:3 name:@"foldr/3"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"foldr" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark append
     /** Takes an element, an index, a sequence and appends the element at that index. */
     id<DLDataProtocol>(^append)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -1271,7 +1271,7 @@ double dmod(double a, double n) {
 
 - (void)addVectorFunctions {
     DLFunction *fn = nil;
-
+    
     #pragma mark vector
     /** Create a vector with the given elements. */
     id<DLDataProtocol>(^vector)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -1281,7 +1281,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:vector argCount:-1 name:@"vector/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"vector" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark vector?
     /** Checks if the given element is a vector. */
     id<DLDataProtocol>(^vectorp)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -1316,7 +1316,7 @@ double dmod(double a, double n) {
 
 - (void)addHashMapFunctions {
     DLFunction *fn = nil;
-
+    
     #pragma mark hash-map
     /** Create a hash map with given key value pair. The first element is taken as a key and the next element as its value and so on.*/
     id<DLDataProtocol>(^hashmap)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -1326,7 +1326,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:hashmap argCount:-1 name:@"hash-map/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"hash-map" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark hash-map?
     /** Checks if the given element is a hash map. */
     id<DLDataProtocol>(^hashmapp)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -1337,11 +1337,11 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:hashmapp argCount:1 name:@"hash-map?/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"hash-map?" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark assoc
     /**
      Takes a hash map and key value pairs, add them to the hash map and return a resulting new hash map.
-
+     
      (assoc {:a 1} :b 2 :c 3) ; {:a 1 :c 4 :b 3}
      */
     id<DLDataProtocol>(^assoc)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -1356,11 +1356,11 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:assoc argCount:-1 name:@"assoc/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"assoc" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark dissoc
     /**
      Takes a hash map and keys, removes the value associated for the key if present and returns the resulting new hash map.
-
+     
      (dissoc {:a 1 :b 2} :b :c) ; {:a 1}
      */
     id<DLDataProtocol>(^dissoc)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -1373,11 +1373,11 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:dissoc argCount:-1 name:@"dissoc/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"dissoc" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark get
     /**
      Takes a key, a hash map and returns the value associated with the key if present else nil.
-
+     
      (get :b {:a 1 :b 2 :c 3}) ; 2
      (get :v {:a 1 :b 2 :c 3}) ; nil
      */
@@ -1388,7 +1388,7 @@ double dmod(double a, double n) {
             id<DLDataProtocol> val = nil;
             if ([DLHashMap isHashMap:coll]) {
                 DLHashMap *hm = (DLHashMap *)[xs second];
-                 val = [hm objectForKey:[xs first]];
+                val = [hm objectForKey:[xs first]];
             } else {
                 [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"get/2",  @"'hash-map'", [coll dataTypeName]] throw];
             }
@@ -1397,11 +1397,11 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:get argCount:2 name:@"get/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"get" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark contains?
     /**
      Checks if the given sequence or collection contains the object.
-
+     
      (contains? :a {:a 1 :b 2 :c 3}) ; true
      (contains? 3 {:a 1 :b 2 :c 3}) ; false
      (contains? :v {:a 1 :b 2 :c 3}) ;false
@@ -1427,7 +1427,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:contains argCount:2 name:@"contains?/2"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"contains?" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark keys
     /** Returns a list containing the hash map keys. */
     id<DLDataProtocol>(^keys)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -1439,7 +1439,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:keys argCount:1 name:@"keys/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"keys" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark values
     /** Returns a list containing the hash map values. */
     id<DLDataProtocol>(^values)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -1451,7 +1451,7 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:values argCount:1 name:@"values/1"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"values" moduleName:[DLConst coreModuleName]]];
-
+    
     #pragma mark keywordize
     /** Keywordize the given hash-map keys which are not a keyword already. */
     id<DLDataProtocol>(^keywordize)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
@@ -2281,8 +2281,9 @@ double dmod(double a, double n) {
             return [DLNil new];
         }
         NSMutableArray *arr = [(DLList *)[elem mutableCopyWithZone:nil] value];
+        NSUInteger i;
         NSUInteger len = [arr count];
-        for (NSUInteger i = len; i > 1; i--) {
+        for (i = len; i > 1; i--) {
             [arr exchangeObjectAtIndex:i - 1 withObjectAtIndex:arc4random_uniform((u_int32_t)i)];
         }
         return [DLVector isVector:elem] ? [[DLVector alloc] initWithArray:arr] : [[DLList alloc] initWithArray:arr];
