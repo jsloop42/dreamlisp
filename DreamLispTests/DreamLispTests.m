@@ -723,6 +723,13 @@
     XCTAssertEqualObjects([dl rep:@"(set)"], @"#{}");
     XCTAssertEqualObjects([dl rep:@"(contains? 3 s)"], @"true");
     XCTAssertEqualObjects([dl rep:@"(contains? 0 s)"], @"false");
+    XCTAssertNotNil([dl rep:@"(def s1 (intersect (set 1 2 3) (set 2 3 4) (set 3 4 5)))"]);
+    XCTAssertEqualObjects([dl rep:@"(count s1)"], @"3");
+    XCTAssertEqualObjects([dl rep:@"(contains? 1 s1)"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(contains? 2 s1)"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(contains? 3 s1)"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(contains? 4 s1)"], @"false");
+    XCTAssertEqualObjects([dl rep:@"(contains? 5 s1)"], @"false");
 }
 
 - (void)testEnv {

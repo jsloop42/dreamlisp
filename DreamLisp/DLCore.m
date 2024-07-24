@@ -419,6 +419,8 @@ double dmod(double a, double n) {
                 count = [(DLList *)first count];
             } else if ([DLHashMap isHashMap:first]) {
                 count = [(DLHashMap *)first count];
+            } else if ([DLSet isSet:first]) {
+                count = [(DLSet *)first count];
             } else {
                 [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, @"count/1", @"'sequence' or 'collection'", 1,
                   [list dataTypeName]] throw];
@@ -1499,7 +1501,7 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"set" moduleName:[DLConst coreModuleName]]];
     
     #pragma mark union
-    /** Returns a new a set which is a union of all the given sets.. */
+    /** Returns a new a set which is a union of all the given sets. */
     id<DLDataProtocol>(^unionSet)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         id<DLDataProtocol> elem;
         NSMutableSet *set = [[NSMutableSet alloc] init];
@@ -1517,6 +1519,32 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:unionSet argCount:-1 name:@"union/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"union" moduleName:[DLConst coreModuleName]]];
+    
+    #pragma mark intersect
+    /** Returns a new a set which is an intersection of all the given sets. */
+    id<DLDataProtocol>(^intersect)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        id<DLDataProtocol> elem;
+        NSMutableSet *set = [[NSMutableSet alloc] init];
+        NSUInteger i;
+        NSUInteger len = [xs count];
+        id<DLDataProtocol> first = [xs first];
+        if ([DLSet isSet:first]) {
+            set = [(DLSet *)first value];
+        } else if ([DLList isKindOfList:first]) {
+            set = [[NSMutableSet alloc] initWithArray:[(DLList *)first value]];
+        }
+        for (i = 1; i < len; i++) {
+            if ([DLSet isSet:elem]) {
+                [set intersectSet:[(DLSet *)elem value]];
+            } else if ([DLList isKindOfList:elem]) {
+                NSSet *aSet = [[NSSet alloc] initWithArray:[(DLList *)elem value]];
+                [set intersectSet:aSet];
+            }
+        }
+        return [[DLSet alloc] initWithSet:set];
+    };
+    fn = [[DLFunction alloc] initWithFn:intersect argCount:-1 name:@"intersect/n"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"intersect" moduleName:[DLConst coreModuleName]]];
 }
 
 #pragma mark - Atom
