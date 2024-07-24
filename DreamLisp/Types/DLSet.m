@@ -175,7 +175,7 @@
     for (id elem in _set) {
         [arr addObject:[elem description]];
     }
-    return [arr isEmpty] ? @"(set nil)" : [NSString stringWithFormat:@"(set %@)", [arr componentsJoinedByString:@" "]];
+    return [arr isEmpty] ? @"#{}" : [NSString stringWithFormat:@"#{%@}", [arr componentsJoinedByString:@" "]];
 }
 
 - (NSString *)debugDescription {
