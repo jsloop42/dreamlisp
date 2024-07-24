@@ -203,7 +203,7 @@
 }
 
 - (NSUInteger)hash {
-    return [_table count];
+    return [_table hash];
 }
 
 - (NSInteger)sortValue {
