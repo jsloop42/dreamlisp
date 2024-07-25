@@ -1546,6 +1546,17 @@ double dmod(double a, double n) {
     fn = [[DLFunction alloc] initWithFn:set argCount:-1 name:@"set/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"set" moduleName:[DLConst coreModuleName]]];
     
+    #pragma mark set?
+    /** Checks if the given element is a set. */
+    id<DLDataProtocol>(^setp)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        @autoreleasepool {
+            [DLTypeUtils checkArity:xs arity:1];
+            return [[DLBool alloc] initWithBool:[DLSet isSet:[xs first]]];
+        }
+    };
+    fn = [[DLFunction alloc] initWithFn:setp argCount:1 name:@"set?/1"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"set?" moduleName:[DLConst coreModuleName]]];
+    
     #pragma mark union
     /** Returns a new a set which is a union of all the given sets. */
     id<DLDataProtocol>(^unionSet)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
