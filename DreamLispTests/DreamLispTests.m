@@ -569,6 +569,13 @@
     XCTAssertEqualObjects([stdIOService output], @"abc\\def\\ghi");
     XCTAssertEqualObjects([dl rep:@"(println (list 1 2 \"abc\" \"\\\"\") \"def\")"], @"nil");
     XCTAssertEqualObjects([stdIOService output], @"(1 2 abc \") def");
+    XCTAssertEqualObjects([dl rep:@"(println \"abc\\n\" \"def\")"], @"nil");
+    XCTAssertEqualObjects([stdIOService output], @"abc\n def");
+    // (print)
+    [dl rep:@"(print \"abc\")"];
+    XCTAssertEqualObjects([stdIOService output], @"abc");
+    [dl rep:@"(print \"abc\\n\" \"def\")"];
+    XCTAssertEqualObjects([stdIOService output], @"abc\ndef");
 }
 
 - (void)testDef {
@@ -725,11 +732,20 @@
     XCTAssertEqualObjects([dl rep:@"(contains? 0 s)"], @"false");
     XCTAssertNotNil([dl rep:@"(def s1 (intersect (set 1 2 3) (set 2 3 4) (set 3 4 5)))"]);
     XCTAssertEqualObjects([dl rep:@"(count s1)"], @"3");
+    // contains?
     XCTAssertEqualObjects([dl rep:@"(contains? 1 s1)"], @"true");
     XCTAssertEqualObjects([dl rep:@"(contains? 2 s1)"], @"true");
     XCTAssertEqualObjects([dl rep:@"(contains? 3 s1)"], @"true");
     XCTAssertEqualObjects([dl rep:@"(contains? 4 s1)"], @"false");
     XCTAssertEqualObjects([dl rep:@"(contains? 5 s1)"], @"false");
+    // remove
+    [dl rep:@"(def s (set 1 2 3 1))"];
+    XCTAssertEqualObjects([dl rep:@"(count s)"], @"3");
+    [dl rep:@"(def s1 (remove 3 s))"];
+    XCTAssertEqualObjects([dl rep:@"(count s1)"], @"2");
+    XCTAssertEqualObjects([dl rep:@"(contains? 1 s1)"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(contains? 2 s1)"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(contains? 3 s1)"], @"false");
 }
 
 - (void)testEnv {
@@ -1337,6 +1353,10 @@
     XCTAssertEqualObjects([dl rep:@"(append 4 4 '(0 1 2 3 5))"], @"(0 1 2 3 4 5)");
     XCTAssertThrows([dl rep:@"(append 0 -1 '(1 2))"]);
     XCTAssertThrows([dl rep:@"(append 0 4 '(1 2))"]);
+    // remove
+    XCTAssertEqualObjects([dl rep:@"(remove \"abc\" '(\"abc\" \"def\"))"], @"(\"def\")");
+    XCTAssertEqualObjects([dl rep:@"(remove -1 '(0 -1 2 3 4))"], @"(0 2 3 4)");
+    XCTAssertEqualObjects([dl rep:@"(remove 64 '(20 31 42 53 64))"], @"(20 31 42 53)");
 }
 
 - (void)testVectorCoreFunctions {
@@ -1405,6 +1425,10 @@
     XCTAssertThrows([dl rep:@"(append 0 -1 [1 3])"]);
     XCTAssertThrows([dl rep:@"(append 0 4 [1 2])"]);
     XCTAssertThrows([dl rep:@"(append 0 [1 2])"]);
+    // remove
+    XCTAssertEqualObjects([dl rep:@"(remove 1 [0 1 2 3 4])"], @"[0 2 3 4]");
+    XCTAssertEqualObjects([dl rep:@"(remove 0 [0 1 2 3 4])"], @"[1 2 3 4]");
+    XCTAssertEqualObjects([dl rep:@"(remove 4 [0 1 2 3 4])"], @"[0 1 2 3]");
 }
 
 - (void)testKeyword {
