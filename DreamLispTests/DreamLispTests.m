@@ -730,6 +730,7 @@
     XCTAssertEqualObjects([dl rep:@"(set)"], @"#{}");
     XCTAssertEqualObjects([dl rep:@"(contains? 3 s)"], @"true");
     XCTAssertEqualObjects([dl rep:@"(contains? 0 s)"], @"false");
+    // intersect
     XCTAssertNotNil([dl rep:@"(def s1 (intersect (set 1 2 3) (set 2 3 4) (set 3 4 5)))"]);
     XCTAssertEqualObjects([dl rep:@"(count s1)"], @"3");
     // contains?
@@ -746,6 +747,27 @@
     XCTAssertEqualObjects([dl rep:@"(contains? 1 s1)"], @"true");
     XCTAssertEqualObjects([dl rep:@"(contains? 2 s1)"], @"true");
     XCTAssertEqualObjects([dl rep:@"(contains? 3 s1)"], @"false");
+    // union
+    XCTAssertNotNil([dl rep:@"(def su (union (set 1 2) (set 2 3) (set 3 4)))"]);
+    XCTAssertEqualObjects([dl rep:@"(count su)"], @"4");
+    XCTAssertEqualObjects([dl rep:@"(contains? 1 su)"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(contains? 2 su)"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(contains? 3 su)"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(contains? 4 su)"], @"true");
+    // immutablity check
+    XCTAssertNotNil([dl rep:@"(def s1 (set 1 2))"]);
+    XCTAssertNotNil([dl rep:@"(def s2 (set 1 2 3))"]);
+    XCTAssertNotNil([dl rep:@"(def s12 (union s1 s2))"]);
+    XCTAssertEqualObjects([dl rep:@"(count s12)"], @"3");
+    XCTAssertEqualObjects([dl rep:@"(count s1)"], @"2");
+    XCTAssertEqualObjects([dl rep:@"(count s2)"], @"3");
+    XCTAssertNotNil([dl rep:@"(def s12 (intersect s1 s2))"]);
+    XCTAssertEqualObjects([dl rep:@"(count s12)"], @"2");
+    XCTAssertEqualObjects([dl rep:@"(count s1)"], @"2");
+    XCTAssertEqualObjects([dl rep:@"(count s2)"], @"3");
+    // subset
+    XCTAssertEqualObjects([dl rep:@"(subset? s1 s2)"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(subset? s2 s1)"], @"false");
 }
 
 - (void)testEnv {
