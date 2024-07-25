@@ -1094,6 +1094,17 @@ double dmod(double a, double n) {
                     [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"into/2", @"'collection'", [second dataTypeName]] throw];
                     return [DLNil new];
                 }
+            } else if ([DLSet isSet:first]) {
+                DLSet *set = (DLSet *)first;
+                if ([DLList isKindOfList:second]) {
+                    if ([DLVector isVector:second]) {
+                        return [[DLVector alloc] initWithArray:[set allObjects]];
+                    }
+                    return [[DLList alloc] initWithArray:[set allObjects]];
+                } else {
+                    [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"into/2", @"'list'", [second dataTypeName]] throw];
+                    return [DLNil new];
+                }
             } else {
                 [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, @"into/2", @"'collection'", 1, [first dataTypeName]] throw];
                 return [DLNil new];

@@ -158,6 +158,10 @@
     return set;
 }
 
+- (NSArray *)allObjects {
+    return [_set allObjects];
+}
+
 - (BOOL)isEqual:(id)object {
     if (![DLSet isSet:object]) return NO;
     DLSet *set = (DLSet *)object;
