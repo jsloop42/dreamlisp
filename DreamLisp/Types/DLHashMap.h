@@ -30,6 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (id<DLDataProtocol>)objectForKey:(id)key;
 - (void)setObject:(id<DLDataProtocol>)object forKey:(id)key;
 - (NSUInteger)count;
+- (BOOL)isEmpty;
 - (NSArray *)allKeys;
 - (NSArray *)allObjects;
 - (BOOL)containsKey:(id)key;

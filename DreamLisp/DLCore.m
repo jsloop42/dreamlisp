@@ -397,8 +397,19 @@ double dmod(double a, double n) {
         @autoreleasepool {
             BOOL ret = YES;
             [DLTypeUtils checkArity:xs arity:1];
-            id<DLDataProtocol> first = (id<DLDataProtocol>)[xs first];
-            ret = [DLString isString:first] ? [(DLString *)first isEmpty] : [[DLList dataToList:first fnName:@"empty?/1"] isEmpty];
+            id<DLDataProtocol> elem = (id<DLDataProtocol>)[xs first];
+            if ([DLList isKindOfList:elem]) {
+                ret = [(DLList *)elem isEmpty];
+            } else if ([DLSet isSet:elem]) {
+                ret = [(DLSet *)elem isEmpty];
+            } else if ([DLHashMap isHashMap:elem]) {
+                ret = [(DLHashMap *)elem isEmpty];
+            } else if ([DLString isString:elem]) {
+                ret = [(DLString *)elem isEmpty];
+            } else {
+                [[[DLError alloc] initWithFormat:DLDataTypeMismatch, @"'sequence' or 'collection'", [elem dataTypeName]] throw];
+                return [DLNil new];
+            }
             return [[DLBool alloc] initWithBool:ret];
         }
     };

@@ -173,6 +173,10 @@
     return [_table count];
 }
 
+- (BOOL)isEmpty {
+    return [self count] == 0;
+}
+
 - (NSArray *)allKeys {
     return [_table allKeys];
 }

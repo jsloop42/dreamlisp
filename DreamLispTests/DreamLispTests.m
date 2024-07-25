@@ -706,6 +706,9 @@
     XCTAssertEqualObjects([dl rep:@"{a 2}"], @"{1 2}");
     XCTAssertThrows([dl rep:@"{b 2}"], @"'b' not found");
     XCTAssertEqualObjects([dl rep:@"(contains? a {a 2})"], @"true");
+    // empty?
+    XCTAssertEqualObjects([dl rep:@"(empty? {})"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(empty? {:a 1})"], @"false");
 }
 
 /** Test hash map keyword key as get function*/
@@ -768,6 +771,9 @@
     // subset
     XCTAssertEqualObjects([dl rep:@"(subset? s1 s2)"], @"true");
     XCTAssertEqualObjects([dl rep:@"(subset? s2 s1)"], @"false");
+    // empty?
+    XCTAssertEqualObjects([dl rep:@"(empty? (set))"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(empty? (set 1))"], @"false");
 }
 
 - (void)testEnv {
@@ -1993,9 +1999,9 @@
     XCTAssertEqualObjects([dl rep:@"(try (+ []) (catch ex (str ex)))"], @"\"Expected 'number' but obtained 'vector'\"");
     XCTAssertEqualObjects([dl rep:@"(try (+ [] \"\") (catch ex (str ex)))"], @"\"Expected 'number' but obtained 'vector'\"");
     XCTAssertEqualObjects([dl rep:@"(try (+ '()) (catch ex (str ex)))"], @"\"Expected 'number' but obtained 'list'\"");
-    XCTAssertEqualObjects([dl rep:@"(try (empty? 1) (catch ex (str ex)))"], @"\"'empty?/1' requires 'list' but obtained 'number'\"");
-    XCTAssertEqualObjects([dl rep:@"(try (empty? 1.0) (catch ex (str ex)))"], @"\"'empty?/1' requires 'list' but obtained 'number'\"");
-    XCTAssertEqualObjects([dl rep:@"(try (empty? (atom 1)) (catch ex (str ex)))"], @"\"'empty?/1' requires 'list' but obtained 'atom'\"");
+    XCTAssertEqualObjects([dl rep:@"(try (empty? 1) (catch ex (str ex)))"], @"\"Expected 'sequence' or 'collection' but obtained 'number'\"");
+    XCTAssertEqualObjects([dl rep:@"(try (empty? 1.0) (catch ex (str ex)))"], @"\"Expected 'sequence' or 'collection' but obtained 'number'\"");
+    XCTAssertEqualObjects([dl rep:@"(try (empty? (atom 1)) (catch ex (str ex)))"], @"\"Expected 'sequence' or 'collection' but obtained 'atom'\"");
     XCTAssertEqualObjects([dl rep:@"(try (first true) (catch ex (str ex)))"], @"\"'first/1' requires 'sequence' for argument 1 but obtained 'bool'\"");
     // Function not found
     XCTAssertEqualObjects([dl rep:@"(try (abc [1 2 3]) (catch ex (str ex)))"], @"\"'user:abc/1' not found\"");
