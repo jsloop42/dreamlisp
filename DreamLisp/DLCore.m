@@ -1567,6 +1567,38 @@ double dmod(double a, double n) {
     };
     fn = [[DLFunction alloc] initWithFn:intersect argCount:-1 name:@"intersect/n"];
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"intersect" moduleName:[DLConst coreModuleName]]];
+    
+    #pragma mark subset?
+    /** Checks if the first set is a subset of the second. */
+    id<DLDataProtocol>(^subset)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
+        [DLTypeUtils checkArity:xs arity:2];
+        NSString *fnName = @"subset?/2";
+        id<DLDataProtocol> first = [xs first];
+        id<DLDataProtocol> second = [xs second];
+        if (![DLSet isSet:first] && ![DLList isKindOfList:first]) {
+            [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'set' or 'sequence'", 1, [first dataTypeName]] throw];
+            return [DLNil new];
+        }
+        if (![DLSet isSet:second] && ![DLList isKindOfList:second]) {
+            [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, fnName, @"'set' or 'sequence'", 2, [second dataTypeName]] throw];
+            return [DLNil new];
+        }
+        NSMutableSet *aSet, *bSet;
+        if ([DLList isKindOfList:first]) {
+            aSet = [[NSMutableSet alloc] initWithArray:[(DLList *)first value]];
+        } else {
+            aSet = [(DLSet *)first value];
+        }
+        if ([DLList isKindOfList:second]) {
+            bSet = [[NSMutableSet alloc] initWithArray:[(DLList *)second value]];
+        } else {
+            bSet = [(DLSet *)second value];
+        }
+        BOOL ret = [aSet isSubsetOfSet:bSet];
+        return [[DLBool alloc] initWithBool:ret];
+    };
+    fn = [[DLFunction alloc] initWithFn:subset argCount:2 name:@"subset?/2"];
+    [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"subset?" moduleName:[DLConst coreModuleName]]];
 }
 
 #pragma mark - Atom
