@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** Checks if the given object is a member of the set. */
 - (BOOL)contains:(id<DLDataProtocol>)object;
 - (NSMutableSet *)removeImmutable:(id<DLDataProtocol>)object;
+- (BOOL)isEqual:(id)object;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -187,6 +187,8 @@ double dmod(double a, double n) {
         return [(DLList *)lhs isEqual:(DLList *)rhs];
     } else if ([DLHashMap isHashMap:lhs] && [DLHashMap isHashMap:rhs]) {
         return [(DLHashMap *)lhs isEqual:(DLHashMap *)rhs];
+    } else if ([DLSet isSet:lhs] && [DLSet isSet:rhs]) {
+        return [(DLSet *)lhs isEqual:(DLSet *)rhs];
     } else if ([DLNil isNil:lhs] && [DLNil isNil:rhs]) {
         return YES;
     } else if ([DLBool isBool:lhs] && [DLBool isBool:rhs]) {

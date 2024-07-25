@@ -158,6 +158,12 @@
     return set;
 }
 
+- (BOOL)isEqual:(id)object {
+    if (![DLSet isSet:object]) return NO;
+    DLSet *set = (DLSet *)object;
+    return [_set isEqualTo:[set value]];
+}
+
 - (NSUInteger)hash {
     return [_set hash];
 }

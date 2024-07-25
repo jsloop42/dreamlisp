@@ -774,6 +774,13 @@
     // empty?
     XCTAssertEqualObjects([dl rep:@"(empty? (set))"], @"true");
     XCTAssertEqualObjects([dl rep:@"(empty? (set 1))"], @"false");
+    // =
+    XCTAssertEqualObjects([dl rep:@"(= (set 1) (set 1))"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(= (set 1) (set 2))"], @"false");
+    XCTAssertEqualObjects([dl rep:@"(= (set 1) (set 1 2))"], @"false");
+    XCTAssertEqualObjects([dl rep:@"(= (set 1) (set 1 1))"], @"true");
+    XCTAssertEqualObjects([dl rep:@"(= (set 1) [1 2])"], @"false");
+    XCTAssertEqualObjects([dl rep:@"(= (set) (set))"], @"true");    
 }
 
 - (void)testEnv {
