@@ -2454,7 +2454,7 @@ double dmod(double a, double n) {
     [_env setObject:fn forKey:[[DLSymbol alloc] initWithFunction:fn name:@"rand" moduleName:[DLConst coreModuleName]]];
     
     #pragma mark shuffle
-    /** Returns the given list shuffled using Fisher-Yates shuffle. */
+    /** Returns the given list shuffled using Fisher-Yates shuffle with uniform random distribution. */
     id<DLDataProtocol>(^shuffle)(NSMutableArray *xs) = ^id<DLDataProtocol>(NSMutableArray *xs) {
         [DLTypeUtils checkArityCount:[xs count] arity:1 fnName:@"shuffle/1"];
         id<DLDataProtocol> elem = [xs first];

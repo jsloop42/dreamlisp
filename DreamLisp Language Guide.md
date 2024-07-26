@@ -1,6 +1,6 @@
 # DreamLisp Programming Language Guide
 
-v1.0
+v1.1
 
 ### Data Types
 
@@ -81,6 +81,10 @@ Hash maps are dictionary collection which can have key-value pair. The short not
 Hash map does not guarantee ordering of elements. Here the first expression uses strings as keys, whereas the second one uses a keyword. Keywords have the same semantics as that of Clojure keyword. We use `def` to bind a value to a variable. Here we bind the hash-map to the variable `person`. 
 
 When using keyword in the function position of a list with the argument as a hash-map, we get the value associated with that key in the hash-map if present, else `nil`. If we are using a different key type, we can use the `get` function to get the value associated with the key as in the last expression.
+
+#### Set
+
+Set is an unordered collection of unique elements. It is printed as `#{}`, but creation uses the function `set` instead of reader macro to keep the language simple. Certain core functions work with sets directly, others convert the set to a list and operate on them similar to hash-map.
 
 #### Keyword
 
@@ -411,6 +415,15 @@ Takes an element, an index, a sequence and appends the element at that index.
 (0 1 2 3 4 5)
 ```
 
+#### remove/2
+
+Removes the given element from the sequence or collection if present.
+
+```
+λ user> (remove 0 [0 1 2 3])
+[1 2 3]
+```
+
 #### nth/2
 
 Returns the nth element from the sequence.
@@ -490,6 +503,9 @@ Takes a sequence and any element, adds the element into the sequence, returning 
 
 λ user> (into [] '("kanji" "kana" "hiragana"))
 ["kanji" "kana" "hiragana"]
+
+λ user> (into (set) [1 2 2 1])
+#{2 1}
 ```
 
 #### join/2
@@ -689,6 +705,58 @@ Keywordize the given hash-map keys which are not a keyword already.
 ```
 λ user> (keywordize {"name" "finder" "location" "mac"})
 {:name "finder" :location "mac"}
+```
+
+### Set functions
+
+An unordered collection of unique elements.
+
+#### set/1
+
+Creates a new set.
+
+```
+λ user> (set 1 2 3 2 1)
+#{3 2 1}
+```
+
+#### set?/1
+
+A predicate which checks if the given element is a `set`.
+
+```
+λ user> (set? (set))
+true
+```
+
+#### union/n
+
+Gives a new set that contains unique elements from all the given sets combined.
+
+```
+λ user> (union (set 1 2) (set 2 3) (set 3 4))
+#{3 2 1 4}
+```
+
+#### intersect/n
+
+Gives a new set that contains only the common elements among the given sets.
+
+```
+λ user> (intersect (set 1 2 3) (set 2 3) (set 3 4))
+#{3 1 2}
+```
+
+#### subset?/2
+
+Checks if the first set is a subset of the second set.
+
+```
+λ user> (subset? (set 1 2) (set 1 2 3))
+true
+
+λ user> (subset? (set 1 2 3) (set 1 2))
+false
 ```
 
 ### Special forms

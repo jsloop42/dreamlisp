@@ -9,7 +9,7 @@ runtime and Foundation library.
 #### Version
 
 ```
-DreamLisp v1.0 (13) [Objective-C 2.0]
+DreamLisp v1.1 (14) [Objective-C 2.0]
 Shell v1.2 (5)
 ```
 
