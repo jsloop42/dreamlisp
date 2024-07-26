@@ -1697,6 +1697,7 @@
     XCTAssertEqualObjects([dl rep:@"(meta l-wm)"], @"{\"b\" 2}");
     XCTAssertEqualObjects([dl rep:@"(meta (with-meta l-wm {\"new_meta\" 123}))"], @"{\"new_meta\" 123}");
     XCTAssertEqualObjects([dl rep:@"(meta l-wm)"], @"{\"b\" 2}");
+    XCTAssertEqualObjects([dl rep:@"(meta (with-meta (set 1 2) {\"z\" 13}))"], @"{\"z\" 13}");
     // testing metadata on builtin functions
     XCTAssertEqualObjects([dl rep:@"(meta +)"], @"nil");
     [dl rep:@"(def f-wm3 ^{\"fm\" 2} +)"];
@@ -1925,6 +1926,7 @@
     XCTAssertEqualObjects([dl rep:@"(coll? 1)"], @"false");
     XCTAssertEqualObjects([dl rep:@"(coll? nil)"], @"false");
     XCTAssertEqualObjects([dl rep:@"(coll? (atom 0))"], @"false");
+    XCTAssertEqualObjects([dl rep:@"(coll? (set))"], @"true");
     // contains? on list
     XCTAssertEqualObjects([dl rep:@"(contains? 1 '(0 1 2))"], @"true");
     XCTAssertEqualObjects([dl rep:@"(contains? -1 '(0 -1 -2))"], @"true");
@@ -2323,6 +2325,7 @@
     [dl rep:@"(def str-xs [\"It\" \"is\" \"an\" \"ancient\" \"Mariner\" \"And\" \"he\" \"stoppeth\" \"one\" \"of\" \"three\"])"];
     XCTAssertEqualObjects([dl rep:@"(filter (fn (x) (= (count x) 3)) str-xs)"], @"[\"And\" \"one\"]");
     XCTAssertEqualObjects([dl rep:@"(filter (fn (a) true) {:a 1 :b 2})"], @"[[:a 1] [:b 2]]");
+    XCTAssertEqualObjects([dl rep:@"(sort (filter even?/1 (set 1 2 3 4)))"], @"[2 4]");
 }
 
 - (void)testPartition {
@@ -2334,6 +2337,8 @@
     XCTAssertEqualObjects([dl rep:@"(sort [:key :asc] (first hmv1))"], @"[:b :d]");
     XCTAssertEqualObjects([dl rep:@"(sort [:key :asc] (second hmv1))"], @"[:a :c]");
     XCTAssertEqualObjects([dl rep:@"(partition (fn (x) (> x 4)) [4 2 5 3 1])"], @"[[5] [4 2 3 1]]");
+    XCTAssertEqualObjects([dl rep:@"(partition even?/1 [1 2 3 4])"], @"[[2 4] [1 3]]");
+    XCTAssertEqualObjects([dl rep:@"(map sort/1 (partition odd?/1 (set 1 2 3 4)))"], @"((1 3) (2 4))");
 }
 
 - (void)testFlatten {
@@ -2345,6 +2350,7 @@
     XCTAssertEqualObjects([dl rep:@"(flatten '())"], @"()");
     XCTAssertEqualObjects([dl rep:@"(flatten '((+ 1 2) 3))"], @"(user:+ 1 2 3)");
     XCTAssertThrows([dl rep:@"(flatten nil)"]);
+    XCTAssertEqualObjects([dl rep:@"(sort (flatten (set 1 2 (set 3 4))))"], @"(1 2 3 4)");
 }
 
 - (void)testJoin {
@@ -2429,6 +2435,8 @@
     XCTAssertEqualObjects([dl rep:@"(map (fn (a b) [a b]) {:a 1} {:x 3})"], @"([[:a 1] [:x 3]])");
     XCTAssertEqualObjects([dl rep:@"(flatten (map (fn (a b) [a b]) {:a 1 :b 2} {:c 3 :d 4}))"], @"(:a 1 :c 3 :b 2 :d 4)");
     XCTAssertEqualObjects([dl rep:@"(map (fn [a b] [a b]) {:a 1 :b 2} [3 4])"], @"([[:a 1] 3] [[:b 2] 4])");
+    // set
+    XCTAssertEqualObjects([dl rep:@"(sort (map (fn (x) x) (set 1 2 3 2 1)))"], @"(1 2 3)");
 }
 
 - (void)testFold {
@@ -2447,6 +2455,9 @@
     [dl rep:@"(def hm {:a 1 :b 2 :c 3})"];
     [dl rep:@"(def hm-ret (foldr (fn (x y acc) (println x y acc) (assoc acc x y)) {} hm))"];
     XCTAssertEqualObjects([dl rep:@"(= hm hm-ret)"], @"true");
+    // set
+    XCTAssertEqualObjects([dl rep:@"(foldl (fn (x acc) (+ x acc)) 0 (set 1 2 3))"], @"6");
+    XCTAssertEqualObjects([dl rep:@"(foldr (fn (x acc) (* x acc)) 1 (set 1 2 3))"], @"6");
 }
 
 - (void)testThreadingMacro {

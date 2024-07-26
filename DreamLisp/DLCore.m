@@ -648,6 +648,8 @@ double dmod(double a, double n) {
                         col = [(DLList *)rest[j] value];
                     } else if ([DLHashMap isHashMap:rest[j]]) {
                         col = [DLUtils hashMapToVectorArray:rest[j]];
+                    } else if ([DLSet isSet:rest[j]]) {
+                        col = [[(DLSet *)rest[j] allObjects] mutableCopy];
                     }
                     [arg addObject:col[i]];
                 }
@@ -915,6 +917,9 @@ double dmod(double a, double n) {
                 [kv addObject:[hm objectForKey:key]];
                 [arr addObject:[[DLVector alloc] initWithArray:kv]];
             }
+        } else if ([DLSet isSet:second]) {
+            DLSet *set = (DLSet *)second;
+            arr = [[set allObjects] mutableCopy];
         }
         for (elem in arr) {
             [arg removeAllObjects];
@@ -962,6 +967,13 @@ double dmod(double a, double n) {
                 [vec add:[[DLHashMap alloc] initWithMapTable:[ret second]]];
                 return vec;
             }
+            if ([DLSet isSet:second]) {
+                ret = [self partitionArray:[[(DLSet *)second allObjects] mutableCopy] withPredicate:fn];
+                DLList *xs = [DLList new];
+                [xs add:[[DLList alloc] initWithArray:[ret first]]];
+                [xs add:[[DLList alloc] initWithArray:[ret second]]];
+                return xs;
+            }
             [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithNameArity, @"partition/2", @"'collection'", 2, [first dataTypeName]] throw];
             return nil;
         }
@@ -981,6 +993,9 @@ double dmod(double a, double n) {
                 if ([DLVector isVector:first]) {
                     return [[DLVector alloc] initWithArray:acc];
                 }
+                return [[DLList alloc] initWithArray:acc];
+            } else if ([DLSet isSet:first]) {
+                [self flatten:[[DLList alloc] initWithArray:[(DLSet *)first allObjects]] acc:acc];
                 return [[DLList alloc] initWithArray:acc];
             }
             [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"flatten/1", @"'sequence'", [first dataTypeName]] throw];
@@ -1309,6 +1324,8 @@ double dmod(double a, double n) {
             elem = [xs nth:i];
             if ([DLList isKindOfList:elem]) {
                 [self flatten:elem acc:acc];
+            } else if ([DLSet isSet:elem]) {
+                [self flatten:[[DLList alloc] initWithArray:[(DLSet *)elem allObjects]] acc:acc];
             } else {
                 [acc addObject:elem];
             }
@@ -2077,7 +2094,7 @@ double dmod(double a, double n) {
         @autoreleasepool {
             [DLTypeUtils checkArity:xs arity:1];
             id<DLDataProtocol> first = (id<DLDataProtocol>)[xs first];
-            return [[DLBool alloc] initWithBool:([DLList isList:first] || [DLVector isVector:first] || [DLHashMap isHashMap:first])];
+            return [[DLBool alloc] initWithBool:([DLList isList:first] || [DLVector isVector:first] || [DLHashMap isHashMap:first] || [DLSet isSet:first])];
         }
     };
     fn = [[DLFunction alloc] initWithFn:collp argCount:1 name:@"coll?/1"];
@@ -2286,6 +2303,7 @@ double dmod(double a, double n) {
             if ([DLKeyword isKeyword:first]) return [[DLKeyword alloc] initWithMeta:meta keyword:(DLKeyword *)first];
             if ([DLSymbol isSymbol:first]) return [[DLSymbol alloc] initWithMeta:meta symbol:(DLSymbol *)first];
             if ([DLHashMap isHashMap:first]) return [[DLHashMap alloc] initWithMeta:meta hashmap:(DLHashMap *)first];
+            if ([DLSet isSet:first]) return [[DLSet alloc] initWithMeta:meta set:(DLSet *)first];
             if ([DLList isList:first]) return [[DLList alloc] initWithMeta:meta list:(DLList *)first];
             if ([DLVector isVector:first]) return [[DLVector alloc] initWithMeta:meta vector:(DLVector *)first];
             if ([DLNumber isNumber:first]) return [[DLNumber alloc] initWithMeta:meta number:(DLNumber *)first];
@@ -2397,6 +2415,11 @@ double dmod(double a, double n) {
                 DLHashMap *hm = (DLHashMap *)elem;
                 [hm setObject:[[DLNumber alloc] initWithInteger:[hm count]] forKey:[[DLKeyword alloc] initWithString:@"count"]];
                 [hm setObject:[[DLBool alloc] initWithBool:[elem isMutable]] forKey:[[DLKeyword alloc] initWithString:@"mutable?"]];
+            } else if ([DLSet isSet:elem]) {
+                DLSet *set = (DLSet *)elem;
+                [hm setObject:[[DLNumber alloc] initWithInteger:[set count]] forKey:[[DLKeyword alloc] initWithString:@"count"]];
+                [hm setObject:[[DLBool alloc] initWithBool:[set isEmpty]] forKey:[[DLKeyword alloc] initWithString:@"empty?"]];
+                [hm setObject:[[DLBool alloc] initWithBool:[set isMutable]] forKey:[[DLKeyword alloc] initWithString:@"mutable?"]];
             } else if ([DLKeyword isKeyword:elem]) {
                 DLKeyword *kwd = (DLKeyword *)elem;
                 [hm setObject:[kwd value] forKey:[[DLKeyword alloc] initWithString:@"name"]];

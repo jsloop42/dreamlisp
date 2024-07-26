@@ -106,6 +106,8 @@ static BOOL _isCacheEnabled;
         } else {
             res = [self hashMapToArray:object];
         }
+    } else if ([DLSet isSet:object]) {
+        res = [[(DLSet *)object allObjects] mutableCopy];
     } else {
         [[[DLError alloc] initWithFormat:DLDataTypeMismatch, @"'sequence'", [object dataTypeName]] throw];
     }
