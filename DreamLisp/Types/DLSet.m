@@ -148,6 +148,12 @@
     return [_set isEmpty];
 }
 
+- (NSMutableSet *)unionSet:(NSMutableSet *)set {
+    NSMutableSet *aSet = [_set mutableCopyWithZone:nil];
+    [aSet unionSet:set];
+    return aSet;
+}
+
 - (BOOL)contains:(id<DLDataProtocol>)object {
     return [_set member:object] != nil;
 }

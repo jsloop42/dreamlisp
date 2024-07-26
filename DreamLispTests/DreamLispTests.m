@@ -2375,6 +2375,7 @@
     XCTAssertEqualObjects([dl rep:@"(into '() {:a 1})"], @"((:a 1))");
     XCTAssertEqualObjects([dl rep:@"(into '(1 2) {:a 1})"], @"(1 2 (:a 1))");
     XCTAssertThrows([dl rep:@"(into '(1 2) 1)"]);
+    XCTAssertEqualObjects([dl rep:@"(sort (into '() (set 1 2 1)))"], @"(1 2)");
     // vector
     XCTAssertEqualObjects([dl rep:@"(into [] nil)"], @"[]");
     XCTAssertEqualObjects([dl rep:@"(into [] '(1 2 3))"], @"[1 2 3]");
@@ -2384,6 +2385,7 @@
     XCTAssertEqualObjects([dl rep:@"(into [] {:a 1})"], @"[[:a 1]]");
     XCTAssertEqualObjects([dl rep:@"(into [1 2] {:a 1})"], @"[1 2 [:a 1]]");
     XCTAssertThrows([dl rep:@"(into [1 2] 1)"]);
+    XCTAssertEqualObjects([dl rep:@"(sort (into [] (set 1 2 1)))"], @"[1 2]");
     // hash-map
     XCTAssertEqualObjects([dl rep:@"(into {} nil)"], @"{}");
     XCTAssertEqualObjects([dl rep:@"(into {} [[:a 1]])"], @"{:a 1}");
@@ -2393,6 +2395,9 @@
     XCTAssertEqualObjects([dl rep:@"(into {} {:a 1})"], @"{:a 1}");
     XCTAssertEqualObjects([dl rep:@"(count (into {:a 1} {:b 2}))"], @"2");
     XCTAssertThrows([dl rep:@"(into {} 1)"]);
+    // set
+    XCTAssertEqualObjects([dl rep:@"(into (set) (set 1))"], @"#{1}");
+    XCTAssertEqualObjects([dl rep:@"(into (set) [21])"], @"#{21}");
 }
 
 - (void)testIndexOf {

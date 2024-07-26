@@ -1083,6 +1083,8 @@ double dmod(double a, double n) {
                     ret = [list addObject:second];
                 } else if ([DLHashMap isHashMap:second]) {
                     ret = [DLUtils addObjectsToList:list fromHashMap:second];
+                } else if ([DLSet isSet:second]) {
+                    ret = [[DLList alloc] initWithArray:[(DLSet *)second allObjects]];
                 } else {
                     [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"into/2", @"'sequence' or 'collection'", [second dataTypeName]] throw];
                     return [DLNil new];
@@ -1095,6 +1097,8 @@ double dmod(double a, double n) {
                     ret = [vec addObject:second];
                 } else if ([DLHashMap isHashMap:second]) {
                     ret = [DLUtils addObjectsToVector:vec fromHashMap:second];
+                } else if ([DLSet isSet:second]) {
+                    ret = [[DLVector alloc] initWithArray:[(DLSet *)second allObjects]];
                 } else {
                     [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"into/2", @"'sequence' or 'collection'", [second dataTypeName]] throw];
                     return [DLNil new];
@@ -1112,11 +1116,11 @@ double dmod(double a, double n) {
             } else if ([DLSet isSet:first]) {
                 DLSet *set = (DLSet *)first;
                 if ([DLList isKindOfList:second]) {
-                    if ([DLVector isVector:second]) {
-                        return [[DLVector alloc] initWithArray:[set allObjects]];
-                    }
-                    return [[DLList alloc] initWithArray:[set allObjects]];
-                } else {
+                    return [[DLSet alloc] initWithArray:[(DLList *)second value]];
+                } else if ([DLSet isSet:second]) {
+                    return [[DLSet alloc] initWithSet:[set unionSet:[(DLSet *)second value]]];
+                }
+                else {
                     [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"into/2", @"'list'", [second dataTypeName]] throw];
                     return [DLNil new];
                 }
