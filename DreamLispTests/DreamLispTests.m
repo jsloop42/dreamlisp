@@ -782,8 +782,8 @@
     XCTAssertEqualObjects([dl rep:@"(= (set 1) [1 2])"], @"false");
     XCTAssertEqualObjects([dl rep:@"(= (set) (set))"], @"true");
     // into
-    XCTAssertEqualObjects([dl rep:@"(sort (into (set 1 2 3) []))"], @"[1 2 3]");
-    XCTAssertEqualObjects([dl rep:@"(sort (into (set 1 2 1 2) '()))"], @"(1 2)");
+    XCTAssertEqualObjects([dl rep:@"(into (set 1) [])"], @"#{1}");
+    XCTAssertEqualObjects([dl rep:@"(sort (into [] (set 1 2 1 2)))"], @"[1 2]");
     // set?
     XCTAssertEqualObjects([dl rep:@"(set? (set))"], @"true");
     XCTAssertEqualObjects([dl rep:@"(set? {})"], @"false");

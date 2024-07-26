@@ -1116,7 +1116,7 @@ double dmod(double a, double n) {
             } else if ([DLSet isSet:first]) {
                 DLSet *set = (DLSet *)first;
                 if ([DLList isKindOfList:second]) {
-                    return [[DLSet alloc] initWithArray:[(DLList *)second value]];
+                    return [[DLSet alloc] initWithSet:[set unionSet:[[NSMutableSet alloc] initWithArray:[(DLList *)second value]]]];
                 } else if ([DLSet isSet:second]) {
                     return [[DLSet alloc] initWithSet:[set unionSet:[(DLSet *)second value]]];
                 }
