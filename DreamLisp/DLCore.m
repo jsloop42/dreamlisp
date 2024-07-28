@@ -996,7 +996,7 @@ double dmod(double a, double n) {
                 return [[DLList alloc] initWithArray:acc];
             } else if ([DLSet isSet:first]) {
                 [self flatten:[[DLList alloc] initWithArray:[(DLSet *)first allObjects]] acc:acc];
-                return [[DLList alloc] initWithArray:acc];
+                return [[DLSet alloc] initWithArray:acc];
             }
             [[[DLError alloc] initWithFormat:DLDataTypeMismatchWithName, @"flatten/1", @"'sequence'", [first dataTypeName]] throw];
             return [DLNil new];

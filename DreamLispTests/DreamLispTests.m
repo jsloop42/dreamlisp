@@ -2350,7 +2350,7 @@
     XCTAssertEqualObjects([dl rep:@"(flatten '())"], @"()");
     XCTAssertEqualObjects([dl rep:@"(flatten '((+ 1 2) 3))"], @"(user:+ 1 2 3)");
     XCTAssertThrows([dl rep:@"(flatten nil)"]);
-    XCTAssertEqualObjects([dl rep:@"(sort (flatten (set 1 2 (set 3 4))))"], @"(1 2 3 4)");
+    XCTAssertEqualObjects([dl rep:@"(sort (into [] (flatten (set 1 2 (set 3 4)))))"], @"[1 2 3 4]");
 }
 
 - (void)testJoin {
