@@ -1231,7 +1231,7 @@ double dmod(double a, double n) {
     id<DLDataProtocol> elem = nil;
     NSEnumerator *itr = isRight ? [arr reverseObjectEnumerator] : [arr objectEnumerator];
     NSMutableArray *params = nil;
-    NSUInteger *idx = 0;
+    NSUInteger idx = 0;
     for (elem in itr) {
         if ([NSMutableArray isMutableArray:elem]) {
             params = (NSMutableArray *)elem;
@@ -2466,7 +2466,7 @@ double dmod(double a, double n) {
         NSUInteger i;
         NSUInteger len = [arr count];
         for (i = len; i > 1; i--) {
-            [arr exchangeObjectAtIndex:i - 1 withObjectAtIndex:arc4random_uniform((u_int32_t)i)];
+            [arr exchangeObjectAtIndex:i - 1 withObjectAtIndex:arc4random_uniform((uint32_t)i)];
         }
         return [DLVector isVector:elem] ? [[DLVector alloc] initWithArray:arr] : [[DLList alloc] initWithArray:arr];
     };
