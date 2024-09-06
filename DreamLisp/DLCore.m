@@ -105,7 +105,7 @@ double dmod(double a, double n) {
                     [invocation setTarget:aNum];
                     [invocation setArgument:&bNum atIndex:2];
                     [invocation invoke];
-                    [invocation getReturnValue:&ret];
+                    [invocation getReturnValue:(void *)&ret];
                 }
             }
             if (isDouble) return [[DLNumber alloc] initWithDoubleNumber:ret];
