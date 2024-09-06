@@ -62,41 +62,66 @@ double dmod(double a, double n) {
     return a - n * floor(a / n);
 }
 
+- (NSDecimalNumber *)performArithmeticOpWithNumber:(NSDecimalNumber *)aNum bNum:(NSDecimalNumber *)bNum forSEL:(SEL)sel {
+    NSMethodSignature *methodSig = [[NSDecimalNumber class] instanceMethodSignatureForSelector:sel];
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:methodSig];
+    NSDecimalNumber *ret = [[NSDecimalNumber alloc] init];
+    [invocation setSelector:sel];
+    [invocation setTarget:aNum];
+    [invocation setArgument:&bNum atIndex:2];
+    [invocation invoke];
+    [invocation getReturnValue:&ret];
+    return ret;
+}
+
 /** Arithmetic functions takes variadic arguments. If no arguments are given, default identities are returned if present, @c 0 for @c (+) and @c 1 @c (*). */
 - (void)addArithmeticFunctions {
     DLFunction *fn = nil;
+    NSDecimalNumber *ret = [[NSDecimalNumber alloc] init];
     
     id<DLDataProtocol>(^calc)(NSMutableArray *args, SEL sel) = ^id<DLDataProtocol>(NSMutableArray *args, SEL sel) {
         @autoreleasepool {
-            NSDecimalNumber *num = [NSDecimalNumber new];
             NSUInteger len = [args count];
             NSUInteger i = 0;
             BOOL isDouble = NO;
-            DLNumber *aNum = nil;
+            DLNumber *aNum1, *bNum1;
+            NSDecimalNumber *aNum, *bNum;
+
             if (len == 0) {
                 [DLTypeUtils checkArity:args arity:1];
             } else if (len == 1) {
                 return [DLNumber dataToNumber:args[0]];
             }
-            if (len >= 2) {
-                aNum = [DLNumber dataToNumber:args[0]];
-                if ([aNum isDouble]) isDouble = YES;
-                NSDecimalNumber *n = [aNum value];
-                if ([n respondsToSelector:sel]) {
-                    aNum = [DLNumber dataToNumber:args[1]];
-                    if ([aNum isDouble]) isDouble = YES;
-                    num = objc_msgSend(n, sel, [aNum value]);
-                }
+            
+            NSMethodSignature *methodSig = [[NSDecimalNumber class] instanceMethodSignatureForSelector:sel];
+            NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:methodSig];
+            [invocation setSelector:sel];
+        
+            if (len >= 2) {  // first add first two numbers and then keep adding other numbers on to it if the op is add
+                aNum1 = [DLNumber dataToNumber:args[0]];
+                bNum1 = [DLNumber dataToNumber:args[1]];
+                if ([aNum1 isDouble] || [bNum1 isDouble]) isDouble = YES;
+                aNum = [aNum1 value];
+                bNum = [bNum1 value];
+                [invocation setTarget:aNum];
+                [invocation setArgument:&bNum atIndex:2];
+                [invocation invoke];
+                [invocation getReturnValue:&ret];
             }
             if (len > 2) {
                 for (i = 2; i < len; i++) {
-                    aNum = [DLNumber dataToNumber:args[i]];
-                    if ([aNum isDouble]) isDouble = YES;
-                    num = objc_msgSend(num, sel, [aNum value]);
+                    aNum = ret;
+                    bNum1 = [DLNumber dataToNumber:args[i]];
+                    if ([bNum1 isDouble]) isDouble = YES;
+                    bNum = [bNum1 value];
+                    [invocation setTarget:aNum];
+                    [invocation setArgument:&bNum atIndex:2];
+                    [invocation invoke];
+                    [invocation getReturnValue:&ret];
                 }
             }
-            if (isDouble) return [[DLNumber alloc] initWithDoubleNumber:num];
-            return [[DLNumber alloc] initWithNumber:num];
+            if (isDouble) return [[DLNumber alloc] initWithDoubleNumber:ret];
+            return [[DLNumber alloc] initWithNumber:ret];
         }
     };
     
