@@ -62,18 +62,6 @@ double dmod(double a, double n) {
     return a - n * floor(a / n);
 }
 
-- (NSDecimalNumber *)performArithmeticOpWithNumber:(NSDecimalNumber *)aNum bNum:(NSDecimalNumber *)bNum forSEL:(SEL)sel {
-    NSMethodSignature *methodSig = [[NSDecimalNumber class] instanceMethodSignatureForSelector:sel];
-    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:methodSig];
-    NSDecimalNumber *ret = [[NSDecimalNumber alloc] init];
-    [invocation setSelector:sel];
-    [invocation setTarget:aNum];
-    [invocation setArgument:&bNum atIndex:2];
-    [invocation invoke];
-    [invocation getReturnValue:&ret];
-    return ret;
-}
-
 /** Arithmetic functions takes variadic arguments. If no arguments are given, default identities are returned if present, @c 0 for @c (+) and @c 1 @c (*). */
 - (void)addArithmeticFunctions {
     DLFunction *fn = nil;
@@ -106,7 +94,7 @@ double dmod(double a, double n) {
                 [invocation setTarget:aNum];
                 [invocation setArgument:&bNum atIndex:2];
                 [invocation invoke];
-                [invocation getReturnValue:&ret];
+                [invocation getReturnValue:(void *)&ret];
             }
             if (len > 2) {
                 for (i = 2; i < len; i++) {
