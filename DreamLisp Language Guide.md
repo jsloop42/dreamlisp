@@ -1,6 +1,6 @@
 # DreamLisp Programming Language Guide
 
-v1.1
+v1.2
 
 ### Data Types
 
@@ -144,7 +144,7 @@ A function represents a unit of computation with a set of expressions grouped to
 
 Here `inc/1` and `dec/1` are two functions which take an argument `n` and increments or decrements by one. The string given after the argument is the docstring.
 
-Note: When using the REPL, on a line break the expression will be evaluated. We can define the function without line breaks or we can load from a file.
+Note: When using the REPL, on a line break the expression will be evaluated if it is well formed. We can also load code from a file.
 
 ```
 λ user> (inc 41)
